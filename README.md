@@ -9,14 +9,14 @@ Installation
 ============
 1. Requires linking [SocketRocket](https://github.com/square/SocketRocket) against your xcode project.
 2. Create a bridging header for SocketRocket
-2. Copy the SwiftIO folder into your xcode project
-3. 
+3. Copy the SwiftIO folder into your xcode project
 
 Use
 ===
 
 ```
 let socket = SocketIOClient(socketURL: "http://localhost:8080")
+// let socket = SocketIOClient(socketURL: "https://localhost:8080", secure: true)
 socket.on("connect") {data in
     println("socket connected")
     socket.emit("testEcho")
