@@ -1,6 +1,8 @@
 Socket.IO-Client-Swift
 ======================
 
+Work in progress
+
 socket.io-client for Swift
 
 Installation
