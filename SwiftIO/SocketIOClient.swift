@@ -219,7 +219,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     
     // Called when the socket is closed
     func webSocket(webSocket: SRWebSocket!, didCloseWithCode code: Int, reason: String!, wasClean: Bool) {
-        self.pingTimer.invalidate()
+        self.pingTimer?.invalidate()
         self.connected = false
         self.connecting = false
         self.handleEvent(event: "disconnect", data: reason)
