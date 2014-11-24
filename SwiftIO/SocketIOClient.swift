@@ -63,7 +63,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     private var handlers = [EventHandler]()
     var io:SRWebSocket?
     var pingTimer:NSTimer!
-    lazy var recieveBuffer = [[String:String]]()
+    lazy var recieveBuffer = [String]()
     var secure = false
     
     init(socketURL:String, secure:Bool = false) {
@@ -202,12 +202,8 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             let binaryGroup = mutMessage["(\\d*)-\\[\"(.*)\",(\\{.*\\})\\]"].groups()
             if (binaryGroup != nil && binaryGroup[1] == "451") {
                 let event = binaryGroup[2]
-                let dataObject:AnyObject = binaryGroup[3] as AnyObject
-                var bufferFrame = [
-                    "event": event,
-                ]
                 
-                self.recieveBuffer.append(bufferFrame)
+                self.recieveBuffer.append(event)
                 return
             }
             /**
@@ -219,12 +215,8 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         Begin check for binary data
         **/
         if let binaryData = message as? NSData {
-            // if let binaryAsString = NSString(data: binaryData, encoding: NSUTF8StringEncoding) {
-            //     println(binaryAsString)
-            // }
             let lastBufferedFrame = self.recieveBuffer.removeLast()
-            self.handleEvent(event: lastBufferedFrame["event"]!,
-                data: binaryData)
+            self.handleEvent(event: lastBufferedFrame, data: binaryData)
         }
         /**
         End check for binary data
