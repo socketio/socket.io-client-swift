@@ -63,6 +63,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     private var handlers = [EventHandler]()
     var io:SRWebSocket?
     var pingTimer:NSTimer!
+    lazy var recieveBuffer = [[String:String]]()
     var secure = false
     
     init(socketURL:String, secure:Bool = false) {
@@ -112,13 +113,13 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         let frame = socketMessage(event: event, args: args)
         let str = frame.createMessage()
         
-        println("Sending: \(str)")
+        // println("Sending: \(str)")
         self.io?.send(str)
     }
     
     // Handles events
     func handleEvent(#event:String, data:Any?) {
-        println("Should do event: \(event) with data: \(data)")
+        // println("Should do event: \(event) with data: \(data)")
         
         for handler in self.handlers {
             if (handler.event == event) {
@@ -129,7 +130,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 }
             }
         }
-
+        
     }
     
     // Adds handlers to the socket
@@ -146,9 +147,9 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     // Parses messages recieved
     private func parseSocketMessage(#message:AnyObject?) {
         if (message == nil) {
-            // TODO handle nil
             return
         }
+        // println(message!)
         
         if let stringMessage = message as? String {
             /**
@@ -171,6 +172,9 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             End check for socket info frame
             **/
             
+            /**
+            Begin check for message
+            **/
             let messageGroups = mutMessage["(\\d*)(\\[.*\\])?"].groups()
             if (messageGroups.count == 3 && messageGroups[1] == "42") {
                 let messagePart = messageGroups[2]
@@ -182,12 +186,49 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                         data = nil
                     } else {
                         data = messageInternals[2]
-
+                        
                     }
                     self.handleEvent(event: event, data: data)
+                    return
                 }
             }
+            /**
+            End Check for message
+            **/
+            
+            /**
+            Begin check for binary placeholder
+            **/
+            let binaryGroup = mutMessage["(\\d*)-\\[\"(.*)\",(\\{.*\\})\\]"].groups()
+            if (binaryGroup != nil && binaryGroup[1] == "451") {
+                let event = binaryGroup[2]
+                let dataObject:AnyObject = binaryGroup[3] as AnyObject
+                var bufferFrame = [
+                    "event": event,
+                ]
+                
+                self.recieveBuffer.append(bufferFrame)
+                return
+            }
+            /**
+            End check for binary placeholder
+            **/
         }
+        
+        /**
+        Begin check for binary data
+        **/
+        if let binaryData = message as? NSData {
+            // if let binaryAsString = NSString(data: binaryData, encoding: NSUTF8StringEncoding) {
+            //     println(binaryAsString)
+            // }
+            let lastBufferedFrame = self.recieveBuffer.removeLast()
+            self.handleEvent(event: lastBufferedFrame["event"]!,
+                data: binaryData)
+        }
+        /**
+        End check for binary data
+        **/
     }
     
     // Sends ping
@@ -199,7 +240,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Starts the ping timer
-    func startPingTimer(#interval:Int) {
+    private func startPingTimer(#interval:Int) {
         self.pingTimer = NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(interval), target: self,
             selector: Selector("sendPing"), userInfo: nil, repeats: true)
     }
