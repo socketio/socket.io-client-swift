@@ -25,13 +25,31 @@ private class EventHandler: NSObject {
     }
 }
 
-private struct socketMessage {
+private struct binaryMessage {
+    let messageFormat = "45%@-[\"%@\",%@]"
     var event:String!
-    var args:AnyObject!
+    var data:NSData!
     
-    init(event:String, args:AnyObject?) {
+    init(event:String, data:NSData) {
+        self.event = event
+        self.data = data
+    }
+    
+    func createMessage() -> String {
+        return NSString(format: messageFormat, event)
+    }
+}
+
+private struct SocketMessage {
+    var event:String!
+    var args:Any!
+    var placeholders:Int!
+    var currentPlace = 0
+    
+    init(event:String, args:Any?, placeholders:Int = 0) {
         self.event = event
         self.args = args?
+        self.placeholders = placeholders
     }
     
     func createMessage() -> String {
@@ -41,7 +59,7 @@ private struct socketMessage {
             if (args is NSDictionary) {
                 array += ","
                 var jsonSendError:NSError?
-                var jsonSend = NSJSONSerialization.dataWithJSONObject(args,
+                var jsonSend = NSJSONSerialization.dataWithJSONObject(args as NSDictionary,
                     options: NSJSONWritingOptions(0), error: &jsonSendError)
                 var jsonString = NSString(data: jsonSend!, encoding: NSUTF8StringEncoding)
                 return array + jsonString! + "]"
@@ -53,6 +71,30 @@ private struct socketMessage {
             return array + "]"
         }
     }
+    
+    mutating func fillInPlaceHolder(data:NSData) -> Bool {
+        func checkDoEvent() -> Bool {
+            if (self.placeholders == self.currentPlace) {
+                return true
+            } else {
+                return false
+            }
+        }
+        
+        if (checkDoEvent()) {
+            return true
+        }
+        
+        if let stringArgs = args as? String {
+            let mutStringArgs = RegexMutable(stringArgs)
+            let base64 = data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions.allZeros)
+            let placeHolder = "~~" + String(self.currentPlace)
+            self.args = mutStringArgs[placeHolder] ~= "\"" + base64 + "\""
+            self.currentPlace++
+            return checkDoEvent()
+        }
+        return false
+    }
 }
 
 class SocketIOClient: NSObject, SRWebSocketDelegate {
@@ -63,7 +105,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     private var handlers = [EventHandler]()
     var io:SRWebSocket?
     var pingTimer:NSTimer!
-    lazy var recieveBuffer = [String]()
+    private var lastSocketMessage:SocketMessage?
     var secure = false
     
     init(socketURL:String, secure:Bool = false) {
@@ -105,12 +147,17 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Sends a message
-    func emit(event:String, args:AnyObject? = nil) {
+    func emit(event:String, args:Any? = nil) {
         if (!self.connected) {
             return
         }
         
-        let frame = socketMessage(event: event, args: args)
+        if let binaryData = args as? NSData {
+            self.sendBinaryData(event, data: binaryData)
+            return
+        }
+        
+        let frame = SocketMessage(event: event, args: args)
         let str = frame.createMessage()
         
         // println("Sending: \(str)")
@@ -130,7 +177,6 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 }
             }
         }
-        
     }
     
     // Adds handlers to the socket
@@ -196,31 +242,75 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             End Check for message
             **/
             
+            // Check for message with binary placeholders
+            self.parseBinaryMessage(message: message!)
+        }
+        
+        // Message is binary
+        if let binary = message as? NSData {
+            self.parseBinaryData(binary)
+        }
+    }
+    
+    // Tries to parse a message that contains binary
+    func parseBinaryMessage(#message:AnyObject) {
+        if let stringMessage = message as? String {
+            var mutMessage = RegexMutable(stringMessage)
             /**
             Begin check for binary placeholder
             **/
             let binaryGroup = mutMessage["(\\d*)-\\[\"(.*)\",(\\{.*\\})\\]"].groups()
-            if (binaryGroup != nil && binaryGroup[1] == "451") {
+            // println(binaryGroup)
+            if (binaryGroup != nil) {
+                let messageType = RegexMutable(binaryGroup[1])
+                let numberOfPlaceholders = messageType["45"] ~= ""
                 let event = binaryGroup[2]
-                
-                self.recieveBuffer.append(event)
+                let mutMessageObject = RegexMutable(binaryGroup[3])
+                let placeholdersRemoved = mutMessageObject["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] ~= "~~$2"
+                let mes = SocketMessage(event: event, args: placeholdersRemoved,
+                    placeholders: numberOfPlaceholders.integerValue)
+                self.lastSocketMessage = mes
                 return
             }
             /**
             End check for binary placeholder
             **/
         }
-        
-        /**
-        Begin check for binary data
-        **/
-        if let binaryData = message as? NSData {
-            let lastBufferedFrame = self.recieveBuffer.removeLast()
-            self.handleEvent(event: lastBufferedFrame, data: binaryData)
+    }
+    
+    // Handles binary data
+    func parseBinaryData(data:NSData) {
+        if (self.lastSocketMessage == nil) {
+            return
         }
-        /**
-        End check for binary data
-        **/
+        
+        let shouldExecute = self.lastSocketMessage?.fillInPlaceHolder(data)
+        var event = self.lastSocketMessage!.event
+        var args = self.lastSocketMessage!.args
+        // println(args)
+        if (shouldExecute != nil && shouldExecute!) {
+            self.handleEvent(event: event, data: args)
+        }
+    }
+    
+    // Sends binary data
+    func sendBinaryData(event:String, data:NSData) {
+        println("should send binary")
+        let message = binaryMessage(event: event, data: data)
+        //        var hexBits = ""
+        //        var byteArray = [UInt8](count: data.length, repeatedValue: 0x0)
+        //        data.getBytes(&byteArray, length:data.length)
+        //        for value in byteArray {
+        //            hexBits += NSString(format:"%2X", value) as String
+        //        }
+        //        let hexBytes = hexBits.stringByReplacingOccurrencesOfString("\u{0020}", withString: "0",
+        //            options: NSStringCompareOptions.CaseInsensitiveSearch)
+        //        println(hexBytes)
+        // println("binary message " + message.createMessage())
+        // println(byteArray)
+        // println("[" + ", ".join(byteArray.map({"\($0)"})) + "]")
+        self.io?.send(message.createMessage())
+        self.io?.send(data)
     }
     
     // Sends ping
