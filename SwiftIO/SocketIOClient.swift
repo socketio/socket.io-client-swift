@@ -170,7 +170,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         
         if let dict = args as? NSDictionary {
             // Check for binary data
-            let (newDict, hadBinary, binaryDatas) = self.parseNSDictionary(event: event, dict: dict)
+            let (newDict, hadBinary, binaryDatas) = self.parseNSDictionary(dict: dict)
             if (hadBinary) {
                 frame = Event(event: event, args: newDict, placeholders: binaryDatas!.count)
                 str = frame.createBinaryMessage()
@@ -225,7 +225,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Parses a NSDictionary, looking for NSData objects
-    func parseNSDictionary(#event:String, dict:NSDictionary) -> (NSDictionary, Bool, [NSData]?) {
+    func parseNSDictionary(#dict:NSDictionary) -> (NSDictionary, Bool, [NSData]?) {
         var returnDict = NSMutableDictionary()
         var placeholder = 0
         var containedData = false
