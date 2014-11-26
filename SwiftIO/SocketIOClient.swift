@@ -281,7 +281,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             let messageGroups = mutMessage["(\\d*)(\\[.*\\])?"].groups()
             if (messageGroups.count == 3 && messageGroups[1] == "42") {
                 let messagePart = messageGroups[2]
-                let messageInternals = RegexMutable(messagePart)["\\[\"(.*?)\",?(.*?)?(,.*)?\\]"].groups()
+                let messageInternals = RegexMutable(messagePart)["\\[\"(.*?)\",(.*?)?\\]"].groups()
                 if (messageInternals != nil && messageInternals.count > 2) {
                     let event = messageInternals[1]
                     var data:Any!
