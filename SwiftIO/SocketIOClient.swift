@@ -25,22 +25,7 @@ private class EventHandler: NSObject {
     }
 }
 
-private struct binaryMessage {
-    let messageFormat = "45%@-[\"%@\",%@]"
-    var event:String!
-    var data:NSData!
-    
-    init(event:String, data:NSData) {
-        self.event = event
-        self.data = data
-    }
-    
-    func createMessage() -> String {
-        return NSString(format: messageFormat, event)
-    }
-}
-
-private struct SocketMessage {
+private struct Event {
     var event:String!
     var args:Any!
     var placeholders:Int!
@@ -54,6 +39,26 @@ private struct SocketMessage {
     
     func createMessage() -> String {
         var array = "42["
+        array += "\"" + event + "\""
+        if (args? != nil) {
+            if (args is NSDictionary) {
+                array += ","
+                var jsonSendError:NSError?
+                var jsonSend = NSJSONSerialization.dataWithJSONObject(args as NSDictionary,
+                    options: NSJSONWritingOptions(0), error: &jsonSendError)
+                var jsonString = NSString(data: jsonSend!, encoding: NSUTF8StringEncoding)
+                return array + jsonString! + "]"
+            } else {
+                array += ",\"\(args!)\""
+                return array + "]"
+            }
+        } else {
+            return array + "]"
+        }
+    }
+    
+    func createBinaryMessage() -> String {
+        var array = "45\(self.placeholders)-["
         array += "\"" + event + "\""
         if (args? != nil) {
             if (args is NSDictionary) {
@@ -105,7 +110,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     private var handlers = [EventHandler]()
     var io:SRWebSocket?
     var pingTimer:NSTimer!
-    private var lastSocketMessage:SocketMessage?
+    private var lastSocketMessage:Event?
     var secure = false
     
     init(socketURL:String, secure:Bool = false) {
@@ -146,19 +151,48 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         self.io?.open()
     }
     
+    // Creates a binary message, ready for sending
+    private func createBinaryDataForSend(data:NSData) -> NSData {
+        var byteArray = [UInt8](count: 1, repeatedValue: 0x0)
+        byteArray[0] = 4
+        var mutData = NSMutableData(bytes: &byteArray, length: 1)
+        mutData.appendData(data)
+        return mutData
+    }
+    
     // Sends a message
     func emit(event:String, args:Any? = nil) {
         if (!self.connected) {
             return
         }
+        var frame:Event!
+        var str:String!
         
-        if let binaryData = args as? NSData {
-            self.sendBinaryData(event, data: binaryData)
+        if let dict = args as? NSDictionary {
+            // Check for binary data
+            let (newDict, hadBinary, binaryDatas) = self.parseNSDictionary(event: event, dict: dict)
+            if (hadBinary) {
+                frame = Event(event: event, args: newDict, placeholders: binaryDatas!.count)
+                str = frame.createBinaryMessage()
+                self.io?.send(str)
+                for data in binaryDatas! {
+                    let sendData = self.createBinaryDataForSend(data)
+                    self.io?.send(sendData)
+                }
+                return
+            }
+        } else if let binaryData = args as? NSData {
+            // args is just binary
+            frame = Event(event: event, args: ["_placeholder": true, "num": 0], placeholders: 1)
+            str = frame.createBinaryMessage()
+            self.io?.send(str)
+            let sendData = self.createBinaryDataForSend(binaryData)
+            self.io?.send(sendData)
             return
         }
         
-        let frame = SocketMessage(event: event, args: args)
-        let str = frame.createMessage()
+        frame = Event(event: event, args: args)
+        str = frame.createMessage()
         
         // println("Sending: \(str)")
         self.io?.send(str)
@@ -188,6 +222,29 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     // Opens the connection to the socket
     func open() {
         self.connect()
+    }
+    
+    // Parses a NSDictionary, looking for NSData objects
+    func parseNSDictionary(#event:String, dict:NSDictionary) -> (NSDictionary, Bool, [NSData]?) {
+        var returnDict = NSMutableDictionary()
+        var placeholder = 0
+        var containedData = false
+        var returnDatas = [NSData]()
+        for (key, value) in dict {
+            if let binaryData = value as? NSData {
+                containedData = true
+                returnDatas.append(binaryData)
+                returnDict[key as String] = ["_placeholder": true, "num": placeholder]
+                placeholder++
+            } else {
+                returnDict[key as String] = value
+            }
+        }
+        if (containedData) {
+            return (returnDict, true, returnDatas)
+        } else {
+            return (returnDict, false, nil)
+        }
     }
     
     // Parses messages recieved
@@ -267,7 +324,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 let event = binaryGroup[2]
                 let mutMessageObject = RegexMutable(binaryGroup[3])
                 let placeholdersRemoved = mutMessageObject["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] ~= "~~$2"
-                let mes = SocketMessage(event: event, args: placeholdersRemoved,
+                let mes = Event(event: event, args: placeholdersRemoved,
                     placeholders: numberOfPlaceholders.integerValue)
                 self.lastSocketMessage = mes
                 return
@@ -291,26 +348,6 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         if (shouldExecute != nil && shouldExecute!) {
             self.handleEvent(event: event, data: args)
         }
-    }
-    
-    // Sends binary data
-    func sendBinaryData(event:String, data:NSData) {
-        println("should send binary")
-        let message = binaryMessage(event: event, data: data)
-        //        var hexBits = ""
-        //        var byteArray = [UInt8](count: data.length, repeatedValue: 0x0)
-        //        data.getBytes(&byteArray, length:data.length)
-        //        for value in byteArray {
-        //            hexBits += NSString(format:"%2X", value) as String
-        //        }
-        //        let hexBytes = hexBits.stringByReplacingOccurrencesOfString("\u{0020}", withString: "0",
-        //            options: NSStringCompareOptions.CaseInsensitiveSearch)
-        //        println(hexBytes)
-        // println("binary message " + message.createMessage())
-        // println(byteArray)
-        // println("[" + ", ".join(byteArray.map({"\($0)"})) + "]")
-        self.io?.send(message.createMessage())
-        self.io?.send(data)
     }
     
     // Sends ping
