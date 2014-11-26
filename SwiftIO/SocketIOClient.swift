@@ -316,7 +316,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             /**
             Begin check for binary placeholder
             **/
-            let binaryGroup = mutMessage["(\\d*)-\\[\"(.*)\",(\\{.*\\})\\]"].groups()
+            let binaryGroup = mutMessage["(\\d*)-\\[\"(.*)\",(\\{.*\\})\\]$"].groups()
             // println(binaryGroup)
             if (binaryGroup != nil) {
                 let messageType = RegexMutable(binaryGroup[1])
