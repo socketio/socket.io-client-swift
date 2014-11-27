@@ -103,7 +103,6 @@ private struct Event {
 }
 
 class SocketIOClient: NSObject, SRWebSocketDelegate {
-    let session:NSURLSession?
     let socketURL:String!
     var connected = false
     var connecting = false
@@ -114,14 +113,6 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     var secure = false
     
     init(socketURL:String, secure:Bool = false) {
-        let sessionConfig:NSURLSessionConfiguration = NSURLSessionConfiguration.defaultSessionConfiguration()
-        sessionConfig.allowsCellularAccess = true
-        sessionConfig.HTTPAdditionalHeaders = ["Content-Type": "application/json"]
-        sessionConfig.timeoutIntervalForRequest = 30
-        sessionConfig.timeoutIntervalForResource = 60
-        sessionConfig.HTTPMaximumConnectionsPerHost = 1
-        
-        self.session = NSURLSession(configuration: sessionConfig)
         var mutURL = RegexMutable(socketURL)
         mutURL = mutURL["http://"] ~= ""
         mutURL = mutURL["https://"] ~= ""
