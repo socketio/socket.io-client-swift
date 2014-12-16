@@ -216,7 +216,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Parses a NSDictionary, looking for NSData objects
-    func parseNSDictionary(#dict:NSDictionary) -> (NSDictionary, Bool, [NSData]?) {
+    private func parseNSDictionary(#dict:NSDictionary) -> (NSDictionary, Bool, [NSData]?) {
         var returnDict = NSMutableDictionary()
         var placeholder = 0
         var containedData = false
@@ -353,6 +353,19 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     private func startPingTimer(#interval:Int) {
         self.pingTimer = NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(interval), target: self,
             selector: Selector("sendPing"), userInfo: nil, repeats: true)
+    }
+    
+    // Helper method
+    func toJSON(data:Any!) -> NSDictionary? {
+        var err:NSError?
+        var stringData = data as String
+        var JSONData = stringData.dataUsingEncoding(NSUTF8StringEncoding)
+        var json = NSJSONSerialization.JSONObjectWithData(JSONData!, options: NSJSONReadingOptions.allZeros, error: &err) as NSDictionary
+        if (err != nil) {
+            println(err?.localizedDescription)
+            return nil
+        }
+        return json
     }
     
     // Called when a message is recieved
