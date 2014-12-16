@@ -24,6 +24,12 @@ socket.on("connect") {data in
         "data": true
         ])
 }
+
+socket.on("foobar") {data in
+    if let json = socket.toJSON(data) {
+        println(json["test"])
+    }
+}
 socket.connect()
 ```
 
