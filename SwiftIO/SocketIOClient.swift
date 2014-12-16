@@ -190,16 +190,16 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Handles events
-    func handleEvent(#event:String, data:Any?) {
+    func handleEvent(#event:String, var data:Any?) {
         // println("Should do event: \(event) with data: \(data)")
-        
+        data = parseData(data)
         for handler in self.handlers {
             if (handler.event == event) {
-                if (data != nil) {
-                    handler.executeCallback(data)
-                } else {
+                if (data == nil) {
                     handler.executeCallback(nil)
+                    continue
                 }
+                handler.executeCallback(data)
             }
         }
     }
@@ -213,6 +213,36 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     // Opens the connection to the socket
     func open() {
         self.connect()
+    }
+    
+    // temporary until I redo how messages are parsed
+    private func parseData(data:Any?) -> Any? {
+        if (data == nil) {
+            return nil
+        }
+        
+        if let json = self.toJSON(data) {
+            return json
+        }
+        
+        let dataAsString = data as String
+        if (dataAsString == "true") {
+            return true
+        } else if (dataAsString == "false") {
+            return false
+        } else if (dataAsString.hasPrefix("[") && dataAsString.hasSuffix("]")) {
+            var trimArray = Array(dataAsString)
+            trimArray.removeAtIndex(0)
+            trimArray.removeAtIndex(trimArray.count - 1)
+            var ret = String(trimArray).componentsSeparatedByString(",")
+            var returnArray = [Any]()
+            for item in ret {
+                returnArray.append(item)
+            }
+            return returnArray
+        }
+        
+        return data
     }
     
     // Parses a NSDictionary, looking for NSData objects
@@ -275,13 +305,14 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 let messageInternals = RegexMutable(messagePart)["\\[\"(.*?)\",(.*?)?\\]$"].groups()
                 if (messageInternals != nil && messageInternals.count > 2) {
                     let event = messageInternals[1]
-                    var data:Any!
+                    var data:String?
                     if (messageInternals[2] == "") {
                         data = nil
                     } else {
                         data = messageInternals[2]
                         
                     }
+                    
                     self.handleEvent(event: event, data: data)
                     return
                 }
@@ -356,16 +387,19 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Helper method
-    func toJSON(data:Any!) -> NSDictionary? {
+    func toJSON(data:Any?) -> NSDictionary? {
+        if (data == nil || data is Bool || data is Int) {
+            return nil
+        }
         var err:NSError?
         var stringData = data as String
         var JSONData = stringData.dataUsingEncoding(NSUTF8StringEncoding)
-        var json = NSJSONSerialization.JSONObjectWithData(JSONData!, options: NSJSONReadingOptions.allZeros, error: &err) as NSDictionary
-        if (err != nil) {
-            println(err?.localizedDescription)
+        var json:AnyObject? = NSJSONSerialization.JSONObjectWithData(JSONData!, options: NSJSONReadingOptions.allZeros, error: &err)
+        if (err != nil || json == nil) {
+            // println(err?.localizedDescription)
             return nil
         }
-        return json
+        return json as? NSDictionary
     }
     
     // Called when a message is recieved

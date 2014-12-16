@@ -25,9 +25,28 @@ socket.on("connect") {data in
         ])
 }
 
-socket.on("foobar") {data in
-    if let json = socket.toJSON(data) {
-        println(json["test"])
+socket.on("jsonTest") {data in
+    if let json = data as? NSDictionary {
+        println(json["test"]!) // foo bar
+    }
+}
+
+socket.on("boolTest") {data in
+    if let bool = data as? Bool {
+        println(bool) // true
+    }
+}
+
+socket.on("arrayTest") {data in
+    if let array = data as? [Any] {
+        println(array[0]) // 2
+        println(array[1]) // "test"
+    }
+}
+
+socket.on("intTest") {data in
+    if let stringData = data as? NSString {
+        println(stringData.integerValue)
     }
 }
 socket.connect()
@@ -42,16 +61,12 @@ socket.emit("testObject", args: [
         
 // Recieving data
 socket.on("dataTest") {data in
-    var err:NSError?
-    var stringData = data as String
-    var data = stringData.dataUsingEncoding(NSUTF8StringEncoding)
-    var json = NSJSONSerialization.JSONObjectWithData(data!, 
-        options: NSJSONReadingOptions.AllowFragments, error: &err) as NSDictionary
-    var bufData = NSData(base64EncodedString: (json["buf"] as String),
-        options: NSDataBase64DecodingOptions.allZeros)
-    if let dataAsString = NSString(data: bufData!, encoding: NSUTF8StringEncoding) {
-        println(dataAsString)
+    if let json = data as? NSDictionary {
+        var imageData = NSData(base64EncodedString: (json["test"] as String),
+        options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters)
+        if let dataAsString = NSString(data: imageData!, encoding: NSUTF8StringEncoding) {
+            println(dataAsString)
+        }
     }
 }
-
 ```
