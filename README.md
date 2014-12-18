@@ -14,7 +14,7 @@ Installation
 Use
 ===
 
-```
+```swift
 let socket = SocketIOClient(socketURL: "http://localhost:8080")
 // let socket = SocketIOClient(socketURL: "https://localhost:8080", secure: true)
 socket.on("connect") {data in
@@ -53,7 +53,7 @@ socket.connect()
 ```
 
 Binary support is not guaranteed to work. All recieved data is encoded in base64 strings.
-```
+```swift
 // Sending binary
 socket.emit("testObject", args: [
         "data": "Hello World".dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!,
