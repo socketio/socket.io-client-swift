@@ -9,14 +9,14 @@ import Foundation
 
 private class EventHandler: NSObject {
     let event:String!
-    let callback:((data:Any?) -> Void)!
+    let callback:((data:AnyObject?) -> Void)!
     
-    init(event:String, callback:((data:Any?) -> Void)?) {
+    init(event:String, callback:((data:AnyObject?) -> Void)?) {
         self.event = event
         self.callback = callback
     }
     
-    func executeCallback(args:Any?) {
+    func executeCallback(args:AnyObject?) {
         if (args != nil) {
             callback(data: args!)
         } else {
@@ -27,11 +27,11 @@ private class EventHandler: NSObject {
 
 private struct Event {
     var event:String!
-    var args:Any!
+    var args:AnyObject!
     var placeholders:Int!
     var currentPlace = 0
     
-    init(event:String, args:Any?, placeholders:Int = 0) {
+    init(event:String, args:AnyObject?, placeholders:Int = 0) {
         self.event = event
         self.args = args?
         self.placeholders = placeholders
@@ -152,7 +152,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Sends a message
-    func emit(event:String, args:Any? = nil) {
+    func emit(event:String, args:AnyObject? = nil) {
         if (!self.connected) {
             return
         }
@@ -190,9 +190,9 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Handles events
-    func handleEvent(#event:String, var data:Any?) {
+    func handleEvent(#event:String, var data:AnyObject?) {
         // println("Should do event: \(event) with data: \(data)")
-        data = parseData(data)
+        // data = parseData(data as? String)
         for handler in self.handlers {
             if (handler.event == event) {
                 if (data == nil) {
@@ -205,7 +205,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Adds handlers to the socket
-    func on(name:String, callback:((data:Any?) -> Void)?) {
+    func on(name:String, callback:((data:AnyObject?) -> Void)?) {
         let handler = EventHandler(event: name, callback: callback)
         self.handlers.append(handler)
     }
@@ -215,34 +215,22 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         self.connect()
     }
     
-    // temporary until I redo how messages are parsed
-    private func parseData(data:Any?) -> Any? {
+    // Parses data for events
+    private func parseData(data:String?) -> AnyObject? {
         if (data == nil) {
             return nil
         }
+        var err:NSError?
         
-        if let json = self.toJSON(data) {
-            return json
+        let stringData = data!.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)
+        let parsed:AnyObject? = NSJSONSerialization.JSONObjectWithData(stringData!,
+            options: NSJSONReadingOptions.AllowFragments, error: &err)
+        if (err != nil) {
+            // println(err)
+            return nil
         }
         
-        let dataAsString = data as String
-        if (dataAsString == "true") {
-            return true
-        } else if (dataAsString == "false") {
-            return false
-        } else if (dataAsString.hasPrefix("[") && dataAsString.hasSuffix("]")) {
-            var trimArray = Array(dataAsString)
-            trimArray.removeAtIndex(0)
-            trimArray.removeAtIndex(trimArray.count - 1)
-            var ret = String(trimArray).componentsSeparatedByString(",")
-            var returnArray = [Any]()
-            for item in ret {
-                returnArray.append(item)
-            }
-            return returnArray
-        }
-        
-        return data
+        return parsed
     }
     
     // Parses a NSDictionary, looking for NSData objects
@@ -273,6 +261,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         if (message == nil) {
             return
         }
+        
         // println(message!)
         
         if let stringMessage = message as? String {
@@ -310,7 +299,11 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                         data = nil
                     } else {
                         data = messageInternals[2]
-                        
+                    }
+                    
+                    if let json:AnyObject = self.parseData(data) {
+                        self.handleEvent(event: event, data: json)
+                        return
                     }
                     
                     self.handleEvent(event: event, data: data)
@@ -365,8 +358,8 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         
         let shouldExecute = self.lastSocketMessage?.fillInPlaceHolder(data)
         var event = self.lastSocketMessage!.event
-        var args = self.lastSocketMessage!.args
-        // println(args)
+        var args:AnyObject? = self.parseData(self.lastSocketMessage!.args as? String)
+        
         if (shouldExecute != nil && shouldExecute!) {
             self.handleEvent(event: event, data: args)
         }
@@ -384,22 +377,6 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     private func startPingTimer(#interval:Int) {
         self.pingTimer = NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(interval), target: self,
             selector: Selector("sendPing"), userInfo: nil, repeats: true)
-    }
-    
-    // Helper method
-    func toJSON(data:Any?) -> NSDictionary? {
-        if (data == nil || data is Bool || data is Int) {
-            return nil
-        }
-        var err:NSError?
-        var stringData = data as String
-        var JSONData = stringData.dataUsingEncoding(NSUTF8StringEncoding)
-        var json:AnyObject? = NSJSONSerialization.JSONObjectWithData(JSONData!, options: NSJSONReadingOptions.allZeros, error: &err)
-        if (err != nil || json == nil) {
-            // println(err?.localizedDescription)
-            return nil
-        }
-        return json as? NSDictionary
     }
     
     // Called when a message is recieved

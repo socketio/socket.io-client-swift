@@ -27,7 +27,7 @@ socket.on("connect") {data in
 
 socket.on("jsonTest") {data in
     if let json = data as? NSDictionary {
-        println(json["test"]!) // foo bar
+       println(json["test"]!) // foo bar
     }
 }
 
@@ -38,15 +38,15 @@ socket.on("boolTest") {data in
 }
 
 socket.on("arrayTest") {data in
-    if let array = data as? [Any] {
+    if let array = data as? NSArray {
         println(array[0]) // 2
         println(array[1]) // "test"
     }
 }
 
 socket.on("intTest") {data in
-    if let stringData = data as? NSString {
-        println(stringData.integerValue)
+    if let intData = data as? Int {
+        println(intData)
     }
 }
 socket.connect()
