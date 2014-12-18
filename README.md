@@ -62,9 +62,9 @@ socket.emit("testObject", args: [
 // Recieving data
 socket.on("dataTest") {data in
     if let json = data as? NSDictionary {
-        var imageData = NSData(base64EncodedString: (json["test"] as String),
-        options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters)
-        if let dataAsString = NSString(data: imageData!, encoding: NSUTF8StringEncoding) {
+        var textData = NSData(base64EncodedString: (json["test"] as String),
+            options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters)
+        if let dataAsString = NSString(data: textData!, encoding: NSUTF8StringEncoding) {
             println(dataAsString)
         }
     }
