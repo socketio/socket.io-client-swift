@@ -415,7 +415,6 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             return
         } else if (self.connected) {
             self.connecting = false
-            self.reconnnects = false
             self.reconnecting = false
             return
         }
