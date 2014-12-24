@@ -104,20 +104,45 @@ private struct Event {
 
 class SocketIOClient: NSObject, SRWebSocketDelegate {
     let socketURL:String!
+    let secure:Bool!
+    private var handlers = [EventHandler]()
+    private var lastSocketMessage:Event?
     var connected = false
     var connecting = false
-    private var handlers = [EventHandler]()
     var io:SRWebSocket?
     var pingTimer:NSTimer!
-    private var lastSocketMessage:Event?
-    var secure = false
+    var reconnnects = true
+    var reconnecting = false
+    var reconnectAttempts = 10
+    var reconnectWait = 10
     
-    init(socketURL:String, secure:Bool = false) {
+    init(socketURL:String, opts:[String: AnyObject]? = nil) {
+        super.init()
         var mutURL = RegexMutable(socketURL)
+        
+        if (mutURL["https://"].matches().count != 0) {
+            self.secure = true
+        } else {
+            self.secure = false
+        }
         mutURL = mutURL["http://"] ~= ""
         mutURL = mutURL["https://"] ~= ""
         self.socketURL = mutURL
-        self.secure = secure
+        
+        // Set options
+        if (opts != nil) {
+            if let reconnects = opts!["reconnects"] as? Bool {
+                self.reconnnects = reconnects
+            }
+            
+            if let reconnectAttempts = opts!["reconnectAttempts"] as? Int {
+                self.reconnectAttempts = abs(reconnectAttempts)
+            }
+            
+            if let reconnectWait = opts!["reconnectWait"] as? Int {
+                self.reconnectWait = abs(reconnectWait)
+            }
+        }
     }
     
     // Closes the socket
@@ -125,6 +150,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         self.pingTimer?.invalidate()
         self.connecting = false
         self.connected = false
+        self.reconnnects = false
         self.io?.close()
     }
     
@@ -132,7 +158,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     func connect() {
         self.connecting = true
         var endpoint:String!
-        if (self.secure) {
+        if (self.secure!) {
             endpoint = "wss://\(self.socketURL)/socket.io/?EIO=2&transport=websocket"
         } else {
             endpoint = "ws://\(self.socketURL)/socket.io/?EIO=2&transport=websocket"
@@ -379,8 +405,35 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             selector: Selector("sendPing"), userInfo: nil, repeats: true)
     }
     
+    // We lost connection and should attempt to reestablish
+    private func tryReconnect(#triesLeft:Int) {
+        if (self.connected || triesLeft <= 0) {
+            self.connecting = false
+            self.reconnnects = false
+            self.reconnecting = false
+            self.handleEvent(event: "disconnect", data: "Failed to reconnect")
+            return
+        }
+        
+        // println("Trying to reconnect #\(reconnectAttempts - triesLeft)")
+        
+        self.reconnecting = true
+        let waitTime = UInt64(self.reconnectWait) * NSEC_PER_SEC
+        let time = dispatch_time(DISPATCH_TIME_NOW, Int64(waitTime))
+        
+        // Wait reconnectWait and then check if connected. Repeat if not
+        dispatch_after(time, dispatch_get_main_queue()) {[weak self] in
+            if (self == nil || self!.connected) {
+                return
+            }
+            
+            self!.tryReconnect(triesLeft: triesLeft - 1)
+        }
+        self.connect()
+    }
+    
     // Called when a message is recieved
-    func webSocket(webSocket: SRWebSocket!, didReceiveMessage message:AnyObject?) {
+    func webSocket(webSocket:SRWebSocket!, didReceiveMessage message:AnyObject?) {
         // println(message)
         self.parseSocketMessage(message: message)
     }
@@ -388,15 +441,34 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     // Called when the socket is opened
     func webSocketDidOpen(webSocket: SRWebSocket!) {
         self.connecting = false
+        self.reconnecting = false
         self.connected = true
         self.handleEvent(event: "connect", data: nil)
     }
     
     // Called when the socket is closed
-    func webSocket(webSocket: SRWebSocket!, didCloseWithCode code: Int, reason: String!, wasClean: Bool) {
+    func webSocket(webSocket:SRWebSocket!, didCloseWithCode code:Int, reason:String!, wasClean:Bool) {
         self.pingTimer?.invalidate()
         self.connected = false
         self.connecting = false
-        self.handleEvent(event: "disconnect", data: reason)
+        if (!self.reconnnects) {
+            self.handleEvent(event: "disconnect", data: reason)
+        } else {
+            self.handleEvent(event: "reconnect", data: reason)
+            self.tryReconnect(triesLeft: self.reconnectAttempts)
+            
+        }
+    }
+    
+    func webSocket(webSocket:SRWebSocket!, didFailWithError error:NSError!) {
+        self.pingTimer?.invalidate()
+        self.connected = false
+        self.connecting = false
+        if (!self.reconnnects) {
+            self.handleEvent(event: "disconnect", data: error.localizedDescription)
+        } else if (!self.reconnecting) {
+            self.handleEvent(event: "reconnect", data: error.localizedDescription)
+            self.tryReconnect(triesLeft: self.reconnectAttempts)
+        }
     }
 }
