@@ -407,21 +407,25 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     
     // We lost connection and should attempt to reestablish
     private func tryReconnect(#triesLeft:Int) {
-        if (self.connected || triesLeft <= 0) {
+        if (triesLeft <= 0) {
             self.connecting = false
             self.reconnnects = false
             self.reconnecting = false
             self.handleEvent(event: "disconnect", data: "Failed to reconnect")
             return
+        } else if (self.connected) {
+            self.connecting = false
+            self.reconnnects = false
+            self.reconnecting = false
+            return
         }
         
         // println("Trying to reconnect #\(reconnectAttempts - triesLeft)")
         
-        self.reconnecting = true
         let waitTime = UInt64(self.reconnectWait) * NSEC_PER_SEC
         let time = dispatch_time(DISPATCH_TIME_NOW, Int64(waitTime))
         
-        // Wait reconnectWait and then check if connected. Repeat if not
+        // Wait reconnectWait seconds and then check if connected. Repeat if not
         dispatch_after(time, dispatch_get_main_queue()) {[weak self] in
             if (self == nil || self!.connected) {
                 return
@@ -429,6 +433,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             
             self!.tryReconnect(triesLeft: triesLeft - 1)
         }
+        self.reconnecting = true
         self.connect()
     }
     
@@ -439,7 +444,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Called when the socket is opened
-    func webSocketDidOpen(webSocket: SRWebSocket!) {
+    func webSocketDidOpen(webSocket:SRWebSocket!) {
         self.connecting = false
         self.reconnecting = false
         self.connected = true
