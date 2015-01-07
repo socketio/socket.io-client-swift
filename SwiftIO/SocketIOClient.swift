@@ -42,7 +42,7 @@ private class EventHandler: NSObject {
     }
 }
 
-private struct Event {
+private class Event {
     var event:String!
     var args:AnyObject!
     var placeholders:Int!
@@ -94,7 +94,7 @@ private struct Event {
         }
     }
     
-    mutating func fillInPlaceHolder(data:NSData) -> Bool {
+    func fillInPlaceHolder(data:NSData) -> Bool {
         func checkDoEvent() -> Bool {
             if (self.placeholders == self.currentPlace) {
                 return true
@@ -130,7 +130,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     var pingTimer:NSTimer!
     var reconnnects = true
     var reconnecting = false
-    var reconnectAttempts = 10
+    var reconnectAttempts = -1
     var reconnectWait = 10
     
     init(socketURL:String, opts:[String: AnyObject]? = nil) {
@@ -153,7 +153,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             }
             
             if let reconnectAttempts = opts!["reconnectAttempts"] as? Int {
-                self.reconnectAttempts = abs(reconnectAttempts)
+                self.reconnectAttempts = reconnectAttempts
             }
             
             if let reconnectWait = opts!["reconnectWait"] as? Int {
@@ -410,10 +410,9 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     
     // Sends ping
     func sendPing() {
-        if (!self.connected) {
-            return
+        if (self.connected) {
+            self.io?.send("2")
         }
-        self.io?.send("2")
     }
     
     // Starts the ping timer
@@ -423,8 +422,8 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // We lost connection and should attempt to reestablish
-    private func tryReconnect(#triesLeft:Int) {
-        if (triesLeft <= 0) {
+    private func tryReconnect(var #triesLeft:Int) {
+        if (triesLeft != -1 && triesLeft <= 0) {
             self.connecting = false
             self.reconnnects = false
             self.reconnecting = false
@@ -437,6 +436,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         }
         
         // println("Trying to reconnect #\(reconnectAttempts - triesLeft)")
+        self.handleEvent(event: "reconnectAttempt", data: triesLeft)
         
         let waitTime = UInt64(self.reconnectWait) * NSEC_PER_SEC
         let time = dispatch_time(DISPATCH_TIME_NOW, Int64(waitTime))
@@ -447,7 +447,11 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 return
             }
             
-            self!.tryReconnect(triesLeft: triesLeft - 1)
+            if (triesLeft != -1) {
+                triesLeft = triesLeft - 1
+            }
+            
+            self!.tryReconnect(triesLeft: triesLeft)
         }
         self.reconnecting = true
         self.connect()

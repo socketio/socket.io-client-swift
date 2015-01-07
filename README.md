@@ -16,7 +16,7 @@ Use
 // opts can be omitted, will use default values
 let socket = SocketIOClient(socketURL: "https://localhost:8080", opts: [
     "reconnects": true, // default true
-    "reconnectAttempts": 5, // default 10
+    "reconnectAttempts": 5, // default -1 (infinite tries)
     "reconnectWait": 5 // default 10
 ])
 
@@ -37,6 +37,12 @@ socket.on("disconnect") {data in
 socket.on("reconnect") {data in
     if let reason = data as? String {
         println("Socket reconnecting: \(reason)")
+    }
+}
+
+socket.on("reconnectAttempt") {data in
+    if let triesLeft = data as? Int {
+        println(triesLeft)
     }
 }
 
