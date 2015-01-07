@@ -5,7 +5,7 @@ Socket.IO-client for Swift. Supports ws/wss connections and binary
 
 Installation
 ============
-1. Requires linking [SocketRocket](https://github.com/square/SocketRocket) against your xcode project. (Be sure to link the frameworks required by SocketRocket)
+1. Requires linking [SocketRocket](https://github.com/square/SocketRocket) against your xcode project. (Be sure to link the [frameworks](https://github.com/square/SocketRocket#framework-dependencies) required by SocketRocket)
 2. Create a bridging header for SocketRocket
 3. Copy the SwiftIO folder into your xcode project
 
