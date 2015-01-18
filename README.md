@@ -91,6 +91,7 @@ socket.connect()
 
 // Sending binary
 socket.emit("testData", args: [
-        "data": "Hello World".dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!,
+        "data": "Hello World".dataUsingEncoding(NSUTF8StringEncoding,
+            allowLossyConversion: false)!,
         "test": true])
 ```
