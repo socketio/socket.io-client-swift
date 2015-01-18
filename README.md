@@ -70,24 +70,27 @@ socket.on("intTest") {data in
         println(intData)
     }
 }
-socket.connect()
-```
-
-Binary support is not guaranteed to work. All recieved data is encoded in base64 strings.
-```swift
-// Sending binary
-socket.emit("testObject", args: [
-        "data": "Hello World".dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!,
-        "test": true])
         
 // Recieving data
 socket.on("dataTest") {data in
-    if let json = data as? NSDictionary {
-        var textData = NSData(base64EncodedString: (json["test"] as String),
-            options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters)
-        if let dataAsString = NSString(data: textData!, encoding: NSUTF8StringEncoding) {
-            println(dataAsString)
+    if let data = data as? NSData {
+        println("data is binary")
+    }
+}
+
+socket.on("objectDataTest") {data in
+    if let dict = data as? NSDictionary {
+        if let data = dict["data"] as? NSData {
+            let string = NSString(data: data, encoding: NSUTF8StringEncoding)
+            println("Got data: \(string!)")
         }
     }
 }
+
+socket.connect()
+
+// Sending binary
+socket.emit("testData", args: [
+        "data": "Hello World".dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!,
+        "test": true])
 ```

@@ -43,15 +43,40 @@ private class EventHandler: NSObject {
 }
 
 private class Event {
-    var event:String!
     var args:AnyObject!
-    var placeholders:Int!
     var currentPlace = 0
+    var event:String!
+    lazy var datas = [NSData]()
+    var placeholders:Int!
     
     init(event:String, args:AnyObject?, placeholders:Int = 0) {
         self.event = event
         self.args = args?
         self.placeholders = placeholders
+    }
+    
+    func addData(data:NSData) -> Bool {
+        func checkDoEvent() -> Bool {
+            if self.placeholders == self.currentPlace {
+                return true
+            } else {
+                return false
+            }
+        }
+        
+        if checkDoEvent() {
+            return true
+        }
+        
+        self.datas.append(data)
+        self.currentPlace++
+        
+        if checkDoEvent() {
+            self.currentPlace = 0
+            return true
+        } else {
+            return false
+        }
     }
     
     func createMessage() -> String {
@@ -95,27 +120,30 @@ private class Event {
         }
     }
     
-    func fillInPlaceHolder(data:NSData) -> Bool {
-        func checkDoEvent() -> Bool {
-            if self.placeholders == self.currentPlace {
-                return true
-            } else {
-                return false
+    func fillInPlaceholders(args:AnyObject) -> AnyObject {
+        if let dict = args as? NSDictionary {
+            var newDict = [String: AnyObject]()
+            
+            for (key, value) in dict {
+                newDict[key as String] = value
+                
+                // If the value is a string we need to check
+                // if it is a placeholder for data
+                if let value = value as? String {
+                    if value == "~~\(self.currentPlace)" {
+                        newDict[key as String] = self.datas.removeAtIndex(0)
+                        self.currentPlace++
+                    }
+                }
+            }
+            
+            return newDict
+        } else if let string = args as? String {
+            if string == "~~\(self.currentPlace)" {
+                return self.datas.removeAtIndex(0)
             }
         }
         
-        if checkDoEvent() {
-            return true
-        }
-        
-        if let stringArgs = args as? String {
-            let mutStringArgs = RegexMutable(stringArgs)
-            let base64 = data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions.allZeros)
-            let placeHolder = "~~" + String(self.currentPlace)
-            self.args = mutStringArgs[placeHolder] ~= "\"" + base64 + "\""
-            self.currentPlace++
-            return checkDoEvent()
-        }
         return false
     }
 }
@@ -395,7 +423,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 let numberOfPlaceholders = messageType["45"] ~= ""
                 let event = binaryGroup[2]
                 let mutMessageObject = RegexMutable(binaryGroup[3])
-                let placeholdersRemoved = mutMessageObject["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] ~= "~~$2"
+                let placeholdersRemoved = mutMessageObject["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] ~= "\"~~$2\""
                 let mes = Event(event: event, args: placeholdersRemoved,
                     placeholders: numberOfPlaceholders.integerValue)
                 self.lastSocketMessage = mes
@@ -413,12 +441,15 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             return
         }
         
-        let shouldExecute = self.lastSocketMessage?.fillInPlaceHolder(data)
-        var event = self.lastSocketMessage!.event
-        var args:AnyObject? = self.parseData(self.lastSocketMessage!.args as? String)
+        let shouldExecute = self.lastSocketMessage?.addData(data)
         
         if shouldExecute != nil && shouldExecute! {
-            self.handleEvent(event: event, data: args)
+            var event = self.lastSocketMessage!.event
+            var parsedArgs:AnyObject? = self.parseData(self.lastSocketMessage!.args as? String)
+            if let args:AnyObject = parsedArgs {
+                let filledInArgs:AnyObject = self.lastSocketMessage!.fillInPlaceholders(args)
+                self.handleEvent(event: event, data: filledInArgs)
+            }
         }
     }
     
