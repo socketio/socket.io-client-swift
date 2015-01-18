@@ -95,3 +95,6 @@ socket.emit("testData", args: [
             allowLossyConversion: false)!,
         "test": true])
 ```
+License
+=======
+MIT
