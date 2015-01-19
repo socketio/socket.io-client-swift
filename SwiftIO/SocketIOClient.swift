@@ -102,6 +102,8 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Sends a message
+    // If a message contains binary we have to send those
+    // seperately.
     func emit(event:String, args:AnyObject? = nil) {
         if !self.connected {
             return
@@ -144,9 +146,9 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Handles events
-    func handleEvent(#event:String, var data:AnyObject?) {
+    func handleEvent(#event:String, data:AnyObject?) {
         // println("Should do event: \(event) with data: \(data)")
-        // data = parseData(data as? String)
+        
         for handler in self.handlers {
             if handler.event == event {
                 if data == nil {
@@ -160,7 +162,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Adds handlers to the socket
-    func on(name:String, callback:((data:AnyObject?) -> Void)?) {
+    func on(name:String, callback:((data:AnyObject?) -> Void)) {
         let handler = EventHandler(event: name, callback: callback)
         self.handlers.append(handler)
     }

@@ -24,7 +24,6 @@
 
 import Foundation
 
-
 class EventHandler: NSObject {
     let event:String!
     let callback:((data:AnyObject?) -> Void)!
