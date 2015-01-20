@@ -1,7 +1,7 @@
 Socket.IO-Client-Swift
 ======================
 
-Socket.IO-client for Swift. Supports ws/wss connections and binary
+Socket.IO-client for Swift. Supports ws/wss connections and binary. For socket.io 1.0+
 
 Installation
 ============
@@ -15,10 +15,9 @@ Methods
 -------
 1. `socket.on(name:String, callback:((data:AnyObject?) -> Void))` - Adds a handler for an event.
 2. `socket.onMultipleArgs(name:String, callback:((data:[AnyObject]) -> Void))` - Adds a handler for an event that           can have multiple items. Items are stored in an array.
-3. `socket.emit(event:String, args:AnyObject? = nil)` - Sends an event with optional arg.
-4. `socket.emitMultiple(event:String, args:AnyObject...)` - Sends an event with multiple args.
-5. `socket.connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
-6. `socket.close()` - Closes the socket. Once a socket is closed it should not be reopened. 
+3. `socket.emit(event:String, args:AnyObject...)` - Sends a message. Can send multiple args.
+4. `socket.connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
+5. `socket.close()` - Closes the socket. Once a socket is closed it should not be reopened. 
 
 ```swift
 // opts can be omitted, will use default values
