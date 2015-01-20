@@ -1,7 +1,7 @@
 Socket.IO-Client-Swift
 ======================
 
-Socket.IO-client for Swift. Supports ws/wss connections and binary
+Socket.IO-client for Swift. Supports ws/wss connections and binary. For socket.io 1.0+
 
 Installation
 ============
