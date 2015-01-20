@@ -27,8 +27,8 @@ import Foundation
 class SocketIOClient: NSObject, SRWebSocketDelegate {
     let socketURL:String!
     private let secure:Bool!
-    private var handlers = [EventHandler]()
-    private var lastSocketMessage:Event?
+    private var handlers = [SocketEventHandler]()
+    private var lastSocketMessage:SocketEvent?
     private var pingTimer:NSTimer!
     var connected = false
     var connecting = false
@@ -109,7 +109,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             return
         }
         
-        var frame:Event
+        var frame:SocketEvent
         var str:String
         var items = [AnyObject](count: args.count, repeatedValue: 1)
         var numberOfPlaceholders = -1
@@ -165,14 +165,14 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         }
         
         if hasBinary {
-            str = Event.createMessageForEvent(event, withArgs: items,
+            str = SocketEvent.createMessageForEvent(event, withArgs: items,
                 hasBinary: true, withDatas: datas.count)
             self.io?.send(str)
             for data in datas {
                 self.io?.send(data)
             }
         } else {
-            str = Event.createMessageForEvent(event, withArgs: items, hasBinary: false)
+            str = SocketEvent.createMessageForEvent(event, withArgs: items, hasBinary: false)
             self.io?.send(str)
         }
     }
@@ -200,13 +200,13 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     
     // Adds handler for single arg message
     func on(name:String, callback:((data:AnyObject?) -> Void)) {
-        let handler = EventHandler(event: name, callback: callback)
+        let handler = SocketEventHandler(event: name, callback: callback)
         self.handlers.append(handler)
     }
     
     // Adds handler for multiple arg message
     func onMultipleArgs(name:String, callback:((data:[AnyObject]) -> Void)) {
-        let handler = EventHandler(event: name, callback: callback)
+        let handler = SocketEventHandler(event: name, callback: callback)
         self.handlers.append(handler)
     }
     
@@ -355,7 +355,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 let mutMessageObject = RegexMutable(binaryGroup[3])
                 let placeholdersRemoved = mutMessageObject["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"]
                     ~= "\"~~$2\""
-                let mes = Event(event: event, args: placeholdersRemoved,
+                let mes = SocketEvent(event: event, args: placeholdersRemoved,
                     placeholders: numberOfPlaceholders.integerValue)
                 self.lastSocketMessage = mes
                 return
@@ -369,7 +369,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                     let mutMessageObject = RegexMutable(binaryGroups[3])
                     let placeholdersRemoved = mutMessageObject["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"]
                         ~= "\"~~$2\""
-                    let mes = Event(event: event, args: placeholdersRemoved,
+                    let mes = SocketEvent(event: event, args: placeholdersRemoved,
                         placeholders: numberOfPlaceholders.integerValue)
                     self.lastSocketMessage = mes
                     return
