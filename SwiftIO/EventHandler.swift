@@ -22,15 +22,19 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-import Foundation
-
-class EventHandler: NSObject {
+class EventHandler {
     let event:String!
     let callback:((data:AnyObject?) -> Void)!
+    var callbackMult:((data:[AnyObject]) -> Void)!
     
-    init(event:String, callback:((data:AnyObject?) -> Void)?) {
+    init(event:String, callback:((data:AnyObject?) -> Void)) {
         self.event = event
         self.callback = callback
+    }
+    
+    init(event:String, callback:((data:[AnyObject]) -> Void)) {
+        self.event = event
+        self.callbackMult = callback
     }
     
     func executeCallback(args:AnyObject?) {
@@ -39,5 +43,9 @@ class EventHandler: NSObject {
         } else {
             callback(data: nil)
         }
+    }
+    
+    func executeCallback(args:[AnyObject]) {
+        callbackMult(data: args)
     }
 }

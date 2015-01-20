@@ -26,9 +26,9 @@ import Foundation
 
 class Event {
     var args:AnyObject!
-    var currentPlace = 0
-    var event:String!
+    lazy var currentPlace = 0
     lazy var datas = [NSData]()
+    var event:String!
     var placeholders:Int!
     
     init(event:String, args:AnyObject?, placeholders:Int = 0) {
@@ -61,48 +61,42 @@ class Event {
         }
     }
     
-    func createMessage() -> String {
-        var array = "42["
-        array += "\"" + event + "\""
-        
-        if args? != nil {
-            if args is NSDictionary {
-                array += ","
-                var jsonSendError:NSError?
-                var jsonSend = NSJSONSerialization.dataWithJSONObject(args as NSDictionary,
-                    options: NSJSONWritingOptions(0), error: &jsonSendError)
-                var jsonString = NSString(data: jsonSend!, encoding: NSUTF8StringEncoding)
-                return array + jsonString! + "]"
+    class func createMessageForEvent(event:String, withArgs args:[AnyObject],
+        hasBinary:Bool, withDatas datas:Int = 0) -> String {
+            
+            var message:String
+            var jsonSendError:NSError?
+            
+            if !hasBinary {
+                message = "42[\"\(event)\""
             } else {
-                array += ",\"\(args!)\""
-                return array + "]"
+                message = "45\(datas)-[\"\(event)\""
             }
-        } else {
-            return array + "]"
-        }
+            
+            for arg in args {
+                message += ","
+                
+                if arg is NSDictionary || arg is [AnyObject] {
+                    let jsonSend = NSJSONSerialization.dataWithJSONObject(arg,
+                        options: NSJSONWritingOptions(0), error: &jsonSendError)
+                    let jsonString = NSString(data: jsonSend!, encoding: NSUTF8StringEncoding)
+                    
+                    message += jsonString!
+                    continue
+                }
+                
+                if arg is String {
+                    message += "\"\(arg)\""
+                    continue
+                }
+                
+                message += "\(arg)"
+            }
+            
+            return message + "]"
     }
     
-    func createBinaryMessage() -> String {
-        var array = "45\(self.placeholders)-["
-        array += "\"" + event + "\""
-        if args? != nil {
-            if args is NSDictionary {
-                array += ","
-                var jsonSendError:NSError?
-                var jsonSend = NSJSONSerialization.dataWithJSONObject(args as NSDictionary,
-                    options: NSJSONWritingOptions(0), error: &jsonSendError)
-                var jsonString = NSString(data: jsonSend!, encoding: NSUTF8StringEncoding)
-                return array + jsonString! + "]"
-            } else {
-                array += ",\"\(args!)\""
-                return array + "]"
-            }
-        } else {
-            return array + "]"
-        }
-    }
-    
-    func fillInPlaceholders(args:AnyObject) -> AnyObject {
+    func fillInPlaceholders(_ args:AnyObject = true) -> AnyObject {
         if let dict = args as? NSDictionary {
             var newDict = [String: AnyObject]()
             
@@ -123,6 +117,27 @@ class Event {
         } else if let string = args as? String {
             if string == "~~\(self.currentPlace)" {
                 return self.datas.removeAtIndex(0)
+            }
+        } else if args is Bool {
+            var returnArr = [AnyObject]()
+            // We have multiple items
+            // Do it live
+            let argsAsArray = "[\(self.args)]"
+            if let parsedArr = SocketIOClient.parseData(argsAsArray) as? NSArray {
+                for item in parsedArr {
+                    if let strItem = item as? String {
+                        if strItem == "~~\(self.currentPlace)" {
+                            returnArr.append(self.datas[self.currentPlace])
+                            self.currentPlace++
+                            continue
+                        } else {
+                            returnArr.append(strItem)
+                        }
+                    } else {
+                        returnArr.append(item)
+                    }
+                }
+                return returnArr
             }
         }
         

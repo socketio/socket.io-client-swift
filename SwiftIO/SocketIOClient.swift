@@ -26,13 +26,13 @@ import Foundation
 
 class SocketIOClient: NSObject, SRWebSocketDelegate {
     let socketURL:String!
-    let secure:Bool!
+    private let secure:Bool!
     private var handlers = [EventHandler]()
     private var lastSocketMessage:Event?
+    private var pingTimer:NSTimer!
     var connected = false
     var connecting = false
     var io:SRWebSocket?
-    var pingTimer:NSTimer!
     var reconnnects = true
     var reconnecting = false
     var reconnectAttempts = -1
@@ -110,14 +110,13 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         }
         
         var frame:Event!
-        var str:String!
+        var str:String
         
         if let dict = args as? NSDictionary {
             // Check for binary data
-            let (newDict, hadBinary, binaryDatas) = self.parseNSDictionary(dict: dict)
+            let (newDict, hadBinary, binaryDatas) = self.parseNSDictionary(dict)
             if hadBinary {
-                frame = Event(event: event, args: newDict, placeholders: binaryDatas!.count)
-                str = frame.createBinaryMessage()
+                str = Event.createMessageForEvent(event, withArgs: [newDict], hasBinary: true, withDatas: binaryDatas!.count)
                 self.io?.send(str)
                 
                 for data in binaryDatas! {
@@ -129,40 +128,158 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             }
         } else if let binaryData = args as? NSData {
             // args is just binary
-            frame = Event(event: event, args: ["_placeholder": true, "num": 0], placeholders: 1)
-            str = frame.createBinaryMessage()
+            str = Event.createMessageForEvent(event, withArgs: [["_placeholder": true, "num": 0]],
+                hasBinary: true, withDatas: 1)
+            
             self.io?.send(str)
             let sendData = self.createBinaryDataForSend(binaryData)
             self.io?.send(sendData)
             
             return
+        } else if let arr = args as? NSArray {
+            var hadBinary = false
+            var placeholders = [AnyObject](count: arr.count, repeatedValue: 1)
+            var datas = [NSData]()
+            var placeNum = 0
+            
+            for i in 0..<arr.count {
+                if arr[i] is NSData {
+                    hadBinary = true
+                    placeholders[i] = ["_placeholder": true, "num": placeNum]
+                    datas.append(self.createBinaryDataForSend(arr[i] as NSData))
+                    placeNum++
+                } else {
+                    placeholders[i] = arr[i]
+                }
+            }
+            
+            if hadBinary {
+                str = Event.createMessageForEvent(event, withArgs: [placeholders],
+                    hasBinary: true, withDatas: datas.count)
+                
+                self.io?.send(str)
+                for data in datas {
+                    self.io?.send(data)
+                }
+                return
+            }
         }
         
-        frame = Event(event: event, args: args)
-        str = frame.createMessage()
+        if args == nil {
+            str = "42[\"\(event)\"]"
+        } else {
+            str = Event.createMessageForEvent(event, withArgs: [args!], hasBinary: false)
+        }
         
         // println("Sending: \(str)")
         self.io?.send(str)
     }
     
+    // Sends a message with multiple args
+    // If a message contains binary we have to send those
+    // seperately.
+    func emitMultiple(event:String, args:AnyObject...) {
+        if !self.connected {
+            return
+        }
+        
+        var frame:Event
+        var str:String
+        var items = [AnyObject](count: args.count, repeatedValue: 1)
+        var numberOfPlaceholders = -1
+        var hasBinary = false
+        var datas = [NSData]()
+        
+        for i in 0..<args.count {
+            if let dict = args[i] as? NSDictionary {
+                // Check for binary data
+                let (newDict, hadBinary, binaryDatas) = self.parseNSDictionary(dict,
+                    placeholders: numberOfPlaceholders + 1)
+                if hadBinary {
+                    numberOfPlaceholders = binaryDatas!.count
+                    
+                    for data in binaryDatas! {
+                        let sendData = self.createBinaryDataForSend(data)
+                        datas.append(sendData)
+                    }
+                    hasBinary = true
+                    items[i] = newDict
+                    continue
+                }
+                items[i] = dict
+            } else if let arr = args[i] as? NSArray {
+                // arg is array, check for binary
+                var replacementArr = [AnyObject](count: arr.count, repeatedValue: 1)
+                for g in 0..<arr.count {
+                    if arr[g] is NSData {
+                        hasBinary = true
+                        numberOfPlaceholders++
+                        
+                        let sendData = self.createBinaryDataForSend(arr[g] as NSData)
+                        
+                        datas.append(sendData)
+                        replacementArr[g] = ["_placeholder": true,
+                            "num": numberOfPlaceholders]
+                    } else {
+                        replacementArr[g] = arr[g]
+                    }
+                }
+                items[i] = replacementArr
+            } else if let binaryData = args[i] as? NSData {
+                // args is just binary
+                hasBinary = true
+                let sendData = self.createBinaryDataForSend(binaryData)
+                
+                numberOfPlaceholders++
+                items[i] = ["_placeholder": true, "num": numberOfPlaceholders]
+                datas.append(sendData)
+            } else {
+                items[i] = args[i]
+            }
+        }
+        
+        if hasBinary {
+            str = Event.createMessageForEvent(event, withArgs: items,
+                hasBinary: true, withDatas: datas.count)
+            self.io?.send(str)
+            for data in datas {
+                self.io?.send(data)
+            }
+        } else {
+            str = Event.createMessageForEvent(event, withArgs: items, hasBinary: false)
+            self.io?.send(str)
+        }
+    }
+    
     // Handles events
-    func handleEvent(#event:String, data:AnyObject?) {
+    func handleEvent(#event:String, data:AnyObject?, multipleItems:Bool = false) {
         // println("Should do event: \(event) with data: \(data)")
         
         for handler in self.handlers {
-            if handler.event == event {
+            if handler.event == event && !multipleItems {
                 if data == nil {
                     handler.executeCallback(nil)
                     continue
                 }
                 
                 handler.executeCallback(data)
+            } else if handler.event == event && multipleItems {
+                if let arr = data as? [AnyObject] {
+                    handler.executeCallback(arr)
+                    continue
+                }
             }
         }
     }
     
-    // Adds handlers to the socket
+    // Adds handler for single arg message
     func on(name:String, callback:((data:AnyObject?) -> Void)) {
+        let handler = EventHandler(event: name, callback: callback)
+        self.handlers.append(handler)
+    }
+    
+    // Adds handler for multiple arg message
+    func onMultipleArgs(name:String, callback:((data:[AnyObject]) -> Void)) {
         let handler = EventHandler(event: name, callback: callback)
         self.handlers.append(handler)
     }
@@ -173,7 +290,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Parses data for events
-    private func parseData(data:String?) -> AnyObject? {
+    class func parseData(data:String?) -> AnyObject? {
         if data == nil {
             return nil
         }
@@ -192,9 +309,9 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Parses a NSDictionary, looking for NSData objects
-    private func parseNSDictionary(#dict:NSDictionary) -> (NSDictionary, Bool, [NSData]?) {
+    private func parseNSDictionary(dict:NSDictionary, placeholders:Int = 0) -> (NSDictionary, Bool, [NSData]?) {
         var returnDict = NSMutableDictionary()
-        var placeholder = 0
+        var placeholder = placeholders
         var containedData = false
         var returnDatas = [NSData]()
         for (key, value) in dict {
@@ -262,13 +379,22 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                         data = messageInternals[2]
                     }
                     
-                    if let json:AnyObject = self.parseData(data) {
-                        self.handleEvent(event: event, data: json)
+                    // It would be nice if socket.io only allowed one thing
+                    // per message, but alas, it doesn't.
+                    if let parsed:AnyObject = SocketIOClient.parseData(data) {
+                        self.handleEvent(event: event, data: parsed)
                         return
+                    } else if let strData = data {
+                        // There are multiple items in the message
+                        // Turn it into a String and run it through
+                        // parseData to try and get an array.
+                        let asArray = "[\(strData)]"
+                        
+                        if let parsed:AnyObject = SocketIOClient.parseData(asArray) {
+                            self.handleEvent(event: event, data: parsed, multipleItems: true)
+                            return
+                        }
                     }
-                    
-                    self.handleEvent(event: event, data: data)
-                    return
                 }
             }
             /**
@@ -286,12 +412,12 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Tries to parse a message that contains binary
-    func parseBinaryMessage(#message:AnyObject) {
+    private func parseBinaryMessage(#message:AnyObject) {
         if let stringMessage = message as? String {
             var mutMessage = RegexMutable(stringMessage)
             
             /**
-            Begin check for binary placeholder
+            Begin check for binary placeholders
             **/
             let binaryGroup = mutMessage["(\\d*)-\\[\"(.*)\",(\\{.*\\})\\]$"].groups()
             
@@ -301,28 +427,50 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 let numberOfPlaceholders = messageType["45"] ~= ""
                 let event = binaryGroup[2]
                 let mutMessageObject = RegexMutable(binaryGroup[3])
-                let placeholdersRemoved = mutMessageObject["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] ~= "\"~~$2\""
+                let placeholdersRemoved = mutMessageObject["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"]
+                    ~= "\"~~$2\""
                 let mes = Event(event: event, args: placeholdersRemoved,
                     placeholders: numberOfPlaceholders.integerValue)
                 self.lastSocketMessage = mes
                 return
+            } else {
+                // There are multiple items in binary message
+                let binaryGroups = mutMessage["(\\d*)-\\[(\".*?\"),(.*)\\]$"].groups()
+                if binaryGroups != nil {
+                    let messageType = RegexMutable(binaryGroups[1])
+                    let numberOfPlaceholders = messageType["45"] ~= ""
+                    let event = RegexMutable(binaryGroups[2] as String)["\""] ~= ""
+                    let mutMessageObject = RegexMutable(binaryGroups[3])
+                    let placeholdersRemoved = mutMessageObject["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"]
+                        ~= "\"~~$2\""
+                    let mes = Event(event: event, args: placeholdersRemoved,
+                        placeholders: numberOfPlaceholders.integerValue)
+                    self.lastSocketMessage = mes
+                    return
+                }
             }
             /**
-            End check for binary placeholder
+            End check for binary placeholders
             **/
         }
     }
     
     // Handles binary data
-    func parseBinaryData(data:NSData) {
+    private func parseBinaryData(data:NSData) {
         let shouldExecute = self.lastSocketMessage?.addData(data)
         
         if shouldExecute != nil && shouldExecute! {
             var event = self.lastSocketMessage!.event
-            var parsedArgs:AnyObject? = self.parseData(self.lastSocketMessage!.args as? String)
+            var parsedArgs:AnyObject? = SocketIOClient.parseData(self.lastSocketMessage!.args as? String)
+            
             if let args:AnyObject = parsedArgs {
                 let filledInArgs:AnyObject = self.lastSocketMessage!.fillInPlaceholders(args)
                 self.handleEvent(event: event, data: filledInArgs)
+            } else {
+                // We have multiple items
+                let filledInArgs:AnyObject = self.lastSocketMessage!.fillInPlaceholders()
+                self.handleEvent(event: event, data: filledInArgs, multipleItems: true)
+                return
             }
         }
     }
