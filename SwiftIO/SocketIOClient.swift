@@ -101,84 +101,10 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         return mutData
     }
     
-    // Sends a message
-    // If a message contains binary we have to send those
-    // seperately.
-    func emit(event:String, args:AnyObject? = nil) {
-        if !self.connected {
-            return
-        }
-        
-        var frame:Event!
-        var str:String
-        
-        if let dict = args as? NSDictionary {
-            // Check for binary data
-            let (newDict, hadBinary, binaryDatas) = self.parseNSDictionary(dict)
-            if hadBinary {
-                str = Event.createMessageForEvent(event, withArgs: [newDict], hasBinary: true, withDatas: binaryDatas!.count)
-                self.io?.send(str)
-                
-                for data in binaryDatas! {
-                    let sendData = self.createBinaryDataForSend(data)
-                    self.io?.send(sendData)
-                }
-                
-                return
-            }
-        } else if let binaryData = args as? NSData {
-            // args is just binary
-            str = Event.createMessageForEvent(event, withArgs: [["_placeholder": true, "num": 0]],
-                hasBinary: true, withDatas: 1)
-            
-            self.io?.send(str)
-            let sendData = self.createBinaryDataForSend(binaryData)
-            self.io?.send(sendData)
-            
-            return
-        } else if let arr = args as? NSArray {
-            var hadBinary = false
-            var placeholders = [AnyObject](count: arr.count, repeatedValue: 1)
-            var datas = [NSData]()
-            var placeNum = 0
-            
-            for i in 0..<arr.count {
-                if arr[i] is NSData {
-                    hadBinary = true
-                    placeholders[i] = ["_placeholder": true, "num": placeNum]
-                    datas.append(self.createBinaryDataForSend(arr[i] as NSData))
-                    placeNum++
-                } else {
-                    placeholders[i] = arr[i]
-                }
-            }
-            
-            if hadBinary {
-                str = Event.createMessageForEvent(event, withArgs: [placeholders],
-                    hasBinary: true, withDatas: datas.count)
-                
-                self.io?.send(str)
-                for data in datas {
-                    self.io?.send(data)
-                }
-                return
-            }
-        }
-        
-        if args == nil {
-            str = "42[\"\(event)\"]"
-        } else {
-            str = Event.createMessageForEvent(event, withArgs: [args!], hasBinary: false)
-        }
-        
-        // println("Sending: \(str)")
-        self.io?.send(str)
-    }
-    
     // Sends a message with multiple args
     // If a message contains binary we have to send those
     // seperately.
-    func emitMultiple(event:String, args:AnyObject...) {
+    func emit(event:String, args:AnyObject...) {
         if !self.connected {
             return
         }

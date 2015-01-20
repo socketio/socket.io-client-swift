@@ -34,7 +34,7 @@ socket.on("connect") {data in
     socket.emit("dataTest", args: data)
 
     // Sending multiple args
-    socket.emitMultiple("multTest", args: [data], 1.4, 1, "true", 
+    socket.emit("multTest", args: [data], 1.4, 1, "true", 
         true, ["test": data], data)
 }
 
