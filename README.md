@@ -26,6 +26,16 @@ socket.on("connect") {data in
     socket.emit("testObject", args: [
         "data": true
         ])
+    socket.emit("arrayTest", args: [1, true, "test", ["test": "test"], data, data])
+    socket.emit("stringTest", args: "stringTest")
+    socket.emit("intTest", args: 1)
+    socket.emit("doubleTest", args: 2.3)
+    socket.emit("boolTest", args: true)
+    socket.emit("dataTest", args: data)
+
+    // Sending multiple args
+    socket.emitMultiple("multTest", args: [data], 1.4, 1, "true", 
+        true, ["test": data], data)
 }
 
 socket.on("disconnect") {data in
@@ -70,8 +80,24 @@ socket.on("intTest") {data in
         println(intData)
     }
 }
+
+// Messages that have multiple items are passed
+// by an array
+socket.onMultipleArgs("multipleItems") {datas in
+    if let str = datas[0] as? String {
+        println(str)
+    }
+
+    if let arr = datas[1] as? [Int] {
+        println(arr)
+    }
+
+    if let obj = datas[4] as? NSDictionary {
+        println(obj["test"])
+    }
+}
         
-// Recieving data
+// Recieving binary
 socket.on("dataTest") {data in
     if let data = data as? NSData {
         println("data is binary")
