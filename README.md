@@ -29,6 +29,8 @@ let socket = SocketIOClient(socketURL: "https://localhost:8080", opts: [
 
 socket.on("connect") {data in
     println("socket connected")
+    
+    // Sending messages
     socket.emit("testEcho")
     socket.emit("testObject", args: [
         "data": true
@@ -36,11 +38,8 @@ socket.on("connect") {data in
     socket.emit("arrayTest", args: [1, true, "test", ["test": "test"], data, data])
     socket.emit("stringTest", args: "stringTest")
     socket.emit("intTest", args: 1)
-    socket.emit("doubleTest", args: 2.3)
-    socket.emit("boolTest", args: true)
-    socket.emit("dataTest", args: data)
 
-    // Sending multiple args
+    // Sending multiple args per message
     socket.emit("multTest", args: [data], 1.4, 1, "true", 
         true, ["test": data], data)
 }
@@ -82,12 +81,6 @@ socket.on("arrayTest") {data in
     }
 }
 
-socket.on("intTest") {data in
-    if let intData = data as? Int {
-        println(intData)
-    }
-}
-
 // Messages that have multiple items are passed
 // by an array
 socket.onMultipleArgs("multipleItems") {datas in
@@ -120,6 +113,7 @@ socket.on("objectDataTest") {data in
     }
 }
 
+// Connecting
 socket.connect()
 
 // Sending binary
