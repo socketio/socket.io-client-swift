@@ -25,7 +25,7 @@
 class SocketEventHandler {
     let event:String!
     let callback:((data:AnyObject?) -> Void)!
-    var callbackMult:((data:[AnyObject]) -> Void)!
+    let callbackMult:((data:[AnyObject]) -> Void)!
     
     init(event:String, callback:((data:AnyObject?) -> Void)) {
         self.event = event
@@ -38,11 +38,7 @@ class SocketEventHandler {
     }
     
     func executeCallback(args:AnyObject?) {
-        if args != nil {
-            callback(data: args!)
-        } else {
-            callback(data: nil)
-        }
+        callback(data: args)
     }
     
     func executeCallback(args:[AnyObject]) {

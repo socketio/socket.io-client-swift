@@ -128,6 +128,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                         let sendData = self.createBinaryDataForSend(data)
                         datas.append(sendData)
                     }
+                    
                     hasBinary = true
                     items[i] = newDict
                     continue
