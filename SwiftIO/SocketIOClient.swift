@@ -104,7 +104,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     // Sends a message with multiple args
     // If a message contains binary we have to send those
     // seperately.
-    func emit(event:String, args:AnyObject...) {
+    func emit(event:String, _ args:AnyObject...) {
         if !self.connected {
             return
         }
