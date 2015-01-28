@@ -32,15 +32,15 @@ socket.on("connect") {data in
     
     // Sending messages
     socket.emit("testEcho")
-    socket.emit("testObject", args: [
+    socket.emit("testObject", [
         "data": true
         ])
-    socket.emit("arrayTest", args: [1, true, "test", ["test": "test"], data, data])
-    socket.emit("stringTest", args: "stringTest")
-    socket.emit("intTest", args: 1)
+    socket.emit("arrayTest", [1, true, "test", ["test": "test"], data, data])
+    socket.emit("stringTest", "stringTest")
+    socket.emit("intTest", 1)
 
     // Sending multiple args per message
-    socket.emit("multTest", args: [data], 1.4, 1, "true", 
+    socket.emit("multTest", [data], 1.4, 1, "true", 
         true, ["test": data], data)
 }
 
@@ -117,7 +117,7 @@ socket.on("objectDataTest") {data in
 socket.connect()
 
 // Sending binary
-socket.emit("testData", args: [
+socket.emit("testData", [
         "data": "Hello World".dataUsingEncoding(NSUTF8StringEncoding,
             allowLossyConversion: false)!,
         "test": true])
