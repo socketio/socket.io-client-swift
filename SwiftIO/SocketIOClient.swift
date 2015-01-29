@@ -114,7 +114,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         var items = [AnyObject](count: args.count, repeatedValue: 1)
         var numberOfPlaceholders = -1
         var hasBinary = false
-        var datas = [NSData]()
+        var emitDatas = [NSData]()
         
         for i in 0..<args.count {
             if let dict = args[i] as? NSDictionary {
@@ -122,9 +122,9 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 let (newDict, hadBinary, binaryDatas) = SocketIOClient.parseNSDictionary(dict,
                     placeholders: numberOfPlaceholders)
                 if hadBinary {
-                    numberOfPlaceholders = binaryDatas!.count
+                    numberOfPlaceholders = binaryDatas.count
                     
-                    datas.extend(binaryDatas!)
+                    emitDatas.extend(binaryDatas)
                     hasBinary = true
                     items[i] = newDict
                 } else {
@@ -137,10 +137,10 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 
                 if hadData {
                     hasBinary = true
-                    numberOfPlaceholders += datas.count
+                    numberOfPlaceholders += emitDatas.count
                     
-                    for data in newDatas! {
-                        datas.append(data)
+                    for data in newDatas {
+                        emitDatas.append(data)
                     }
                     
                     items[i] = replace
@@ -154,7 +154,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 
                 numberOfPlaceholders++
                 items[i] = ["_placeholder": true, "num": numberOfPlaceholders]
-                datas.append(sendData)
+                emitDatas.append(sendData)
             } else {
                 items[i] = args[i]
             }
@@ -162,10 +162,10 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         
         if hasBinary {
             str = SocketEvent.createMessageForEvent(event, withArgs: items,
-                hasBinary: true, withDatas: datas.count)
+                hasBinary: true, withDatas: emitDatas.count)
 
             self.io?.send(str)
-            for data in datas {
+            for data in emitDatas {
                 self.io?.send(data)
             }
         } else {
@@ -213,11 +213,10 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Parse an NSArray looking for binary data
-    class func parseArray(arr:NSArray, var placeholders:Int) -> (NSArray, Bool, [NSData]?) {
+    private class func parseArray(arr:NSArray, var placeholders:Int) -> (NSArray, Bool, [NSData]) {
         var replacementArr = [AnyObject](count: arr.count, repeatedValue: 1)
         var hasBinary = false
-        var recurse = false
-        var datas = [NSData]()
+        var arrayDatas = [NSData]()
         
         if placeholders == -1 {
             placeholders = 0
@@ -228,7 +227,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 hasBinary = true
                 let sendData = self.createBinaryDataForSend(arr[g] as NSData)
                 
-                datas.append(sendData)
+                arrayDatas.append(sendData)
                 replacementArr[g] = ["_placeholder": true,
                     "num": placeholders++]
             } else if let dict = arr[g] as? NSDictionary {
@@ -236,22 +235,21 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 
                 if hadBinary {
                     hasBinary = true
-                    placeholders += dictArrs!.count
+                    placeholders += dictArrs.count
                     replacementArr[g] = nestDict
-                    datas.extend(dictArrs!)
+                    arrayDatas.extend(dictArrs)
                 } else {
                     replacementArr[g] = dict
                 }
             } else if let nestArr = arr[g] as? NSArray {
                 // Recursive
-                recurse = true
                 let (nested, hadBinary, nestDatas) = self.parseArray(nestArr, placeholders: placeholders)
                 
                 if hadBinary {
                     hasBinary = true
-                    placeholders += nestDatas!.count
+                    placeholders += nestDatas.count
                     replacementArr[g] = nested
-                    datas.extend(nestDatas!)
+                    arrayDatas.extend(nestDatas)
                 } else {
                     replacementArr[g] = arr[g]
                 }
@@ -260,7 +258,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             }
         }
         
-        return (replacementArr, hasBinary, datas)
+        return (replacementArr, hasBinary, arrayDatas)
     }
     
     // Parses data for events
@@ -283,7 +281,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Parses a NSDictionary, looking for NSData objects
-    private class func parseNSDictionary(dict:NSDictionary, var placeholders:Int) -> (NSDictionary, Bool, [NSData]?) {
+    private class func parseNSDictionary(dict:NSDictionary, var placeholders:Int) -> (NSDictionary, Bool, [NSData]) {
         var returnDict = NSMutableDictionary()
         var hasBinary = false
         if placeholders == -1 {
@@ -303,8 +301,8 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 if hadBinary {
                     hasBinary = true
                     returnDict[key as String] = replace
-                    placeholders += arrDatas!.count
-                    returnDatas.extend(arrDatas!)
+                    placeholders += arrDatas.count
+                    returnDatas.extend(arrDatas)
                 } else {
                     returnDict[key as String] = arr
                 }
@@ -315,8 +313,8 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 if hadBinary {
                     hasBinary = true
                     returnDict[key as String] = nestDict
-                    placeholders += nestDatas!.count
-                    returnDatas.extend(nestDatas!)
+                    placeholders += nestDatas.count
+                    returnDatas.extend(nestDatas)
                 } else {
                     returnDict[key as String] = dict
                 }
