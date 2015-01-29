@@ -180,11 +180,6 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         
         for handler in self.handlers {
             if handler.event == event && !multipleItems {
-                if data == nil {
-                    handler.executeCallback(nil)
-                    continue
-                }
-                
                 handler.executeCallback(data)
             } else if handler.event == event && multipleItems {
                 if let arr = data as? [AnyObject] {
