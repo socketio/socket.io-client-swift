@@ -96,45 +96,88 @@ class SocketEvent {
             return message + "]"
     }
     
+    private func fillInArray(arr:NSArray) -> NSArray {
+        var newArr = [AnyObject](count: arr.count, repeatedValue: 0)
+        // println(arr)
+        
+        for i in 0..<arr.count {
+            if let nest = arr[i] as? NSArray {
+                newArr[i] = self.fillInArray(nest)
+            } else if let dict = arr[i] as? NSDictionary {
+                newArr[i] = self.fillInDict(dict)
+            } else if let str = arr[i] as? String {
+                let mut = RegexMutable(str)
+                if let num = mut["~~(\\d)"].groups() {
+                    newArr[i] = self.datas[num[1].toInt()!]
+                    // self.currentPlace++
+                } else {
+                    newArr[i] = arr[i]
+                }
+            } else {
+                newArr[i] = arr[i]
+            }
+        }
+        
+        return newArr
+    }
+    
+    private func fillInDict(dict:NSDictionary) -> NSDictionary {
+        var newDict = [String: AnyObject]()
+        
+        for (key, value) in dict {
+            newDict[key as String] = value
+            
+            // If the value is a string we need to check
+            // if it is a placeholder for data
+            if let str = value as? String {
+                let mut = RegexMutable(str)
+                
+                if let num = mut["~~(\\d)"].groups() {
+                    newDict[key as String] = self.datas[num[1].toInt()!]
+                } else {
+                    newDict[key as String] = str
+                }
+            } else if let nestDict = value as? NSDictionary {
+                newDict[key as String] = self.fillInDict(nestDict)
+            } else if let arr = value as? NSArray {
+                newDict[key as String] = self.fillInArray(arr)
+            }
+        }
+        
+        return newDict
+    }
+    
     func fillInPlaceholders(_ args:AnyObject = true) -> AnyObject {
         if let dict = args as? NSDictionary {
-            var newDict = [String: AnyObject]()
-            
-            for (key, value) in dict {
-                newDict[key as String] = value
-                
-                // If the value is a string we need to check
-                // if it is a placeholder for data
-                if let value = value as? String {
-                    if value == "~~\(self.currentPlace)" {
-                        newDict[key as String] = self.datas.removeAtIndex(0)
-                        self.currentPlace++
-                    }
-                }
-            }
-            
-            return newDict
+            return self.fillInDict(dict)
+        } else if let arr = args as? NSArray {
+            return self.fillInArray(args as NSArray)
         } else if let string = args as? String {
             if string == "~~\(self.currentPlace)" {
                 return self.datas.removeAtIndex(0)
             }
         } else if args is Bool {
-            var returnArr = [AnyObject]()
             // We have multiple items
             // Do it live
             let argsAsArray = "[\(self.args)]"
             if let parsedArr = SocketIOClient.parseData(argsAsArray) as? NSArray {
-                for item in parsedArr {
-                    if let strItem = item as? String {
-                        if strItem == "~~\(self.currentPlace)" {
-                            returnArr.append(self.datas[self.currentPlace])
-                            self.currentPlace++
-                            continue
+                var returnArr = [AnyObject](count: parsedArr.count, repeatedValue: 0)
+                
+                for i in 0..<parsedArr.count {
+                    if let str = parsedArr[i] as? String {
+                        let mut = RegexMutable(str)
+                        
+                        if let num = mut["~~(\\d)"].groups() {
+                            returnArr.append(self.datas[num[1].toInt()!])
                         } else {
-                            returnArr.append(strItem)
+                            returnArr.append(str)
                         }
+                    } else if let arr = parsedArr[i] as? NSArray {
+                        returnArr[i] = self.fillInArray(arr)
+                    } else if let dict = parsedArr[i] as? NSDictionary {
+                        returnArr[i] = self.fillInDict(dict)
                     } else {
-                        returnArr.append(item)
+                        returnArr[i] = parsedArr[i]
                     }
                 }
                 return returnArr
