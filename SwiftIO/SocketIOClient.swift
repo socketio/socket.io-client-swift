@@ -33,6 +33,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     private var handlers = [SocketEventHandler]()
     private var lastSocketMessage:SocketEvent?
     private var pingTimer:NSTimer!
+    var closed = false
     var connected = false
     var connecting = false
     var io:SRWebSocket?
@@ -73,15 +74,20 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     // Closes the socket
     func close() {
         self.pingTimer?.invalidate()
+        self.closed = true
         self.connecting = false
         self.connected = false
-        self.reconnnects = false
         self.io?.close()
     }
     
     // Connects to the server
     func connect() {
+        if self.closed {
+            println("Warning: This socket was previvously closed. Reopening could be dangerous. Be careful.")
+        }
+        
         self.connecting = true
+        self.closed = false
         var endpoint:String!
         
         if self.secure! {
@@ -166,7 +172,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         if hasBinary {
             str = SocketEvent.createMessageForEvent(event, withArgs: items,
                 hasBinary: true, withDatas: emitDatas.count)
-
+            
             self.io?.send(str)
             for data in emitDatas {
                 self.io?.send(data)
@@ -387,6 +393,14 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                         }
                     }
                 }
+                
+                // Check for no item event
+                let noItemMessage = RegexMutable(messagePart)["\\[\"(.*?)\"]$"].groups()
+                if noItemMessage != nil && noItemMessage.count == 2 {
+                    let event = noItemMessage[1]
+                    self.handleEvent(event: event, data: nil, multipleItems: false)
+                    return
+                }
             }
             /**
             End Check for message
@@ -500,7 +514,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         
         // Wait reconnectWait seconds and then check if connected. Repeat if not
         dispatch_after(time, dispatch_get_main_queue()) {[weak self] in
-            if self == nil || self!.connected {
+            if self == nil || self!.connected || self!.closed {
                 return
             }
             
@@ -521,6 +535,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     
     // Called when the socket is opened
     func webSocketDidOpen(webSocket:SRWebSocket!) {
+        self.closed = false
         self.connecting = false
         self.reconnecting = false
         self.connected = true
@@ -532,7 +547,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         self.pingTimer?.invalidate()
         self.connected = false
         self.connecting = false
-        if !self.reconnnects {
+        if self.closed || !self.reconnnects {
             self.handleEvent(event: "disconnect", data: reason)
         } else {
             self.handleEvent(event: "reconnect", data: reason)
@@ -546,7 +561,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         self.pingTimer?.invalidate()
         self.connected = false
         self.connecting = false
-        if !self.reconnnects {
+        if self.closed || !self.reconnnects {
             self.handleEvent(event: "disconnect", data: error.localizedDescription)
         } else if !self.reconnecting {
             self.handleEvent(event: "reconnect", data: error.localizedDescription)
