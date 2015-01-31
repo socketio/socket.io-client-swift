@@ -24,6 +24,9 @@
 
 import Foundation
 
+typealias NormalCallback = (AnyObject?) -> Void
+typealias MultipleCallback = (AnyObject...) -> Void
+
 class SocketIOClient: NSObject, SRWebSocketDelegate {
     let socketURL:String!
     private let secure:Bool!
@@ -190,13 +193,13 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Adds handler for single arg message
-    func on(name:String, callback:((data:AnyObject?) -> Void)) {
+    func on(name:String, callback:NormalCallback) {
         let handler = SocketEventHandler(event: name, callback: callback)
         self.handlers.append(handler)
     }
     
     // Adds handler for multiple arg message
-    func onMultipleArgs(name:String, callback:((data:[AnyObject]) -> Void)) {
+    func onMultipleItems(name:String, callback:MultipleCallback) {
         let handler = SocketEventHandler(event: name, callback: callback)
         self.handlers.append(handler)
     }
@@ -463,7 +466,6 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         }
     }
     
-    // Sends ping
     func sendPing() {
         if self.connected {
             self.io?.send("2")
@@ -514,7 +516,6 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     
     // Called when a message is recieved
     func webSocket(webSocket:SRWebSocket!, didReceiveMessage message:AnyObject?) {
-        // println(message)
         self.parseSocketMessage(message: message)
     }
     
@@ -540,6 +541,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         }
     }
     
+    // Called when an error occurs.
     func webSocket(webSocket:SRWebSocket!, didFailWithError error:NSError!) {
         self.pingTimer?.invalidate()
         self.connected = false

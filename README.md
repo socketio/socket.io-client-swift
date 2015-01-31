@@ -9,15 +9,25 @@ Installation
 2. Create a bridging header for SocketRocket
 3. Copy the SwiftIO folder into your xcode project
 
-Use
+API
 ===
+Constructor
+-----------
+`init(socketURL: String, opts[String: AnyObject]? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values.)
 Methods
 -------
 1. `socket.on(name:String, callback:((data:AnyObject?) -> Void))` - Adds a handler for an event.
-2. `socket.onMultipleArgs(name:String, callback:((data:[AnyObject]) -> Void))` - Adds a handler for an event that           can have multiple items. Items are stored in an array.
+2. `socket.onMultipleItems(name:String, callback:((data:AnyObject...) -> Void))` - Adds a handler for an event that           can have multiple items. Items are stored in an array.
 3. `socket.emit(event:String, args:AnyObject...)` - Sends a message. Can send multiple args.
 4. `socket.connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
-5. `socket.close()` - Closes the socket. Once a socket is closed it should not be reopened. 
+5. `socket.close()` - Closes the socket. Once a socket is closed it should not be reopened.
+
+Events
+------
+1. `connect` - Emitted when on a successful connection.
+2. `disconnect` - Emitted when the connection is closed.
+3. `reconnect` - Emitted when the connection is starting to reconnect.
+4. `reconnectAttempt` - Emitted when attempting to reconnect.
 
 ```swift
 // opts can be omitted, will use default values
@@ -27,21 +37,20 @@ let socket = SocketIOClient(socketURL: "https://localhost:8080", opts: [
     "reconnectWait": 5 // default 10
 ])
 
+// Socket Events
 socket.on("connect") {data in
     println("socket connected")
     
     // Sending messages
     socket.emit("testEcho")
+
     socket.emit("testObject", [
         "data": true
         ])
-    socket.emit("arrayTest", [1, true, "test", ["test": "test"], data, data])
-    socket.emit("stringTest", "stringTest")
-    socket.emit("intTest", 1)
 
-    // Sending multiple args per message
-    socket.emit("multTest", [data], 1.4, 1, "true", 
-        true, ["test": data], data)
+    // Sending multiple items per message
+    socket.emit("multTest", [1], 1.4, 1, "true",
+        true, ["test": "foo"], "bar")
 }
 
 socket.on("disconnect") {data in
@@ -61,6 +70,7 @@ socket.on("reconnectAttempt") {data in
         println(triesLeft)
     }
 }
+// End Socket Events
 
 socket.on("jsonTest") {data in
     if let json = data as? NSDictionary {
@@ -68,31 +78,18 @@ socket.on("jsonTest") {data in
     }
 }
 
-socket.on("boolTest") {data in
-    if let bool = data as? Bool {
-        println(bool) // true
-    }
-}
-
-socket.on("arrayTest") {data in
-    if let array = data as? NSArray {
-        println(array[0]) // 2
-        println(array[1]) // "test"
-    }
-}
-
 // Messages that have multiple items are passed
 // by an array
-socket.onMultipleArgs("multipleItems") {datas in
-    if let str = datas[0] as? String {
+socket.onMultipleItems("multipleItems") {data in
+    if let str = data[0] as? String {
         println(str)
     }
 
-    if let arr = datas[1] as? [Int] {
+    if let arr = data[1] as? [Int] {
         println(arr)
     }
 
-    if let obj = datas[4] as? NSDictionary {
+    if let obj = data[4] as? NSDictionary {
         println(obj["test"])
     }
 }

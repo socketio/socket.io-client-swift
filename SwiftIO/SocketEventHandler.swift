@@ -24,24 +24,24 @@
 
 class SocketEventHandler {
     let event:String!
-    let callback:((data:AnyObject?) -> Void)!
-    let callbackMult:((data:[AnyObject]) -> Void)!
+    let callback:NormalCallback!
+    let callbackMult:MultipleCallback!
     
-    init(event:String, callback:((data:AnyObject?) -> Void)) {
+    init(event:String, callback:NormalCallback) {
         self.event = event
         self.callback = callback
     }
     
-    init(event:String, callback:((data:[AnyObject]) -> Void)) {
+    init(event:String, callback:MultipleCallback) {
         self.event = event
         self.callbackMult = callback
     }
     
-    func executeCallback(args:AnyObject?) {
-        callback(data: args)
+    func executeCallback(item:AnyObject?) {
+        callback(item)
     }
     
-    func executeCallback(args:[AnyObject]) {
-        callbackMult(data: args)
+    func executeCallback(items:[AnyObject]) {
+        callbackMult(items)
     }
 }
