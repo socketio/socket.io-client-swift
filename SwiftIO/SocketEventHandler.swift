@@ -49,7 +49,11 @@ class SocketEventHandler {
                 callbackMult?(nil)
             }
         } else {
-            callback?(item)
+            if items != nil {
+                callback?(items)
+            } else {
+                callback?(item)
+            }
         }
     }
 }
