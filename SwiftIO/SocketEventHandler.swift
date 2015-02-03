@@ -26,6 +26,7 @@ class SocketEventHandler {
     let event:String!
     let callback:NormalCallback?
     let callbackMult:MultipleCallback?
+    var multiEvent = false
     
     init(event:String, callback:NormalCallback) {
         self.event = event
@@ -35,18 +36,17 @@ class SocketEventHandler {
     init(event:String, callback:MultipleCallback) {
         self.event = event
         self.callbackMult = callback
+        self.multiEvent = true
     }
     
-    func executeCallback(item:AnyObject?, multiple:Bool) {
-        if callback == nil || multiple {
-            if item != nil && item is NSArray {
-                callbackMult?(item as? NSArray)
+    func executeCallback(item:AnyObject?, items:NSArray? = nil) {
+        if self.multiEvent {
+            if items != nil {
+                callbackMult?(items)
+            } else if item != nil {
+                callbackMult?([item!])
             } else {
-                if item != nil {
-                    callbackMult?([item!])
-                } else {
-                    callbackMult?(nil)
-                }
+                callbackMult?(nil)
             }
         } else {
             callback?(item)

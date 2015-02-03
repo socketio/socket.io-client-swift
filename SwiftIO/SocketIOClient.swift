@@ -189,7 +189,11 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         
         for handler in self.handlers {
             if handler.event == event {
-                handler.executeCallback(data, multiple: multipleItems)
+                if data is NSArray {
+                    handler.executeCallback(nil, items: (data as NSArray))
+                } else {
+                    handler.executeCallback(data)
+                }
             }
         }
     }
