@@ -109,7 +109,6 @@ class SocketEvent {
                 let mut = RegexMutable(str)
                 if let num = mut["~~(\\d)"].groups() {
                     newArr[i] = self.datas[num[1].toInt()!]
-                    // self.currentPlace++
                 } else {
                     newArr[i] = arr[i]
                 }
@@ -154,7 +153,7 @@ class SocketEvent {
             return self.fillInArray(args as NSArray)
         } else if let string = args as? String {
             if string == "~~\(self.currentPlace)" {
-                return self.datas.removeAtIndex(0)
+                return self.datas[0]
             }
         } else if args is Bool {
             // We have multiple items
@@ -168,7 +167,7 @@ class SocketEvent {
                         let mut = RegexMutable(str)
                         
                         if let num = mut["~~(\\d)"].groups() {
-                            returnArr.append(self.datas[num[1].toInt()!])
+                            returnArr[i] = self.datas[num[1].toInt()!]
                         } else {
                             returnArr.append(str)
                         }
