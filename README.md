@@ -81,15 +81,19 @@ socket.on("jsonTest") {data in
 // Messages that have multiple items are passed
 // by an array
 socket.onMultipleItems("multipleItems") {data in
-    if let str = data[0] as? String {
+    if data == nil {
+        return
+    }
+
+    if let str = data![0] as? String {
         println(str)
     }
 
-    if let arr = data[1] as? [Int] {
+    if let arr = data![1] as? [Int] {
         println(arr)
     }
 
-    if let obj = data[4] as? NSDictionary {
+    if let obj = data![4] as? NSDictionary {
         println(obj["test"])
     }
 }

@@ -24,8 +24,8 @@
 
 class SocketEventHandler {
     let event:String!
-    let callback:NormalCallback!
-    let callbackMult:MultipleCallback!
+    let callback:NormalCallback?
+    let callbackMult:MultipleCallback?
     
     init(event:String, callback:NormalCallback) {
         self.event = event
@@ -37,11 +37,19 @@ class SocketEventHandler {
         self.callbackMult = callback
     }
     
-    func executeCallback(item:AnyObject?) {
-        callback(item)
-    }
-    
-    func executeCallback(items:[AnyObject]) {
-        callbackMult(items)
+    func executeCallback(item:AnyObject?, multiple:Bool) {
+        if callback == nil || multiple {
+            if item != nil && item is NSArray {
+                callbackMult?(item as? NSArray)
+            } else {
+                if item != nil {
+                    callbackMult?([item!])
+                } else {
+                    callbackMult?(nil)
+                }
+            }
+        } else {
+            callback?(item)
+        }
     }
 }

@@ -25,7 +25,7 @@
 import Foundation
 
 typealias NormalCallback = (AnyObject?) -> Void
-typealias MultipleCallback = (AnyObject...) -> Void
+typealias MultipleCallback = (NSArray?) -> Void
 
 class SocketIOClient: NSObject, SRWebSocketDelegate {
     let socketURL:String!
@@ -188,12 +188,8 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         // println("Should do event: \(event) with data: \(data)")
         
         for handler in self.handlers {
-            if handler.event == event && !multipleItems {
-                handler.executeCallback(data)
-            } else if handler.event == event && multipleItems {
-                if let arr = data as? [AnyObject] {
-                    handler.executeCallback(arr)
-                }
+            if handler.event == event {
+                handler.executeCallback(data, multiple: multipleItems)
             }
         }
     }
