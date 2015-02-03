@@ -169,7 +169,7 @@ class SocketEvent {
                         if let num = mut["~~(\\d)"].groups() {
                             returnArr[i] = self.datas[num[1].toInt()!]
                         } else {
-                            returnArr.append(str)
+                            returnArr[i] = str
                         }
                     } else if let arr = parsedArr[i] as? NSArray {
                         returnArr[i] = self.fillInArray(arr)
