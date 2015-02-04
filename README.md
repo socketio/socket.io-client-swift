@@ -34,7 +34,8 @@ Events
 let socket = SocketIOClient(socketURL: "https://localhost:8080", opts: [
     "reconnects": true, // default true
     "reconnectAttempts": 5, // default -1 (infinite tries)
-    "reconnectWait": 5 // default 10
+    "reconnectWait": 5, // default 10
+    "nsp": "swift" // connects to the specified namespace. Default is /
 ])
 
 // Socket Events
