@@ -62,15 +62,23 @@ class SocketEvent {
     }
     
     class func createMessageForEvent(event:String, withArgs args:[AnyObject],
-        hasBinary:Bool, withDatas datas:Int = 0) -> String {
+        hasBinary:Bool, withDatas datas:Int = 0, toNamespace nsp:String?) -> String {
             
             var message:String
             var jsonSendError:NSError?
             
             if !hasBinary {
-                message = "42[\"\(event)\""
+                if nsp == nil {
+                    message = "42[\"\(event)\""
+                } else {
+                    message = "42/\(nsp!),[\"\(event)\""
+                }
             } else {
-                message = "45\(datas)-[\"\(event)\""
+                if nsp == nil {
+                    message = "45\(datas)-[\"\(event)\""
+                } else {
+                    message = "45\(datas)-/\(nsp!),[\"\(event)\""
+                }
             }
             
             for arg in args {
