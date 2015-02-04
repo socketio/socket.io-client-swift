@@ -17,7 +17,7 @@ Constructor
 Methods
 -------
 1. `socket.on(name:String, callback:((data:AnyObject?) -> Void))` - Adds a handler for an event.
-2. `socket.onMultipleItems(name:String, callback:((data:AnyObject...) -> Void))` - Adds a handler for an event that           can have multiple items. Items are stored in an array.
+2. `socket.onMultipleItems(name:String, callback:((data:NSArray?) -> Void))` - Adds a handler for an event that           can have multiple items. Items are stored in an array.
 3. `socket.emit(event:String, args:AnyObject...)` - Sends a message. Can send multiple args.
 4. `socket.connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
 5. `socket.close()` - Closes the socket. Once a socket is closed it should not be reopened.
