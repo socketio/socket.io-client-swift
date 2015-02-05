@@ -26,8 +26,9 @@ Events
 ------
 1. `connect` - Emitted when on a successful connection.
 2. `disconnect` - Emitted when the connection is closed.
-3. `reconnect` - Emitted when the connection is starting to reconnect.
-4. `reconnectAttempt` - Emitted when attempting to reconnect.
+3. `error` - Emitted if the websocket encounters an error.
+4. `reconnect` - Emitted when the connection is starting to reconnect.
+5. `reconnectAttempt` - Emitted when attempting to reconnect.
 
 ```swift
 // opts can be omitted, will use default values
