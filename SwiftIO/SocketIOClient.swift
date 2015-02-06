@@ -37,7 +37,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     var connected = false
     var connecting = false
     var io:SRWebSocket?
-    var nspString:String?
+    var nsp:String?
     var reconnects = true
     var reconnecting = false
     var reconnectAttempts = -1
@@ -72,7 +72,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             }
             
             if let nsp = opts!["nsp"] as? String {
-                self.nspString = nsp
+                self.nsp = nsp
             }
         }
     }
@@ -177,7 +177,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         
         if hasBinary {
             str = SocketEvent.createMessageForEvent(event, withArgs: items,
-                hasBinary: true, withDatas: emitDatas.count, toNamespace: self.nspString)
+                hasBinary: true, withDatas: emitDatas.count, toNamespace: self.nsp)
             
             self.io?.send(str)
             for data in emitDatas {
@@ -185,7 +185,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             }
         } else {
             str = SocketEvent.createMessageForEvent(event, withArgs: items, hasBinary: false,
-                withDatas: 0, toNamespace: self.nspString)
+                withDatas: 0, toNamespace: self.nsp)
             self.io?.send(str)
         }
     }
@@ -206,8 +206,8 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     private func joinNamespace() {
-        if self.nspString != nil {
-            self.io?.send("40/\(self.nspString!)")
+        if self.nsp != nil {
+            self.io?.send("40/\(self.nsp!)")
         }
     }
     
@@ -343,7 +343,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Parses messages recieved
-    private func parseSocketMessage(#message:AnyObject?) {
+    private func parseSocketMessage(message:AnyObject?) {
         if message == nil {
             return
         }
@@ -352,8 +352,8 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         
         if let stringMessage = message as? String {
             // Check for successful namepsace connect
-            if self.nspString != nil {
-                if stringMessage == "40/\(self.nspString!)" {
+            if self.nsp != nil {
+                if stringMessage == "40/\(self.nsp!)" {
                     self.handleEvent(event: "connect", data: nil)
                     return
                 }
@@ -364,6 +364,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             var mutMessage = RegexMutable(stringMessage)
             var setup:String!
             let messageData = mutMessage["(\\d*)(\\{.*\\})?"].groups()
+            
             if messageData != nil && messageData[1] == "0" {
                 setup = messageData[2]
                 let data = setup.dataUsingEncoding(NSUTF8StringEncoding)!
@@ -394,7 +395,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                     messagePart = messageGroups[3]
                 }
                 
-                if namespace == "" && self.nspString != nil {
+                if namespace == "" && self.nsp != nil {
                     return
                 }
                 
@@ -479,7 +480,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                     mutMessageObject = RegexMutable(binaryGroup[4])
                 }
                 
-                if namespace == "" && self.nspString != nil {
+                if namespace == "" && self.nsp != nil {
                     self.lastSocketMessage = nil
                     return
                 }
@@ -516,7 +517,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         }
     }
     
-    func sendPing() {
+    private func sendPing() {
         if self.connected {
             self.io?.send("2")
         }
@@ -566,7 +567,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     
     // Called when a message is recieved
     func webSocket(webSocket:SRWebSocket!, didReceiveMessage message:AnyObject?) {
-        self.parseSocketMessage(message: message)
+        self.parseSocketMessage(message)
     }
     
     // Called when the socket is opened
@@ -576,7 +577,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         self.reconnecting = false
         self.connected = true
         
-        if self.nspString != nil {
+        if self.nsp != nil {
             // Join namespace
             self.joinNamespace()
             return
