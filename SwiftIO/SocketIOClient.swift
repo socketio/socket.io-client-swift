@@ -94,7 +94,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         
         self.connecting = true
         self.closed = false
-        var endpoint:String!
+        var endpoint:String
         
         if self.secure! {
             endpoint = "wss://\(self.socketURL)/socket.io/?EIO=2&transport=websocket"
@@ -517,7 +517,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         }
     }
     
-    private func sendPing() {
+    func sendPing() {
         if self.connected {
             self.io?.send("2")
         }
