@@ -28,8 +28,8 @@ typealias NormalCallback = (AnyObject?) -> Void
 typealias MultipleCallback = (NSArray?) -> Void
 
 class SocketIOClient: NSObject, SRWebSocketDelegate {
-    let socketURL:String!
-    private let secure:Bool!
+    let socketURL:NSMutableString!
+    private var secure = false
     private var handlers = [SocketEventHandler]()
     private var lastSocketMessage:SocketEvent?
     private var pingTimer:NSTimer!
@@ -45,7 +45,6 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     var sid:String?
     
     init(socketURL:String, opts:[String: AnyObject]? = nil) {
-        super.init()
         var mutURL = RegexMutable(socketURL)
         
         if mutURL["https://"].matches().count != 0 {
@@ -55,6 +54,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         }
         mutURL = mutURL["http://"] ~= ""
         mutURL = mutURL["https://"] ~= ""
+
         self.socketURL = mutURL
         
         // Set options
@@ -96,7 +96,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         self.closed = false
         var endpoint:String
         
-        if self.secure! {
+        if self.secure {
             endpoint = "wss://\(self.socketURL)/socket.io/?EIO=2&transport=websocket"
         } else {
             endpoint = "ws://\(self.socketURL)/socket.io/?EIO=2&transport=websocket"
@@ -197,7 +197,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         for handler in self.handlers {
             if handler.event == event {
                 if data is NSArray {
-                    handler.executeCallback(nil, items: (data as NSArray))
+                    handler.executeCallback(nil, items: (data as! NSArray))
                 } else {
                     handler.executeCallback(data)
                 }
@@ -241,7 +241,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         for g in 0..<arr.count {
             if arr[g] is NSData {
                 hasBinary = true
-                let sendData = self.createBinaryDataForSend(arr[g] as NSData)
+                let sendData = self.createBinaryDataForSend(arr[g] as! NSData)
                 
                 arrayDatas.append(sendData)
                 replacementArr[g] = ["_placeholder": true,
@@ -310,17 +310,17 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 hasBinary = true
                 let sendData = self.createBinaryDataForSend(binaryData)
                 returnDatas.append(sendData)
-                returnDict[key as String] = ["_placeholder": true, "num": placeholders++]
+                returnDict[key as! String] = ["_placeholder": true, "num": placeholders++]
             } else if let arr = value as? NSArray {
                 let (replace, hadBinary, arrDatas) = self.parseArray(arr, placeholders: placeholders)
                 
                 if hadBinary {
                     hasBinary = true
-                    returnDict[key as String] = replace
+                    returnDict[key as! String] = replace
                     placeholders += arrDatas.count
                     returnDatas.extend(arrDatas)
                 } else {
-                    returnDict[key as String] = arr
+                    returnDict[key as! String] = arr
                 }
             } else if let dict = value as? NSDictionary {
                 // Recursive
@@ -328,14 +328,14 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 
                 if hadBinary {
                     hasBinary = true
-                    returnDict[key as String] = nestDict
+                    returnDict[key as! String] = nestDict
                     placeholders += nestDatas.count
                     returnDatas.extend(nestDatas)
                 } else {
-                    returnDict[key as String] = dict
+                    returnDict[key as! String] = dict
                 }
             } else {
-                returnDict[key as String] = value
+                returnDict[key as! String] = value
             }
         }
         
@@ -373,7 +373,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 if let json:AnyObject? = NSJSONSerialization.JSONObjectWithData(data,
                     options: nil, error: &jsonError) {
                         self.sid = json!["sid"] as? String
-                        self.startPingTimer(interval: (json!["pingInterval"] as Int) / 1000)
+                        self.startPingTimer(interval: (json!["pingInterval"] as! Int) / 1000)
                         return
                 }
             }
@@ -467,7 +467,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             
             if binaryGroup != nil {
                 // println(binaryGroup)
-                var event:String!
+                var event:NSString!
                 var mutMessageObject:NSMutableString!
                 var namespace:String?
                 let messageType = RegexMutable(binaryGroup[1])
@@ -488,7 +488,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 let placeholdersRemoved = mutMessageObject["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"]
                     ~= "\"~~$2\""
                 
-                let mes = SocketEvent(event: event, args: placeholdersRemoved,
+                let mes = SocketEvent(event: event as! String, args: placeholdersRemoved,
                     placeholders: numberOfPlaceholders.integerValue)
                 self.lastSocketMessage = mes
             }

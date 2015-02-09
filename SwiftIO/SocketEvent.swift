@@ -33,7 +33,7 @@ class SocketEvent {
     
     init(event:String, args:AnyObject?, placeholders:Int = 0) {
         self.event = event
-        self.args = args?
+        self.args = args
         self.placeholders = placeholders
     }
     
@@ -89,7 +89,7 @@ class SocketEvent {
                         options: NSJSONWritingOptions(0), error: &jsonSendError)
                     let jsonString = NSString(data: jsonSend!, encoding: NSUTF8StringEncoding)
                     
-                    message += jsonString!
+                    message += jsonString! as! String
                     continue
                 }
                 
@@ -132,7 +132,7 @@ class SocketEvent {
         var newDict = [String: AnyObject]()
         
         for (key, value) in dict {
-            newDict[key as String] = value
+            newDict[key as! String] = value
             
             // If the value is a string we need to check
             // if it is a placeholder for data
@@ -140,14 +140,14 @@ class SocketEvent {
                 let mut = RegexMutable(str)
                 
                 if let num = mut["~~(\\d)"].groups() {
-                    newDict[key as String] = self.datas[num[1].toInt()!]
+                    newDict[key as! String] = self.datas[num[1].toInt()!]
                 } else {
-                    newDict[key as String] = str
+                    newDict[key as! String] = str
                 }
             } else if let nestDict = value as? NSDictionary {
-                newDict[key as String] = self.fillInDict(nestDict)
+                newDict[key as! String] = self.fillInDict(nestDict)
             } else if let arr = value as? NSArray {
-                newDict[key as String] = self.fillInArray(arr)
+                newDict[key as! String] = self.fillInArray(arr)
             }
         }
         
@@ -158,7 +158,7 @@ class SocketEvent {
         if let dict = args as? NSDictionary {
             return self.fillInDict(dict)
         } else if let arr = args as? NSArray {
-            return self.fillInArray(args as NSArray)
+            return self.fillInArray(args as! NSArray)
         } else if let string = args as? String {
             if string == "~~\(self.currentPlace)" {
                 return self.datas[0]

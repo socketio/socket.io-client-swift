@@ -31,11 +31,13 @@ class SocketEventHandler {
     init(event:String, callback:NormalCallback) {
         self.event = event
         self.callback = callback
+        self.callbackMult = nil
     }
     
     init(event:String, callback:MultipleCallback) {
         self.event = event
         self.callbackMult = callback
+        self.callback = nil
         self.multiEvent = true
     }
     
