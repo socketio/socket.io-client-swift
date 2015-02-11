@@ -113,14 +113,7 @@ public class SwiftRegex: NSObject, BooleanType {
     }
     
     public func matches(options: NSMatchingOptions = nil) -> [String] {
-        var returnStr = [String]()
-        var t = matchResults(options: options).map { self.substring($0.range) }
-        
-        for str in t {
-            returnStr.append(str as! String)
-        }
-        
-        return returnStr
+        return matchResults(options: options).map { self.substring($0.range) } as [NSString] as! [String]
     }
     
     public func allGroups(options: NSMatchingOptions = nil) -> [[String]] {
@@ -153,12 +146,7 @@ public class SwiftRegex: NSObject, BooleanType {
             out.appendString( substring( NSRange(location:pos, length:targetRange.length-pos) ) as! String )
             
             if let mutableTarget = target as? NSMutableString {
-                var str = ""
-                for char in out as String {
-                    str += String(char)
-                }
-                
-                mutableTarget.setString(str)
+                mutableTarget.setString(out as String)
                 return mutableTarget
             } else {
                 SwiftRegex.failure("Modify on non-mutable")
