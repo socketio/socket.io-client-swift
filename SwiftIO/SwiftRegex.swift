@@ -93,7 +93,7 @@ public class SwiftRegex: NSObject, BooleanType {
         }
         set(newValue) {
             if let mutableTarget = target as? NSMutableString {
-                for match in matchResults().reverse() {
+                for match in matchResults()!.reverse() {
                     let replacement = regex.replacementStringForResult( match,
                         inString: target as! String, offset: 0, template: newValue )
                     mutableTarget.replaceCharactersInRange(match.rangeAtIndex(groupno), withString: replacement)
@@ -104,25 +104,32 @@ public class SwiftRegex: NSObject, BooleanType {
         }
     }
     
-    func matchResults(options: NSMatchingOptions = nil) -> [NSTextCheckingResult] {
-        return regex.matchesInString(target as! String, options: options, range: targetRange) as! [NSTextCheckingResult]
+    func matchResults(options: NSMatchingOptions = nil) -> [NSTextCheckingResult]? {
+        let matches = regex.matchesInString(target as! String, options: options, range: targetRange)
+            as? [NSTextCheckingResult]
+        
+        if matches != nil {
+            return matches!
+        } else {
+            return nil
+        }
     }
     
     public func ranges(options: NSMatchingOptions = nil) -> [NSRange] {
-        return matchResults(options: options).map { $0.range }
+        return matchResults(options: options)!.map { $0.range }
     }
     
     public func matches(options: NSMatchingOptions = nil) -> [String] {
-        return matchResults(options: options).map { self.substring($0.range) } as [NSString] as! [String]
+        return matchResults(options: options)!.map( { self.substring($0.range) as String } )
     }
     
     public func allGroups(options: NSMatchingOptions = nil) -> [[String]] {
-        return matchResults(options: options).map { self.groupsForMatch($0) }
+        return matchResults(options: options)!.map { self.groupsForMatch($0) }
     }
     
     public func dictionary(options: NSMatchingOptions = nil) -> Dictionary<String,String> {
         var out = Dictionary<String,String>()
-        for match in matchResults(options: options) {
+        for match in matchResults(options: options)! {
             out[substring(match.rangeAtIndex(1)) as! String] =
                 substring(match.rangeAtIndex(2)) as? String
         }
