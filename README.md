@@ -16,9 +16,9 @@ Constructor
 `init(socketURL: String, opts[String: AnyObject]? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values.)
 Methods
 -------
-1. `socket.on(name:String, callback:((data:AnyObject?) -> Void))` - Adds a handler for an event.
-2. `socket.onMultipleItems(name:String, callback:((data:NSArray?) -> Void))` - Adds a handler for an event that           can have multiple items. Items are stored in an array.
-3. `socket.emit(event:String, args:AnyObject...)` - Sends a message. Can send multiple args.
+1. `socket.on(name:String, callback:((data:AnyObject?) -> Void)) -> SocketAckHandler` - Adds a handler for an event. Returns a SocketAckHandler which can be used to ack an event. See example.
+2. `socket.onMultipleItems(name:String, callback:((data:NSArray?) -> Void)) -> SocketAckHandler` - Adds a handler for an event that can have multiple items. Items are stored in an array. Returns a SocketAckHandler which can be used to ack an event. See example.
+3. `socket.emit(event:String, args:AnyObject...) -> SocketAckHandler` - Sends a message. Can send multiple args. Returns a SocketAckHandler that can be used to request an ack. See example.
 4. `socket.connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
 5. `socket.close()` - Closes the socket. Once a socket is closed it should not be reopened.
 
@@ -30,6 +30,8 @@ Events
 4. `reconnect` - Emitted when the connection is starting to reconnect.
 5. `reconnectAttempt` - Emitted when attempting to reconnect.
 
+Example
+=======
 ```swift
 // opts can be omitted, will use default values
 let socket = SocketIOClient(socketURL: "https://localhost:8080", opts: [
@@ -54,6 +56,18 @@ socket.on("connect") {data in
     socket.emit("multTest", [1], 1.4, 1, "true",
         true, ["test": "foo"], "bar")
 }
+
+// Requesting acks, and adding ack args
+socket.on("ackEvent") {data in
+    if let str = data as? String {
+        println("Got ackEvent")
+    }
+
+    socket.emit("ackTest", "test").onAck {data in
+        println(data)
+    }
+
+}.ackWith("I got your event", "dude")
 
 socket.on("disconnect") {data in
     if let reason = data as? String {
