@@ -58,7 +58,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         }
         mutURL = mutURL["http://"] ~= ""
         mutURL = mutURL["https://"] ~= ""
-
+        
         self.socketURL = mutURL
         
         // Set options
@@ -101,9 +101,9 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         var endpoint:String
         
         if self.secure {
-            endpoint = "wss://\(self.socketURL)/socket.io/?EIO=2&transport=websocket"
+            endpoint = "wss://\(self.socketURL)/socket.io/?transport=websocket"
         } else {
-            endpoint = "ws://\(self.socketURL)/socket.io/?EIO=2&transport=websocket"
+            endpoint = "ws://\(self.socketURL)/socket.io/?transport=websocket"
         }
         
         self.io = SRWebSocket(URL: NSURL(string: endpoint))
@@ -212,14 +212,10 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         for handler in self.handlers {
             if handler.event == event {
                 if data is NSArray {
-                    dispatch_async(dispatch_get_main_queue()) {
-                        handler.executeCallback(nil, items: (data as! NSArray))
-                    }
+                    handler.executeCallback(nil, items: (data as! NSArray))
                     
                 } else {
-                    dispatch_async(dispatch_get_main_queue()) {
-                        handler.executeCallback(data)
-                    }
+                    handler.executeCallback(data)
                 }
             }
         }
