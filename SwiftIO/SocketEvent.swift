@@ -97,18 +97,18 @@ class SocketEvent {
                     return self.completeMessage(msg, args: args)
                     
                 } else {
-                    msg = "43\(nsp)["
+                    msg = "43/\(nsp),\(ack)["
                     
                     return self.completeMessage(msg, args: args)
                 }
             } else {
                 if nsp == "/" {
-                    msg = "46\(binary)-\(ack)[\"\(event)\""
+                    msg = "46\(binary)-\(ack)["
                     
                     return self.completeMessage(msg, args: args)
                     
                 } else {
-                    msg = "46\(binary)-\(nsp),\(ack)[\"\(event)\""
+                    msg = "46\(binary)-/\(nsp),\(ack)["
                     
                     return self.completeMessage(msg, args: args)
                 }

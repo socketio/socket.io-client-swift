@@ -182,17 +182,21 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             
             if !hasBinary {
                 if self?.nsp == nil {
-                    str = SocketEvent.createAck(ack, withEvent: event, withArgs: items, withAckType: 3, withNsp: "/")
+                    str = SocketEvent.createAck(ack, withEvent: event, withArgs: items,
+                        withAckType: 3, withNsp: "/")
                 } else {
-                    str = SocketEvent.createAck(ack, withEvent: event, withArgs: items, withAckType: 3, withNsp: self!.nsp!)
+                    str = SocketEvent.createAck(ack, withEvent: event, withArgs: items,
+                        withAckType: 3, withNsp: self!.nsp!)
                 }
                 
                 self?.io?.send(str)
             } else {
                 if self?.nsp == nil {
-                    str = SocketEvent.createAck(ack, withEvent: event, withArgs: items, withAckType: 6, withNsp: "/")
+                    str = SocketEvent.createAck(ack, withEvent: event, withArgs: items,
+                        withAckType: 6, withNsp: "/", withBinary: emitDatas.count)
                 } else {
-                    str = SocketEvent.createAck(ack, withEvent: event, withArgs: items, withAckType: 6, withNsp: self!.nsp!)
+                    str = SocketEvent.createAck(ack, withEvent: event, withArgs: items,
+                        withAckType: 6, withNsp: self!.nsp!, withBinary: emitDatas.count)
                 }
                 
                 self?.io?.send(str)
@@ -603,7 +607,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                     ~= "\"~~$2\""
                 
                 let mes:SocketEvent
-                if ackNum != "" {
+                if ackNum == "" {
                     mes = SocketEvent(event: event, args: placeholdersRemoved,
                         placeholders: numberOfPlaceholders.toInt()!)
                 } else {
