@@ -36,10 +36,11 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     let emitQueue = dispatch_queue_create("emitQueue".cStringUsingEncoding(NSUTF8StringEncoding),
         DISPATCH_QUEUE_SERIAL)
     private var ackHandlers = [SocketAckHandler]()
-    private var secure = false
+    private var currentAck = -1
     private var handlers = [SocketEventHandler]()
     private var lastSocketMessage:SocketEvent?
     private var pingTimer:NSTimer!
+    private var secure = false
     var closed = false
     var connected = false
     var connecting = false
@@ -126,13 +127,10 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     // Sends a message with multiple args
     // If a message contains binary we have to send those
     // seperately.
-    func emit(event:String, _ args:AnyObject...) -> SocketAckHandler {
+    func emit(event:String, _ args:AnyObject...) {
         if !self.connected {
-            return SocketAckHandler(event: "fail")
+            return
         }
-        
-        let ackHandler = SocketAckHandler(event: event)
-        self.ackHandlers.append(ackHandler)
         
         dispatch_async(self.emitQueue) {[weak self] in
             if self == nil {
@@ -141,11 +139,29 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             
             self?._emit(event, args)
         }
+    }
+    
+    func emitWithAck(event:String, _ args:AnyObject...) -> SocketAckHandler {
+        if !self.connected {
+            return SocketAckHandler(event: "fail")
+        }
+        
+        self.currentAck++
+        let ackHandler = SocketAckHandler(event: event, ackNum: self.currentAck)
+        self.ackHandlers.append(ackHandler)
+        
+        dispatch_async(self.emitQueue) {[weak self] in
+            if self == nil {
+                return
+            }
+            
+            self?._emit(event, args, ack: true)
+        }
         
         return ackHandler
     }
     
-    private func _emit(event:String, _ args:[AnyObject]) {
+    private func _emit(event:String, _ args:[AnyObject], ack:Bool = false) {
         var frame:SocketEvent
         var str:String
         
@@ -156,16 +172,27 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         }
         
         if hasBinary {
-            str = SocketEvent.createMessageForEvent(event, withArgs: items,
-                hasBinary: true, withDatas: emitDatas.count, toNamespace: self.nsp)
+            if !ack {
+                str = SocketEvent.createMessageForEvent(event, withArgs: items,
+                    hasBinary: true, withDatas: emitDatas.count, toNamespace: self.nsp)
+            } else {
+                str = SocketEvent.createMessageForEvent(event, withArgs: items,
+                    hasBinary: true, withDatas: emitDatas.count, toNamespace: self.nsp, wantsAck: self.currentAck)
+            }
             
             self.io?.send(str)
             for data in emitDatas {
                 self.io?.send(data)
             }
         } else {
-            str = SocketEvent.createMessageForEvent(event, withArgs: items, hasBinary: false,
-                withDatas: 0, toNamespace: self.nsp)
+            if !ack {
+                str = SocketEvent.createMessageForEvent(event, withArgs: items, hasBinary: false,
+                    withDatas: 0, toNamespace: self.nsp)
+            } else {
+                str = SocketEvent.createMessageForEvent(event, withArgs: items, hasBinary: false,
+                    withDatas: 0, toNamespace: self.nsp, wantsAck: self.currentAck)
+            }
+            
             self.io?.send(str)
         }
     }
@@ -203,6 +230,16 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 for data in emitDatas {
                     self?.io?.send(data)
                 }
+            }
+        }
+    }
+    
+    // Called when the socket gets an ack for something it sent
+    private func handleAck(ack:Int, data:AnyObject?) {
+        for handler in self.ackHandlers {
+            if handler.ackNum == ack {
+                handler.callback?(data)
+                break
             }
         }
     }
@@ -264,7 +301,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Parse an NSArray looking for binary data
-    private class func parseArray(arr:NSArray, var placeholders:Int) -> (NSArray, Bool, [NSData]) {
+    private static func parseArray(arr:NSArray, var placeholders:Int) -> (NSArray, Bool, [NSData]) {
         var replacementArr = [AnyObject](count: arr.count, repeatedValue: 1)
         var hasBinary = false
         var arrayDatas = [NSData]()
@@ -512,6 +549,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                         if ackNum == "" {
                             self.handleEvent(event, data: parsed)
                         } else {
+                            self.currentAck = ackNum.toInt()!
                             self.handleEvent(event, data: parsed, isInternalMessage: false,
                                 wantsAck: ackNum.toInt(), withAckType: 3)
                         }
@@ -525,6 +563,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                             if ackNum == "" {
                                 self.handleEvent(event, data: parsed)
                             } else {
+                                self.currentAck = ackNum.toInt()!
                                 self.handleEvent(event, data: parsed, isInternalMessage: false,
                                     wantsAck: ackNum.toInt(), withAckType: 3)
                             }
@@ -540,11 +579,31 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                     if ackNum == "" {
                         self.handleEvent(event, data: nil)
                     } else {
+                        self.currentAck = ackNum.toInt()!
                         self.handleEvent(event, data: nil, isInternalMessage: false,
                             wantsAck: ackNum.toInt(), withAckType: 3)
                     }
                     return
                 }
+            } else if messageGroups[1].hasPrefix("43") {
+                let arr = Array(messageGroups[1])
+                let ackNum:String
+                let nsp = messageGroups[2]
+                
+                if nsp == "" && self.nsp != nil {
+                    return
+                }
+                
+                if nsp == "" {
+                    ackNum = String(arr[2...arr.count-1])
+                } else {
+                    ackNum = messageGroups[3]
+                }
+                
+                let ackData:AnyObject? = SocketIOClient.parseData(messageGroups[4])
+                self.handleAck(ackNum.toInt()!, data: ackData)
+                
+                return
             }
             /**
             End Check for message
@@ -574,9 +633,13 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             /**
             Begin check for binary placeholders
             **/
-            let binaryGroup = mutMessage["^(\\d*)-\\/?(\\w*)?,?(\\d*)?\\[(\".*?\"),(.*)\\]$"].groups()
+            let binaryGroup = mutMessage["^(\\d*)-\\/?(\\w*)?,?(\\d*)?\\[(\".*?\")?,?(.*)?\\]$"].groups()
             
-            if binaryGroup != nil {
+            if binaryGroup == nil {
+                return
+            }
+            
+            if binaryGroup[1].hasPrefix("45") {
                 // println(binaryGroup)
                 var ackNum:String
                 var event:String
@@ -611,11 +674,35 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                     mes = SocketEvent(event: event, args: placeholdersRemoved,
                         placeholders: numberOfPlaceholders.toInt()!)
                 } else {
+                    self.currentAck = ackNum.toInt()!
                     mes = SocketEvent(event: event, args: placeholdersRemoved,
-                        placeholders: numberOfPlaceholders.toInt()!, ack: ackNum.toInt())
+                        placeholders: numberOfPlaceholders.toInt()!, ackNum: ackNum.toInt())
                 }
                 
                 self.lastSocketMessage = mes
+            } else if binaryGroup[1].hasPrefix("46") {
+                let messageType = RegexMutable(binaryGroup[1])
+                let numberOfPlaceholders = (messageType["46"] ~= "") as String
+                let ackNum:String
+                let nsp:String
+                
+                if binaryGroup[3] == "" {
+                    ackNum = binaryGroup[2]
+                    nsp = ""
+                } else {
+                    ackNum = binaryGroup[3]
+                    nsp = binaryGroup[2]
+                }
+                
+                if nsp == "" && self.nsp != nil {
+                    return
+                }
+                var mutMessageObject = RegexMutable(binaryGroup[5])
+                let placeholdersRemoved = mutMessageObject["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"]
+                    ~= "\"~~$2\""
+                
+                self.lastSocketMessage = SocketEvent(event: "", args: placeholdersRemoved,
+                    placeholders: numberOfPlaceholders.toInt()!, ackNum: ackNum.toInt(), justAck: true)
             }
             /**
             End check for binary placeholders
@@ -634,6 +721,11 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             if let args:AnyObject = parsedArgs {
                 let filledInArgs:AnyObject = self.lastSocketMessage!.fillInPlaceholders(args)
                 
+                if self.lastSocketMessage!.justAck! {
+                    self.handleAck(self.lastSocketMessage!.ack!, data: filledInArgs)
+                    return
+                }
+                
                 if self.lastSocketMessage!.ack != nil {
                     self.handleEvent(event, data: filledInArgs, isInternalMessage: false,
                         wantsAck: self.lastSocketMessage!.ack!, withAckType: 6)
@@ -642,6 +734,11 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 }
             } else {
                 let filledInArgs:AnyObject = self.lastSocketMessage!.fillInPlaceholders()
+                
+                if self.lastSocketMessage!.justAck! {
+                    self.handleAck(self.lastSocketMessage!.ack!, data: filledInArgs)
+                    return
+                }
                 
                 if self.lastSocketMessage!.ack != nil {
                     self.handleEvent(event, data: filledInArgs, isInternalMessage: false,

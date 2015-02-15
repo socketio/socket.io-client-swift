@@ -18,9 +18,10 @@ Methods
 -------
 1. `socket.on(name:String, callback:((data:AnyObject?) -> Void)) -> SocketAckHandler` - Adds a handler for an event. Returns a SocketAckHandler which can be used to ack an event. See example.
 2. `socket.onMultipleItems(name:String, callback:((data:NSArray?) -> Void)) -> SocketAckHandler` - Adds a handler for an event that can have multiple items. Items are stored in an array. Returns a SocketAckHandler which can be used to ack an event. See example.
-3. `socket.emit(event:String, args:AnyObject...) -> SocketAckHandler` - Sends a message. Can send multiple args. Returns a SocketAckHandler that can be used to request an ack. See example.
-4. `socket.connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
-5. `socket.close()` - Closes the socket. Once a socket is closed it should not be reopened.
+3. `socket.emit(event:String, args:AnyObject...)` - Sends a message. Can send multiple args.
+4. `socket.emitWithAck(event:String, args:AnyObject...) -> SocketAckHandler` - Sends a message that requests an acknoweldgement from the server. Returns a SocketAckHandler which you can use to add an onAck handler. See example.
+5. `socket.connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
+6. `socket.close()` - Closes the socket. Once a socket is closed it should not be reopened.
 
 Events
 ------

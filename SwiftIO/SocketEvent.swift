@@ -25,6 +25,7 @@
 import Foundation
 
 class SocketEvent {
+    let justAck:Bool!
     var ack:Int?
     var args:AnyObject!
     lazy var currentPlace = 0
@@ -32,11 +33,12 @@ class SocketEvent {
     var event:String!
     var placeholders:Int!
     
-    init(event:String, args:AnyObject?, placeholders:Int = 0, ack:Int? = nil) {
+    init(event:String, args:AnyObject?, placeholders:Int = 0, ackNum:Int? = nil, justAck:Bool = false) {
         self.event = event
         self.args = args
         self.placeholders = placeholders
-        self.ack = ack
+        self.ack = ackNum
+        self.justAck = justAck
     }
     
     func addData(data:NSData) -> Bool {
@@ -64,22 +66,38 @@ class SocketEvent {
     }
     
     static func createMessageForEvent(event:String, withArgs args:[AnyObject],
-        hasBinary:Bool, withDatas datas:Int = 0, toNamespace nsp:String?) -> String {
+        hasBinary:Bool, withDatas datas:Int = 0, toNamespace nsp:String?, wantsAck ack:Int? = nil) -> String {
             
             var message:String
             var jsonSendError:NSError?
             
             if !hasBinary {
                 if nsp == nil {
-                    message = "42[\"\(event)\","
+                    if ack == nil {
+                        message = "42[\"\(event)\","
+                    } else {
+                        message = "42\(ack!)[\"\(event)\","
+                    }
                 } else {
-                    message = "42/\(nsp!),[\"\(event)\","
+                    if ack == nil {
+                        message = "42/\(nsp!),[\"\(event)\","
+                    } else {
+                        message = "42/\(nsp!),\(ack!)[\"\(event)\","
+                    }
                 }
             } else {
                 if nsp == nil {
-                    message = "45\(datas)-[\"\(event)\","
+                    if ack == nil {
+                        message = "45\(datas)-[\"\(event)\","
+                    } else {
+                        message = "45\(datas)-\(ack!)[\"\(event)\","
+                    }
                 } else {
-                    message = "45\(datas)-/\(nsp!),[\"\(event)\","
+                    if ack == nil {
+                        message = "45\(datas)-/\(nsp!),[\"\(event)\","
+                    } else {
+                        message = "45\(datas)-/\(nsp!),\(ack!)[\"\(event)\","
+                    }
                 }
             }
             

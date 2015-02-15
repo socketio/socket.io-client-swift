@@ -24,14 +24,16 @@
 
 import Foundation
 
-typealias AckCallback = ([AnyObject]?) -> Void
+typealias AckCallback = (AnyObject?) -> Void
 
 class SocketAckHandler {
+    let ackNum:Int!
     let event:String!
     var ackData:[AnyObject]?
     var callback:AckCallback?
     
-    init(event:String) {
+    init(event:String, ackNum:Int = 0) {
+        self.ackNum = ackNum
         self.event = event
     }
     
