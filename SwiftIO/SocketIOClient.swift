@@ -248,23 +248,25 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     func handleEvent(event:String, data:AnyObject?, isInternalMessage:Bool = false,
         wantsAck ack:Int? = nil, withAckType ackType:Int = 3) {
             // println("Should do event: \(event) with data: \(data)")
-            if !self.connected && !isInternalMessage {
-                return
-            }
-            
-            for handler in self.handlers {
-                if handler.event == event {
-                    if data is NSArray {
-                        handler.executeCallback(nil, items: (data as! NSArray))
-                        if ack != nil {
-                            self.emitAck(ack!, withEvent: event,
-                                withData: handler.ack.ackData, withAckType: ackType)
-                        }
-                    } else {
-                        handler.executeCallback(data)
-                        if ack != nil {
-                            self.emitAck(ack!, withEvent: event,
-                                withData: handler.ack.ackData, withAckType: ackType)
+            dispatch_async(dispatch_get_main_queue()) {
+                if !self.connected && !isInternalMessage {
+                    return
+                }
+                
+                for handler in self.handlers {
+                    if handler.event == event {
+                        if data is NSArray {
+                            handler.executeCallback(nil, items: (data as! NSArray))
+                            if ack != nil {
+                                self.emitAck(ack!, withEvent: event,
+                                    withData: handler.ack.ackData, withAckType: ackType)
+                            }
+                        } else {
+                            handler.executeCallback(data)
+                            if ack != nil {
+                                self.emitAck(ack!, withEvent: event,
+                                    withData: handler.ack.ackData, withAckType: ackType)
+                            }
                         }
                     }
                 }
