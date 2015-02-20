@@ -25,16 +25,20 @@
 import Foundation
 
 class SocketEvent {
+    let justAck:Bool!
+    var ack:Int?
     var args:AnyObject!
     lazy var currentPlace = 0
     lazy var datas = [NSData]()
     var event:String!
     var placeholders:Int!
     
-    init(event:String, args:AnyObject?, placeholders:Int = 0) {
+    init(event:String, args:AnyObject?, placeholders:Int = 0, ackNum:Int? = nil, justAck:Bool = false) {
         self.event = event
-        self.args = args?
+        self.args = args
         self.placeholders = placeholders
+        self.ack = ackNum
+        self.justAck = justAck
     }
     
     func addData(data:NSData) -> Bool {
@@ -62,46 +66,101 @@ class SocketEvent {
     }
     
     class func createMessageForEvent(event:String, withArgs args:[AnyObject],
-        hasBinary:Bool, withDatas datas:Int = 0, toNamespace nsp:String?) -> String {
+        hasBinary:Bool, withDatas datas:Int = 0, toNamespace nsp:String?, wantsAck ack:Int? = nil) -> String {
             
             var message:String
             var jsonSendError:NSError?
             
             if !hasBinary {
                 if nsp == nil {
-                    message = "42[\"\(event)\""
+                    if ack == nil {
+                        message = "42[\"\(event)\","
+                    } else {
+                        message = "42\(ack!)[\"\(event)\","
+                    }
                 } else {
-                    message = "42/\(nsp!),[\"\(event)\""
+                    if ack == nil {
+                        message = "42/\(nsp!),[\"\(event)\","
+                    } else {
+                        message = "42/\(nsp!),\(ack!)[\"\(event)\","
+                    }
                 }
             } else {
                 if nsp == nil {
-                    message = "45\(datas)-[\"\(event)\""
+                    if ack == nil {
+                        message = "45\(datas)-[\"\(event)\","
+                    } else {
+                        message = "45\(datas)-\(ack!)[\"\(event)\","
+                    }
                 } else {
-                    message = "45\(datas)-/\(nsp!),[\"\(event)\""
+                    if ack == nil {
+                        message = "45\(datas)-/\(nsp!),[\"\(event)\","
+                    } else {
+                        message = "45\(datas)-/\(nsp!),\(ack!)[\"\(event)\","
+                    }
                 }
             }
             
-            for arg in args {
-                message += ","
-                
-                if arg is NSDictionary || arg is [AnyObject] {
-                    let jsonSend = NSJSONSerialization.dataWithJSONObject(arg,
-                        options: NSJSONWritingOptions(0), error: &jsonSendError)
-                    let jsonString = NSString(data: jsonSend!, encoding: NSUTF8StringEncoding)
+            return self.completeMessage(message, args: args)
+    }
+    
+    class func createAck(ack:Int, withEvent event:String, withArgs args:[AnyObject],
+        withAckType ackType:Int, withNsp nsp:String, withBinary binary:Int = 0) -> String {
+            var msg:String
+            
+            if ackType == 3 {
+                if nsp == "/" {
+                    msg = "43\(ack)["
                     
-                    message += jsonString!
-                    continue
+                    return self.completeMessage(msg, args: args)
+                    
+                } else {
+                    msg = "43/\(nsp),\(ack)["
+                    
+                    return self.completeMessage(msg, args: args)
                 }
-                
-                if arg is String {
-                    message += "\"\(arg)\""
-                    continue
+            } else {
+                if nsp == "/" {
+                    msg = "46\(binary)-\(ack)["
+                    
+                    return self.completeMessage(msg, args: args)
+                    
+                } else {
+                    msg = "46\(binary)-/\(nsp),\(ack)["
+                    
+                    return self.completeMessage(msg, args: args)
                 }
+            }
+    }
+    
+    private class func completeMessage(var message:String, args:[AnyObject]) -> String {
+        var err:NSError?
+        for arg in args {
+            
+            if arg is NSDictionary || arg is [AnyObject] {
+                let jsonSend = NSJSONSerialization.dataWithJSONObject(arg,
+                    options: NSJSONWritingOptions(0), error: &err)
+                let jsonString = NSString(data: jsonSend!, encoding: NSUTF8StringEncoding)
                 
-                message += "\(arg)"
+                message += jsonString! as String
+                message += ","
+                continue
             }
             
-            return message + "]"
+            if arg is String {
+                message += "\"\(arg)\""
+                message += ","
+                continue
+            }
+            
+            message += "\(arg)"
+            message += ","
+        }
+        
+        if message != "" {
+            message.removeAtIndex(message.endIndex.predecessor())
+        }
+        return message + "]"
     }
     
     private func fillInArray(arr:NSArray) -> NSArray {

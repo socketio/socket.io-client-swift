@@ -1,9 +1,9 @@
 //
-//  EventHandler.swift
+//  SocketAckHandler.swift
 //  Socket.IO-Swift
 //
-//  Created by Erik Little on 1/18/15.
-//
+//  Created by Erik Little on 2/14/15.
+
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
 //  in the Software without restriction, including without limitation the rights
@@ -22,43 +22,26 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-class SocketEventHandler {
-    let ack:SocketAckHandler!
+import Foundation
+
+typealias AckCallback = (AnyObject?) -> Void
+
+class SocketAckHandler {
+    let ackNum:Int!
     let event:String!
-    let callback:NormalCallback?
-    let callbackMult:MultipleCallback?
-    var multiEvent = false
+    var ackData:[AnyObject]?
+    var callback:AckCallback?
     
-    init(event:String, callback:NormalCallback, ack:SocketAckHandler) {
+    init(event:String, ackNum:Int = 0) {
+        self.ackNum = ackNum
         self.event = event
+    }
+    
+    func onAck(callback:AckCallback) {
         self.callback = callback
-        self.callbackMult = nil
-        self.ack = ack
     }
     
-    init(event:String, callback:MultipleCallback, ack:SocketAckHandler) {
-        self.event = event
-        self.callbackMult = callback
-        self.callback = nil
-        self.multiEvent = true
-        self.ack = ack
-    }
-    
-    func executeCallback(item:AnyObject?, items:NSArray? = nil) {
-        if self.multiEvent {
-            if items != nil {
-                callbackMult?(items)
-            } else if item != nil {
-                callbackMult?([item!])
-            } else {
-                callbackMult?(nil)
-            }
-        } else {
-            if items != nil {
-                callback?(items)
-            } else {
-                callback?(item)
-            }
-        }
+    func ackWith(data:AnyObject...) {
+        self.ackData = data
     }
 }
