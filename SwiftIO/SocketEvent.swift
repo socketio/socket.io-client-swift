@@ -112,18 +112,10 @@ class SocketEvent {
                 if nsp == "/" {
                     msg = "43\(ack)["
                     
-                    if args.count == 0 {
-                        return msg + "]"
-                    }
-                    
                     return self.completeMessage(msg, args: args)
                     
                 } else {
                     msg = "43/\(nsp),\(ack)["
-                    
-                    if args.count == 0 {
-                        return msg + "]"
-                    }
                     
                     return self.completeMessage(msg, args: args)
                 }
@@ -131,18 +123,10 @@ class SocketEvent {
                 if nsp == "/" {
                     msg = "46\(binary)-\(ack)["
                     
-                    if args.count == 0 {
-                        return msg + "]"
-                    }
-                    
                     return self.completeMessage(msg, args: args)
                     
                 } else {
                     msg = "46\(binary)-/\(nsp),\(ack)["
-                    
-                    if args.count == 0 {
-                        return msg + "]"
-                    }
                     
                     return self.completeMessage(msg, args: args)
                 }
@@ -151,6 +135,11 @@ class SocketEvent {
     
     private class func completeMessage(var message:String, args:[AnyObject]) -> String {
         var err:NSError?
+        
+        if args.count == 0 {
+            return message + "]"
+        }
+        
         for arg in args {
             
             if arg is NSDictionary || arg is [AnyObject] {
