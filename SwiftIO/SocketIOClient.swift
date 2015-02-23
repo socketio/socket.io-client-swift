@@ -24,9 +24,6 @@
 
 import Foundation
 
-typealias NormalCallback = (AnyObject?) -> Void
-typealias MultipleCallback = (NSArray?) -> Void
-
 class SocketIOClient: NSObject, SRWebSocketDelegate {
     let socketURL:NSMutableString!
     let ackQueue = dispatch_queue_create("ackQueue".cStringUsingEncoding(NSUTF8StringEncoding),
@@ -57,9 +54,8 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         
         if mutURL["https://"].matches().count != 0 {
             self.secure = true
-        } else {
-            self.secure = false
         }
+        
         mutURL = mutURL["http://"] ~= ""
         mutURL = mutURL["https://"] ~= ""
         
@@ -198,7 +194,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // If the server wants to know that the client received data
-    private func emitAck(ack:Int, withEvent event:String, withData data:[AnyObject]?, withAckType ackType:Int) {
+    func emitAck(ack:Int, withData data:[AnyObject]?, withAckType ackType:Int) {
         dispatch_async(self.ackQueue) {[weak self] in
             if self == nil || !self!.connected || data == nil {
                 return
@@ -209,20 +205,20 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             
             if !hasBinary {
                 if self?.nsp == nil {
-                    str = SocketEvent.createAck(ack, withEvent: event, withArgs: items,
+                    str = SocketEvent.createAck(ack, withArgs: items,
                         withAckType: 3, withNsp: "/")
                 } else {
-                    str = SocketEvent.createAck(ack, withEvent: event, withArgs: items,
+                    str = SocketEvent.createAck(ack, withArgs: items,
                         withAckType: 3, withNsp: self!.nsp!)
                 }
                 
                 self?.io?.send(str)
             } else {
                 if self?.nsp == nil {
-                    str = SocketEvent.createAck(ack, withEvent: event, withArgs: items,
+                    str = SocketEvent.createAck(ack, withArgs: items,
                         withAckType: 6, withNsp: "/", withBinary: emitDatas.count)
                 } else {
-                    str = SocketEvent.createAck(ack, withEvent: event, withArgs: items,
+                    str = SocketEvent.createAck(ack, withArgs: items,
                         withAckType: 6, withNsp: self!.nsp!, withBinary: emitDatas.count)
                 }
                 
@@ -256,16 +252,27 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 for handler in self.handlers {
                     if handler.event == event {
                         if data is NSArray {
-                            handler.executeCallback(nil, items: (data as! NSArray))
                             if ack != nil {
-                                self.emitAck(ack!, withEvent: event,
-                                    withData: handler.ack.ackData, withAckType: ackType)
+                                handler.executeCallback(data as? NSArray, withAck: ack!,
+                                    withAckType: ackType, withSocket: self)
+                            } else {
+                                handler.executeCallback(data as? NSArray)
                             }
                         } else {
-                            handler.executeCallback(data)
+                            
+                            // Trying to do a ternary expression in the executeCallback method
+                            // seemed to crash Swift
+                            var dataArr:NSArray? = nil
+                            
+                            if let data:AnyObject = data {
+                                dataArr = [data]
+                            }
+                            
                             if ack != nil {
-                                self.emitAck(ack!, withEvent: event,
-                                    withData: handler.ack.ackData, withAckType: ackType)
+                                handler.executeCallback(dataArr, withAck: ack!,
+                                    withAckType: ackType, withSocket: self)
+                            } else {
+                                handler.executeCallback(dataArr)
                             }
                         }
                     }
@@ -280,21 +287,9 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Adds handler for single arg message
-    func on(name:String, callback:NormalCallback) -> SocketAckHandler {
-        let ackHandler = SocketAckHandler(event: name)
-        let handler = SocketEventHandler(event: name, callback: callback, ack: ackHandler)
+    func on(name:String, callback:NormalCallback) {
+        let handler = SocketEventHandler(event: name, callback: callback)
         self.handlers.append(handler)
-        
-        return ackHandler
-    }
-    
-    // Adds handler for multiple arg message
-    func onMultipleItems(name:String, callback:MultipleCallback) -> SocketAckHandler {
-        let ackHandler = SocketAckHandler(event: name)
-        let handler = SocketEventHandler(event: name, callback: callback, ack: ackHandler)
-        self.handlers.append(handler)
-        
-        return ackHandler
     }
     
     // Opens the connection to the socket
@@ -303,7 +298,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Parse an NSArray looking for binary data
-    private static func parseArray(arr:NSArray, var placeholders:Int) -> (NSArray, Bool, [NSData]) {
+    private class func parseArray(arr:NSArray, var placeholders:Int) -> (NSArray, Bool, [NSData]) {
         var replacementArr = [AnyObject](count: arr.count, repeatedValue: 1)
         var hasBinary = false
         var arrayDatas = [NSData]()
@@ -352,7 +347,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Parses data for events
-    static func parseData(data:String?) -> AnyObject? {
+    class func parseData(data:String?) -> AnyObject? {
         if data == nil {
             return nil
         }
@@ -370,7 +365,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         return parsed
     }
     
-    private static func parseEmitArgs(args:[AnyObject]) -> ([AnyObject], Bool, [NSData]) {
+    private class func parseEmitArgs(args:[AnyObject]) -> ([AnyObject], Bool, [NSData]) {
         var items = [AnyObject](count: args.count, repeatedValue: 1)
         var numberOfPlaceholders = -1
         var hasBinary = false
@@ -424,7 +419,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Parses a NSDictionary, looking for NSData objects
-    private static func parseNSDictionary(dict:NSDictionary, var placeholders:Int) -> (NSDictionary, Bool, [NSData]) {
+    private class func parseNSDictionary(dict:NSDictionary, var placeholders:Int) -> (NSDictionary, Bool, [NSData]) {
         var returnDict = NSMutableDictionary()
         var hasBinary = false
         if placeholders == -1 {
@@ -589,7 +584,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 }
             } else if messageGroups[1].hasPrefix("43") {
                 let arr = Array(messageGroups[1])
-                let ackNum:String
+                var ackNum:String
                 let nsp = messageGroups[2]
                 
                 if nsp == "" && self.nsp != nil {
@@ -671,7 +666,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 let placeholdersRemoved = mutMessageObject["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"]
                     ~= "\"~~$2\""
                 
-                let mes:SocketEvent
+                var mes:SocketEvent
                 if ackNum == "" {
                     mes = SocketEvent(event: event, args: placeholdersRemoved,
                         placeholders: numberOfPlaceholders.toInt()!)
@@ -685,8 +680,8 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             } else if binaryGroup[1].hasPrefix("46") {
                 let messageType = RegexMutable(binaryGroup[1])
                 let numberOfPlaceholders = (messageType["46"] ~= "") as String
-                let ackNum:String
-                let nsp:String
+                var ackNum:String
+                var nsp:String
                 
                 if binaryGroup[3] == "" {
                     ackNum = binaryGroup[2]

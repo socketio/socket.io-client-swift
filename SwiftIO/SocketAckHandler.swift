@@ -29,7 +29,6 @@ typealias AckCallback = (AnyObject?) -> Void
 class SocketAckHandler {
     let ackNum:Int!
     let event:String!
-    var ackData:[AnyObject]?
     var callback:AckCallback?
     
     init(event:String, ackNum:Int = 0) {
@@ -39,9 +38,5 @@ class SocketAckHandler {
     
     func onAck(callback:AckCallback) {
         self.callback = callback
-    }
-    
-    func ackWith(data:AnyObject...) {
-        self.ackData = data
     }
 }

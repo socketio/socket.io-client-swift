@@ -65,7 +65,7 @@ class SocketEvent {
         }
     }
     
-    static func createMessageForEvent(event:String, withArgs args:[AnyObject],
+    class func createMessageForEvent(event:String, withArgs args:[AnyObject],
         hasBinary:Bool, withDatas datas:Int = 0, toNamespace nsp:String?, wantsAck ack:Int? = nil) -> String {
             
             var message:String
@@ -104,18 +104,27 @@ class SocketEvent {
             return self.completeMessage(message, args: args)
     }
     
-    static func createAck(ack:Int, withEvent event:String, withArgs args:[AnyObject],
-        withAckType ackType:Int, withNsp nsp:String, withBinary binary:Int = 0) -> String {
+    class func createAck(ack:Int, withArgs args:[AnyObject], withAckType ackType:Int,
+        withNsp nsp:String, withBinary binary:Int = 0) -> String {
             var msg:String
             
             if ackType == 3 {
                 if nsp == "/" {
                     msg = "43\(ack)["
                     
+                    if args.count == 0 {
+                        println(msg + "]")
+                        return msg + "]"
+                    }
+                    
                     return self.completeMessage(msg, args: args)
                     
                 } else {
                     msg = "43/\(nsp),\(ack)["
+                    
+                    if args.count == 0 {
+                        return msg + "]"
+                    }
                     
                     return self.completeMessage(msg, args: args)
                 }
@@ -123,17 +132,25 @@ class SocketEvent {
                 if nsp == "/" {
                     msg = "46\(binary)-\(ack)["
                     
+                    if args.count == 0 {
+                        return msg + "]"
+                    }
+                    
                     return self.completeMessage(msg, args: args)
                     
                 } else {
                     msg = "46\(binary)-/\(nsp),\(ack)["
+                    
+                    if args.count == 0 {
+                        return msg + "]"
+                    }
                     
                     return self.completeMessage(msg, args: args)
                 }
             }
     }
     
-    private static func completeMessage(var message:String, args:[AnyObject]) -> String {
+    private class func completeMessage(var message:String, args:[AnyObject]) -> String {
         var err:NSError?
         for arg in args {
             
@@ -142,7 +159,7 @@ class SocketEvent {
                     options: NSJSONWritingOptions(0), error: &err)
                 let jsonString = NSString(data: jsonSend!, encoding: NSUTF8StringEncoding)
                 
-                message += jsonString! as! String
+                message += jsonString! as String
                 message += ","
                 continue
             }
