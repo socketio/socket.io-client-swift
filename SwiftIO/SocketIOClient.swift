@@ -24,9 +24,6 @@
 
 import Foundation
 
-typealias NormalCallback = (AnyObject?) -> Void
-typealias MultipleCallback = (NSArray?) -> Void
-
 class SocketIOClient: NSObject, SRWebSocketDelegate {
     let socketURL:NSMutableString!
     let ackQueue = dispatch_queue_create("ackQueue".cStringUsingEncoding(NSUTF8StringEncoding),
@@ -197,7 +194,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // If the server wants to know that the client received data
-    private func emitAck(ack:Int, withEvent event:String, withData data:[AnyObject]?, withAckType ackType:Int) {
+    func emitAck(ack:Int, withData data:[AnyObject]?, withAckType ackType:Int) {
         dispatch_async(self.ackQueue) {[weak self] in
             if self == nil || !self!.connected || data == nil {
                 return
@@ -208,20 +205,20 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             
             if !hasBinary {
                 if self?.nsp == nil {
-                    str = SocketEvent.createAck(ack, withEvent: event, withArgs: items,
+                    str = SocketEvent.createAck(ack, withArgs: items,
                         withAckType: 3, withNsp: "/")
                 } else {
-                    str = SocketEvent.createAck(ack, withEvent: event, withArgs: items,
+                    str = SocketEvent.createAck(ack, withArgs: items,
                         withAckType: 3, withNsp: self!.nsp!)
                 }
                 
                 self?.io?.send(str)
             } else {
                 if self?.nsp == nil {
-                    str = SocketEvent.createAck(ack, withEvent: event, withArgs: items,
+                    str = SocketEvent.createAck(ack, withArgs: items,
                         withAckType: 6, withNsp: "/", withBinary: emitDatas.count)
                 } else {
-                    str = SocketEvent.createAck(ack, withEvent: event, withArgs: items,
+                    str = SocketEvent.createAck(ack, withArgs: items,
                         withAckType: 6, withNsp: self!.nsp!, withBinary: emitDatas.count)
                 }
                 
@@ -255,16 +252,27 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 for handler in self.handlers {
                     if handler.event == event {
                         if data is NSArray {
-                            handler.executeCallback(nil, items: (data as NSArray))
                             if ack != nil {
-                                self.emitAck(ack!, withEvent: event,
-                                    withData: handler.ack.ackData, withAckType: ackType)
+                                handler.executeCallback(data as? NSArray, withAck: ack!,
+                                    withAckType: ackType, withSocket: self)
+                            } else {
+                                handler.executeCallback(data as? NSArray)
                             }
                         } else {
-                            handler.executeCallback(data)
+                            
+                            // Trying to do a ternary expression in the executeCallback method
+                            // seemed to crash Swift
+                            var dataArr:NSArray? = nil
+                            
+                            if let data:AnyObject = data {
+                                dataArr = [data]
+                            }
+                            
                             if ack != nil {
-                                self.emitAck(ack!, withEvent: event,
-                                    withData: handler.ack.ackData, withAckType: ackType)
+                                handler.executeCallback(dataArr, withAck: ack!,
+                                    withAckType: ackType, withSocket: self)
+                            } else {
+                                handler.executeCallback(dataArr)
                             }
                         }
                     }
@@ -279,21 +287,9 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Adds handler for single arg message
-    func on(name:String, callback:NormalCallback) -> SocketAckHandler {
-        let ackHandler = SocketAckHandler(event: name)
-        let handler = SocketEventHandler(event: name, callback: callback, ack: ackHandler)
+    func on(name:String, callback:NormalCallback) {
+        let handler = SocketEventHandler(event: name, callback: callback)
         self.handlers.append(handler)
-        
-        return ackHandler
-    }
-    
-    // Adds handler for multiple arg message
-    func onMultipleItems(name:String, callback:MultipleCallback) -> SocketAckHandler {
-        let ackHandler = SocketAckHandler(event: name)
-        let handler = SocketEventHandler(event: name, callback: callback, ack: ackHandler)
-        self.handlers.append(handler)
-        
-        return ackHandler
     }
     
     // Opens the connection to the socket

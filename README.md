@@ -18,8 +18,7 @@ Constructor
 `init(socketURL: String, opts[String: AnyObject]? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values.)
 Methods
 -------
-1. `socket.on(name:String, callback:((data:AnyObject?) -> Void)) -> SocketAckHandler` - Adds a handler for an event. Returns a SocketAckHandler which can be used to ack an event. See example.
-2. `socket.onMultipleItems(name:String, callback:((data:NSArray?) -> Void)) -> SocketAckHandler` - Adds a handler for an event that can have multiple items. Items are stored in an array. Returns a SocketAckHandler which can be used to ack an event. See example.
+1. `socket.on(name:String, callback:((data:NSArray?, ack:AckEmitter?) -> Void))` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
 3. `socket.emit(event:String, args:AnyObject...)` - Sends a message. Can send multiple args.
 4. `socket.emitWithAck(event:String, args:AnyObject...) -> SocketAckHandler` - Sends a message that requests an acknoweldgement from the server. Returns a SocketAckHandler which you can use to add an onAck handler. See example.
 5. `socket.connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
@@ -45,7 +44,7 @@ let socket = SocketIOClient(socketURL: "https://localhost:8080", opts: [
 ])
 
 // Socket Events
-socket.on("connect") {data in
+socket.on("connect") {data, ack in
     println("socket connected")
 
     // Sending messages
@@ -60,9 +59,9 @@ socket.on("connect") {data in
         true, ["test": "foo"], "bar")
 }
 
-// Requesting acks, and adding ack args
-socket.on("ackEvent") {data in
-    if let str = data as? String {
+// Requesting acks, and responding to acks
+socket.on("ackEvent") {data, ack in
+    if let str = data?[0] as? String {
         println("Got ackEvent")
     }
 
@@ -70,36 +69,37 @@ socket.on("ackEvent") {data in
         println(data)
     }
 
-}.ackWith("I got your event", "dude")
+    ack?("Got your event", "dude")
+}
 
-socket.on("disconnect") {data in
-    if let reason = data as? String {
+socket.on("disconnect") {data, ack in
+    if let reason = data?[0] as? String {
         println("Socket disconnected: \(reason)")
     }
 }
 
-socket.on("reconnect") {data in
-    if let reason = data as? String {
+socket.on("reconnect") {data, ack in
+    if let reason = data?[0] as? String {
         println("Socket reconnecting: \(reason)")
     }
 }
 
-socket.on("reconnectAttempt") {data in
-    if let triesLeft = data as? Int {
+socket.on("reconnectAttempt") {data, ack in
+    if let triesLeft = data?[0] as? Int {
         println(triesLeft)
     }
 }
 // End Socket Events
 
-socket.on("jsonTest") {data in
-    if let json = data as? NSDictionary {
+socket.on("jsonTest") {data, ack in
+    if let json = data?[0] as? NSDictionary {
        println(json["test"]!) // foo bar
     }
 }
 
 // Messages that have multiple items are passed
 // by an array
-socket.onMultipleItems("multipleItems") {data in
+socket.on("multipleItems") {data, ack in
     if data == nil {
         return
     }
@@ -118,14 +118,14 @@ socket.onMultipleItems("multipleItems") {data in
 }
 
 // Recieving binary
-socket.on("dataTest") {data in
-    if let data = data as? NSData {
+socket.on("dataTest") {data, ack in
+    if let data = data?[0] as? NSData {
         println("data is binary")
     }
 }
 
-socket.on("objectDataTest") {data in
-    if let dict = data as? NSDictionary {
+socket.on("objectDataTest") {data, ack in
+    if let dict = data?[0] as? NSDictionary {
         if let data = dict["data"] as? NSData {
             let string = NSString(data: data, encoding: NSUTF8StringEncoding)
             println("Got data: \(string!)")

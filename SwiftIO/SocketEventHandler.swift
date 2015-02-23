@@ -22,43 +22,28 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
+typealias NormalCallback = (NSArray?, AckEmitter?) -> Void
+typealias AckEmitter = (AnyObject...) -> Void
+
+private func emitAckCallback(socket:SocketIOClient, num:Int, type:Int) -> AckEmitter {
+    func emitter(items:AnyObject...) {
+        socket.emitAck(num, withData: items, withAckType: type)
+    }
+    
+    return emitter
+}
+
 class SocketEventHandler {
-    let ack:SocketAckHandler!
     let event:String!
     let callback:NormalCallback?
-    let callbackMult:MultipleCallback?
-    var multiEvent = false
     
-    init(event:String, callback:NormalCallback, ack:SocketAckHandler) {
+    init(event:String, callback:NormalCallback) {
         self.event = event
         self.callback = callback
-        self.callbackMult = nil
-        self.ack = ack
     }
     
-    init(event:String, callback:MultipleCallback, ack:SocketAckHandler) {
-        self.event = event
-        self.callbackMult = callback
-        self.callback = nil
-        self.multiEvent = true
-        self.ack = ack
-    }
-    
-    func executeCallback(item:AnyObject?, items:NSArray? = nil) {
-        if self.multiEvent {
-            if items != nil {
-                callbackMult?(items)
-            } else if item != nil {
-                callbackMult?([item!])
-            } else {
-                callbackMult?(nil)
-            }
-        } else {
-            if items != nil {
-                callback?(items)
-            } else {
-                callback?(item)
-            }
-        }
+    func executeCallback(_ items:NSArray? = nil, withAck ack:Int? = nil, withAckType type:Int? = nil,
+        withSocket socket:SocketIOClient? = nil) {
+            callback?(items, ack != nil ? emitAckCallback(socket!, ack!, type!) : nil)
     }
 }
