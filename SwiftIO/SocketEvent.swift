@@ -113,7 +113,6 @@ class SocketEvent {
                     msg = "43\(ack)["
                     
                     if args.count == 0 {
-                        println(msg + "]")
                         return msg + "]"
                     }
                     
