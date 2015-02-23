@@ -15,7 +15,7 @@ API
 ===
 Constructor
 -----------
-`init(socketURL: String, opts[String: AnyObject]? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values.)
+`init(socketURL: String, opts:[String: AnyObject]? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values.)
 Methods
 -------
 1. `socket.on(name:String, callback:((data:AnyObject?) -> Void)) -> SocketAckHandler` - Adds a handler for an event. Returns a SocketAckHandler which can be used to ack an event. See example.
