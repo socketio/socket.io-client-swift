@@ -98,8 +98,7 @@ socket.on("jsonTest") {data, ack in
     }
 }
 
-// Messages that have multiple items are passed
-// by an array
+// Event items are passed by an array
 socket.on("multipleItems") {data, ack in
     if data == nil {
         return
