@@ -263,10 +263,12 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     
     // Called when the socket gets an ack for something it sent
     private func handleAck(ack:Int, data:AnyObject?) {
-        for handler in self.ackHandlers {
-            if handler.ackNum == ack {
+        self.ackHandlers = self.ackHandlers.filter {handler in
+            if handler.ackNum != ack {
+                return true
+            } else {
                 handler.callback?(data)
-                break
+                return false
             }
         }
     }
