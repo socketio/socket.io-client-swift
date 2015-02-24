@@ -111,26 +111,18 @@ class SocketEvent {
             if ackType == 3 {
                 if nsp == "/" {
                     msg = "43\(ack)["
-                    
-                    return self.completeMessage(msg, args: args)
-                    
                 } else {
                     msg = "43/\(nsp),\(ack)["
-                    
-                    return self.completeMessage(msg, args: args)
                 }
             } else {
                 if nsp == "/" {
                     msg = "46\(binary)-\(ack)["
-                    
-                    return self.completeMessage(msg, args: args)
-                    
                 } else {
                     msg = "46\(binary)-/\(nsp),\(ack)["
-                    
-                    return self.completeMessage(msg, args: args)
                 }
             }
+            
+            return self.completeMessage(msg, args: args)
     }
     
     private class func completeMessage(var message:String, args:[AnyObject]) -> String {
