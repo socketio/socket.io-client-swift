@@ -32,10 +32,12 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         DISPATCH_QUEUE_SERIAL)
     let emitQueue = dispatch_queue_create("emitQueue".cStringUsingEncoding(NSUTF8StringEncoding),
         DISPATCH_QUEUE_SERIAL)
+    private lazy var params:[String: AnyObject] = [String: AnyObject]()
     private var ackHandlers = [SocketAckHandler]()
     private var currentAck = -1
     private var handlers = [SocketEventHandler]()
     private var lastSocketMessage:SocketEvent?
+    private var paramConnect = false
     private var pingTimer:NSTimer!
     private var secure = false
     var closed = false
@@ -92,21 +94,41 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     
     // Connects to the server
     func connect() {
+        self.connectWithURL(self.createConnectURL())
+    }
+    
+    // Connect to the server using params
+    func connectWithParams(params:[String: AnyObject]) {
+        self.params = params
+        self.paramConnect = true
+        var endpoint = self.createConnectURL()
+        
+        for (key, value) in params {
+            let keyEsc = key.stringByAddingPercentEncodingWithAllowedCharacters(
+                NSCharacterSet.URLHostAllowedCharacterSet())!
+            endpoint += "&\(keyEsc)="
+            
+            if value is String {
+                let valueEsc = (value as! String).stringByAddingPercentEncodingWithAllowedCharacters(
+                    NSCharacterSet.URLHostAllowedCharacterSet())!
+                endpoint += "\(valueEsc)"
+            } else {
+                endpoint += "\(value)"
+            }
+        }
+        
+        self.connectWithURL(endpoint)
+    }
+    
+    private func connectWithURL(url:String) {
         if self.closed {
             println("Warning: This socket was previvously closed. Reopening could be dangerous. Be careful.")
         }
         
         self.connecting = true
         self.closed = false
-        var endpoint:String
         
-        if self.secure {
-            endpoint = "wss://\(self.socketURL)/socket.io/?transport=websocket"
-        } else {
-            endpoint = "ws://\(self.socketURL)/socket.io/?transport=websocket"
-        }
-        
-        self.io = SRWebSocket(URL: NSURL(string: endpoint))
+        self.io = SRWebSocket(URL: NSURL(string: url))
         self.io?.delegate = self
         self.io?.open()
     }
@@ -118,6 +140,14 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         var mutData = NSMutableData(bytes: &byteArray, length: 1)
         mutData.appendData(data)
         return mutData
+    }
+    
+    private func createConnectURL() -> String {
+        if self.secure {
+            return "wss://\(self.socketURL)/socket.io/?transport=websocket"
+        } else {
+            return "ws://\(self.socketURL)/socket.io/?transport=websocket"
+        }
     }
     
     // Sends a message with multiple args
@@ -286,7 +316,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         }
     }
     
-    // Adds handler for single arg message
+    // Adds handler for an event
     func on(name:String, callback:NormalCallback) {
         let handler = SocketEventHandler(event: name, callback: callback)
         self.handlers.append(handler)
@@ -794,7 +824,12 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             self!.tryReconnect(triesLeft: triesLeft)
         }
         self.reconnecting = true
-        self.connect()
+        
+        if self.paramConnect {
+            self.connectWithParams(self.params)
+        } else {
+            self.connect()
+        }
     }
     
     // Called when a message is recieved
