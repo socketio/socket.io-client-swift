@@ -22,7 +22,7 @@ Methods
 3. `socket.emit(event:String, args:AnyObject...)` - Sends a message. Can send multiple args.
 4. `socket.emitWithAck(event:String, args:AnyObject...) -> SocketAckHandler` - Sends a message that requests an acknoweldgement from the server. Returns a SocketAckHandler which you can use to add an onAck handler. See example.
 5. `socket.connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
-6. `socket.connectWithParams` - Establishes a connection to the server, passing the specified params. A "connect" event is fired upon successful connection.
+6. `socket.connectWithParams(params:[String: AnyObject])` - Establishes a connection to the server, passing the specified params. A "connect" event is fired upon successful connection.
 6. `socket.close()` - Closes the socket. Once a socket is closed it should not be reopened.
 
 Events
