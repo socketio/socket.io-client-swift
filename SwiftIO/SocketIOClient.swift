@@ -89,6 +89,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         self.closed = true
         self.connecting = false
         self.connected = false
+        self.io?.send("41")
         self.io?.close()
     }
     
