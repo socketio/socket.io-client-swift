@@ -74,29 +74,29 @@ class SocketEvent {
             if !hasBinary {
                 if nsp == nil {
                     if ack == nil {
-                        message = "42[\"\(event)\","
+                        message = "42[\"\(event)\""
                     } else {
-                        message = "42\(ack!)[\"\(event)\","
+                        message = "42\(ack!)[\"\(event)\""
                     }
                 } else {
                     if ack == nil {
-                        message = "42/\(nsp!),[\"\(event)\","
+                        message = "42/\(nsp!),[\"\(event)\""
                     } else {
-                        message = "42/\(nsp!),\(ack!)[\"\(event)\","
+                        message = "42/\(nsp!),\(ack!)[\"\(event)\""
                     }
                 }
             } else {
                 if nsp == nil {
                     if ack == nil {
-                        message = "45\(datas)-[\"\(event)\","
+                        message = "45\(datas)-[\"\(event)\""
                     } else {
-                        message = "45\(datas)-\(ack!)[\"\(event)\","
+                        message = "45\(datas)-\(ack!)[\"\(event)\""
                     }
                 } else {
                     if ack == nil {
-                        message = "45\(datas)-/\(nsp!),[\"\(event)\","
+                        message = "45\(datas)-/\(nsp!),[\"\(event)\""
                     } else {
-                        message = "45\(datas)-/\(nsp!),\(ack!)[\"\(event)\","
+                        message = "45\(datas)-/\(nsp!),\(ack!)[\"\(event)\""
                     }
                 }
             }
@@ -122,14 +122,16 @@ class SocketEvent {
                 }
             }
             
-            return self.completeMessage(msg, args: args)
+            return self.completeMessage(msg, args: args, ack: true)
     }
     
-    private class func completeMessage(var message:String, args:[AnyObject]) -> String {
+    private class func completeMessage(var message:String, args:[AnyObject], ack:Bool = false) -> String {
         var err:NSError?
         
         if args.count == 0 {
             return message + "]"
+        } else if !ack {
+            message += ","
         }
         
         for arg in args {
