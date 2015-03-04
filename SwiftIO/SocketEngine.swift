@@ -24,6 +24,12 @@
 
 import Foundation
 
+extension String {
+    private var length:Int {
+        return Array(self).count
+    }
+}
+
 private enum PacketType: String {
     case OPEN = "0"
     case CLOSE = "1"
@@ -40,6 +46,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     private var pingTimer:NSTimer?
     private var pollingTimer:NSTimer?
     private var _polling = true
+    private var wait = false
     private var _websocket = false
     private var websocketConnected = false
     var pingInterval:Int?
@@ -62,9 +69,11 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         self.pingTimer?.invalidate()
         self.pollingTimer?.invalidate()
         
-        if websocketConnected {
+        if self.websocket {
             self.ws?.send(PacketType.MESSAGE.rawValue + PacketType.CLOSE.rawValue)
             self.ws?.close()
+        } else {
+            // TODO handling polling
         }
     }
     
@@ -104,26 +113,45 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     }
     
     func doPoll() {
-        if self.urlPolling == nil || self.websocket {
+        if self.urlPolling == nil || self.websocket || self.wait {
             return
         }
         
         let time = Int(NSDate().timeIntervalSince1970)
         let req = NSURLRequest(URL: NSURL(string: self.urlPolling! + "&t=\(time)-0&b64=1" + "&sid=\(self.sid)")!)
+        self.wait = true
         
         NSURLConnection.sendAsynchronousRequest(req, queue: self.pollingQueue) {[weak self] res, data, err in
             if self == nil {
                 return
             } else if err != nil {
                 println(err)
+                self?.handlePollingFailed()
                 return
             }
             
-            let str = NSString(data: data, encoding: NSUTF8StringEncoding)
-            
-            println(str)
-            
-            // TODO parse packets
+            if let str = NSString(data: data, encoding: NSUTF8StringEncoding) {
+                // println(str)
+                var mut = RegexMutable(str)
+                
+                let groups = mut["(\\d):(.*)"].groups()
+                if groups[1] == "" || groups[2] == "" {
+                    return
+                }
+                
+                let type = groups[1]
+                var mutPart = RegexMutable(groups[0])
+                
+                if type != "2" {
+                    return
+                }
+                
+                mutPart["^2:40"] ~= ""
+                
+                self?.parsePollingMessage(mutPart)
+                self?.wait = false
+                self?.doPoll()
+            }
         }
     }
     
@@ -141,12 +169,10 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                 if self == nil {
                     return
                 } else if err != nil || data == nil {
-                    println("Error")
                     println(err)
-                    if !self!.client.reconnecting {
-                        self?.client.tryReconnect(triesLeft: self!.client.reconnectAttempts)
-                    }
+                    self?.handlePollingFailed()
                     return
+                    
                 }
                 
                 if let dataString = NSString(data: data, encoding: NSUTF8StringEncoding) {
@@ -170,10 +196,10 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                                     self?.sid = sid
                                     self?.client.didConnect()
                                     self?.client.handleEvent("connect", data: nil, isInternalMessage: false)
-
+                                    
                                     self?.ws = SRWebSocket(URL: NSURL(string: urlWebSocket + "&sid=\(self!.sid)")!)
                                     self?.ws?.delegate = self
-                                    self?.ws?.open()
+                                    //self?.ws?.open()
                                     
                                 } else {
                                     NSLog("Error handshaking")
@@ -192,11 +218,71 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         }
     }
     
-    func handlePollingResponse(str:String) {
-        // TODO add polling
+    // A poll failed, try and reconnect
+    private func handlePollingFailed() {
+        if !self.client.reconnecting {
+            self.pingTimer?.invalidate()
+            self.client.tryReconnect(triesLeft: self.client.reconnectAttempts)
+        }
     }
     
-    func parseWebSocketMessage(message:AnyObject?) {
+    // Translatation of engine.io-parser#decodePayload
+    func parsePollingMessage(str:String) {
+        if str.length == 1 {
+            return
+        }
+        
+        // println(str)
+        
+        var length = ""
+        var n = 0
+        var msg = ""
+        
+        func testLength(length:String, inout n:Int) -> Bool {
+            if let num = length.toInt() {
+                n = num
+                if num != n {
+                    return true
+                }
+            }
+            
+            return false
+        }
+        
+        for var i = 0, l = str.length; i < l; i++ {
+            let strArray = Array(str)
+            let chr = String(strArray[i])
+            
+            if chr != ":" {
+                length += chr
+            } else {
+                if  testLength(length, &n) || length == "" {
+                    println("parsing error at testlength")
+                    return
+                }
+                
+                msg = String(strArray[i+1...i+n])
+                
+                if let lengthInt = length.toInt() {
+                    if lengthInt != msg.length {
+                        println("parsing error")
+                        return
+                    }
+                }
+                
+                if msg.length != 0 {
+                    self.parseEngineMessage(msg)
+                }
+                
+                i += n
+                length = ""
+            }
+        }
+    }
+    
+    func parseEngineMessage(message:AnyObject?) {
+        // println(message)
+        
         if let data = message as? NSData {
             // Strip off message type
             self.client.parseSocketMessage(data.subdataWithRange(NSMakeRange(1, data.length - 1)))
@@ -212,13 +298,15 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
             return
         }
         
-        let type = strMessage["(\\d)"].matches()[0]
+        let type = strMessage["^(\\d)"].groups()?[1]
         
         if type != PacketType.MESSAGE.rawValue {
             // TODO Handle other packets
+            println(message)
             return
         }
         
+        // Remove message type
         message.removeAtIndex(message.startIndex)
         self.client.parseSocketMessage(message)
     }
@@ -263,10 +351,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                         return
                     } else if err != nil {
                         println(err)
-                        self?.pingTimer?.invalidate()
-                        if !self!.client.reconnecting {
-                            self?.client.tryReconnect(triesLeft: self!.client.reconnectAttempts)
-                        }
+                        self?.handlePollingFailed()
                         return
                     }
                     
@@ -305,7 +390,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     func webSocket(webSocket:SRWebSocket!, didReceiveMessage message:AnyObject?) {
         // println(message)
         
-        self.parseWebSocketMessage(message)
+        self.parseEngineMessage(message)
     }
     
     // Called when the socket is opened
