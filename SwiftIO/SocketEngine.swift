@@ -56,16 +56,14 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     }
     
     func open(opts:[String: AnyObject]? = nil) {
-        var url:String
+        var url = "\(self.client.socketURL)/socket.io/?transport="
         var urlPolling:String
         var urlWebSocket:String
         
         if self.client.secure {
-            url = "\(self.client.socketURL)/socket.io/?transport="
             urlPolling = "https://" + url + "polling"
             urlWebSocket = "wss://" + url + "websocket"
         } else {
-            url = "\(self.client.socketURL)/socket.io/?transport="
             urlPolling = "http://" + url + "polling"
             urlWebSocket = "ws://" + url + "websocket"
         }
@@ -109,12 +107,15 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         // TODO add polling
     }
     
-    func parseWebSocketMessage(message:AnyObject?) {
-        if !(message is String) {
+    func parseWebSocketMessage(var message:AnyObject?) {
+        if let data = message as? NSData {
+            // Strip off message type
+            self.client.parseSocketMessage(data.subdataWithRange(NSMakeRange(1, data.length - 1)))
             return
         }
         
-        var strMessage = RegexMutable(message as String)
+        var message = message as String
+        var strMessage = RegexMutable(message)
         
         // We should upgrade
         if strMessage == "3probe" {
@@ -128,6 +129,9 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
             // TODO Handle other packets
             return
         }
+        
+        message.removeAtIndex(message.startIndex)
+        self.client.parseSocketMessage(message)
     }
     
     func probeWebSocket() {

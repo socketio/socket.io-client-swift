@@ -87,7 +87,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         }
         
         super.init()
-
+        
         self.engine = SocketEngine(client: self)
     }
     
@@ -506,7 +506,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     // Parses messages recieved
-    private func parseSocketMessage(message:AnyObject?) {
+    func parseSocketMessage(message:AnyObject?) {
         if message == nil {
             return
         }
@@ -515,41 +515,39 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         
         if let stringMessage = message as? String {
             // Check for successful namepsace connect
+            
+            if stringMessage == "0" {
+                // connected
+                self.closed = false
+                self.connecting = false
+                self.reconnecting = false
+                self.connected = true
+                
+                if self.nsp != nil {
+                    // Join namespace
+                    self.joinNamespace()
+                    return
+                }
+                
+                // Don't handle as internal because something crazy could happen where
+                // we disconnect before it's handled
+                self.handleEvent("connect", data: nil)
+            }
             if self.nsp != nil {
-                if stringMessage == "40/\(self.nsp!)" {
+                if stringMessage == "0/\(self.nsp!)" {
                     self.handleEvent("connect", data: nil)
                     return
                 }
             }
-            /**
-            Begin check for socket info frame
-            **/
-            var mutMessage = RegexMutable(stringMessage)
-            var setup:String!
-            let messageData = mutMessage["(\\d*)(\\{.*\\})?"].groups()
             
-            if messageData != nil && messageData[1] == "0" {
-                setup = messageData[2]
-                let data = setup.dataUsingEncoding(NSUTF8StringEncoding)!
-                var jsonError:NSError?
-                
-                if let json:AnyObject? = NSJSONSerialization.JSONObjectWithData(data,
-                    options: nil, error: &jsonError) {
-                        self.sid = json!["sid"] as? String
-                        self.startPingTimer(interval: (json!["pingInterval"] as Int) / 1000)
-                        return
-                }
-            }
-            /**
-            End check for socket info frame
-            **/
+            var mutMessage = RegexMutable(stringMessage)
             
             /**
             Begin check for message
             **/
             let messageGroups = mutMessage["(\\d*)\\/?(\\w*)?,?(\\d*)?(\\[.*\\])?"].groups()
             
-            if messageGroups[1].hasPrefix("42") {
+            if messageGroups[1].hasPrefix("2") {
                 var mesNum = messageGroups[1]
                 var ackNum:String
                 var namespace:String?
@@ -558,7 +556,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 if messageGroups[3] != "" {
                     ackNum = messageGroups[3]
                 } else {
-                    let range = Range<String.Index>(start: mesNum.startIndex, end: advance(mesNum.startIndex, 2))
+                    let range = Range<String.Index>(start: mesNum.startIndex, end: advance(mesNum.startIndex, 1))
                     mesNum.replaceRange(range, with: "")
                     ackNum = mesNum
                 }
@@ -581,6 +579,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                         data = messageInternals[2]
                     }
                     
+                    println(data)
                     // It would be nice if socket.io only allowed one thing
                     // per message, but alas, it doesn't.
                     if let parsed:AnyObject = SocketIOClient.parseData(data) {
@@ -623,7 +622,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                     }
                     return
                 }
-            } else if messageGroups[1].hasPrefix("43") {
+            } else if messageGroups[1].hasPrefix("3") {
                 let arr = Array(messageGroups[1])
                 var ackNum:String
                 let nsp = messageGroups[2]
@@ -677,7 +676,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 return
             }
             
-            if binaryGroup[1].hasPrefix("45") {
+            if binaryGroup[1].hasPrefix("5") {
                 // println(binaryGroup)
                 var ackNum:String
                 var event:String
@@ -718,9 +717,9 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 }
                 
                 self.lastSocketMessage = mes
-            } else if binaryGroup[1].hasPrefix("46") {
+            } else if binaryGroup[1].hasPrefix("6") {
                 let messageType = RegexMutable(binaryGroup[1])
-                let numberOfPlaceholders = (messageType["46"] ~= "") as String
+                let numberOfPlaceholders = (messageType["6"] ~= "") as String
                 var ackNum:String
                 var nsp:String
                 
