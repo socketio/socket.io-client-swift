@@ -30,7 +30,7 @@ private var fixSwift:AnyObject?
 
 extension String {
     private var length:Int {
-        return Array(self).count
+        return countElements(self)
     }
 }
 
@@ -79,6 +79,22 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         }
     }
     
+    private func createBinaryDataForSend(data:NSData) -> (NSData?, String?) {
+        if self.websocket {
+            var byteArray = [UInt8](count: 1, repeatedValue: 0x0)
+            byteArray[0] = 4
+            var mutData = NSMutableData(bytes: &byteArray, length: 1)
+            mutData.appendData(data)
+            return (mutData, nil)
+        } else {
+            var str = "b4"
+            str += data.base64EncodedStringWithOptions(
+                NSDataBase64EncodingOptions.Encoding64CharacterLineLength)
+            
+            return (nil, str)
+        }
+    }
+    
     private func createURLs(params:[String: AnyObject]? = nil) -> (String, String) {
         var url = "\(self.client.socketURL)/socket.io/?transport="
         var urlPolling:String
@@ -120,28 +136,30 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         }
         
         let time = Int(NSDate().timeIntervalSince1970)
-        let req = NSURLRequest(URL: NSURL(string: self.urlPolling! + "&t=\(time)-0&b64=1" + "&sid=\(self.sid)")!)
+        let req = NSURLRequest(URL:
+            NSURL(string: self.urlPolling! + "&t=\(time)-0&b64=1" + "&sid=\(self.sid)")!)
         self.wait = true
         
-        NSURLConnection.sendAsynchronousRequest(req, queue: self.pollingQueue) {[weak self] res, data, err in
-            if self == nil {
-                return
-            } else if err != nil {
-                println(err)
-                self?.handlePollingFailed()
-                return
-            }
-            
-            // println(data)
-            
-            if let str = NSString(data: data, encoding: NSUTF8StringEncoding) {
-                // println(str)
+        NSURLConnection.sendAsynchronousRequest(req,
+            queue: self.pollingQueue) {[weak self] res, data, err in
+                if self == nil {
+                    return
+                } else if err != nil {
+                    // println(err)
+                    self?.handlePollingFailed()
+                    return
+                }
                 
-                self?.parsePollingMessage(str)
-            }
-            
-            self?.wait = false
-            self?.doPoll()
+                // println(data)
+                
+                if let str = NSString(data: data, encoding: NSUTF8StringEncoding) {
+                    // println(str)
+                    
+                    self?.parsePollingMessage(str)
+                }
+                
+                self?.wait = false
+                self?.doPoll()
         }
     }
     
@@ -159,7 +177,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                 if self == nil {
                     return
                 } else if err != nil || data == nil {
-                    println(err)
+                    // println(err)
                     self?.handlePollingFailed()
                     return
                     
@@ -188,16 +206,10 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                                 // println(json)
                                 self?.sid = sid
                                 
-                                if let up = json["upgrades"] as? [String] {
-                                    for available in up {
-                                        if available == "websocket" {
-                                            self?.ws = SRWebSocket(URL:
-                                                NSURL(string: urlWebSocket + "&sid=\(self!.sid)")!)
-                                            self?.ws?.delegate = self
-                                            self?.ws?.open()
-                                        }
-                                    }
-                                }
+                                self?.ws = SRWebSocket(URL:
+                                    NSURL(string: urlWebSocket + "&sid=\(self!.sid)")!)
+                                self?.ws?.delegate = self
+                                // self?.ws?.open()
                             } else {
                                 NSLog("Error handshaking")
                                 return
@@ -218,6 +230,8 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     private func handlePollingFailed() {
         if !self.client.reconnecting {
             self.pingTimer?.invalidate()
+            self.wait = false
+            self.client.handleEvent("reconnect", data: "XHR polling timeout", isInternalMessage: true)
             self.client.tryReconnect(triesLeft: self.client.reconnectAttempts)
         }
     }
@@ -253,7 +267,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
             } else {
                 if  testLength(length, &n) || length == "" {
                     println("parsing error at testlength")
-                    return
+                    exit(1)
                 }
                 
                 msg = String(strArray[i+1...i+n])
@@ -261,7 +275,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                 if let lengthInt = length.toInt() {
                     if lengthInt != msg.length {
                         println("parsing error")
-                        return
+                        exit(1)
                     }
                 }
                 
@@ -331,7 +345,8 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
             if !(msg is NSData) {
                 self.ws?.send("\(PacketType.MESSAGE.rawValue)\(msg)")
             } else {
-                self.ws?.send(msg)
+                let (data, nilString) = self.createBinaryDataForSend(msg as NSData)
+                self.ws?.send(data!)
             }
         } else {
             self.sendPollMessage(msg)
@@ -370,7 +385,42 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     }
     
     func sendPollMessage(msg:AnyObject) {
+        var postData:NSData
+        let time = Int(NSDate().timeIntervalSince1970)
+        var req = NSMutableURLRequest(URL:
+            NSURL(string:self.urlPolling! + "&t=\(time)&b64=1" + "&sid=\(self.sid)")!)
         
+        req.HTTPMethod = "POST"
+        req.setValue("application/html-text", forHTTPHeaderField: "Content-Type")
+        
+        if msg is NSData {
+            println("sending poll binary")
+            let (nilData, data) = self.createBinaryDataForSend(msg as NSData)
+            
+            let dataLen = countElements(data!)
+            postData = "\(dataLen):\(data!)".dataUsingEncoding(NSUTF8StringEncoding,
+                allowLossyConversion: false)!
+        } else if !(msg is String) {
+            return
+        } else {
+            // println(msg)
+            let strMsg = "\(PacketType.MESSAGE.rawValue)\(msg as String)"
+            // println(strMsg)
+            
+            let postCount = countElements(strMsg)
+            postData = ("\(postCount):\(strMsg)").dataUsingEncoding(NSUTF8StringEncoding,
+                allowLossyConversion: false)!
+        }
+        
+        req.setValue(String(postData.length), forHTTPHeaderField: "Content-Length")
+        req.HTTPBody = postData
+        
+        NSURLConnection.sendAsynchronousRequest(req, queue: self.pollingQueue) {[weak self] res, data, err in
+            if err != nil {
+                println(err)
+                return
+            }
+        }
     }
     
     // Starts the ping timer

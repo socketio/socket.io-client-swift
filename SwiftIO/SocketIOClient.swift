@@ -109,13 +109,13 @@ class SocketIOClient {
     }
     
     // Creates a binary message, ready for sending
-    private class func createBinaryDataForSend(data:NSData) -> NSData {
-        var byteArray = [UInt8](count: 1, repeatedValue: 0x0)
-        byteArray[0] = 4
-        var mutData = NSMutableData(bytes: &byteArray, length: 1)
-        mutData.appendData(data)
-        return mutData
-    }
+//    private class func createBinaryDataForSend(data:NSData) -> NSData {
+//        var byteArray = [UInt8](count: 1, repeatedValue: 0x0)
+//        byteArray[0] = 4
+//        var mutData = NSMutableData(bytes: &byteArray, length: 1)
+//        mutData.appendData(data)
+//        return mutData
+//    }
     
     func didConnect() {
         self.closed = false
@@ -317,7 +317,7 @@ class SocketIOClient {
         for g in 0..<arr.count {
             if arr[g] is NSData {
                 hasBinary = true
-                let sendData = self.createBinaryDataForSend(arr[g] as NSData)
+                let sendData = arr[g] as NSData
                 
                 arrayDatas.append(sendData)
                 replacementArr[g] = ["_placeholder": true,
@@ -412,11 +412,10 @@ class SocketIOClient {
             } else if let binaryData = args[i] as? NSData {
                 // args is just binary
                 hasBinary = true
-                let sendData = SocketIOClient.createBinaryDataForSend(binaryData)
                 
                 numberOfPlaceholders++
                 items[i] = ["_placeholder": true, "num": numberOfPlaceholders]
-                emitDatas.append(sendData)
+                emitDatas.append(binaryData)
             } else {
                 items[i] = args[i]
             }
@@ -437,8 +436,8 @@ class SocketIOClient {
         for (key, value) in dict {
             if let binaryData = value as? NSData {
                 hasBinary = true
-                let sendData = self.createBinaryDataForSend(binaryData)
-                returnDatas.append(sendData)
+                
+                returnDatas.append(binaryData)
                 returnDict[key as String] = ["_placeholder": true, "num": placeholders++]
             } else if let arr = value as? NSArray {
                 let (replace, hadBinary, arrDatas) = self.parseArray(arr, placeholders: placeholders)
@@ -751,7 +750,10 @@ class SocketIOClient {
     
     // We lost connection and should attempt to reestablish
     func tryReconnect(var #triesLeft:Int) {
+        self.connected = false
+        
         if triesLeft != -1 && triesLeft <= 0 {
+            self.connected = false
             self.connecting = false
             self.reconnects = false
             self.reconnecting = false
