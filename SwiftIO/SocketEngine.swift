@@ -103,18 +103,21 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         
         NSURLConnection.sendAsynchronousRequest(reqPolling, queue: self.pollingQueue) {[weak self] res, data, err in
             var err:NSError?
-            
-            if self == nil || err != nil || data == nil {
+            if self == nil {
+                return
+            } else if err != nil || data == nil {
                 println("Error")
                 println(err)
-                exit(1)
+                if !self!.client.reconnecting {
+                    self?.client.tryReconnect(triesLeft: self!.client.reconnectAttempts)
+                }
+                return
             }
             
             let sub = data.subdataWithRange(NSMakeRange(5, data.length - 5))
             
             if let json = NSJSONSerialization.JSONObjectWithData(sub,
                 options: NSJSONReadingOptions.AllowFragments, error: &err) as? NSDictionary {
-                    println(json)
                     if let sid = json["sid"] as? String {
                         self?.sid = sid
                         

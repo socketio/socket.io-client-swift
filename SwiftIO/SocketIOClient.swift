@@ -750,7 +750,7 @@ class SocketIOClient: NSObject {
     }
     
     // We lost connection and should attempt to reestablish
-    private func tryReconnect(var #triesLeft:Int) {
+    func tryReconnect(var #triesLeft:Int) {
         if triesLeft != -1 && triesLeft <= 0 {
             self.connecting = false
             self.reconnects = false
@@ -845,9 +845,5 @@ class SocketIOClient: NSObject {
             self.handleEvent("reconnect", data: error.localizedDescription, isInternalMessage: true)
             self.tryReconnect(triesLeft: self.reconnectAttempts)
         }
-    }
-    
-    func testEngine() {
-        self.engine.open()
     }
 }
