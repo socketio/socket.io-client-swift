@@ -44,7 +44,6 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     unowned let client:SocketIOClient
     private let pollingQueue = NSOperationQueue()
     private var pingTimer:NSTimer?
-    private var pollingTimer:NSTimer?
     private var _polling = true
     private var wait = false
     private var _websocket = false
@@ -67,7 +66,6 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     
     func close() {
         self.pingTimer?.invalidate()
-        self.pollingTimer?.invalidate()
         
         if self.websocket {
             self.ws?.send(PacketType.MESSAGE.rawValue + PacketType.CLOSE.rawValue)
@@ -165,39 +163,46 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                 
                 if let dataString = NSString(data: data, encoding: NSUTF8StringEncoding) {
                     var mutString = RegexMutable(dataString)
-                    
                     let parsed = mutString["(\\d*):(\\d)(\\{.*\\})?"].groups()
                     
-                    if parsed.count == 4 {
-                        let length = parsed[1]
-                        let type = parsed[2]
-                        let jsonData = parsed[3].dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)
-                        
-                        if type != "0" {
-                            NSLog("Error handshaking")
-                            return
-                        }
-                        
-                        if let json = NSJSONSerialization.JSONObjectWithData(jsonData!,
-                            options: NSJSONReadingOptions.AllowFragments, error: &err) as? NSDictionary {
-                                if let sid = json["sid"] as? String {
-                                    self?.sid = sid
-                                    self?.client.didConnect()
-                                    self?.client.handleEvent("connect", data: nil, isInternalMessage: false)
-                                    
-                                    self?.ws = SRWebSocket(URL: NSURL(string: urlWebSocket + "&sid=\(self!.sid)")!)
-                                    self?.ws?.delegate = self
-                                    //self?.ws?.open()
-                                    
-                                } else {
-                                    NSLog("Error handshaking")
-                                    return
+                    if parsed.count != 4 {
+                        return
+                    }
+                    
+                    let length = parsed[1]
+                    let type = parsed[2]
+                    let jsonData = parsed[3].dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)
+                    
+                    if type != "0" {
+                        NSLog("Error handshaking")
+                        return
+                    }
+                    
+                    if let json = NSJSONSerialization.JSONObjectWithData(jsonData!,
+                        options: NSJSONReadingOptions.AllowFragments, error: &err) as? NSDictionary {
+                            if let sid = json["sid"] as? String {
+                                // println(json)
+                                self?.sid = sid
+                                
+                                if let up = json["upgrades"] as? [String] {
+                                    for available in up {
+                                        if available == "websocket" {
+                                            self?.ws = SRWebSocket(URL:
+                                                NSURL(string: urlWebSocket + "&sid=\(self!.sid)")!)
+                                            self?.ws?.delegate = self
+                                            self?.ws?.open()
+                                        }
+                                    }
                                 }
                                 
-                                if let pingInterval = json["pingInterval"] as? Int {
-                                    self?.pingInterval = pingInterval / 1000
-                                }
-                        }
+                            } else {
+                                NSLog("Error handshaking")
+                                return
+                            }
+                            
+                            if let pingInterval = json["pingInterval"] as? Int {
+                                self?.pingInterval = pingInterval / 1000
+                            }
                     }
                     
                     self?.doPoll()
@@ -293,12 +298,17 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                 // binary in base64 string
                 message.removeRange(Range<String.Index>(start: message.startIndex,
                     end: advance(message.startIndex, 2)))
+                
+                if let data = NSData(base64EncodedString: message,
+                    options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters) {
+                        self.client.parseSocketMessage(data)
+                }
+                
+                return
             }
             
-            if let data = NSData(base64EncodedString: message,
-                options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters) {
-                    self.client.parseSocketMessage(data)
-            }
+            println("Got something idk what to do with")
+            println(message)
             return
         }
         
@@ -314,7 +324,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     }
     
     func send(msg:AnyObject) {
-        if self.websocketConnected {
+        if self.websocket {
             if !(msg is NSData) {
                 self.ws?.send("\(PacketType.MESSAGE.rawValue)\(msg)")
             } else {
@@ -377,7 +387,6 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         if self.websocketConnected {
             self._websocket = true
             self._polling = false
-            self.pollingTimer?.invalidate()
             self.ws?.send(PacketType.UPGRADE.rawValue)
         }
     }
@@ -391,31 +400,25 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     
     // Called when the socket is opened
     func webSocketDidOpen(webSocket:SRWebSocket!) {
-        println("socket opened")
         self.websocketConnected = true
         self.probeWebSocket()
     }
     
     // Called when the socket is closed
     func webSocket(webSocket:SRWebSocket!, didCloseWithCode code:Int, reason:String!, wasClean:Bool) {
-        println("socket closed")
-        self.pingTimer?.invalidate()
         self.websocketConnected = false
         self._websocket = false
         self._polling = true
         
-        // Temp
-        self.client.webSocket(webSocket, didCloseWithCode: code, reason: reason, wasClean: wasClean)
+        self.client.webSocketDidCloseWithCode(code, reason: reason, wasClean: wasClean)
     }
     
     // Called when an error occurs.
     func webSocket(webSocket:SRWebSocket!, didFailWithError error:NSError!) {
-        self.pingTimer?.invalidate()
         self.websocketConnected = false
         self._websocket = false
         self._polling = true
         
-        // Temp
-        self.client.webSocket(webSocket, didFailWithError: error)
+        self.client.webSocketDidFailWithError(error)
     }
 }

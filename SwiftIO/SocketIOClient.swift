@@ -24,7 +24,7 @@
 
 import Foundation
 
-class SocketIOClient: NSObject {
+class SocketIOClient {
     let engine:SocketEngine!
     let socketURL:NSMutableString!
     let ackQueue = dispatch_queue_create("ackQueue".cStringUsingEncoding(NSUTF8StringEncoding),
@@ -84,8 +84,6 @@ class SocketIOClient: NSObject {
             }
         }
         
-        super.init()
-        
         self.engine = SocketEngine(client: self)
     }
     
@@ -120,6 +118,7 @@ class SocketIOClient: NSObject {
     }
     
     func didConnect() {
+        self.closed = false
         self.connected = true
         self.connecting = false
         self.reconnecting = false
@@ -485,10 +484,7 @@ class SocketIOClient: NSObject {
             
             if stringMessage == "0" {
                 // connected
-                self.closed = false
-                self.connecting = false
-                self.reconnecting = false
-                self.connected = true
+                self.didConnect()
                 
                 if self.nsp != nil {
                     // Join namespace
@@ -805,26 +801,8 @@ class SocketIOClient: NSObject {
         }
     }
     
-    // Called when the socket is opened
-    func webSocketDidOpen(webSocket:SRWebSocket!) {
-        self.closed = false
-        self.connecting = false
-        self.reconnecting = false
-        self.connected = true
-        
-        if self.nsp != nil {
-            // Join namespace
-            self.joinNamespace()
-            return
-        }
-        
-        // Don't handle as internal because something crazy could happen where
-        // we disconnect before it's handled
-        self.handleEvent("connect", data: nil)
-    }
-    
     // Called when the socket is closed
-    func webSocket(webSocket:SRWebSocket!, didCloseWithCode code:Int, reason:String!, wasClean:Bool) {
+    func webSocketDidCloseWithCode(code:Int, reason:String!, wasClean:Bool) {
         self.connected = false
         self.connecting = false
         if self.closed || !self.reconnects {
@@ -837,7 +815,7 @@ class SocketIOClient: NSObject {
     }
     
     // Called when an error occurs.
-    func webSocket(webSocket:SRWebSocket!, didFailWithError error:NSError!) {
+    func webSocketDidFailWithError(error:NSError!) {
         self.connected = false
         self.connecting = false
         self.handleEvent("error", data: error.localizedDescription, isInternalMessage: true)
