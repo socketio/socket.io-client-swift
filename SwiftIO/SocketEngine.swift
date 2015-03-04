@@ -24,6 +24,10 @@
 
 import Foundation
 
+// This is used because in Swift 1.1, turning on -O causes a
+// memory access violation in SocketEngine#parseEngineMessage
+private var fixSwift:AnyObject?
+
 extension String {
     private var length:Int {
         return Array(self).count
@@ -194,7 +198,6 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                                         }
                                     }
                                 }
-                                
                             } else {
                                 NSLog("Error handshaking")
                                 return
@@ -220,7 +223,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     }
     
     // Translatation of engine.io-parser#decodePayload
-    func parsePollingMessage(str:String) {
+    private func parsePollingMessage(str:String) {
         if str.length == 1 {
             return
         }
@@ -263,7 +266,8 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                 }
                 
                 if msg.length != 0 {
-                    self.parseEngineMessage(msg)
+                    fixSwift = msg
+                    self.parseEngineMessage(fixSwift)
                 }
                 
                 i += n
@@ -272,7 +276,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         }
     }
     
-    func parseEngineMessage(message:AnyObject?) {
+    private func parseEngineMessage(message:AnyObject?) {
         // println(message)
         
         if let data = message as? NSData {
@@ -281,8 +285,8 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
             return
         }
         
-        var message = message as String
-        var strMessage = RegexMutable(message)
+        var messageString = message as String
+        var strMessage = RegexMutable(messageString)
         
         // We should upgrade
         if strMessage == "3probe" {
@@ -294,12 +298,12 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         
         if type != PacketType.MESSAGE.rawValue {
             // TODO Handle other packets
-            if message.hasPrefix("b4") {
+            if messageString.hasPrefix("b4") {
                 // binary in base64 string
-                message.removeRange(Range<String.Index>(start: message.startIndex,
-                    end: advance(message.startIndex, 2)))
+                messageString.removeRange(Range<String.Index>(start: messageString.startIndex,
+                    end: advance(messageString.startIndex, 2)))
                 
-                if let data = NSData(base64EncodedString: message,
+                if let data = NSData(base64EncodedString: messageString,
                     options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters) {
                         self.client.parseSocketMessage(data)
                 }
@@ -308,13 +312,12 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
             }
             
             println("Got something idk what to do with")
-            println(message)
-            return
+            println(messageString)
         }
         
         // Remove message type
-        message.removeAtIndex(message.startIndex)
-        self.client.parseSocketMessage(message)
+        messageString.removeAtIndex(messageString.startIndex)
+        self.client.parseSocketMessage(messageString)
     }
     
     func probeWebSocket() {
