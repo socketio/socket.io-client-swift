@@ -55,7 +55,14 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         self.client = client
     }
     
-    func open(opts:[String: AnyObject]? = nil) {
+    func close() {
+        if websocketConnected {
+            self.ws?.send(PacketType.MESSAGE.rawValue + PacketType.CLOSE.rawValue)
+            self.ws?.close()
+        }
+    }
+    
+    private func createURLs(params:[String: AnyObject]? = nil) -> (NSURL, NSURL) {
         var url = "\(self.client.socketURL)/socket.io/?transport="
         var urlPolling:String
         var urlWebSocket:String
@@ -68,7 +75,31 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
             urlWebSocket = "ws://" + url + "websocket"
         }
         
-        let reqPolling = NSURLRequest(URL: NSURL(string: urlPolling)!)
+        if params != nil {
+            for (key, value) in params! {
+                let keyEsc = key.stringByAddingPercentEncodingWithAllowedCharacters(
+                    NSCharacterSet.URLHostAllowedCharacterSet())!
+                urlPolling += "&\(keyEsc)="
+                urlWebSocket += "&\(keyEsc)="
+                
+                if value is String {
+                    let valueEsc = (value as String).stringByAddingPercentEncodingWithAllowedCharacters(
+                        NSCharacterSet.URLHostAllowedCharacterSet())!
+                    urlPolling += "\(valueEsc)"
+                    urlWebSocket += "\(valueEsc)"
+                } else {
+                    urlPolling += "\(value)"
+                    urlWebSocket += "\(value)"
+                }
+            }
+        }
+        
+        return (NSURL(string: urlPolling)!, NSURL(string: urlWebSocket)!)
+    }
+    
+    func open(opts:[String: AnyObject]? = nil) {
+        let (urlPolling, urlWebSocket) = self.createURLs(params: opts)
+        let reqPolling = NSURLRequest(URL: urlPolling)
         
         NSURLConnection.sendAsynchronousRequest(reqPolling, queue: self.pollingQueue) {[weak self] res, data, err in
             var err:NSError?
@@ -87,7 +118,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                     if let sid = json["sid"] as? String {
                         self?.sid = sid
                         
-                        self?.ws = SRWebSocket(URL: NSURL(string: urlWebSocket + "&sid=\(self!.sid)")!)
+                        self?.ws = SRWebSocket(URL: urlWebSocket.URLByAppendingPathComponent("&sid=\(self!.sid)"))
                         self?.ws?.delegate = self
                         self?.ws?.open()
                         
@@ -140,6 +171,18 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         }
     }
     
+    func send(msg:AnyObject) {
+        if self.websocketConnected {
+            if !(msg is NSData) {
+                self.ws?.send("\(PacketType.MESSAGE.rawValue)\(msg)")
+            } else {
+                self.ws?.send(msg)
+            }
+        } else {
+            // TODO handle polling
+        }
+    }
+    
     func sendPing() {
         if self.websocketConnected {
             self.ws?.send(PacketType.PING.rawValue)
@@ -184,11 +227,17 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         println("socket closed")
         self.pingTimer?.invalidate()
         self.websocketConnected = false
+        
+        // Temp
+        self.client.webSocket(webSocket, didCloseWithCode: code, reason: reason, wasClean: wasClean)
     }
     
     // Called when an error occurs.
     func webSocket(webSocket:SRWebSocket!, didFailWithError error:NSError!) {
         self.pingTimer?.invalidate()
         self.websocketConnected = false
+        
+        // Temp
+        self.client.webSocket(webSocket, didFailWithError: error)
     }
 }

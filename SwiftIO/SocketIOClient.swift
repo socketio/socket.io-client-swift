@@ -24,7 +24,7 @@
 
 import Foundation
 
-class SocketIOClient: NSObject, SRWebSocketDelegate {
+class SocketIOClient: NSObject {
     let engine:SocketEngine!
     let socketURL:NSMutableString!
     let ackQueue = dispatch_queue_create("ackQueue".cStringUsingEncoding(NSUTF8StringEncoding),
@@ -44,7 +44,6 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     var closed = false
     var connected = false
     var connecting = false
-    var io:SRWebSocket?
     var nsp:String?
     var reconnects = true
     var reconnecting = false
@@ -97,49 +96,20 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         self.closed = true
         self.connecting = false
         self.connected = false
-        self.io?.send("41")
-        self.io?.close()
+        self.engine?.close()
     }
     
     // Connects to the server
     func connect() {
-        self.connectWithURL(self.createConnectURL())
+        self.engine.open()
     }
     
     // Connect to the server using params
     func connectWithParams(params:[String: AnyObject]) {
         self.params = params
         self.paramConnect = true
-        var endpoint = self.createConnectURL()
         
-        for (key, value) in params {
-            let keyEsc = key.stringByAddingPercentEncodingWithAllowedCharacters(
-                NSCharacterSet.URLHostAllowedCharacterSet())!
-            endpoint += "&\(keyEsc)="
-            
-            if value is String {
-                let valueEsc = (value as String).stringByAddingPercentEncodingWithAllowedCharacters(
-                    NSCharacterSet.URLHostAllowedCharacterSet())!
-                endpoint += "\(valueEsc)"
-            } else {
-                endpoint += "\(value)"
-            }
-        }
-        
-        self.connectWithURL(endpoint)
-    }
-    
-    private func connectWithURL(url:String) {
-        if self.closed {
-            println("Warning: This socket was previvously closed. Reopening could be dangerous. Be careful.")
-        }
-        
-        self.connecting = true
-        self.closed = false
-        
-        self.io = SRWebSocket(URL: NSURL(string: url))
-        self.io?.delegate = self
-        self.io?.open()
+        self.engine.open(opts: params)
     }
     
     // Creates a binary message, ready for sending
@@ -149,14 +119,6 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
         var mutData = NSMutableData(bytes: &byteArray, length: 1)
         mutData.appendData(data)
         return mutData
-    }
-    
-    private func createConnectURL() -> String {
-        if self._secure {
-            return "wss://\(self.socketURL)/socket.io/?transport=websocket"
-        } else {
-            return "ws://\(self.socketURL)/socket.io/?transport=websocket"
-        }
     }
     
     // Sends a message with multiple args
@@ -215,9 +177,9 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                     hasBinary: true, withDatas: emitDatas.count, toNamespace: self.nsp, wantsAck: self.currentAck)
             }
             
-            self.io?.send(str)
+            self.engine?.send(str)
             for data in emitDatas {
-                self.io?.send(data)
+                self.engine?.send(data)
             }
         } else {
             if !ack {
@@ -228,7 +190,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                     withDatas: 0, toNamespace: self.nsp, wantsAck: self.currentAck)
             }
             
-            self.io?.send(str)
+            self.engine?.send(str)
         }
     }
     
@@ -251,7 +213,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                         withAckType: 3, withNsp: self!.nsp!)
                 }
                 
-                self?.io?.send(str)
+                self?.engine?.send(str)
             } else {
                 if self?.nsp == nil {
                     str = SocketEvent.createAck(ack, withArgs: items,
@@ -261,9 +223,9 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                         withAckType: 6, withNsp: self!.nsp!, withBinary: emitDatas.count)
                 }
                 
-                self?.io?.send(str)
+                self?.engine?.send(str)
                 for data in emitDatas {
-                    self?.io?.send(data)
+                    self?.engine?.send(data)
                 }
             }
         }
@@ -321,9 +283,10 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             }
     }
     
+    // Should be removed and moved to SocketEngine
     func joinNamespace() {
         if self.nsp != nil {
-            self.io?.send("40/\(self.nsp!)")
+            self.engine?.send("0/\(self.nsp!)")
         }
     }
     
@@ -579,7 +542,6 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                         data = messageInternals[2]
                     }
                     
-                    println(data)
                     // It would be nice if socket.io only allowed one thing
                     // per message, but alas, it doesn't.
                     if let parsed:AnyObject = SocketIOClient.parseData(data) {
@@ -632,7 +594,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 }
                 
                 if nsp == "" {
-                    ackNum = String(arr[2...arr.count-1])
+                    ackNum = String(arr[1...arr.count-1])
                 } else {
                     ackNum = messageGroups[3]
                 }
@@ -694,7 +656,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                     ackNum = ""
                 }
                 
-                numberOfPlaceholders = (messageType["45"] ~= "") as String
+                numberOfPlaceholders = (messageType["5"] ~= "") as String
                 event = (RegexMutable(binaryGroup[4])["\""] ~= "") as String
                 mutMessageObject = RegexMutable(binaryGroup[5])
                 
@@ -784,20 +746,6 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                     self.handleEvent(event, data: filledInArgs)
                 }
             }
-        }
-    }
-    
-    func sendPing() {
-        if self.connected {
-            self.io?.send("2")
-        }
-    }
-    
-    // Starts the ping timer
-    private func startPingTimer(#interval:Int) {
-        dispatch_async(dispatch_get_main_queue()) {
-            self.pingTimer = NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(interval), target: self,
-                selector: Selector("sendPing"), userInfo: nil, repeats: true)
         }
     }
     
