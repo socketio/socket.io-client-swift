@@ -25,6 +25,7 @@
 import Foundation
 
 class SocketIOClient: NSObject, SRWebSocketDelegate {
+    let engine:SocketEngine!
     let socketURL:NSMutableString!
     let ackQueue = dispatch_queue_create("ackQueue".cStringUsingEncoding(NSUTF8StringEncoding),
         DISPATCH_QUEUE_SERIAL)
@@ -39,7 +40,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     private var lastSocketMessage:SocketEvent?
     private var paramConnect = false
     private var pingTimer:NSTimer!
-    private var secure = false
+    private var _secure = false
     var closed = false
     var connected = false
     var connecting = false
@@ -49,13 +50,16 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     var reconnecting = false
     var reconnectAttempts = -1
     var reconnectWait = 10
+    var secure:Bool {
+        return self._secure
+    }
     var sid:String?
     
     init(socketURL:String, opts:[String: AnyObject]? = nil) {
         var mutURL = RegexMutable(socketURL)
         
         if mutURL["https://"].matches().count != 0 {
-            self.secure = true
+            self._secure = true
         }
         
         mutURL = mutURL["http://"] ~= ""
@@ -81,6 +85,10 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
                 self.nsp = nsp
             }
         }
+        
+        super.init()
+
+        self.engine = SocketEngine(client: self)
     }
     
     // Closes the socket
@@ -144,7 +152,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
     }
     
     private func createConnectURL() -> String {
-        if self.secure {
+        if self._secure {
             return "wss://\(self.socketURL)/socket.io/?transport=websocket"
         } else {
             return "ws://\(self.socketURL)/socket.io/?transport=websocket"
@@ -313,7 +321,7 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             }
     }
     
-    private func joinNamespace() {
+    func joinNamespace() {
         if self.nsp != nil {
             self.io?.send("40/\(self.nsp!)")
         }
@@ -890,5 +898,9 @@ class SocketIOClient: NSObject, SRWebSocketDelegate {
             self.handleEvent("reconnect", data: error.localizedDescription, isInternalMessage: true)
             self.tryReconnect(triesLeft: self.reconnectAttempts)
         }
+    }
+    
+    func testEngine() {
+        self.engine.open()
     }
 }
