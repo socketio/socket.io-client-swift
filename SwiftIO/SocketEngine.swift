@@ -130,28 +130,16 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                 return
             }
             
+            // println(data)
+            
             if let str = NSString(data: data, encoding: NSUTF8StringEncoding) {
                 // println(str)
-                var mut = RegexMutable(str)
                 
-                let groups = mut["(\\d):(.*)"].groups()
-                if groups[1] == "" || groups[2] == "" {
-                    return
-                }
-                
-                let type = groups[1]
-                var mutPart = RegexMutable(groups[0])
-                
-                if type != "2" {
-                    return
-                }
-                
-                mutPart["^2:40"] ~= ""
-                
-                self?.parsePollingMessage(mutPart)
-                self?.wait = false
-                self?.doPoll()
+                self?.parsePollingMessage(str)
             }
+            
+            self?.wait = false
+            self?.doPoll()
         }
     }
     
@@ -241,9 +229,8 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         func testLength(length:String, inout n:Int) -> Bool {
             if let num = length.toInt() {
                 n = num
-                if num != n {
-                    return true
-                }
+            } else {
+                return true
             }
             
             return false
@@ -302,7 +289,16 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         
         if type != PacketType.MESSAGE.rawValue {
             // TODO Handle other packets
-            println(message)
+            if message.hasPrefix("b4") {
+                // binary in base64 string
+                message.removeRange(Range<String.Index>(start: message.startIndex,
+                    end: advance(message.startIndex, 2)))
+            }
+            
+            if let data = NSData(base64EncodedString: message,
+                options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters) {
+                    self.client.parseSocketMessage(data)
+            }
             return
         }
         
