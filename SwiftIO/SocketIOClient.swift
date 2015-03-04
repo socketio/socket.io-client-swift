@@ -39,7 +39,6 @@ class SocketIOClient: NSObject {
     private var handlers = [SocketEventHandler]()
     private var lastSocketMessage:SocketEvent?
     private var paramConnect = false
-    private var pingTimer:NSTimer!
     private var _secure = false
     var closed = false
     var connected = false
@@ -92,7 +91,6 @@ class SocketIOClient: NSObject {
     
     // Closes the socket
     func close() {
-        self.pingTimer?.invalidate()
         self.closed = true
         self.connecting = false
         self.connected = false
@@ -119,6 +117,12 @@ class SocketIOClient: NSObject {
         var mutData = NSMutableData(bytes: &byteArray, length: 1)
         mutData.appendData(data)
         return mutData
+    }
+    
+    func didConnect() {
+        self.connected = true
+        self.connecting = false
+        self.reconnecting = false
     }
     
     // Sends a message with multiple args
@@ -821,7 +825,6 @@ class SocketIOClient: NSObject {
     
     // Called when the socket is closed
     func webSocket(webSocket:SRWebSocket!, didCloseWithCode code:Int, reason:String!, wasClean:Bool) {
-        self.pingTimer?.invalidate()
         self.connected = false
         self.connecting = false
         if self.closed || !self.reconnects {
@@ -835,7 +838,6 @@ class SocketIOClient: NSObject {
     
     // Called when an error occurs.
     func webSocket(webSocket:SRWebSocket!, didFailWithError error:NSError!) {
-        self.pingTimer?.invalidate()
         self.connected = false
         self.connecting = false
         self.handleEvent("error", data: error.localizedDescription, isInternalMessage: true)
