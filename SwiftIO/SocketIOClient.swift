@@ -108,15 +108,6 @@ class SocketIOClient {
         self.engine.open(opts: params)
     }
     
-    // Creates a binary message, ready for sending
-//    private class func createBinaryDataForSend(data:NSData) -> NSData {
-//        var byteArray = [UInt8](count: 1, repeatedValue: 0x0)
-//        byteArray[0] = 4
-//        var mutData = NSMutableData(bytes: &byteArray, length: 1)
-//        mutData.appendData(data)
-//        return mutData
-//    }
-    
     func didConnect() {
         self.closed = false
         self.connected = true
