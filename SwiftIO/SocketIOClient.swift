@@ -225,7 +225,14 @@ class SocketIOClient {
             if handler.ackNum != ack {
                 return true
             } else {
-                handler.callback?(data)
+                if data is NSArray {
+                    handler.callback?(data as? NSArray)
+                } else if data != nil {
+                    handler.callback?([data!])
+                } else {
+                    handler.callback?(nil)
+                }
+                
                 return false
             }
         }
@@ -465,23 +472,23 @@ class SocketIOClient {
         
         if let stringMessage = message as? String {
             // Check for successful namepsace connect
+            if self.nsp != nil {
+                if stringMessage == "0/\(self.nsp!)" {
+                    self.didConnect()
+                    self.handleEvent("connect", data: nil)
+                    return
+                }
+            }
             
             if stringMessage == "0" {
-                // connected
-                self.didConnect()
-                
                 if self.nsp != nil {
                     // Join namespace
                     self.joinNamespace()
                     return
-                }
-                
-                // Don't handle as internal because something crazy could happen where
-                // we disconnect before it's handled
-                self.handleEvent("connect", data: nil)
-            }
-            if self.nsp != nil {
-                if stringMessage == "0/\(self.nsp!)" {
+                } else {
+                    // Don't handle as internal because something crazy could happen where
+                    // we disconnect before it's handled
+                    self.didConnect()
                     self.handleEvent("connect", data: nil)
                     return
                 }
@@ -705,10 +712,12 @@ class SocketIOClient {
                 let filledInArgs:AnyObject = self.lastSocketMessage!.fillInPlaceholders(args)
                 
                 if self.lastSocketMessage!.justAck! {
+                    // Should handle ack
                     self.handleAck(self.lastSocketMessage!.ack!, data: filledInArgs)
                     return
                 }
                 
+                // Should do event
                 if self.lastSocketMessage!.ack != nil {
                     self.handleEvent(event, data: filledInArgs, isInternalMessage: false,
                         wantsAck: self.lastSocketMessage!.ack!, withAckType: 6)
@@ -718,11 +727,13 @@ class SocketIOClient {
             } else {
                 let filledInArgs:AnyObject = self.lastSocketMessage!.fillInPlaceholders()
                 
+                // Should handle ack
                 if self.lastSocketMessage!.justAck! {
                     self.handleAck(self.lastSocketMessage!.ack!, data: filledInArgs)
                     return
                 }
                 
+                // Should handle ack
                 if self.lastSocketMessage!.ack != nil {
                     self.handleEvent(event, data: filledInArgs, isInternalMessage: false,
                         wantsAck: self.lastSocketMessage!.ack!, withAckType: 6)

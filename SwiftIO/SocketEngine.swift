@@ -221,7 +221,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                                 self?.ws = SRWebSocket(URL:
                                     NSURL(string: urlWebSocket + "&sid=\(self!.sid)")!)
                                 self?.ws?.delegate = self
-                                self?.ws?.open()
+                                // self?.ws?.open()
                             } else {
                                 NSLog("Error handshaking")
                                 return
@@ -278,8 +278,8 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                 length += chr
             } else {
                 if  testLength(length, &n) || length == "" {
-                    println("parsing error at testlength")
-                    exit(1)
+                    self.handlePollingFailed()
+                    return
                 }
                 
                 msg = String(strArray[i+1...i+n])
@@ -287,7 +287,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                 if let lengthInt = length.toInt() {
                     if lengthInt != msg.length {
                         println("parsing error")
-                        exit(1)
+                        return
                     }
                 }
                 
