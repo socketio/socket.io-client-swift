@@ -119,14 +119,17 @@ class SocketIOClient {
         self.connected = true
         self.connecting = false
         self.reconnecting = false
+        self.handleEvent("connect", data: nil, isInternalMessage: false)
     }
     
     // Server wants us to die
     func didForceClose() {
         self.closed = true
-        self.connecting = false
         self.connected = false
+        self.reconnects = false
+        self.connecting = false
         self.reconnecting = false
+        self.handleEvent("disconnect", data: "closed", isInternalMessage: true)
     }
     
     // Sends a message with multiple args
@@ -489,7 +492,6 @@ class SocketIOClient {
             if self.nsp != nil {
                 if stringMessage == "0/\(self.nsp!)" {
                     self.didConnect()
-                    self.handleEvent("connect", data: nil)
                     return
                 }
             }
@@ -503,7 +505,6 @@ class SocketIOClient {
                     // Don't handle as internal because something crazy could happen where
                     // we disconnect before it's handled
                     self.didConnect()
-                    self.handleEvent("connect", data: nil)
                     return
                 }
             }
@@ -758,16 +759,20 @@ class SocketIOClient {
         }
     }
     
+    // Something happened while polling
+    func pollingDidFail() {
+        if !self.reconnecting {
+            self.handleEvent("reconnect", data: "XHR polling error", isInternalMessage: true)
+            self.tryReconnect(triesLeft: self.reconnectAttempts)
+        }
+    }
+    
     // We lost connection and should attempt to reestablish
     func tryReconnect(var #triesLeft:Int) {
         self.connected = false
         
         if triesLeft != -1 && triesLeft <= 0 {
-            self.connected = false
-            self.connecting = false
-            self.reconnects = false
-            self.reconnecting = false
-            self.handleEvent("disconnect", data: "Failed to reconnect", isInternalMessage: true)
+            self.didForceClose()
             return
         } else if self.connected {
             self.connecting = false
@@ -776,7 +781,7 @@ class SocketIOClient {
         }
         
         // println("Trying to reconnect #\(reconnectAttempts - triesLeft)")
-        self.handleEvent("reconnectAttempt", data: triesLeft, isInternalMessage: true)
+        self.handleEvent("reconnectAttempt", data: triesLeft - 1, isInternalMessage: true)
         
         let waitTime = UInt64(self.reconnectWait) * NSEC_PER_SEC
         let time = dispatch_time(DISPATCH_TIME_NOW, Int64(waitTime))
@@ -802,27 +807,15 @@ class SocketIOClient {
         }
     }
     
-    // Called when a message is recieved
-    func webSocket(webSocket:SRWebSocket!, didReceiveMessage message:AnyObject?) {
-        dispatch_async(self.handleQueue) {[weak self] in
-            if self == nil {
-                return
-            }
-            
-            self?.parseSocketMessage(message)
-        }
-    }
-    
     // Called when the socket is closed
     func webSocketDidCloseWithCode(code:Int, reason:String!, wasClean:Bool) {
         self.connected = false
         self.connecting = false
         if self.closed || !self.reconnects {
-            self.handleEvent("disconnect", data: reason, isInternalMessage: true)
+            self.didForceClose()
         } else {
             self.handleEvent("reconnect", data: reason, isInternalMessage: true)
             self.tryReconnect(triesLeft: self.reconnectAttempts)
-            
         }
     }
     
@@ -832,7 +825,7 @@ class SocketIOClient {
         self.connecting = false
         self.handleEvent("error", data: error.localizedDescription, isInternalMessage: true)
         if self.closed || !self.reconnects {
-            self.handleEvent("disconnect", data: error.localizedDescription, isInternalMessage: true)
+            self.didForceClose()
         } else if !self.reconnecting {
             self.handleEvent("reconnect", data: error.localizedDescription, isInternalMessage: true)
             self.tryReconnect(triesLeft: self.reconnectAttempts)

@@ -85,10 +85,6 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         } else {
             self.client.didForceClose()
         }
-        
-        if self.polling {
-            self.client.handleEvent("disconnect", data: "close", isInternalMessage: true)
-        }
     }
     
     private func createBinaryDataForSend(data:NSData) -> (NSData?, String?) {
@@ -147,9 +143,8 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
             return
         }
         
-        let time = Int(NSDate().timeIntervalSince1970)
         let req = NSURLRequest(URL:
-            NSURL(string: self.urlPolling! + "&t=\(time)-0&b64=1" + "&sid=\(self.sid)")!)
+            NSURL(string: self.urlPolling! + "&sid=\(self.sid)")!)
         self.wait = true
         
         NSURLConnection.sendAsynchronousRequest(req,
@@ -248,13 +243,38 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         }
     }
     
-    // A poll failed, try and reconnect
+    // A poll failed, tell the client about it
+    // We check to see if we were closed by the server first
     private func handlePollingFailed() {
         if !self.client.reconnecting {
             self.pingTimer?.invalidate()
             self.wait = false
-            self.client.handleEvent("reconnect", data: "XHR polling timeout", isInternalMessage: true)
-            self.client.tryReconnect(triesLeft: self.client.reconnectAttempts)
+            
+            let forced = {() -> Bool in
+                var err:NSError?
+                let url = NSURL(string: self.urlPolling! + "&sid=\(self.sid)")!
+                let req = NSURLRequest(URL: url, cachePolicy:
+                    NSURLRequestCachePolicy.UseProtocolCachePolicy, timeoutInterval: 4)
+                var resp:NSURLResponse?
+                let data = NSURLConnection.sendSynchronousRequest(req, returningResponse: &resp, error: &err)
+                
+                if data == nil || resp == nil || err != nil {
+                    return false
+                } else if let str = NSString(data: data!, encoding: NSUTF8StringEncoding) {
+                    if str == "1:61:1" {
+                        return true
+                    } else {
+                        return false
+                    }
+                } else {
+                    return false
+                }}()
+            
+            if forced {
+                self.close(forced: true)
+            } else {
+                self.client.pollingDidFail()
+            }
         }
     }
     
