@@ -356,7 +356,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     
     private func probeWebSocket() {
         if self.websocketConnected {
-            self.ws?.send("2probe")
+            self.sendWebSocketMessage("probe", withType: PacketType.PING)
         }
     }
     
@@ -368,9 +368,11 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                 }
                 
                 if self!.websocket {
-                    self?.sendWebSocketMessage(msg, datas: datas)
+                    // println("sending ws: \(msg)")
+                    self?.sendWebSocketMessage(msg, withType: PacketType.MESSAGE, datas: datas)
                 } else {
-                    self?.sendPollMessage(msg, datas: datas)
+                    // println("sending poll: \(msg)")
+                    self?.sendPollMessage(msg, withType: PacketType.MESSAGE, datas: datas)
                 }
             }
         }
@@ -383,42 +385,21 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     }
     
     func sendPing() {
+        // println("sending ping")
+        
         if self.websocket {
-            self.ws?.send(PacketType.PING.rawValue)
+            self.sendWebSocketMessage("", withType: PacketType.PING)
         } else {
-            let time = Int(NSDate().timeIntervalSince1970)
-            var req = NSMutableURLRequest(URL: NSURL(string:
-                self.urlPolling! + "&sid=\(self.sid)")!)
-            let postStr = "1:\(PacketType.PING.rawValue)"
-            let postData = postStr.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!
-            let postLength = "\(postData.length)"
-            
-            req.HTTPMethod = "POST"
-            req.setValue(postLength, forHTTPHeaderField: "Content-Length")
-            req.setValue("application/html-text", forHTTPHeaderField: "Content-Type")
-            req.HTTPBody = postData
-            
-            NSURLConnection.sendAsynchronousRequest(req,
-                queue: self.workQueue) {[weak self] res, data, err in
-                    if self == nil {
-                        return
-                    } else if err != nil {
-                        // println(err)
-                        self?.handlePollingFailed()
-                        return
-                    }
-                    
-                    self?.doPoll()
-            }
+            self.sendPollMessage("", withType: PacketType.PING)
         }
     }
     
-    func sendPollMessage(msg:String, datas:[NSData]?) {
+    private func sendPollMessage(msg:String, withType type:PacketType, datas:[NSData]? = nil) {
         // println("Sending: \(msg)")
         var postData:NSData
         var bDatas:[String]?
         var req = NSMutableURLRequest(URL:
-            NSURL(string:self.urlPolling! + "&sid=\(self.sid)")!)
+            NSURL(string: self.urlPolling! + "&sid=\(self.sid)")!)
         
         req.HTTPMethod = "POST"
         req.setValue("application/html-text", forHTTPHeaderField: "Content-Type")
@@ -433,8 +414,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
             }
         }
         
-        let strMsg = "\(PacketType.MESSAGE.rawValue)\(msg)"
-        
+        let strMsg = "\(type.rawValue)\(msg)"
         let postCount = countElements(strMsg)
         var postStr = "\(postCount):\(strMsg)"
         
@@ -460,8 +440,8 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         }
     }
     
-    func sendWebSocketMessage(str:String, datas:[NSData]?) {
-        self.ws?.send("\(PacketType.MESSAGE.rawValue)\(str)")
+    private func sendWebSocketMessage(str:String, withType type:PacketType, datas:[NSData]? = nil) {
+        self.ws?.send("\(type.rawValue)\(str)")
         
         if datas != nil {
             for data in datas! {
@@ -491,7 +471,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
             self.probing = false
             self._websocket = true
             self._polling = false
-            self.ws?.send(PacketType.UPGRADE.rawValue)
+            self.sendWebSocketMessage("", withType: PacketType.UPGRADE)
             self.flushProbeWait()
         }
     }

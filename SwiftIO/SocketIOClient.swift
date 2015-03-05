@@ -103,11 +103,21 @@ class SocketIOClient {
     
     // Connects to the server
     func connect() {
+        if self.closed {
+            println("Warning! This socket was previously closed. This might be dangerous!")
+            self.closed = false
+        }
+        
         self.engine.open()
     }
     
     // Connect to the server using params
     func connectWithParams(params:[String: AnyObject]) {
+        if self.closed {
+            println("Warning! This socket was previously closed. This might be dangerous!")
+            self.closed = false
+        }
+        
         self.params = params
         self.paramConnect = true
         
