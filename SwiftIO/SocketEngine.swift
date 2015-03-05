@@ -272,7 +272,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
             return false
         }
         
-        for var i = 0, l = str.length; i < l; i++ {
+        for var i = 0, l = str.length; i < l; i = i &+ 1 {
             let strArray = Array(str)
             let chr = String(strArray[i])
             
@@ -284,7 +284,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                     return
                 }
                 
-                msg = String(strArray[i+1...i+n])
+                msg = String(strArray[i&+1...i&+n])
                 
                 if let lengthInt = length.toInt() {
                     if lengthInt != msg.length {
