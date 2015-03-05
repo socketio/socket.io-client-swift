@@ -430,7 +430,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                     if self == nil {
                         return
                     } else if err != nil {
-                        println(err)
+                        // println(err)
                         self?.handlePollingFailed()
                         return
                     }
@@ -543,6 +543,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         self.flushProbeWait()
         
         if self.websocket {
+            self.pingTimer?.invalidate()
             self._websocket = false
             self._polling = true
             self.client.webSocketDidCloseWithCode(code, reason: reason, wasClean: wasClean)
@@ -557,6 +558,6 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         self.probing = false
         self.flushProbeWait()
         
-        // self.client.webSocketDidFailWithError(error)
+        self.client.webSocketDidFailWithError(error)
     }
 }
