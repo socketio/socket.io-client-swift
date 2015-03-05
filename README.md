@@ -15,7 +15,7 @@ API
 ===
 Constructor
 -----------
-`init(socketURL: String, opts:[String: AnyObject]? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values.)
+`init(socketURL: String, opts:[String: AnyObject]? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values. See example)
 Methods
 -------
 1. `socket.on(name:String, callback:((data:NSArray?, ack:AckEmitter?) -> Void))` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
@@ -41,7 +41,8 @@ let socket = SocketIOClient(socketURL: "https://localhost:8080", opts: [
     "reconnects": true, // default true
     "reconnectAttempts": 5, // default -1 (infinite tries)
     "reconnectWait": 5, // default 10
-    "nsp": "swift" // connects to the specified namespace. Default is /
+    "nsp": "swift", // connects to the specified namespace. Default is /
+    "forcePolling": true // if true, the socket will only use XHR polling, default is false (polling/WebSockets)
 ])
 
 // Socket Events
