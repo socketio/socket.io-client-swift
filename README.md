@@ -67,7 +67,7 @@ socket.on("ackEvent") {data, ack in
     }
 
     socket.emitWithAck("ackTest", "test").onAck {data in
-        println(data)
+        println(data?[0])
     }
 
     ack?("Got your event", "dude")

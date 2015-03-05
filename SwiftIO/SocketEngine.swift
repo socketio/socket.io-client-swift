@@ -49,6 +49,8 @@ private enum PacketType: String {
 class SocketEngine: NSObject, SRWebSocketDelegate {
     unowned let client:SocketIOClient
     private let workQueue = NSOperationQueue()
+    private let handleQueue = dispatch_queue_create(
+        "handleQueue".cStringUsingEncoding(NSUTF8StringEncoding), DISPATCH_QUEUE_SERIAL)
     private var pingTimer:NSTimer?
     private var _polling = true
     private var probing = false
@@ -134,7 +136,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         return (urlPolling, urlWebSocket)
     }
     
-    func doPoll() {
+    private func doPoll() {
         if self.urlPolling == nil || self.websocket || self.wait {
             return
         }
@@ -221,7 +223,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                                 self?.ws = SRWebSocket(URL:
                                     NSURL(string: urlWebSocket + "&sid=\(self!.sid)")!)
                                 self?.ws?.delegate = self
-                                // self?.ws?.open()
+                                self?.ws?.open()
                             } else {
                                 NSLog("Error handshaking")
                                 return
@@ -304,46 +306,47 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     
     private func parseEngineMessage(message:AnyObject?) {
         // println(message)
-        
-        if let data = message as? NSData {
-            // Strip off message type
-            self.client.parseSocketMessage(data.subdataWithRange(NSMakeRange(1, data.length - 1)))
-            return
-        }
-        
-        var messageString = message as String
-        var strMessage = RegexMutable(messageString)
-        
-        // We should upgrade
-        if strMessage == "3probe" {
-            self.upgradeTransport()
-            return
-        }
-        
-        let type = strMessage["^(\\d)"].groups()?[1]
-        
-        if type != PacketType.MESSAGE.rawValue {
-            // TODO Handle other packets
-            if messageString.hasPrefix("b4") {
-                // binary in base64 string
-                messageString.removeRange(Range<String.Index>(start: messageString.startIndex,
-                    end: advance(messageString.startIndex, 2)))
-                
-                if let data = NSData(base64EncodedString: messageString,
-                    options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters) {
-                        self.client.parseSocketMessage(data)
-                }
-                
+        dispatch_async(self.handleQueue) {[weak self] in
+            if let data = message as? NSData {
+                // Strip off message type
+                self?.client.parseSocketMessage(data.subdataWithRange(NSMakeRange(1, data.length - 1)))
                 return
             }
             
-            println("Got something idk what to do with")
-            println(messageString)
+            var messageString = message as String
+            var strMessage = RegexMutable(messageString)
+            
+            // We should upgrade
+            if strMessage == "3probe" {
+                self?.upgradeTransport()
+                return
+            }
+            
+            let type = strMessage["^(\\d)"].groups()?[1]
+            
+            if type != PacketType.MESSAGE.rawValue {
+                // TODO Handle other packets
+                if messageString.hasPrefix("b4") {
+                    // binary in base64 string
+                    messageString.removeRange(Range<String.Index>(start: messageString.startIndex,
+                        end: advance(messageString.startIndex, 2)))
+                    
+                    if let data = NSData(base64EncodedString: messageString,
+                        options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters) {
+                            self?.client.parseSocketMessage(data)
+                    }
+                    
+                    return
+                }
+                
+                // println("Got something idk what to do with")
+                // println(messageString)
+            }
+            
+            // Remove message type
+            messageString.removeAtIndex(messageString.startIndex)
+            self?.client.parseSocketMessage(messageString)
         }
-        
-        // Remove message type
-        messageString.removeAtIndex(messageString.startIndex)
-        self.client.parseSocketMessage(messageString)
     }
     
     func probeWebSocket() {
