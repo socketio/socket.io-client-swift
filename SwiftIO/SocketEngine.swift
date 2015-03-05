@@ -51,6 +51,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     private let workQueue = NSOperationQueue()
     private let handleQueue = dispatch_queue_create(
         "handleQueue".cStringUsingEncoding(NSUTF8StringEncoding), DISPATCH_QUEUE_SERIAL)
+    private var forcePolling = false
     private var pingTimer:NSTimer?
     private var _polling = true
     private var probing = false
@@ -70,8 +71,9 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     }
     var ws:SRWebSocket?
     
-    init(client:SocketIOClient) {
+    init(client:SocketIOClient, forcePolling:Bool = false) {
         self.client = client
+        self.forcePolling = forcePolling
     }
     
     func close() {
@@ -220,10 +222,12 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                                 // println(json)
                                 self?.sid = sid
                                 
-                                self?.ws = SRWebSocket(URL:
-                                    NSURL(string: urlWebSocket + "&sid=\(self!.sid)")!)
-                                self?.ws?.delegate = self
-                                self?.ws?.open()
+                                if !self!.forcePolling {
+                                    self?.ws = SRWebSocket(URL:
+                                        NSURL(string: urlWebSocket + "&sid=\(self!.sid)")!)
+                                    self?.ws?.delegate = self
+                                    self?.ws?.open()
+                                }
                             } else {
                                 NSLog("Error handshaking")
                                 return

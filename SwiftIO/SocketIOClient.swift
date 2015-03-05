@@ -36,6 +36,7 @@ class SocketIOClient {
     private lazy var params:[String: AnyObject] = [String: AnyObject]()
     private var ackHandlers = [SocketAckHandler]()
     private var currentAck = -1
+    private var forcePolling = false
     private var handlers = [SocketEventHandler]()
     private var lastSocketMessage:SocketEvent?
     private var paramConnect = false
@@ -82,9 +83,13 @@ class SocketIOClient {
             if let nsp = opts!["nsp"] as? String {
                 self.nsp = nsp
             }
+            
+            if let polling = opts!["forcePolling"] as? Bool {
+                self.forcePolling = polling
+            }
         }
         
-        self.engine = SocketEngine(client: self)
+        self.engine = SocketEngine(client: self, forcePolling: self.forcePolling)
     }
     
     // Closes the socket
