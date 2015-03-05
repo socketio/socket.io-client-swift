@@ -437,6 +437,8 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                 self?.handlePollingFailed()
                 return
             }
+            
+            self?.doPoll()
         }
     }
     
