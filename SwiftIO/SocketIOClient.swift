@@ -38,7 +38,7 @@ class SocketIOClient {
     private var currentAck = -1
     private var forcePolling = false
     private var handlers = [SocketEventHandler]()
-    private var lastSocketMessage:SocketEvent?
+    private var waitingData = [SocketEvent]()
     private var paramConnect = false
     private var _secure = false
     var closed = false
@@ -620,7 +620,7 @@ class SocketIOClient {
         
         // Message is binary
         if let binary = message as? NSData {
-            if self.lastSocketMessage == nil {
+            if self.waitingData.isEmpty {
                 return
             }
             
@@ -667,7 +667,6 @@ class SocketIOClient {
                 mutMessageObject = RegexMutable(binaryGroup[5])
                 
                 if namespace == "" && self.nsp != nil {
-                    self.lastSocketMessage = nil
                     return
                 }
                 
@@ -684,7 +683,7 @@ class SocketIOClient {
                         placeholders: numberOfPlaceholders.toInt()!, ackNum: ackNum.toInt())
                 }
                 
-                self.lastSocketMessage = mes
+                self.waitingData.append(mes)
             } else if binaryGroup[1].hasPrefix("6") {
                 let messageType = RegexMutable(binaryGroup[1])
                 let numberOfPlaceholders = (messageType["6"] ~= "") as String
@@ -706,8 +705,10 @@ class SocketIOClient {
                 let placeholdersRemoved = mutMessageObject["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"]
                     ~= "\"~~$2\""
                 
-                self.lastSocketMessage = SocketEvent(event: "", args: placeholdersRemoved,
+                let event = SocketEvent(event: "", args: placeholdersRemoved,
                     placeholders: numberOfPlaceholders.toInt()!, ackNum: ackNum.toInt(), justAck: true)
+                
+                self.waitingData.append(event)
             }
             /**
             End check for binary placeholders
@@ -717,41 +718,42 @@ class SocketIOClient {
     
     // Handles binary data
     private func parseBinaryData(data:NSData) {
-        let shouldExecute = self.lastSocketMessage?.addData(data)
+        let shouldExecute = self.waitingData[0].addData(data)
         
-        if shouldExecute != nil && shouldExecute! {
-            var event = self.lastSocketMessage!.event
-            var parsedArgs:AnyObject? = SocketIOClient.parseData(self.lastSocketMessage!.args as? String)
+        if shouldExecute {
+            let socketEvent = self.waitingData.removeAtIndex(0)
+            var event = socketEvent.event
+            var parsedArgs:AnyObject? = SocketIOClient.parseData(socketEvent.args as? String)
             
             if let args:AnyObject = parsedArgs {
-                let filledInArgs:AnyObject = self.lastSocketMessage!.fillInPlaceholders(args)
+                let filledInArgs:AnyObject = socketEvent.fillInPlaceholders(args)
                 
-                if self.lastSocketMessage!.justAck! {
+                if socketEvent.justAck! {
                     // Should handle ack
-                    self.handleAck(self.lastSocketMessage!.ack!, data: filledInArgs)
+                    self.handleAck(socketEvent.ack!, data: filledInArgs)
                     return
                 }
                 
                 // Should do event
-                if self.lastSocketMessage!.ack != nil {
+                if socketEvent.ack != nil {
                     self.handleEvent(event, data: filledInArgs, isInternalMessage: false,
-                        wantsAck: self.lastSocketMessage!.ack!, withAckType: 6)
+                        wantsAck: socketEvent.ack!, withAckType: 6)
                 } else {
                     self.handleEvent(event, data: filledInArgs)
                 }
             } else {
-                let filledInArgs:AnyObject = self.lastSocketMessage!.fillInPlaceholders()
+                let filledInArgs:AnyObject = socketEvent.fillInPlaceholders()
                 
                 // Should handle ack
-                if self.lastSocketMessage!.justAck! {
-                    self.handleAck(self.lastSocketMessage!.ack!, data: filledInArgs)
+                if socketEvent.justAck! {
+                    self.handleAck(socketEvent.ack!, data: filledInArgs)
                     return
                 }
                 
                 // Should handle ack
-                if self.lastSocketMessage!.ack != nil {
+                if socketEvent.ack != nil {
                     self.handleEvent(event, data: filledInArgs, isInternalMessage: false,
-                        wantsAck: self.lastSocketMessage!.ack!, withAckType: 6)
+                        wantsAck: socketEvent.ack!, withAckType: 6)
                 } else {
                     self.handleEvent(event, data: filledInArgs)
                 }

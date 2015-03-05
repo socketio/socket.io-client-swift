@@ -76,15 +76,9 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         self.forcePolling = forcePolling
     }
     
-    func close(forced:Bool = false) {
+    func close() {
         self.pingTimer?.invalidate()
-        
-        if !forced {
-            self.send(PacketType.CLOSE.rawValue)
-            self.ws?.close()
-        } else {
-            self.client.didForceClose()
-        }
+        self.send(PacketType.CLOSE.rawValue)
     }
     
     private func createBinaryDataForSend(data:NSData) -> (NSData?, String?) {
@@ -250,31 +244,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
             self.pingTimer?.invalidate()
             self.wait = false
             
-            let forced = {() -> Bool in
-                var err:NSError?
-                let url = NSURL(string: self.urlPolling! + "&sid=\(self.sid)")!
-                let req = NSURLRequest(URL: url, cachePolicy:
-                    NSURLRequestCachePolicy.UseProtocolCachePolicy, timeoutInterval: 4)
-                var resp:NSURLResponse?
-                let data = NSURLConnection.sendSynchronousRequest(req, returningResponse: &resp, error: &err)
-                
-                if data == nil || resp == nil || err != nil {
-                    return false
-                } else if let str = NSString(data: data!, encoding: NSUTF8StringEncoding) {
-                    if str == "1:61:1" {
-                        return true
-                    } else {
-                        return false
-                    }
-                } else {
-                    return false
-                }}()
-            
-            if forced {
-                self.close(forced: true)
-            } else {
-                self.client.pollingDidFail()
-            }
+            self.client.pollingDidFail()
         }
     }
     
@@ -361,6 +331,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                     
                     if let data = NSData(base64EncodedString: messageString,
                         options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters) {
+                            // println("sending \(data)")
                             self?.client.parseSocketMessage(data)
                     }
                     
@@ -368,7 +339,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                 }
                 
                 if messageString == PacketType.CLOSE.rawValue {
-                    self?.close(forced: true)
+                    // do nothing
                     return
                 }
                 // println("Got something idk what to do with")
@@ -377,6 +348,8 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
             
             // Remove message type
             messageString.removeAtIndex(messageString.startIndex)
+            // println("sending \(messageString)")
+            
             self?.client.parseSocketMessage(messageString)
         }
     }
@@ -553,11 +526,13 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     // Called when an error occurs.
     func webSocket(webSocket:SRWebSocket!, didFailWithError error:NSError!) {
         self.websocketConnected = false
-        self._websocket = false
         self._polling = true
         self.probing = false
         self.flushProbeWait()
         
-        self.client.webSocketDidFailWithError(error)
+        if self.websocket {
+            self.pingTimer?.invalidate()
+            self.client.webSocketDidFailWithError(error)
+        }
     }
 }
