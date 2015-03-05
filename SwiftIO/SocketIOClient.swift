@@ -171,10 +171,7 @@ class SocketIOClient {
                     hasBinary: true, withDatas: emitDatas.count, toNamespace: self.nsp, wantsAck: self.currentAck)
             }
             
-            self.engine?.send(str)
-            for data in emitDatas {
-                self.engine?.send(data)
-            }
+            self.engine?.send(str, datas: emitDatas)
         } else {
             if !ack {
                 str = SocketEvent.createMessageForEvent(event, withArgs: items, hasBinary: false,
@@ -217,10 +214,7 @@ class SocketIOClient {
                         withAckType: 6, withNsp: self!.nsp!, withBinary: emitDatas.count)
                 }
                 
-                self?.engine?.send(str)
-                for data in emitDatas {
-                    self?.engine?.send(data)
-                }
+                self?.engine?.send(str, datas: emitDatas)
             }
         }
     }
