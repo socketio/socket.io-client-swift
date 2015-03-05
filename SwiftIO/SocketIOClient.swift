@@ -121,6 +121,14 @@ class SocketIOClient {
         self.reconnecting = false
     }
     
+    // Server wants us to die
+    func didForceClose() {
+        self.closed = true
+        self.connecting = false
+        self.connected = false
+        self.reconnecting = false
+    }
+    
     // Sends a message with multiple args
     // If a message contains binary we have to send those
     // seperately.

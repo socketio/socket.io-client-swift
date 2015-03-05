@@ -76,11 +76,15 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         self.forcePolling = forcePolling
     }
     
-    func close() {
+    func close(forced:Bool = false) {
         self.pingTimer?.invalidate()
         
-        self.send(PacketType.CLOSE.rawValue)
-        self.ws?.close()
+        if !forced {
+            self.send(PacketType.CLOSE.rawValue)
+            self.ws?.close()
+        } else {
+            self.client.didForceClose()
+        }
         
         if self.polling {
             self.client.handleEvent("disconnect", data: "close", isInternalMessage: true)
@@ -343,6 +347,10 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                     return
                 }
                 
+                if messageString == PacketType.CLOSE.rawValue {
+                    self?.close(forced: true)
+                    return
+                }
                 // println("Got something idk what to do with")
                 // println(messageString)
             }
@@ -353,27 +361,21 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         }
     }
     
-    func probeWebSocket() {
+    private func probeWebSocket() {
         if self.websocketConnected {
             self.ws?.send("2probe")
         }
     }
     
-    func send(msg:AnyObject, datas:[NSData]? = nil) {
-        let _send = {[weak self] (msg:AnyObject, datas:[NSData]?) -> () -> Void in
+    func send(msg:String, datas:[NSData]? = nil) {
+        let _send = {[weak self] (msg:String, datas:[NSData]?) -> () -> Void in
             return {
                 if self == nil {
                     return
                 }
                 
                 if self!.websocket {
-                    self?.ws?.send("\(PacketType.MESSAGE.rawValue)\(msg)")
-                    if datas != nil {
-                        for data in datas! {
-                            let (data, nilString) = self!.createBinaryDataForSend(data)
-                            self?.ws?.send(data!)
-                        }
-                    }
+                    self?.sendWebSocketMessage(msg, datas: datas)
                 } else {
                     self?.sendPollMessage(msg, datas: datas)
                 }
@@ -393,7 +395,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         } else {
             let time = Int(NSDate().timeIntervalSince1970)
             var req = NSMutableURLRequest(URL: NSURL(string:
-                self.urlPolling! + "&t=\(time)-0&b64=1" + "&sid=\(self.sid)")!)
+                self.urlPolling! + "&sid=\(self.sid)")!)
             let postStr = "1:\(PacketType.PING.rawValue)"
             let postData = postStr.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!
             let postLength = "\(postData.length)"
@@ -418,13 +420,12 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         }
     }
     
-    func sendPollMessage(msg:AnyObject, datas:[NSData]?) {
+    func sendPollMessage(msg:String, datas:[NSData]?) {
         // println("Sending: \(msg)")
         var postData:NSData
         var bDatas:[String]?
-        let time = Int(NSDate().timeIntervalSince1970)
         var req = NSMutableURLRequest(URL:
-            NSURL(string:self.urlPolling! + "&t=\(time)&b64=1" + "&sid=\(self.sid)")!)
+            NSURL(string:self.urlPolling! + "&sid=\(self.sid)")!)
         
         req.HTTPMethod = "POST"
         req.setValue("application/html-text", forHTTPHeaderField: "Content-Type")
@@ -439,7 +440,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
             }
         }
         
-        let strMsg = "\(PacketType.MESSAGE.rawValue)\(msg as String)"
+        let strMsg = "\(PacketType.MESSAGE.rawValue)\(msg)"
         
         let postCount = countElements(strMsg)
         var postStr = "\(postCount):\(strMsg)"
@@ -459,8 +460,22 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         
         NSURLConnection.sendAsynchronousRequest(req, queue: self.workQueue) {[weak self] res, data, err in
             if err != nil {
-                println(err)
+                // println(err)
+                self?.handlePollingFailed()
                 return
+            }
+        }
+    }
+    
+    func sendWebSocketMessage(str:String, datas:[NSData]?) {
+        self.ws?.send("\(PacketType.MESSAGE.rawValue)\(str)")
+        
+        if datas != nil {
+            for data in datas! {
+                let (data, nilString) = self.createBinaryDataForSend(data)
+                if data != nil {
+                    self.ws?.send(data!)
+                }
             }
         }
     }
@@ -491,7 +506,6 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     // Called when a message is recieved
     func webSocket(webSocket:SRWebSocket!, didReceiveMessage message:AnyObject?) {
         // println(message)
-        
         self.parseEngineMessage(message)
     }
     
@@ -506,11 +520,13 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     func webSocket(webSocket:SRWebSocket!, didCloseWithCode code:Int, reason:String!, wasClean:Bool) {
         self.websocketConnected = false
         self.probing = false
-        self._websocket = false
-        self._polling = true
         self.flushProbeWait()
         
-        self.client.webSocketDidCloseWithCode(code, reason: reason, wasClean: wasClean)
+        if self.websocket {
+            self._websocket = false
+            self._polling = true
+            self.client.webSocketDidCloseWithCode(code, reason: reason, wasClean: wasClean)
+        }
     }
     
     // Called when an error occurs.
