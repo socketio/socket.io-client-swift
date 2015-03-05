@@ -79,11 +79,11 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     func close() {
         self.pingTimer?.invalidate()
         
-        if self.websocket {
-            self.ws?.send(PacketType.MESSAGE.rawValue + PacketType.CLOSE.rawValue)
-            self.ws?.close()
-        } else {
-            // TODO handling polling
+        self.send(PacketType.CLOSE.rawValue)
+        self.ws?.close()
+        
+        if self.polling {
+            self.client.handleEvent("disconnect", data: "close", isInternalMessage: true)
         }
     }
     

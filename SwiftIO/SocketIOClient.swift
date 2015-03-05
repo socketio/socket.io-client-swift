@@ -97,6 +97,7 @@ class SocketIOClient {
         self.closed = true
         self.connecting = false
         self.connected = false
+        self.reconnecting = false
         self.engine?.close()
     }
     
