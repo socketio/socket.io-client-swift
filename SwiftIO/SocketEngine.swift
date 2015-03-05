@@ -167,6 +167,14 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         }
     }
     
+    private func flushProbeWait() {
+        for waiter in self.probeWait {
+            waiter()
+        }
+        
+        self.probeWait.removeAll(keepCapacity: false)
+    }
+    
     func open(opts:[String: AnyObject]? = nil) {
         let (urlPolling, urlWebSocket) = self.createURLs(params: opts)
         
@@ -360,7 +368,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                         }
                     }
                 } else {
-                    self?.sendPollMessage(msg)
+                    self?.sendPollMessage(msg, datas: datas)
                 }
             }
         }
@@ -403,10 +411,10 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         }
     }
     
-    func sendPollMessage(msg:AnyObject) {
+    func sendPollMessage(msg:AnyObject, datas:[NSData]?) {
         // println("Sending: \(msg)")
-        
         var postData:NSData
+        var bDatas:[String]?
         let time = Int(NSDate().timeIntervalSince1970)
         var req = NSMutableURLRequest(URL:
             NSURL(string:self.urlPolling! + "&t=\(time)&b64=1" + "&sid=\(self.sid)")!)
@@ -414,24 +422,30 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         req.HTTPMethod = "POST"
         req.setValue("application/html-text", forHTTPHeaderField: "Content-Type")
         
-        if msg is NSData {
-            println("sending poll binary")
-            let (nilData, data) = self.createBinaryDataForSend(msg as NSData)
-            
-            let dataLen = countElements(data!)
-            postData = "\(dataLen):\(data!)".dataUsingEncoding(NSUTF8StringEncoding,
-                allowLossyConversion: false)!
-        } else if !(msg is String) {
-            return
-        } else {
-            // println(msg)
-            let strMsg = "\(PacketType.MESSAGE.rawValue)\(msg as String)"
-            // println(strMsg)
-            
-            let postCount = countElements(strMsg)
-            postData = ("\(postCount):\(strMsg)").dataUsingEncoding(NSUTF8StringEncoding,
-                allowLossyConversion: false)!
+        if datas != nil {
+            bDatas = [String]()
+            for data in datas! {
+                let (nilData, b64Data) = self.createBinaryDataForSend(data)
+                let dataLen = countElements(b64Data!)
+                
+                bDatas!.append("\(dataLen):\(b64Data!)")
+            }
         }
+        
+        let strMsg = "\(PacketType.MESSAGE.rawValue)\(msg as String)"
+        
+        let postCount = countElements(strMsg)
+        var postStr = "\(postCount):\(strMsg)"
+        
+        if bDatas != nil {
+            for data in bDatas! {
+                postStr += data
+            }
+        }
+        
+        postData = postStr.dataUsingEncoding(NSUTF8StringEncoding,
+            allowLossyConversion: false)!
+        
         
         req.setValue(String(postData.length), forHTTPHeaderField: "Content-Length")
         req.HTTPBody = postData
@@ -463,11 +477,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
             self._websocket = true
             self._polling = false
             self.ws?.send(PacketType.UPGRADE.rawValue)
-            for sender in self.probeWait {
-                sender()
-            }
-            
-            self.probeWait.removeAll(keepCapacity: false)
+            self.flushProbeWait()
         }
     }
     
@@ -491,6 +501,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         self.probing = false
         self._websocket = false
         self._polling = true
+        self.flushProbeWait()
         
         self.client.webSocketDidCloseWithCode(code, reason: reason, wasClean: wasClean)
     }
@@ -501,7 +512,8 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         self._websocket = false
         self._polling = true
         self.probing = false
+        self.flushProbeWait()
         
-        self.client.webSocketDidFailWithError(error)
+        // self.client.webSocketDidFailWithError(error)
     }
 }
