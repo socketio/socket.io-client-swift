@@ -36,6 +36,7 @@ class SocketIOClient {
     let reconnectAttempts:Int!
     private lazy var params = [String: AnyObject]()
     private var ackHandlers = [SocketAckHandler]()
+    private var anyHandler:((AnyHandler) -> Void)?
     private var currentAck = -1
     private var currentReconnectAttempt = 0
     private var forcePolling = false
@@ -269,13 +270,17 @@ class SocketIOClient {
     func handleEvent(event:String, data:AnyObject?, isInternalMessage:Bool = false,
         wantsAck ack:Int? = nil, withAckType ackType:Int = 3) {
             // println("Should do event: \(event) with data: \(data)")
-            dispatch_async(dispatch_get_main_queue()) {
-                if !self.connected && !isInternalMessage {
-                    return
-                }
-                
-                for handler in self.handlers {
-                    if handler.event == event {
+            if !self.connected && !isInternalMessage {
+                return
+            }
+            
+            dispatch_async(dispatch_get_main_queue()) {[weak self] in
+                self?.anyHandler?((event, data))
+                return
+            }
+            for handler in self.handlers {
+                if handler.event == event {
+                    dispatch_async(dispatch_get_main_queue()) {
                         if data is NSArray {
                             if ack != nil {
                                 handler.executeCallback(data as? NSArray, withAck: ack!,
@@ -316,6 +321,11 @@ class SocketIOClient {
     func on(name:String, callback:NormalCallback) {
         let handler = SocketEventHandler(event: name, callback: callback)
         self.handlers.append(handler)
+    }
+    
+    // Adds a handler for any event
+    func onAny(handler:(AnyHandler) -> Void) {
+        self.anyHandler = handler
     }
     
     // Opens the connection to the socket

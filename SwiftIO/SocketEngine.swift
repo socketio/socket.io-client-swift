@@ -51,6 +51,8 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     private let workQueue = NSOperationQueue()
     private let emitQueue = dispatch_queue_create(
         "emitQueue".cStringUsingEncoding(NSUTF8StringEncoding), DISPATCH_QUEUE_SERIAL)
+    private let parseQueue = dispatch_queue_create(
+        "parseQueue".cStringUsingEncoding(NSUTF8StringEncoding), DISPATCH_QUEUE_SERIAL)
     private let handleQueue = dispatch_queue_create(
         "handleQueue".cStringUsingEncoding(NSUTF8StringEncoding), DISPATCH_QUEUE_SERIAL)
     private var forcePolling = false
@@ -162,7 +164,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                 if let str = NSString(data: data, encoding: NSUTF8StringEncoding) {
                     // println(str)
                     
-                    dispatch_async(self?.handleQueue) {[weak self] in
+                    dispatch_async(self?.parseQueue) {[weak self] in
                         self?.parsePollingMessage(str)
                         return
                     }
@@ -189,11 +191,21 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     }
     
     private func flushWaitingForPost() {
-        if self.postWait.count == 0 || !self.connected || !self.polling  {
+        if self.postWait.count == 0 || !self.connected {
+            return
+        } else if self.websocket {
+            self.flushWaitingForPostToWebSocket()
             return
         }
         
-        let postStr = self.postWait.reduce("") {$0 + $1}
+        var postStr = ""
+        
+        for packet in self.postWait {
+            let len = countElements(packet)
+            
+            postStr += "\(len):\(packet)"
+        }
+        
         self.postWait.removeAll(keepCapacity: true)
         
         var req = NSMutableURLRequest(URL:
@@ -220,7 +232,18 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
             
             self?.flushWaitingForPost()
             self?.waitingForPost = false
+            self?.doPoll()
         }
+    }
+    
+    // We had packets waiting for send when we upgraded
+    // Send them raw
+    private func flushWaitingForPostToWebSocket() {
+        for msg in self.postWait {
+            self.ws?.send(msg)
+        }
+        
+        self.postWait.removeAll(keepCapacity: true)
     }
     
     // A poll failed, tell the client about it
@@ -313,6 +336,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         
         // println(str)
         
+        let strArray = Array(str)
         var length = ""
         var n = 0
         var msg = ""
@@ -328,7 +352,6 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         }
         
         for var i = 0, l = str.length; i < l; i = i &+ 1 {
-            let strArray = Array(str)
             let chr = String(strArray[i])
             
             if chr != ":" {
@@ -349,8 +372,12 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                 }
                 
                 if msg.length != 0 {
-                    fixSwift = msg
-                    self.parseEngineMessage(fixSwift)
+                    // Be sure to capture the value of the msg
+                    dispatch_async(self.handleQueue) {[weak self, msg] in
+                        fixSwift = msg
+                        self?.parseEngineMessage(fixSwift)
+                        return
+                    }
                 }
                 
                 i += n
@@ -360,7 +387,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     }
     
     private func parseEngineMessage(message:AnyObject?) {
-        // println(message)
+        // println(message!)
         if let data = message as? NSData {
             // Strip off message type
             self.client.parseSocketMessage(data.subdataWithRange(NSMakeRange(1, data.length - 1)))
@@ -382,6 +409,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
             // TODO Handle other packets
             if messageString.hasPrefix("b4") {
                 // binary in base64 string
+                
                 messageString.removeRange(Range<String.Index>(start: messageString.startIndex,
                     end: advance(messageString.startIndex, 2)))
                 
@@ -391,6 +419,9 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                         self.client.parseSocketMessage(data)
                 }
                 
+                return
+            } else if type == PacketType.NOOP.rawValue {
+                self.doPoll()
                 return
             }
             
@@ -456,31 +487,18 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     }
     
     private func sendPollMessage(msg:String, withType type:PacketType, datas:[NSData]? = nil) {
-        // println("Sending: \(msg)")
-        var postData:NSData
-        var bDatas:[String]?
+        // println("Sending: poll: \(msg) as type: \(type.rawValue)")
+        let strMsg = "\(type.rawValue)\(msg)"
+        
+        self.postWait.append(strMsg)
         
         if datas != nil {
-            bDatas = [String]()
             for data in datas! {
                 let (nilData, b64Data) = self.createBinaryDataForSend(data)
-                let dataLen = countElements(b64Data!)
                 
-                bDatas!.append("\(dataLen):\(b64Data!)")
+                self.postWait.append(b64Data!)
             }
         }
-        
-        let strMsg = "\(type.rawValue)\(msg)"
-        let postCount = countElements(strMsg)
-        var postStr = "\(postCount):\(strMsg)"
-        
-        if bDatas != nil {
-            for data in bDatas! {
-                postStr += data
-            }
-        }
-        
-        self.postWait.append(postStr)
         
         if waitingForPost {
             self.doPoll()
@@ -491,6 +509,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     }
     
     private func sendWebSocketMessage(str:String, withType type:PacketType, datas:[NSData]? = nil) {
+        // println("Sending: ws: \(str) as type: \(type.rawValue)")
         self.ws?.send("\(type.rawValue)\(str)")
         
         if datas != nil {
