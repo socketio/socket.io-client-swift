@@ -23,6 +23,7 @@
 //  THE SOFTWARE.
 
 typealias NormalCallback = (NSArray?, AckEmitter?) -> Void
+typealias AnyHandler = (event:String, items:AnyObject?)
 typealias AckEmitter = (AnyObject...) -> Void
 
 private func emitAckCallback(socket:SocketIOClient, num:Int, type:Int) -> AckEmitter {

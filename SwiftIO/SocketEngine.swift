@@ -61,6 +61,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     private var _polling = true
     private var probing = false
     private var probeWait = PollWaitQueue()
+    private let session:NSURLSession!
     private var waitingForPoll = false
     private var waitingForPost = false
     private var _websocket = false
@@ -81,6 +82,8 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     init(client:SocketIOClient, forcePolling:Bool = false) {
         self.client = client
         self.forcePolling = forcePolling
+        self.session = NSURLSession(configuration: NSURLSessionConfiguration.ephemeralSessionConfiguration(),
+            delegate: nil, delegateQueue: self.workQueue)
     }
     
     func close() {
@@ -144,12 +147,10 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
             return
         }
         
-        let req = NSURLRequest(URL:
-            NSURL(string: self.urlPolling! + "&sid=\(self.sid)")!)
+        let req = NSURLRequest(URL: NSURL(string: self.urlPolling! + "&sid=\(self.sid)")!)
         self.waitingForPoll = true
         
-        NSURLConnection.sendAsynchronousRequest(req,
-            queue: self.workQueue) {[weak self] res, data, err in
+        self.session.dataTaskWithRequest(req) {[weak self] data, res, err in
                 if self == nil {
                     return
                 } else if err != nil {
@@ -161,7 +162,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                 
                 // println(data)
                 
-                if let str = NSString(data: data, encoding: NSUTF8StringEncoding) {
+                if let str = NSString(data: data, encoding: NSUTF8StringEncoding) as? String {
                     // println(str)
                     
                     dispatch_async(self?.parseQueue) {[weak self] in
@@ -172,7 +173,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                 
                 self?.waitingForPoll = false
                 self?.doPoll()
-        }
+        }.resume()
     }
     
     private func flushProbeWait() {
@@ -206,10 +207,9 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
             postStr += "\(len):\(packet)"
         }
         
-        self.postWait.removeAll(keepCapacity: true)
+        self.postWait.removeAll(keepCapacity: false)
         
-        var req = NSMutableURLRequest(URL:
-            NSURL(string: self.urlPolling! + "&sid=\(self.sid)")!)
+        let req = NSMutableURLRequest(URL: NSURL(string: self.urlPolling! + "&sid=\(self.sid)")!)
         
         req.HTTPMethod = "POST"
         req.setValue("application/html-text", forHTTPHeaderField: "Content-Type")
@@ -222,7 +222,8 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         req.HTTPBody = postData
         
         self.waitingForPost = true
-        NSURLConnection.sendAsynchronousRequest(req, queue: self.workQueue) {[weak self] res, data, err in
+        
+        self.session.dataTaskWithRequest(req) {[weak self] data, res, err in
             if err != nil {
                 if self!.polling {
                     self?.handlePollingFailed(err)
@@ -233,7 +234,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
             self?.flushWaitingForPost()
             self?.waitingForPost = false
             self?.doPoll()
-        }
+        }.resume()
     }
     
     // We had packets waiting for send when we upgraded
@@ -269,8 +270,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         self.urlWebSocket = urlWebSocket
         let reqPolling = NSURLRequest(URL: NSURL(string: urlPolling + "&b64=1")!)
         
-        NSURLConnection.sendAsynchronousRequest(reqPolling,
-            queue: self.workQueue) {[weak self] res, data, err in
+        self.session.dataTaskWithRequest(reqPolling) {[weak self] data, res, err in
                 var err:NSError?
                 if self == nil {
                     return
@@ -325,7 +325,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                     self?.doPoll()
                     self?.startPingTimer()
                 }
-        }
+        }.resume()
     }
     
     // Translatation of engine.io-parser#decodePayload
@@ -477,8 +477,6 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     }
     
     func sendPing() {
-        // println("sending ping")
-        
         if self.websocket {
             self.sendWebSocketMessage("", withType: PacketType.PING)
         } else {
@@ -527,7 +525,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         if self.pingInterval == nil {
             return
         }
-        
+                
         self.pingTimer?.invalidate()
         dispatch_async(dispatch_get_main_queue()) {
             self.pingTimer = NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(self.pingInterval!), target: self,
