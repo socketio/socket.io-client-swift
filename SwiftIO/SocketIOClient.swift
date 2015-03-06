@@ -151,11 +151,8 @@ class SocketIOClient {
         }
         
         dispatch_async(self.emitQueue) {[weak self] in
-            if self == nil {
-                return
-            }
-            
             self?._emit(event, args)
+            return
         }
     }
     
@@ -169,11 +166,8 @@ class SocketIOClient {
         self.ackHandlers.append(ackHandler)
         
         dispatch_async(self.emitQueue) {[weak self] in
-            if self == nil {
-                return
-            }
-            
             self?._emit(event, args, ack: true)
+            return
         }
         
         return ackHandler
@@ -324,29 +318,27 @@ class SocketIOClient {
     }
     
     // Parse an NSArray looking for binary data
-    private class func parseArray(arr:NSArray, var placeholders:Int) -> (NSArray, Bool, [NSData]) {
+    private class func parseArray(arr:NSArray, var currentPlaceholder:Int) -> (NSArray, Bool, [NSData]) {
         var replacementArr = [AnyObject](count: arr.count, repeatedValue: 1)
         var hasBinary = false
         var arrayDatas = [NSData]()
         
-        if placeholders == -1 {
-            placeholders = 0
-        }
-        
         for g in 0..<arr.count {
             if arr[g] is NSData {
                 hasBinary = true
+                currentPlaceholder++
                 let sendData = arr[g] as NSData
                 
                 arrayDatas.append(sendData)
                 replacementArr[g] = ["_placeholder": true,
-                    "num": placeholders++]
+                    "num": currentPlaceholder]
             } else if let dict = arr[g] as? NSDictionary {
-                let (nestDict, hadBinary, dictArrs) = self.parseNSDictionary(dict, placeholders: placeholders)
+                let (nestDict, hadBinary, dictArrs) = self.parseNSDictionary(dict,
+                    currentPlaceholder: currentPlaceholder)
                 
                 if hadBinary {
                     hasBinary = true
-                    placeholders += dictArrs.count
+                    currentPlaceholder += dictArrs.count
                     replacementArr[g] = nestDict
                     arrayDatas.extend(dictArrs)
                 } else {
@@ -354,11 +346,12 @@ class SocketIOClient {
                 }
             } else if let nestArr = arr[g] as? NSArray {
                 // Recursive
-                let (nested, hadBinary, nestDatas) = self.parseArray(nestArr, placeholders: placeholders)
+                let (nested, hadBinary, nestDatas) = self.parseArray(nestArr,
+                    currentPlaceholder: currentPlaceholder)
                 
                 if hadBinary {
                     hasBinary = true
-                    placeholders += nestDatas.count
+                    currentPlaceholder += nestDatas.count
                     replacementArr[g] = nested
                     arrayDatas.extend(nestDatas)
                 } else {
@@ -393,7 +386,7 @@ class SocketIOClient {
     
     private class func parseEmitArgs(args:[AnyObject]) -> ([AnyObject], Bool, [NSData]) {
         var items = [AnyObject](count: args.count, repeatedValue: 1)
-        var numberOfPlaceholders = -1
+        var currentPlaceholder = -1
         var hasBinary = false
         var emitDatas = [NSData]()
         
@@ -401,9 +394,9 @@ class SocketIOClient {
             if let dict = args[i] as? NSDictionary {
                 // Check for binary data
                 let (newDict, hadBinary, binaryDatas) = SocketIOClient.parseNSDictionary(dict,
-                    placeholders: numberOfPlaceholders)
+                    currentPlaceholder: currentPlaceholder)
                 if hadBinary {
-                    numberOfPlaceholders = binaryDatas.count
+                    currentPlaceholder += binaryDatas.count
                     
                     emitDatas.extend(binaryDatas)
                     hasBinary = true
@@ -414,11 +407,11 @@ class SocketIOClient {
             } else if let arr = args[i] as? NSArray {
                 // arg is array, check for binary
                 let (replace, hadData, newDatas) = SocketIOClient.parseArray(arr,
-                    placeholders: numberOfPlaceholders)
+                    currentPlaceholder: currentPlaceholder)
                 
                 if hadData {
                     hasBinary = true
-                    numberOfPlaceholders += emitDatas.count
+                    currentPlaceholder += newDatas.count
                     
                     for data in newDatas {
                         emitDatas.append(data)
@@ -432,8 +425,8 @@ class SocketIOClient {
                 // args is just binary
                 hasBinary = true
                 
-                numberOfPlaceholders++
-                items[i] = ["_placeholder": true, "num": numberOfPlaceholders]
+                currentPlaceholder++
+                items[i] = ["_placeholder": true, "num": currentPlaceholder]
                 emitDatas.append(binaryData)
             } else {
                 items[i] = args[i]
@@ -444,39 +437,36 @@ class SocketIOClient {
     }
     
     // Parses a NSDictionary, looking for NSData objects
-    private class func parseNSDictionary(dict:NSDictionary, var placeholders:Int) -> (NSDictionary, Bool, [NSData]) {
+    private class func parseNSDictionary(dict:NSDictionary, var currentPlaceholder:Int) -> (NSDictionary, Bool, [NSData]) {
         var returnDict = NSMutableDictionary()
         var hasBinary = false
-        if placeholders == -1 {
-            placeholders = 0
-        }
         var returnDatas = [NSData]()
         
         for (key, value) in dict {
             if let binaryData = value as? NSData {
+                currentPlaceholder++
                 hasBinary = true
-                
                 returnDatas.append(binaryData)
-                returnDict[key as String] = ["_placeholder": true, "num": placeholders++]
+                returnDict[key as String] = ["_placeholder": true, "num": currentPlaceholder++]
             } else if let arr = value as? NSArray {
-                let (replace, hadBinary, arrDatas) = self.parseArray(arr, placeholders: placeholders)
+                let (replace, hadBinary, arrDatas) = self.parseArray(arr, currentPlaceholder: currentPlaceholder)
                 
                 if hadBinary {
                     hasBinary = true
                     returnDict[key as String] = replace
-                    placeholders += arrDatas.count
+                    currentPlaceholder += arrDatas.count
                     returnDatas.extend(arrDatas)
                 } else {
                     returnDict[key as String] = arr
                 }
             } else if let dict = value as? NSDictionary {
                 // Recursive
-                let (nestDict, hadBinary, nestDatas) = self.parseNSDictionary(dict, placeholders: placeholders)
+                let (nestDict, hadBinary, nestDatas) = self.parseNSDictionary(dict, currentPlaceholder: currentPlaceholder)
                 
                 if hadBinary {
                     hasBinary = true
                     returnDict[key as String] = nestDict
-                    placeholders += nestDatas.count
+                    currentPlaceholder += nestDatas.count
                     returnDatas.extend(nestDatas)
                 } else {
                     returnDict[key as String] = dict
@@ -772,9 +762,9 @@ class SocketIOClient {
     }
     
     // Something happened while polling
-    func pollingDidFail() {
+    func pollingDidFail(err:NSError?) {
         if !self.reconnecting {
-            self.handleEvent("reconnect", data: "XHR polling error", isInternalMessage: true)
+            self.handleEvent("reconnect", data: err?.localizedDescription, isInternalMessage: true)
             self.tryReconnect(triesLeft: self.reconnectAttempts)
         }
     }
