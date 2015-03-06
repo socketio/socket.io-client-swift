@@ -46,6 +46,9 @@ let socket = SocketIOClient(socketURL: "https://localhost:8080", opts: [
     "forcePolling": true // if true, the socket will only use XHR polling, default is false (polling/WebSockets)
 ])
 
+// Called on every event
+socket.onAny {println("got event: \($0.event) with items \($0.items)")}
+
 // Socket Events
 socket.on("connect") {data, ack in
     println("socket connected")
