@@ -33,21 +33,23 @@ class SocketIOClient {
         DISPATCH_QUEUE_SERIAL)
     let emitQueue = dispatch_queue_create("emitQueue".cStringUsingEncoding(NSUTF8StringEncoding),
         DISPATCH_QUEUE_SERIAL)
-    private lazy var params:[String: AnyObject] = [String: AnyObject]()
+    let reconnectAttempts:Int!
+    private lazy var params = [String: AnyObject]()
     private var ackHandlers = [SocketAckHandler]()
     private var currentAck = -1
+    private var currentReconnectAttempt = 0
     private var forcePolling = false
     private var handlers = [SocketEventHandler]()
     private var waitingData = [SocketEvent]()
     private var paramConnect = false
     private var _secure = false
+    private var reconnectTimer:NSTimer?
     var closed = false
     var connected = false
     var connecting = false
     var nsp:String?
     var reconnects = true
     var reconnecting = false
-    var reconnectAttempts = -1
     var reconnectWait = 10
     var secure:Bool {
         return self._secure
@@ -65,6 +67,7 @@ class SocketIOClient {
         mutURL = mutURL["https://"] ~= ""
         
         self.socketURL = mutURL
+        self.reconnectAttempts = -1
         
         // Set options
         if opts != nil {
@@ -129,6 +132,9 @@ class SocketIOClient {
         self.connected = true
         self.connecting = false
         self.reconnecting = false
+        self.currentReconnectAttempt = 0
+        self.reconnectTimer?.invalidate()
+        self.reconnectTimer = nil
         self.handleEvent("connect", data: nil, isInternalMessage: false)
     }
     
@@ -764,16 +770,15 @@ class SocketIOClient {
     // Something happened while polling
     func pollingDidFail(err:NSError?) {
         if !self.reconnecting {
+            self.connected = false
             self.handleEvent("reconnect", data: err?.localizedDescription, isInternalMessage: true)
-            self.tryReconnect(triesLeft: self.reconnectAttempts)
+            self.tryReconnect()
         }
     }
     
     // We lost connection and should attempt to reestablish
-    func tryReconnect(var #triesLeft:Int) {
-        self.connected = false
-        
-        if triesLeft != -1 && triesLeft <= 0 {
+    @objc func tryReconnect() {
+        if self.reconnectAttempts != -1 && self.currentReconnectAttempt + 1 > self.reconnectAttempts {
             self.didForceClose()
             return
         } else if self.connected {
@@ -782,26 +787,25 @@ class SocketIOClient {
             return
         }
         
-        // println("Trying to reconnect #\(reconnectAttempts - triesLeft)")
-        self.handleEvent("reconnectAttempt", data: triesLeft - 1, isInternalMessage: true)
-        
-        let waitTime = UInt64(self.reconnectWait) * NSEC_PER_SEC
-        let time = dispatch_time(DISPATCH_TIME_NOW, Int64(waitTime))
-        
-        // Wait reconnectWait seconds and then check if connected. Repeat if not
-        dispatch_after(time, dispatch_get_main_queue()) {[weak self] in
-            if self == nil || self!.connected || self!.closed {
+        if self.reconnectTimer == nil {
+            self.reconnecting = true
+            dispatch_async(dispatch_get_main_queue()) {[weak self] in
+                if self == nil {
+                    return
+                }
+                
+                self?.reconnectTimer = NSTimer.scheduledTimerWithTimeInterval(Double(self!.reconnectWait),
+                    target: self!, selector: "tryReconnect", userInfo: nil, repeats: true)
                 return
             }
             
-            if triesLeft != -1 {
-                triesLeft = triesLeft - 1
-            }
-            
-            self!.tryReconnect(triesLeft: triesLeft)
+            return
         }
-        self.reconnecting = true
         
+        self.handleEvent("reconnectAttempt", data: self.reconnectAttempts - self.currentReconnectAttempt,
+            isInternalMessage: true)
+        
+        self.currentReconnectAttempt++
         if self.paramConnect {
             self.connectWithParams(self.params)
         } else {
@@ -817,7 +821,7 @@ class SocketIOClient {
             self.didForceClose()
         } else {
             self.handleEvent("reconnect", data: reason, isInternalMessage: true)
-            self.tryReconnect(triesLeft: self.reconnectAttempts)
+            self.tryReconnect()
         }
     }
     
@@ -830,7 +834,7 @@ class SocketIOClient {
             self.didForceClose()
         } else if !self.reconnecting {
             self.handleEvent("reconnect", data: error.localizedDescription, isInternalMessage: true)
-            self.tryReconnect(triesLeft: self.reconnectAttempts)
+            self.tryReconnect()
         }
     }
 }

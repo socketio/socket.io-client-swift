@@ -194,7 +194,6 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         }
         
         let postStr = self.postWait.reduce("") {$0 + $1}
-        assert(self.postWait.count != 0)
         self.postWait.removeAll(keepCapacity: true)
         
         var req = NSMutableURLRequest(URL:
@@ -221,7 +220,6 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
             
             self?.flushWaitingForPost()
             self?.waitingForPost = false
-            self?.doPoll()
         }
     }
     
