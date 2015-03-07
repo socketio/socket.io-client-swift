@@ -1,9 +1,9 @@
 Socket.IO-Client-Swift
 ======================
 
-Socket.IO-client for Swift. Supports ws/wss connections and binary. For socket.io 1.0+ and Swift 1.2.
+Socket.IO-client for Swift. Supports ws/wss/polling connections and binary. For socket.io 1.0+ and Swift 1.2.
 
-For Swift 1.1 use the master branch.
+For Swift 1.1 use the 1.1 branch.
 
 Installation
 ============
@@ -15,14 +15,15 @@ API
 ===
 Constructor
 -----------
-`init(socketURL: String, opts:[String: AnyObject]? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values.)
+`init(socketURL: String, opts:[String: AnyObject]? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values. See example)
 Methods
 -------
 1. `socket.on(name:String, callback:((data:NSArray?, ack:AckEmitter?) -> Void))` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
+2. `socket.onAny(callback:((event:String, items:AnyObject?)) -> Void)` - Adds a handler for all events. It will be called on any received event.
 3. `socket.emit(event:String, args:AnyObject...)` - Sends a message. Can send multiple args.
-4. `socket.emitWithAck(event:String, args:AnyObject...) -> SocketAckHandler` - Sends a message that requests an acknoweldgement from the server. Returns a SocketAckHandler which you can use to add an onAck handler. See example.
+4. `socket.emitWithAck(event:String, args:AnyObject...) -> SocketAckHandler` - Sends a message that requests an acknowledgement from the server. Returns a SocketAckHandler which you can use to add an onAck handler. See example.
 5. `socket.connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
-6. `socket.connectWithParams(params:[String: AnyObject])` - Establishes a connection to the server, passing the specified params. A "connect" event is fired upon successful connection.
+6. `socket.connectWithParams(params:[String: AnyObject])` - Establishes a connection to the server passing the specified params. A "connect" event is fired upon successful connection.
 7. `socket.close()` - Closes the socket. Once a socket is closed it should not be reopened.
 
 Events
@@ -41,8 +42,12 @@ let socket = SocketIOClient(socketURL: "https://localhost:8080", opts: [
     "reconnects": true, // default true
     "reconnectAttempts": 5, // default -1 (infinite tries)
     "reconnectWait": 5, // default 10
-    "nsp": "swift" // connects to the specified namespace. Default is /
+    "nsp": "swift", // connects to the specified namespace. Default is /
+    "forcePolling": true // if true, the socket will only use XHR polling, default is false (polling/WebSockets)
 ])
+
+// Called on every event
+socket.onAny {println("got event: \($0.event) with items \($0.items)")}
 
 // Socket Events
 socket.on("connect") {data, ack in
@@ -67,7 +72,7 @@ socket.on("ackEvent") {data, ack in
     }
 
     socket.emitWithAck("ackTest", "test").onAck {data in
-        println(data)
+        println(data?[0])
     }
 
     ack?("Got your event", "dude")
@@ -98,8 +103,7 @@ socket.on("jsonTest") {data, ack in
     }
 }
 
-// Messages that have multiple items are passed
-// by an array
+// Event items are passed by an array
 socket.on("multipleItems") {data, ack in
     if data == nil {
         return

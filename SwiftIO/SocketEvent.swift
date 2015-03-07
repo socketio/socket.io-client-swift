@@ -74,29 +74,29 @@ class SocketEvent {
             if !hasBinary {
                 if nsp == nil {
                     if ack == nil {
-                        message = "42[\"\(event)\""
+                        message = "2[\"\(event)\""
                     } else {
-                        message = "42\(ack!)[\"\(event)\""
+                        message = "2\(ack!)[\"\(event)\""
                     }
                 } else {
                     if ack == nil {
-                        message = "42/\(nsp!),[\"\(event)\""
+                        message = "2/\(nsp!),[\"\(event)\""
                     } else {
-                        message = "42/\(nsp!),\(ack!)[\"\(event)\""
+                        message = "2/\(nsp!),\(ack!)[\"\(event)\""
                     }
                 }
             } else {
                 if nsp == nil {
                     if ack == nil {
-                        message = "45\(datas)-[\"\(event)\""
+                        message = "5\(datas)-[\"\(event)\""
                     } else {
-                        message = "45\(datas)-\(ack!)[\"\(event)\""
+                        message = "5\(datas)-\(ack!)[\"\(event)\""
                     }
                 } else {
                     if ack == nil {
-                        message = "45\(datas)-/\(nsp!),[\"\(event)\""
+                        message = "5\(datas)-/\(nsp!),[\"\(event)\""
                     } else {
-                        message = "45\(datas)-/\(nsp!),\(ack!)[\"\(event)\""
+                        message = "5\(datas)-/\(nsp!),\(ack!)[\"\(event)\""
                     }
                 }
             }
@@ -110,15 +110,15 @@ class SocketEvent {
             
             if ackType == 3 {
                 if nsp == "/" {
-                    msg = "43\(ack)["
+                    msg = "3\(ack)["
                 } else {
-                    msg = "43/\(nsp),\(ack)["
+                    msg = "3/\(nsp),\(ack)["
                 }
             } else {
                 if nsp == "/" {
-                    msg = "46\(binary)-\(ack)["
+                    msg = "6\(binary)-\(ack)["
                 } else {
-                    msg = "46\(binary)-/\(nsp),\(ack)["
+                    msg = "6\(binary)-/\(nsp),\(ack)["
                 }
             }
             
