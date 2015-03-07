@@ -151,29 +151,29 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         self.waitingForPoll = true
         
         self.session.dataTaskWithRequest(req) {[weak self] data, res, err in
-                if self == nil {
-                    return
-                } else if err != nil {
-                    if self!.polling {
-                        self?.handlePollingFailed(err)
-                    }
+            if self == nil {
+                return
+            } else if err != nil {
+                if self!.polling {
+                    self?.handlePollingFailed(err)
+                }
+                return
+            }
+            
+            // println(data)
+            
+            if let str = NSString(data: data, encoding: NSUTF8StringEncoding) as? String {
+                // println(str)
+                
+                dispatch_async(self?.parseQueue) {[weak self] in
+                    self?.parsePollingMessage(str)
                     return
                 }
-                
-                // println(data)
-                
-                if let str = NSString(data: data, encoding: NSUTF8StringEncoding) as? String {
-                    // println(str)
-                    
-                    dispatch_async(self?.parseQueue) {[weak self] in
-                        self?.parsePollingMessage(str)
-                        return
-                    }
-                }
-                
-                self?.waitingForPoll = false
-                self?.doPoll()
-        }.resume()
+            }
+            
+            self?.waitingForPoll = false
+            self?.doPoll()
+            }.resume()
     }
     
     private func flushProbeWait() {
@@ -229,12 +229,16 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
                     self?.handlePollingFailed(err)
                 }
                 return
+            } else if self == nil {
+                return
             }
             
-            self?.flushWaitingForPost()
             self?.waitingForPost = false
-            self?.doPoll()
-        }.resume()
+            dispatch_async(self!.emitQueue) {
+                self?.flushWaitingForPost()
+                self?.doPoll()
+                return
+            }}.resume()
     }
     
     // We had packets waiting for send when we upgraded
@@ -252,6 +256,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
     private func handlePollingFailed(reason:NSError?) {
         if !self.client.reconnecting {
             self.connected = false
+            self.ws?.close()
             self.pingTimer?.invalidate()
             self.waitingForPoll = false
             self.waitingForPost = false
@@ -271,61 +276,58 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         let reqPolling = NSURLRequest(URL: NSURL(string: urlPolling + "&b64=1")!)
         
         self.session.dataTaskWithRequest(reqPolling) {[weak self] data, res, err in
-                var err:NSError?
-                if self == nil {
-                    return
-                } else if err != nil || data == nil {
-                    if self!.polling {
-                        self?.handlePollingFailed(err)
-                    }
+            var err2:NSError?
+            if self == nil {
+                return
+            } else if err != nil || data == nil {
+                self?.handlePollingFailed(err)
+                return
+            }
+            
+            if let dataString = NSString(data: data, encoding: NSUTF8StringEncoding) {
+                var mutString = RegexMutable(dataString)
+                let parsed:[String]? = mutString["(\\d*):(\\d)(\\{.*\\})?"].groups()
+                
+                if parsed == nil || parsed?.count != 4 {
                     return
                 }
                 
-                if let dataString = NSString(data: data, encoding: NSUTF8StringEncoding) {
-                    var mutString = RegexMutable(dataString)
-                    let parsed = mutString["(\\d*):(\\d)(\\{.*\\})?"].groups()
-                    
-                    if parsed.count != 4 {
-                        return
-                    }
-                    
-                    let length = parsed[1]
-                    let type = parsed[2]
-                    let jsonData = parsed[3].dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)
-                    
-                    if type != "0" {
-                        NSLog("Error handshaking")
-                        return
-                    }
-                    
-                    self?.connected = true
-                    
-                    if let json = NSJSONSerialization.JSONObjectWithData(jsonData!,
-                        options: NSJSONReadingOptions.AllowFragments, error: &err) as? NSDictionary {
-                            if let sid = json["sid"] as? String {
-                                // println(json)
-                                self?.sid = sid
-                                
-                                if !self!.forcePolling {
-                                    self?.ws = SRWebSocket(URL:
-                                        NSURL(string: urlWebSocket + "&sid=\(self!.sid)")!)
-                                    self?.ws?.delegate = self
-                                    self?.ws?.open()
-                                }
-                            } else {
-                                NSLog("Error handshaking")
-                                return
-                            }
-                            
-                            if let pingInterval = json["pingInterval"] as? Int {
-                                self?.pingInterval = pingInterval / 1000
-                            }
-                    }
-                    
-                    self?.doPoll()
-                    self?.startPingTimer()
+                let length = parsed![1]
+                let type = parsed![2]
+                let jsonData = parsed![3].dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)
+                
+                if type != "0" {
+                    NSLog("Error handshaking")
+                    return
                 }
-        }.resume()
+                
+                self?.connected = true
+                
+                if let json = NSJSONSerialization.JSONObjectWithData(jsonData!,
+                    options: NSJSONReadingOptions.AllowFragments, error: &err2) as? NSDictionary {
+                        if let sid = json["sid"] as? String {
+                            // println(json)
+                            self?.sid = sid
+                            
+                            if !self!.forcePolling {
+                                self?.ws = SRWebSocket(URL:
+                                    NSURL(string: urlWebSocket + "&sid=\(self!.sid)")!)
+                                self?.ws?.delegate = self
+                                self?.ws?.open()
+                            }
+                        } else {
+                            NSLog("Error handshaking")
+                            return
+                        }
+                        
+                        if let pingInterval = json["pingInterval"] as? Int {
+                            self?.pingInterval = pingInterval / 1000
+                        }
+                }
+                
+                self?.doPoll()
+                self?.startPingTimer()
+            }}.resume()
     }
     
     // Translatation of engine.io-parser#decodePayload
@@ -525,7 +527,7 @@ class SocketEngine: NSObject, SRWebSocketDelegate {
         if self.pingInterval == nil {
             return
         }
-                
+        
         self.pingTimer?.invalidate()
         dispatch_async(dispatch_get_main_queue()) {
             self.pingTimer = NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(self.pingInterval!), target: self,

@@ -45,6 +45,9 @@ class SocketEventHandler {
     
     func executeCallback(_ items:NSArray? = nil, withAck ack:Int? = nil, withAckType type:Int? = nil,
         withSocket socket:SocketIOClient? = nil) {
-            callback?(items, ack != nil ? emitAckCallback(socket!, ack!, type!) : nil)
+            dispatch_async(dispatch_get_main_queue()) {[weak self] in
+                self?.callback?(items, ack != nil ? emitAckCallback(socket!, ack!, type!) : nil)
+                return
+            }
     }
 }

@@ -280,30 +280,28 @@ class SocketIOClient {
             }
             for handler in self.handlers {
                 if handler.event == event {
-                    dispatch_async(dispatch_get_main_queue()) {
-                        if data is NSArray {
-                            if ack != nil {
-                                handler.executeCallback(data as? NSArray, withAck: ack!,
-                                    withAckType: ackType, withSocket: self)
-                            } else {
-                                handler.executeCallback(data as? NSArray)
-                            }
+                    if data is NSArray {
+                        if ack != nil {
+                            handler.executeCallback(data as? NSArray, withAck: ack!,
+                                withAckType: ackType, withSocket: self)
                         } else {
-                            
-                            // Trying to do a ternary expression in the executeCallback method
-                            // seemed to crash Swift
-                            var dataArr:NSArray? = nil
-                            
-                            if let data:AnyObject = data {
-                                dataArr = [data]
-                            }
-                            
-                            if ack != nil {
-                                handler.executeCallback(dataArr, withAck: ack!,
-                                    withAckType: ackType, withSocket: self)
-                            } else {
-                                handler.executeCallback(dataArr)
-                            }
+                            handler.executeCallback(data as? NSArray)
+                        }
+                    } else {
+                        
+                        // Trying to do a ternary expression in the executeCallback method
+                        // seemed to crash Swift
+                        var dataArr:NSArray? = nil
+                        
+                        if let data:AnyObject = data {
+                            dataArr = [data]
+                        }
+                        
+                        if ack != nil {
+                            handler.executeCallback(dataArr, withAck: ack!,
+                                withAckType: ackType, withSocket: self)
+                        } else {
+                            handler.executeCallback(dataArr)
                         }
                     }
                 }
