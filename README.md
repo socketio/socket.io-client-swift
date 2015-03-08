@@ -147,6 +147,11 @@ socket.emit("testData", [
             allowLossyConversion: false)!,
         "test": true])
 ```
+
+Detailed Example
+================
+A more detailed example can be found [here](https://github.com/nuclearace/socket.io-client-swift-example)
+
 License
 =======
 MIT
