@@ -7,7 +7,7 @@ Pod::Spec.new do |s|
                    DESC
 
   s.homepage     = "https://github.com/banjun/socket.io-client-swift"
-  s.license      = "Mixed (each submodules)"
+  s.license      = { :type => 'MIT' }
   s.author       = { "banjun" => "banjun@gmail.com" }
   s.platform     = :ios, "8.0"
   s.source       = { :git => "https://github.com/banjun/socket.io-client-swift.git", :tag => s.version.to_s }
