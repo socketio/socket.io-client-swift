@@ -24,7 +24,7 @@
 
 import Foundation
 
-class SocketIOClient {
+public class SocketIOClient: NSObject {
     let socketURL:NSMutableString!
     let ackQueue = dispatch_queue_create("ackQueue".cStringUsingEncoding(NSUTF8StringEncoding),
         DISPATCH_QUEUE_SERIAL)
@@ -57,7 +57,7 @@ class SocketIOClient {
     }
     var sid:String?
     
-    init(socketURL:String, opts:[String: AnyObject]? = nil) {
+    public init(socketURL:String, opts:[String: AnyObject]? = nil) {
         var mutURL = RegexMutable(socketURL)
         
         if mutURL["https://"].matches().count != 0 {
@@ -96,11 +96,13 @@ class SocketIOClient {
             self.reconnectAttempts = -1
         }
         
+        super.init()
+        
         self.engine = SocketEngine(client: self, forcePolling: self.forcePolling)
     }
     
     // Closes the socket
-    func close() {
+    public func close() {
         self.closed = true
         self.connecting = false
         self.connected = false
@@ -109,7 +111,7 @@ class SocketIOClient {
     }
     
     // Connects to the server
-    func connect() {
+    public func connect() {
         if self.closed {
             println("Warning! This socket was previously closed. This might be dangerous!")
             self.closed = false
@@ -119,7 +121,7 @@ class SocketIOClient {
     }
     
     // Connect to the server using params
-    func connectWithParams(params:[String: AnyObject]) {
+    public func connectWithParams(params:[String: AnyObject]) {
         if self.closed {
             println("Warning! This socket was previously closed. This might be dangerous!")
             self.closed = false
@@ -139,6 +141,7 @@ class SocketIOClient {
         self.currentReconnectAttempt = 0
         self.reconnectTimer?.invalidate()
         self.reconnectTimer = nil
+        
         self.handleEvent("connect", data: nil, isInternalMessage: false)
     }
     
@@ -155,7 +158,7 @@ class SocketIOClient {
     // Sends a message with multiple args
     // If a message contains binary we have to send those
     // seperately.
-    func emit(event:String, _ args:AnyObject...) {
+    public func emit(event:String, _ args:AnyObject...) {
         if !self.connected {
             return
         }
@@ -166,7 +169,12 @@ class SocketIOClient {
         }
     }
     
-    func emitWithAck(event:String, _ args:AnyObject...) -> SocketAckHandler {
+    // Objc doesn't have variadics
+    public func emitObjc(event:String, _ args:[AnyObject]) {
+        self.emit(event, args)
+    }
+
+    public func emitWithAck(event:String, _ args:AnyObject...) -> SocketAckHandler {
         if !self.connected {
             return SocketAckHandler(event: "fail")
         }
@@ -181,6 +189,10 @@ class SocketIOClient {
         }
         
         return ackHandler
+    }
+    
+    public func emitWithAckObjc(event:String, _ args:[AnyObject]) -> SocketAckHandler {
+        return self.emitWithAck(event, args)
     }
     
     private func _emit(event:String, _ args:[AnyObject], ack:Bool = false) {
@@ -217,7 +229,7 @@ class SocketIOClient {
     }
     
     // If the server wants to know that the client received data
-    func emitAck(ack:Int, withData data:[AnyObject]?, withAckType ackType:Int) {
+    internal func emitAck(ack:Int, withData data:[AnyObject]?, withAckType ackType:Int) {
         dispatch_async(self.ackQueue) {[weak self] in
             if self == nil || !self!.connected || data == nil {
                 return
@@ -270,7 +282,7 @@ class SocketIOClient {
     }
     
     // Handles events
-    func handleEvent(event:String, data:AnyObject?, isInternalMessage:Bool = false,
+    public func handleEvent(event:String, data:AnyObject?, isInternalMessage:Bool = false,
         wantsAck ack:Int? = nil, withAckType ackType:Int = 3) {
             // println("Should do event: \(event) with data: \(data)")
             if !self.connected && !isInternalMessage {
@@ -319,18 +331,18 @@ class SocketIOClient {
     }
     
     // Adds handler for an event
-    func on(name:String, callback:NormalCallback) {
+    public func on(name:String, callback:NormalCallback) {
         let handler = SocketEventHandler(event: name, callback: callback)
         self.handlers.append(handler)
     }
     
     // Adds a handler for any event
-    func onAny(handler:(AnyHandler) -> Void) {
+    public func onAny(handler:(AnyHandler) -> Void) {
         self.anyHandler = handler
     }
     
     // Opens the connection to the socket
-    func open() {
+    public func open() {
         self.connect()
     }
     
@@ -497,7 +509,7 @@ class SocketIOClient {
     }
     
     // Parses messages recieved
-    func parseSocketMessage(stringMessage:String) {
+    internal func parseSocketMessage(stringMessage:String) {
         // println(message!)
         
         // Check for successful namepsace connect
@@ -718,7 +730,7 @@ class SocketIOClient {
     }
     
     // Handles binary data
-    func parseBinaryData(data:NSData) {
+    internal func parseBinaryData(data:NSData) {
         let shouldExecute = self.waitingData[0].addData(data)
         
         if shouldExecute {
@@ -763,7 +775,7 @@ class SocketIOClient {
     }
     
     // Something happened while polling
-    func pollingDidFail(err:NSError?) {
+    internal func pollingDidFail(err:NSError?) {
         if !self.reconnecting {
             self.connected = false
             self.handleEvent("reconnect", data: err?.localizedDescription, isInternalMessage: true)
@@ -772,7 +784,7 @@ class SocketIOClient {
     }
     
     // We lost connection and should attempt to reestablish
-    @objc func tryReconnect() {
+    internal func tryReconnect() {
         if self.reconnectAttempts != -1 && self.currentReconnectAttempt + 1 > self.reconnectAttempts {
             self.didForceClose()
             return

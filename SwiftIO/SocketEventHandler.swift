@@ -24,9 +24,9 @@
 
 import Foundation
 
-typealias NormalCallback = (NSArray?, AckEmitter?) -> Void
-typealias AnyHandler = (event:String, items:AnyObject?)
-typealias AckEmitter = (AnyObject...) -> Void
+public typealias NormalCallback = (NSArray?, AckEmitter?) -> Void
+public typealias AnyHandler = (event:String, items:AnyObject?)
+public typealias AckEmitter = (AnyObject...) -> Void
 
 private func emitAckCallback(socket:SocketIOClient, num:Int, type:Int) -> AckEmitter {
     func emitter(items:AnyObject...) {

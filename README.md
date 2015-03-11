@@ -146,6 +146,21 @@ socket.emit("testData", [
         "test": true])
 ```
 
+Objective-C Example
+===================
+```objective-c
+SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8080" opts:nil];
+
+[socket on: @"connect" callback: ^(NSArray* data, void (^ack)(NSArray*)) {
+    NSLog(@"connected");
+    [socket emitObjc:@"echo" :@[@"echo test"]];
+    [[socket emitWithAckObjc:@"ackack" :@[@"test"]] onAck:^(NSArray* data) {
+        NSLog(@"Got data");
+    }];
+}];
+
+```
+
 Detailed Example
 ================
 A more detailed example can be found [here](https://github.com/nuclearace/socket.io-client-swift-example)

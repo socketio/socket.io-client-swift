@@ -147,7 +147,8 @@ class SocketEngine: NSObject, WebSocketDelegate {
             return
         }
         
-        let req = NSURLRequest(URL: NSURL(string: self.urlPolling! + "&sid=\(self.sid)")!)
+        let req = NSMutableURLRequest(URL: NSURL(string: self.urlPolling! + "&sid=\(self.sid)")!)
+        req.timeoutInterval = 0.0
         self.waitingForPoll = true
         
         self.session.dataTaskWithRequest(req) {[weak self] data, res, err in
@@ -481,7 +482,6 @@ class SocketEngine: NSObject, WebSocketDelegate {
     
     func sendPing() {
         if self.websocket {
-            self.ws?.writePing(NSData())
             self.sendWebSocketMessage("", withType: PacketType.PING)
         } else {
             self.sendPollMessage("", withType: PacketType.PING)
