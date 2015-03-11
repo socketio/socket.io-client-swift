@@ -1,0 +1,14 @@
+PODS:
+  - Socket.IO-Client-Swift (0.0.1)
+
+DEPENDENCIES:
+  - Socket.IO-Client-Swift (from `../`)
+
+EXTERNAL SOURCES:
+  Socket.IO-Client-Swift:
+    :path: ../
+
+SPEC CHECKSUMS:
+  Socket.IO-Client-Swift: f16ee2a789714bea303a22c9a879485de72df386
+
+COCOAPODS: 0.36.0
