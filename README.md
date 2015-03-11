@@ -78,25 +78,6 @@ socket.on("ackEvent") {data, ack in
     ack?("Got your event", "dude")
 }
 
-socket.on("disconnect") {data, ack in
-    if let reason = data?[0] as? String {
-        println("Socket disconnected: \(reason)")
-    }
-}
-
-socket.on("reconnect") {data, ack in
-    if let reason = data?[0] as? String {
-        println("Socket reconnecting: \(reason)")
-    }
-}
-
-socket.on("reconnectAttempt") {data, ack in
-    if let triesLeft = data?[0] as? Int {
-        println(triesLeft)
-    }
-}
-// End Socket Events
-
 socket.on("jsonTest") {data, ack in
     if let json = data?[0] as? NSDictionary {
        println(json["test"]!) // foo bar
@@ -119,22 +100,6 @@ socket.on("multipleItems") {data, ack in
 
     if let obj = data![4] as? NSDictionary {
         println(obj["test"])
-    }
-}
-
-// Recieving binary
-socket.on("dataTest") {data, ack in
-    if let data = data?[0] as? NSData {
-        println("data is binary")
-    }
-}
-
-socket.on("objectDataTest") {data, ack in
-    if let dict = data?[0] as? NSDictionary {
-        if let data = dict["data"] as? NSData {
-            let string = NSString(data: data, encoding: NSUTF8StringEncoding)
-            println("Got data: \(string!)")
-        }
     }
 }
 
