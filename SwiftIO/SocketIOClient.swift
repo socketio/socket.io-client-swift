@@ -24,7 +24,7 @@
 
 import Foundation
 
-class SocketIOClient {
+public class SocketIOClient {
     let engine:SocketEngine!
     let socketURL:NSMutableString!
     let ackQueue = dispatch_queue_create("ackQueue".cStringUsingEncoding(NSUTF8StringEncoding),
@@ -57,7 +57,7 @@ class SocketIOClient {
     }
     var sid:String?
     
-    init(socketURL:String, opts:[String: AnyObject]? = nil) {
+    public init(socketURL:String, opts:[String: AnyObject]? = nil) {
         var mutURL = RegexMutable(socketURL)
         
         if mutURL["https://"].matches().count != 0 {
@@ -97,7 +97,7 @@ class SocketIOClient {
     }
     
     // Closes the socket
-    func close() {
+    public func close() {
         self.closed = true
         self.connecting = false
         self.connected = false
@@ -106,7 +106,7 @@ class SocketIOClient {
     }
     
     // Connects to the server
-    func connect() {
+    public func connect() {
         if self.closed {
             println("Warning! This socket was previously closed. This might be dangerous!")
             self.closed = false
@@ -116,7 +116,7 @@ class SocketIOClient {
     }
     
     // Connect to the server using params
-    func connectWithParams(params:[String: AnyObject]) {
+    public func connectWithParams(params:[String: AnyObject]) {
         if self.closed {
             println("Warning! This socket was previously closed. This might be dangerous!")
             self.closed = false
@@ -152,7 +152,7 @@ class SocketIOClient {
     // Sends a message with multiple args
     // If a message contains binary we have to send those
     // seperately.
-    func emit(event:String, _ args:AnyObject...) {
+    public func emit(event:String, _ args:AnyObject...) {
         if !self.connected {
             return
         }
@@ -163,7 +163,7 @@ class SocketIOClient {
         }
     }
     
-    func emitWithAck(event:String, _ args:AnyObject...) -> SocketAckHandler {
+    public func emitWithAck(event:String, _ args:AnyObject...) -> SocketAckHandler {
         if !self.connected {
             return SocketAckHandler(event: "fail")
         }
@@ -316,13 +316,13 @@ class SocketIOClient {
     }
     
     // Adds handler for an event
-    func on(name:String, callback:NormalCallback) {
+    public func on(name:String, callback:NormalCallback) {
         let handler = SocketEventHandler(event: name, callback: callback)
         self.handlers.append(handler)
     }
     
     // Adds a handler for any event
-    func onAny(handler:(AnyHandler) -> Void) {
+    public func onAny(handler:(AnyHandler) -> Void) {
         self.anyHandler = handler
     }
     

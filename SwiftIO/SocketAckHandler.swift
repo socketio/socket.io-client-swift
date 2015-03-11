@@ -26,7 +26,7 @@ import Foundation
 
 typealias AckCallback = (NSArray?) -> Void
 
-class SocketAckHandler {
+public class SocketAckHandler {
     let ackNum:Int!
     let event:String!
     var callback:AckCallback?
