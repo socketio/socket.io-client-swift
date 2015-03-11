@@ -105,12 +105,6 @@ socket.on("multipleItems") {data, ack in
 
 // Connecting
 socket.connect()
-
-// Sending binary
-socket.emit("testData", [
-        "data": "Hello World".dataUsingEncoding(NSUTF8StringEncoding,
-            allowLossyConversion: false)!,
-        "test": true])
 ```
 
 Objective-C Example
