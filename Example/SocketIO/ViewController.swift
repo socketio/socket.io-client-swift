@@ -7,19 +7,24 @@
 //
 
 import UIKit
+import Socket_IO_Client_Swift
 
 class ViewController: UIViewController {
+    let socket = SocketIOClient(socketURL: "http://localhost:3000")
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        
+        socket.onAny {println("got event: \($0.event) with items \($0.items)")}
+        socket.on("connect") { (data, ack) in
+            println("on connect: \(data)")
+            self.socket.emit("message", "Hello!")
+        }
+        socket.on("message") { (data, ack) in
+            println("on message: \(data)")
+            self.socket.close()
+        }
+        socket.connect()
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
-
 }
 
