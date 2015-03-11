@@ -3,13 +3,11 @@ Socket.IO-Client-Swift
 
 Socket.IO-client for Swift. Supports ws/wss/polling connections and binary. For socket.io 1.0+ and Swift 1.2.
 
-For Swift 1.1 use the 1.1 branch.
+For Swift 1.1 use the master branch.
 
 Installation
 ============
-1. Requires linking [SocketRocket](https://github.com/square/SocketRocket) against your xcode project. (Be sure to link the [frameworks](https://github.com/square/SocketRocket#framework-dependencies) required by SocketRocket)
-2. Create a bridging header for SocketRocket
-3. Copy the SwiftIO folder into your xcode project
+1. Copy the SwiftIO folder into your Xcode project!
 
 API
 ===
@@ -21,10 +19,12 @@ Methods
 1. `socket.on(name:String, callback:((data:NSArray?, ack:AckEmitter?) -> Void))` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
 2. `socket.onAny(callback:((event:String, items:AnyObject?)) -> Void)` - Adds a handler for all events. It will be called on any received event.
 3. `socket.emit(event:String, args:AnyObject...)` - Sends a message. Can send multiple args.
-4. `socket.emitWithAck(event:String, args:AnyObject...) -> SocketAckHandler` - Sends a message that requests an acknowledgement from the server. Returns a SocketAckHandler which you can use to add an onAck handler. See example.
-5. `socket.connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
-6. `socket.connectWithParams(params:[String: AnyObject])` - Establishes a connection to the server passing the specified params. A "connect" event is fired upon successful connection.
-7. `socket.close()` - Closes the socket. Once a socket is closed it should not be reopened.
+4. `socket.emitObjc(event:String, args:[AnyObject])` - `emit` for Objective-C
+5. `socket.emitWithAck(event:String, args:AnyObject...) -> SocketAckHandler` - Sends a message that requests an acknowledgement from the server. Returns a SocketAckHandler which you can use to add an onAck handler. See example.
+6. `socket.emitWithAckObjc(event:String, _ args:[AnyObject]) -> SocketAckHandler` - `emitWithAck` for Objective-C.
+7. `socket.connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
+8. `socket.connectWithParams(params:[String: AnyObject])` - Establishes a connection to the server passing the specified params. A "connect" event is fired upon successful connection.
+9. `socket.close()` - Closes the socket. Once a socket is closed it should not be reopened.
 
 Events
 ------
@@ -78,25 +78,6 @@ socket.on("ackEvent") {data, ack in
     ack?("Got your event", "dude")
 }
 
-socket.on("disconnect") {data, ack in
-    if let reason = data?[0] as? String {
-        println("Socket disconnected: \(reason)")
-    }
-}
-
-socket.on("reconnect") {data, ack in
-    if let reason = data?[0] as? String {
-        println("Socket reconnecting: \(reason)")
-    }
-}
-
-socket.on("reconnectAttempt") {data, ack in
-    if let triesLeft = data?[0] as? Int {
-        println(triesLeft)
-    }
-}
-// End Socket Events
-
 socket.on("jsonTest") {data, ack in
     if let json = data?[0] as? NSDictionary {
        println(json["test"]!) // foo bar
@@ -122,30 +103,23 @@ socket.on("multipleItems") {data, ack in
     }
 }
 
-// Recieving binary
-socket.on("dataTest") {data, ack in
-    if let data = data?[0] as? NSData {
-        println("data is binary")
-    }
-}
-
-socket.on("objectDataTest") {data, ack in
-    if let dict = data?[0] as? NSDictionary {
-        if let data = dict["data"] as? NSData {
-            let string = NSString(data: data, encoding: NSUTF8StringEncoding)
-            println("Got data: \(string!)")
-        }
-    }
-}
-
 // Connecting
 socket.connect()
+```
 
-// Sending binary
-socket.emit("testData", [
-        "data": "Hello World".dataUsingEncoding(NSUTF8StringEncoding,
-            allowLossyConversion: false)!,
-        "test": true])
+Objective-C Example
+===================
+```objective-c
+SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8080" opts:nil];
+
+[socket on: @"connect" callback: ^(NSArray* data, void (^ack)(NSArray*)) {
+    NSLog(@"connected");
+    [socket emitObjc:@"echo" :@[@"echo test"]];
+    [[socket emitWithAckObjc:@"ackack" :@[@"test"]] onAck:^(NSArray* data) {
+        NSLog(@"Got data");
+    }];
+}];
+
 ```
 
 Detailed Example

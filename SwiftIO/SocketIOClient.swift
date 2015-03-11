@@ -24,7 +24,7 @@
 
 import Foundation
 
-class SocketIOClient {
+public class SocketIOClient: NSObject {
     let socketURL:NSMutableString!
     let ackQueue = dispatch_queue_create("ackQueue".cStringUsingEncoding(NSUTF8StringEncoding),
         DISPATCH_QUEUE_SERIAL)
@@ -57,7 +57,7 @@ class SocketIOClient {
     }
     var sid:String?
     
-    init(socketURL:String, opts:[String: AnyObject]? = nil) {
+    public init(socketURL:String, opts:[String: AnyObject]? = nil) {
         var mutURL = RegexMutable(socketURL)
         
         if mutURL["https://"].matches().count != 0 {
@@ -96,11 +96,13 @@ class SocketIOClient {
             self.reconnectAttempts = -1
         }
         
+        super.init()
+        
         self.engine = SocketEngine(client: self, forcePolling: self.forcePolling)
     }
     
     // Closes the socket
-    func close() {
+    public func close() {
         self.closed = true
         self.connecting = false
         self.connected = false
@@ -109,7 +111,7 @@ class SocketIOClient {
     }
     
     // Connects to the server
-    func connect() {
+    public func connect() {
         if self.closed {
             println("Warning! This socket was previously closed. This might be dangerous!")
             self.closed = false
@@ -119,7 +121,7 @@ class SocketIOClient {
     }
     
     // Connect to the server using params
-    func connectWithParams(params:[String: AnyObject]) {
+    public func connectWithParams(params:[String: AnyObject]) {
         if self.closed {
             println("Warning! This socket was previously closed. This might be dangerous!")
             self.closed = false
@@ -139,6 +141,7 @@ class SocketIOClient {
         self.currentReconnectAttempt = 0
         self.reconnectTimer?.invalidate()
         self.reconnectTimer = nil
+        
         self.handleEvent("connect", data: nil, isInternalMessage: false)
     }
     
@@ -155,7 +158,7 @@ class SocketIOClient {
     // Sends a message with multiple args
     // If a message contains binary we have to send those
     // seperately.
-    func emit(event:String, _ args:AnyObject...) {
+    public func emit(event:String, _ args:AnyObject...) {
         if !self.connected {
             return
         }
@@ -166,7 +169,12 @@ class SocketIOClient {
         }
     }
     
-    func emitWithAck(event:String, _ args:AnyObject...) -> SocketAckHandler {
+    // Objc doesn't have variadics
+    public func emitObjc(event:String, _ args:[AnyObject]) {
+        self.emit(event, args)
+    }
+
+    public func emitWithAck(event:String, _ args:AnyObject...) -> SocketAckHandler {
         if !self.connected {
             return SocketAckHandler(event: "fail")
         }
@@ -181,6 +189,10 @@ class SocketIOClient {
         }
         
         return ackHandler
+    }
+    
+    public func emitWithAckObjc(event:String, _ args:[AnyObject]) -> SocketAckHandler {
+        return self.emitWithAck(event, args)
     }
     
     private func _emit(event:String, _ args:[AnyObject], ack:Bool = false) {
@@ -217,7 +229,7 @@ class SocketIOClient {
     }
     
     // If the server wants to know that the client received data
-    func emitAck(ack:Int, withData data:[AnyObject]?, withAckType ackType:Int) {
+    internal func emitAck(ack:Int, withData data:[AnyObject]?, withAckType ackType:Int) {
         dispatch_async(self.ackQueue) {[weak self] in
             if self == nil || !self!.connected || data == nil {
                 return
@@ -257,11 +269,11 @@ class SocketIOClient {
                 return true
             } else {
                 if data is NSArray {
-                    handler.callback?(data as? NSArray)
+                    handler.executeAck(data as? NSArray)
                 } else if data != nil {
-                    handler.callback?([data!])
+                    handler.executeAck([data!])
                 } else {
-                    handler.callback?(nil)
+                    handler.executeAck(nil)
                 }
                 
                 return false
@@ -270,7 +282,7 @@ class SocketIOClient {
     }
     
     // Handles events
-    func handleEvent(event:String, data:AnyObject?, isInternalMessage:Bool = false,
+    public func handleEvent(event:String, data:AnyObject?, isInternalMessage:Bool = false,
         wantsAck ack:Int? = nil, withAckType ackType:Int = 3) {
             // println("Should do event: \(event) with data: \(data)")
             if !self.connected && !isInternalMessage {
@@ -319,18 +331,18 @@ class SocketIOClient {
     }
     
     // Adds handler for an event
-    func on(name:String, callback:NormalCallback) {
+    public func on(name:String, callback:NormalCallback) {
         let handler = SocketEventHandler(event: name, callback: callback)
         self.handlers.append(handler)
     }
     
     // Adds a handler for any event
-    func onAny(handler:(AnyHandler) -> Void) {
+    public func onAny(handler:(AnyHandler) -> Void) {
         self.anyHandler = handler
     }
     
     // Opens the connection to the socket
-    func open() {
+    public func open() {
         self.connect()
     }
     
@@ -497,77 +509,86 @@ class SocketIOClient {
     }
     
     // Parses messages recieved
-    func parseSocketMessage(message:AnyObject?) {
-        if message == nil {
-            return
-        }
-        
+    internal func parseSocketMessage(stringMessage:String) {
         // println(message!)
         
-        if let stringMessage = message as? String {
-            // Check for successful namepsace connect
+        // Check for successful namepsace connect
+        if self.nsp != nil {
+            if stringMessage == "0/\(self.nsp!)" {
+                self.didConnect()
+                return
+            }
+        }
+        
+        if stringMessage == "0" {
             if self.nsp != nil {
-                if stringMessage == "0/\(self.nsp!)" {
-                    self.didConnect()
-                    return
-                }
+                // Join namespace
+                self.joinNamespace()
+                return
+            } else {
+                // Don't handle as internal because something crazy could happen where
+                // we disconnect before it's handled
+                self.didConnect()
+                return
+            }
+        }
+        
+        var mutMessage = RegexMutable(stringMessage)
+        
+        /**
+        Begin check for message
+        **/
+        let messageGroups = mutMessage["(\\d*)\\/?(\\w*)?,?(\\d*)?(\\[.*\\])?"].groups()
+        
+        if messageGroups[1].hasPrefix("2") {
+            var mesNum = messageGroups[1]
+            var ackNum:String
+            var namespace:String?
+            var messagePart:String!
+            
+            if messageGroups[3] != "" {
+                ackNum = messageGroups[3]
+            } else {
+                let range = Range<String.Index>(start: mesNum.startIndex, end: advance(mesNum.startIndex, 1))
+                mesNum.replaceRange(range, with: "")
+                ackNum = mesNum
             }
             
-            if stringMessage == "0" {
-                if self.nsp != nil {
-                    // Join namespace
-                    self.joinNamespace()
-                    return
-                } else {
-                    // Don't handle as internal because something crazy could happen where
-                    // we disconnect before it's handled
-                    self.didConnect()
-                    return
-                }
+            namespace = messageGroups[2]
+            messagePart = messageGroups[4]
+            
+            if namespace == "" && self.nsp != nil {
+                return
             }
             
-            var mutMessage = RegexMutable(stringMessage)
-            
-            /**
-            Begin check for message
-            **/
-            let messageGroups = mutMessage["(\\d*)\\/?(\\w*)?,?(\\d*)?(\\[.*\\])?"].groups()
-            
-            if messageGroups[1].hasPrefix("2") {
-                var mesNum = messageGroups[1]
-                var ackNum:String
-                var namespace:String?
-                var messagePart:String!
+            let messageInternals = RegexMutable(messagePart)["\\[\"(.*?)\",(.*?)?\\]$"].groups()
+            if messageInternals != nil && messageInternals.count > 2 {
+                let event = messageInternals[1]
+                var data:String?
                 
-                if messageGroups[3] != "" {
-                    ackNum = messageGroups[3]
+                if messageInternals[2] == "" {
+                    data = nil
                 } else {
-                    let range = Range<String.Index>(start: mesNum.startIndex, end: advance(mesNum.startIndex, 1))
-                    mesNum.replaceRange(range, with: "")
-                    ackNum = mesNum
+                    data = messageInternals[2]
                 }
                 
-                namespace = messageGroups[2]
-                messagePart = messageGroups[4]
-                
-                if namespace == "" && self.nsp != nil {
-                    return
-                }
-                
-                let messageInternals = RegexMutable(messagePart)["\\[\"(.*?)\",(.*?)?\\]$"].groups()
-                if messageInternals != nil && messageInternals.count > 2 {
-                    let event = messageInternals[1]
-                    var data:String?
-                    
-                    if messageInternals[2] == "" {
-                        data = nil
+                // It would be nice if socket.io only allowed one thing
+                // per message, but alas, it doesn't.
+                if let parsed:AnyObject = SocketIOClient.parseData(data) {
+                    if ackNum == "" {
+                        self.handleEvent(event, data: parsed)
                     } else {
-                        data = messageInternals[2]
+                        self.currentAck = ackNum.toInt()!
+                        self.handleEvent(event, data: parsed, isInternalMessage: false,
+                            wantsAck: ackNum.toInt(), withAckType: 3)
                     }
-                    
-                    // It would be nice if socket.io only allowed one thing
-                    // per message, but alas, it doesn't.
-                    if let parsed:AnyObject = SocketIOClient.parseData(data) {
+                    return
+                } else if let strData = data {
+                    // There are multiple items in the message
+                    // Turn it into a String and run it through
+                    // parseData to try and get an array.
+                    let asArray = "[\(strData)]"
+                    if let parsed:AnyObject = SocketIOClient.parseData(asArray) {
                         if ackNum == "" {
                             self.handleEvent(event, data: parsed)
                         } else {
@@ -576,78 +597,53 @@ class SocketIOClient {
                                 wantsAck: ackNum.toInt(), withAckType: 3)
                         }
                         return
-                    } else if let strData = data {
-                        // There are multiple items in the message
-                        // Turn it into a String and run it through
-                        // parseData to try and get an array.
-                        let asArray = "[\(strData)]"
-                        if let parsed:AnyObject = SocketIOClient.parseData(asArray) {
-                            if ackNum == "" {
-                                self.handleEvent(event, data: parsed)
-                            } else {
-                                self.currentAck = ackNum.toInt()!
-                                self.handleEvent(event, data: parsed, isInternalMessage: false,
-                                    wantsAck: ackNum.toInt(), withAckType: 3)
-                            }
-                            return
-                        }
                     }
                 }
-                
-                // Check for no item event
-                let noItemMessage = RegexMutable(messagePart)["\\[\"(.*?)\"]$"].groups()
-                if noItemMessage != nil && noItemMessage.count == 2 {
-                    let event = noItemMessage[1]
-                    if ackNum == "" {
-                        self.handleEvent(event, data: nil)
-                    } else {
-                        self.currentAck = ackNum.toInt()!
-                        self.handleEvent(event, data: nil, isInternalMessage: false,
-                            wantsAck: ackNum.toInt(), withAckType: 3)
-                    }
-                    return
-                }
-            } else if messageGroups[1].hasPrefix("3") {
-                let arr = Array(messageGroups[1])
-                var ackNum:String
-                let nsp = messageGroups[2]
-                
-                if nsp == "" && self.nsp != nil {
-                    return
-                }
-                
-                if nsp == "" {
-                    ackNum = String(arr[1...arr.count-1])
+            }
+            
+            // Check for no item event
+            let noItemMessage = RegexMutable(messagePart)["\\[\"(.*?)\"]$"].groups()
+            if noItemMessage != nil && noItemMessage.count == 2 {
+                let event = noItemMessage[1]
+                if ackNum == "" {
+                    self.handleEvent(event, data: nil)
                 } else {
-                    ackNum = messageGroups[3]
+                    self.currentAck = ackNum.toInt()!
+                    self.handleEvent(event, data: nil, isInternalMessage: false,
+                        wantsAck: ackNum.toInt(), withAckType: 3)
                 }
-                
-                let ackData:AnyObject? = SocketIOClient.parseData(messageGroups[4])
-                self.handleAck(ackNum.toInt()!, data: ackData)
-                
                 return
             }
-            /**
-            End Check for message
-            **/
+        } else if messageGroups[1].hasPrefix("3") {
+            let arr = Array(messageGroups[1])
+            var ackNum:String
+            let nsp = messageGroups[2]
             
-            // Check for message with binary placeholders
-            self.parseBinaryMessage(message: message!)
+            if nsp == "" && self.nsp != nil {
+                return
+            }
+            
+            if nsp == "" {
+                ackNum = String(arr[1...arr.count-1])
+            } else {
+                ackNum = messageGroups[3]
+            }
+            
+            let ackData:AnyObject? = SocketIOClient.parseData(messageGroups[4])
+            self.handleAck(ackNum.toInt()!, data: ackData)
+            
+            return
         }
+        /**
+        End Check for message
+        **/
         
-        // Message is binary
-        if let binary = message as? NSData {
-            if self.waitingData.isEmpty {
-                return
-            }
-            
-            self.parseBinaryData(binary)
-        }
+        // Check for message with binary placeholders
+        self.parseBinaryMessage(message: stringMessage)
     }
     
     // Tries to parse a message that contains binary
     private func parseBinaryMessage(#message:AnyObject) {
-        
         // println(message)
         if let stringMessage = message as? String {
             var mutMessage = RegexMutable(stringMessage)
@@ -734,7 +730,7 @@ class SocketIOClient {
     }
     
     // Handles binary data
-    private func parseBinaryData(data:NSData) {
+    internal func parseBinaryData(data:NSData) {
         let shouldExecute = self.waitingData[0].addData(data)
         
         if shouldExecute {
@@ -779,7 +775,7 @@ class SocketIOClient {
     }
     
     // Something happened while polling
-    func pollingDidFail(err:NSError?) {
+    internal func pollingDidFail(err:NSError?) {
         if !self.reconnecting {
             self.connected = false
             self.handleEvent("reconnect", data: err?.localizedDescription, isInternalMessage: true)
@@ -788,7 +784,7 @@ class SocketIOClient {
     }
     
     // We lost connection and should attempt to reestablish
-    @objc func tryReconnect() {
+    internal func tryReconnect() {
         if self.reconnectAttempts != -1 && self.currentReconnectAttempt + 1 > self.reconnectAttempts {
             self.didForceClose()
             return
@@ -809,8 +805,6 @@ class SocketIOClient {
                     target: self!, selector: "tryReconnect", userInfo: nil, repeats: true)
                 return
             }
-            
-            return
         }
         
         self.handleEvent("reconnectAttempt", data: self.reconnectAttempts - self.currentReconnectAttempt,
