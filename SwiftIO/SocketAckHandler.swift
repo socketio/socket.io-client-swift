@@ -39,4 +39,11 @@ class SocketAckHandler {
     func onAck(callback:AckCallback) {
         self.callback = callback
     }
+    
+    func executeAck(data:NSArray?) {
+        dispatch_async(dispatch_get_main_queue()) {[cb = self.callback] in
+            cb?(data)
+            return
+        }
+    }
 }

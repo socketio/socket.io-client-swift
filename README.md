@@ -7,9 +7,7 @@ For Swift 1.2 use the 1.2 branch.
 
 Installation
 ============
-1. Requires linking [SocketRocket](https://github.com/square/SocketRocket) against your xcode project. (Be sure to link the [frameworks](https://github.com/square/SocketRocket#framework-dependencies) required by SocketRocket)
-2. Create a bridging header for SocketRocket
-3. Copy the SwiftIO folder into your xcode project
+1. Copy the SwiftIO folder into your Xcode project!
 
 API
 ===

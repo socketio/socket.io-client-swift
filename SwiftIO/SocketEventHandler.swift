@@ -22,6 +22,8 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
+import Foundation
+
 typealias NormalCallback = (NSArray?, AckEmitter?) -> Void
 typealias AnyHandler = (event:String, items:AnyObject?)
 typealias AckEmitter = (AnyObject...) -> Void
