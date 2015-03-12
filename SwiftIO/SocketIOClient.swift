@@ -476,7 +476,7 @@ public class SocketIOClient: NSObject {
                 currentPlaceholder++
                 hasBinary = true
                 returnDatas.append(binaryData)
-                returnDict[key as String] = ["_placeholder": true, "num": currentPlaceholder++]
+                returnDict[key as String] = ["_placeholder": true, "num": currentPlaceholder]
             } else if let arr = value as? NSArray {
                 let (replace, hadBinary, arrDatas) = self.parseArray(arr, currentPlaceholder: currentPlaceholder)
                 
