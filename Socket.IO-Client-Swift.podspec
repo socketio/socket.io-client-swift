@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "Socket.IO-Client-Swift"
-  s.version      = "1.1.1"
+  s.version      = "1.1.2"
   s.summary      = "Socket.IO-client for Swift"
   s.description  = <<-DESC
                    Socket.IO-client for Swift.
@@ -10,9 +10,9 @@ Pod::Spec.new do |s|
   s.homepage     = "https://github.com/socketio/socket.io-client-swift"
   s.license      = { :type => 'MIT' }
   s.author       = { "Erik" => "nuclear.ace@gmail.com" }
-  s.platform     = :ios, "8.0"
-  s.platform     = :osx, "10.10"
-  s.source       = { :git => "https://github.com/socketio/socket.io-client-swift.git", :tag => 'v1.1.1' }
+  s.ios.deployment_target = '8.0'
+  s.osx.deployment_target = '10.10'
+  s.source       = { :git => "https://github.com/socketio/socket.io-client-swift.git", :tag => 'v1.1.2' }
   s.source_files  = "SwiftIO/**/*.swift"
   s.requires_arc = true
   # s.dependency 'Starscream', '~> 0.9' # currently this repo includes Starscream swift files
