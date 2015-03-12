@@ -12,14 +12,8 @@ Manually (iOS 7+)
 -----------------
 1. Copy the SwiftIO folder into your Xcode project!
 
-CocoaPods (iOS 8+)
+CocoaPods 0.36.0 or later (iOS 8+)
 ------------------
-Install cocoapods 0.36.0 or later:
-
-```
-$ gem install cocoapods
-```
-
 Create `Podfile` and add `pod 'Socket.IO-Client-Swift'`:
 
 ```ruby
@@ -41,7 +35,6 @@ Import in your swift file:
 ```swift
 import Socket_IO_Client_Swift
 ```
-
 
 API
 ===
@@ -105,6 +98,11 @@ socket.on("ackEvent") {data, ack in
         println("Got ackEvent")
     }
 
+    // data is an array
+    if let int = data?[1] as? Int {
+        println("Got int")
+    }
+
     socket.emitWithAck("ackTest", "test").onAck {data in
         println(data?[0])
     }
@@ -115,25 +113,6 @@ socket.on("ackEvent") {data, ack in
 socket.on("jsonTest") {data, ack in
     if let json = data?[0] as? NSDictionary {
        println(json["test"]!) // foo bar
-    }
-}
-
-// Event items are passed by an array
-socket.on("multipleItems") {data, ack in
-    if data == nil {
-        return
-    }
-
-    if let str = data![0] as? String {
-        println(str)
-    }
-
-    if let arr = data![1] as? [Int] {
-        println(arr)
-    }
-
-    if let obj = data![4] as? NSDictionary {
-        println(obj["test"])
     }
 }
 
