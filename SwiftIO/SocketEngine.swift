@@ -24,10 +24,6 @@
 
 import Foundation
 
-// This is used because in Swift 1.1, turning on -O causes a
-// memory access violation in SocketEngine#parseEngineMessage
-private var fixSwift:AnyObject?
-
 extension String {
     private var length:Int {
         return countElements(self)
@@ -55,18 +51,22 @@ class SocketEngine: NSObject, WebSocketDelegate {
         "parseQueue".cStringUsingEncoding(NSUTF8StringEncoding), DISPATCH_QUEUE_SERIAL)
     private let handleQueue = dispatch_queue_create(
         "handleQueue".cStringUsingEncoding(NSUTF8StringEncoding), DISPATCH_QUEUE_SERIAL)
+    private let session:NSURLSession!
+    private var _connected = false
+    private var fastUpgrade = false
     private var forcePolling = false
     private var pingTimer:NSTimer?
     private var postWait = [String]()
     private var _polling = true
     private var probing = false
     private var probeWait = PollWaitQueue()
-    private let session:NSURLSession!
     private var waitingForPoll = false
     private var waitingForPost = false
     private var _websocket = false
     private var websocketConnected = false
-    var connected = false
+    var connected:Bool {
+        return self._connected
+    }
     var pingInterval:Int?
     var polling:Bool {
         return self._polling
@@ -142,14 +142,29 @@ class SocketEngine: NSObject, WebSocketDelegate {
         return (urlPolling, urlWebSocket)
     }
     
+    private func doFastUpgrade() {
+        self.sendWebSocketMessage("", withType: PacketType.UPGRADE)
+        self._websocket = true
+        self._polling = false
+        self.fastUpgrade = false
+        self.flushProbeWait()
+    }
+    
     private func doPoll() {
-        if self.urlPolling == nil || self.websocket || self.waitingForPoll || !self.connected {
+        if self.websocket || self.waitingForPoll || !self.connected {
             return
         }
         
-        let req = NSMutableURLRequest(URL: NSURL(string: self.urlPolling! + "&sid=\(self.sid)")!)
-        req.timeoutInterval = 0.0
         self.waitingForPoll = true
+        self.doRequest(self.parsePollingMessage)
+    }
+    
+    private func doRequest(callback:(String) -> Void) {
+        if !self.polling {
+            return
+        }
+        
+        let req = NSURLRequest(URL: NSURL(string: self.urlPolling! + "&sid=\(self.sid)")!)
         
         self.session.dataTaskWithRequest(req) {[weak self] data, res, err in
             if self == nil {
@@ -158,28 +173,30 @@ class SocketEngine: NSObject, WebSocketDelegate {
                 if self!.polling {
                     self?.handlePollingFailed(err)
                 }
+                
                 return
             }
-            
             // println(data)
             
             if let str = NSString(data: data, encoding: NSUTF8StringEncoding) as? String {
                 // println(str)
                 
-                dispatch_async(self!.parseQueue) {[weak self] in
-                    if self == nil {
-                        return
-                    }
-                    
-                    self?.parsePollingMessage(str)
-                    return
-                }
+                
+                dispatch_async(self!.parseQueue) {callback(str)}
             }
             
             self?.waitingForPoll = false
-            self?.doPoll()
+            
+            if self!.fastUpgrade {
+                self?.doFastUpgrade()
+                return
+            } else {
+                self?.doPoll()
+            }
             }.resume()
     }
+    
+    
     
     private func flushProbeWait() {
         // println("flushing probe wait")
@@ -227,7 +244,6 @@ class SocketEngine: NSObject, WebSocketDelegate {
         req.HTTPBody = postData
         
         self.waitingForPost = true
-        
         self.session.dataTaskWithRequest(req) {[weak self] data, res, err in
             if self == nil {
                 return
@@ -255,10 +271,11 @@ class SocketEngine: NSObject, WebSocketDelegate {
     }
     
     // A poll failed, tell the client about it
-    // We check to see if we were closed by the server first
     private func handlePollingFailed(reason:NSError?) {
+        assert(self.polling, "Polling failed when we're not polling")
+        
         if !self.client.reconnecting {
-            self.connected = false
+            self._connected = false
             self.ws?.disconnect()
             self.pingTimer?.invalidate()
             self.waitingForPoll = false
@@ -268,7 +285,7 @@ class SocketEngine: NSObject, WebSocketDelegate {
     }
     
     func open(opts:[String: AnyObject]? = nil) {
-        if self.waitingForPost || self.waitingForPoll || self.websocket || self.connected {
+        if self.connected {
             assert(false, "We're in a bad state, this shouldn't happen.")
         }
         
@@ -304,13 +321,12 @@ class SocketEngine: NSObject, WebSocketDelegate {
                     return
                 }
                 
-                self?.connected = true
-                
                 if let json = NSJSONSerialization.JSONObjectWithData(jsonData!,
                     options: NSJSONReadingOptions.AllowFragments, error: &err2) as? NSDictionary {
                         if let sid = json["sid"] as? String {
                             // println(json)
                             self?.sid = sid
+                            self?._connected = true
                             
                             if !self!.forcePolling {
                                 self?.ws = WebSocket(url: NSURL(string: urlWebSocket + "&sid=\(self!.sid)")!)
@@ -363,7 +379,7 @@ class SocketEngine: NSObject, WebSocketDelegate {
                 length += chr
             } else {
                 if length == "" || testLength(length, &n) {
-                    self.handlePollingFailed(nil)
+                    println("failure in parsePollingMessage")
                     return
                 }
                 
@@ -379,10 +395,8 @@ class SocketEngine: NSObject, WebSocketDelegate {
                 if msg.length != 0 {
                     // Be sure to capture the value of the msg
                     dispatch_async(self.handleQueue) {[weak self, msg] in
-                        fixSwift = msg
-                        if fixSwift is String {
-                            self?.parseEngineMessage(fixSwift as String)
-                        }
+                        self?.parseEngineMessage(msg)
+                        return
                     }
                 }
                 
@@ -462,7 +476,7 @@ class SocketEngine: NSObject, WebSocketDelegate {
                     self?.sendWebSocketMessage(msg, withType: PacketType.MESSAGE, datas: datas)
                 } else {
                     // println("sending poll: \(msg):\(datas)")
-                    self?.sendPollMessage(msg, withType: PacketType.MESSAGE, datas: datas)
+                    self?.sendPollMessage(msg, withType: PacketType.MESSAGE, datas: datas, doPoll: true)
                 }
             }
         }
@@ -484,34 +498,34 @@ class SocketEngine: NSObject, WebSocketDelegate {
         if self.websocket {
             self.sendWebSocketMessage("", withType: PacketType.PING)
         } else {
-            self.sendPollMessage("", withType: PacketType.PING)
+            self.sendPollMessage("", withType: PacketType.PING, doPoll: false)
         }
     }
     
-    private func sendPollMessage(msg:String, withType type:PacketType, datas:[NSData]? = nil) {
-        // println("Sending: poll: \(msg) as type: \(type.rawValue)")
-        let strMsg = "\(type.rawValue)\(msg)"
-        
-        self.postWait.append(strMsg)
-        
-        if datas != nil {
-            for data in datas! {
-                let (nilData, b64Data) = self.createBinaryDataForSend(data)
-                
-                self.postWait.append(b64Data!)
+    private func sendPollMessage(msg:String, withType type:PacketType,
+        datas:[NSData]? = nil, doPoll poll:Bool) {
+            // println("Sending poll: \(msg) as type: \(type.rawValue)")
+            let strMsg = "\(type.rawValue)\(msg)"
+            
+            self.postWait.append(strMsg)
+            
+            if datas != nil {
+                for data in datas! {
+                    let (nilData, b64Data) = self.createBinaryDataForSend(data)
+                    
+                    self.postWait.append(b64Data!)
+                }
             }
-        }
-        
-        if waitingForPost {
-            self.doPoll()
-            return
-        } else {
-            self.flushWaitingForPost()
-        }
+            
+            if !self.waitingForPoll && self.waitingForPost && poll {
+                self.doPoll()
+            } else {
+                self.flushWaitingForPost()
+            }
     }
     
     private func sendWebSocketMessage(str:String, withType type:PacketType, datas:[NSData]? = nil) {
-        // println("Sending: ws: \(str) as type: \(type.rawValue)")
+        // println("Sending ws: \(str) as type: \(type.rawValue)")
         self.ws?.writeString("\(type.rawValue)\(str)")
         
         if datas != nil {
@@ -539,12 +553,10 @@ class SocketEngine: NSObject, WebSocketDelegate {
     
     private func upgradeTransport() {
         if self.websocketConnected {
+            // Do a fast upgrade
+            self.fastUpgrade = true
             self.probing = false
-            self._websocket = true
-            self.waitingForPoll = false
-            self._polling = false
-            self.sendWebSocketMessage("", withType: PacketType.UPGRADE)
-            self.flushProbeWait()
+            self.sendPollMessage("", withType: PacketType.NOOP, doPoll: false)
         }
     }
     
@@ -560,7 +572,7 @@ class SocketEngine: NSObject, WebSocketDelegate {
         
         if self.websocket {
             self.pingTimer?.invalidate()
-            self.connected = false
+            self._connected = false
             self._websocket = false
             self._polling = true
             self.client.webSocketDidCloseWithCode(1, reason: "Socket Disconnect", wasClean: true)

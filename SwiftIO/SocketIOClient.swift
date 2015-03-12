@@ -173,7 +173,7 @@ public class SocketIOClient: NSObject {
     public func emitObjc(event:String, _ args:[AnyObject]) {
         self.emit(event, args)
     }
-
+    
     public func emitWithAck(event:String, _ args:AnyObject...) -> SocketAckHandler {
         if !self.connected {
             return SocketAckHandler(event: "fail")
@@ -643,90 +643,88 @@ public class SocketIOClient: NSObject {
     }
     
     // Tries to parse a message that contains binary
-    private func parseBinaryMessage(#message:AnyObject) {
+    private func parseBinaryMessage(#message:String) {
         // println(message)
-        if let stringMessage = message as? String {
-            var mutMessage = RegexMutable(stringMessage)
+        var mutMessage = RegexMutable(message)
+        
+        /**
+        Begin check for binary placeholders
+        **/
+        let binaryGroup = mutMessage["^(\\d*)-\\/?(\\w*)?,?(\\d*)?\\[(\".*?\")?,?(.*)?\\]$"].groups()
+        
+        if binaryGroup == nil {
+            return
+        }
+        
+        if binaryGroup[1].hasPrefix("5") {
+            // println(binaryGroup)
+            var ackNum:String
+            var event:String
+            var mutMessageObject:NSMutableString
+            var namespace:String?
+            var numberOfPlaceholders:String
+            let messageType = RegexMutable(binaryGroup[1])
             
-            /**
-            Begin check for binary placeholders
-            **/
-            let binaryGroup = mutMessage["^(\\d*)-\\/?(\\w*)?,?(\\d*)?\\[(\".*?\")?,?(.*)?\\]$"].groups()
+            namespace = binaryGroup[2]
+            if binaryGroup[3] != "" {
+                ackNum = binaryGroup[3] as String
+            } else if self.nsp == nil && binaryGroup[2] != "" {
+                ackNum = binaryGroup[2]
+            } else {
+                ackNum = ""
+            }
             
-            if binaryGroup == nil {
+            numberOfPlaceholders = (messageType["5"] ~= "") as String
+            event = (RegexMutable(binaryGroup[4])["\""] ~= "") as String
+            mutMessageObject = RegexMutable(binaryGroup[5])
+            
+            if namespace == "" && self.nsp != nil {
                 return
             }
             
-            if binaryGroup[1].hasPrefix("5") {
-                // println(binaryGroup)
-                var ackNum:String
-                var event:String
-                var mutMessageObject:NSMutableString
-                var namespace:String?
-                var numberOfPlaceholders:String
-                let messageType = RegexMutable(binaryGroup[1])
-                
-                namespace = binaryGroup[2]
-                if binaryGroup[3] != "" {
-                    ackNum = binaryGroup[3] as String
-                } else if self.nsp == nil && binaryGroup[2] != "" {
-                    ackNum = binaryGroup[2]
-                } else {
-                    ackNum = ""
-                }
-                
-                numberOfPlaceholders = (messageType["5"] ~= "") as String
-                event = (RegexMutable(binaryGroup[4])["\""] ~= "") as String
-                mutMessageObject = RegexMutable(binaryGroup[5])
-                
-                if namespace == "" && self.nsp != nil {
-                    return
-                }
-                
-                let placeholdersRemoved = mutMessageObject["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"]
-                    ~= "\"~~$2\""
-                
-                var mes:SocketEvent
-                if ackNum == "" {
-                    mes = SocketEvent(event: event, args: placeholdersRemoved,
-                        placeholders: numberOfPlaceholders.toInt()!)
-                } else {
-                    self.currentAck = ackNum.toInt()!
-                    mes = SocketEvent(event: event, args: placeholdersRemoved,
-                        placeholders: numberOfPlaceholders.toInt()!, ackNum: ackNum.toInt())
-                }
-                
-                self.waitingData.append(mes)
-            } else if binaryGroup[1].hasPrefix("6") {
-                let messageType = RegexMutable(binaryGroup[1])
-                let numberOfPlaceholders = (messageType["6"] ~= "") as String
-                var ackNum:String
-                var nsp:String
-                
-                if binaryGroup[3] == "" {
-                    ackNum = binaryGroup[2]
-                    nsp = ""
-                } else {
-                    ackNum = binaryGroup[3]
-                    nsp = binaryGroup[2]
-                }
-                
-                if nsp == "" && self.nsp != nil {
-                    return
-                }
-                var mutMessageObject = RegexMutable(binaryGroup[5])
-                let placeholdersRemoved = mutMessageObject["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"]
-                    ~= "\"~~$2\""
-                
-                let event = SocketEvent(event: "", args: placeholdersRemoved,
-                    placeholders: numberOfPlaceholders.toInt()!, ackNum: ackNum.toInt(), justAck: true)
-                
-                self.waitingData.append(event)
+            let placeholdersRemoved = mutMessageObject["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"]
+                ~= "\"~~$2\""
+            
+            var mes:SocketEvent
+            if ackNum == "" {
+                mes = SocketEvent(event: event, args: placeholdersRemoved,
+                    placeholders: numberOfPlaceholders.toInt()!)
+            } else {
+                self.currentAck = ackNum.toInt()!
+                mes = SocketEvent(event: event, args: placeholdersRemoved,
+                    placeholders: numberOfPlaceholders.toInt()!, ackNum: ackNum.toInt())
             }
-            /**
-            End check for binary placeholders
-            **/
+            
+            self.waitingData.append(mes)
+        } else if binaryGroup[1].hasPrefix("6") {
+            let messageType = RegexMutable(binaryGroup[1])
+            let numberOfPlaceholders = (messageType["6"] ~= "") as String
+            var ackNum:String
+            var nsp:String
+            
+            if binaryGroup[3] == "" {
+                ackNum = binaryGroup[2]
+                nsp = ""
+            } else {
+                ackNum = binaryGroup[3]
+                nsp = binaryGroup[2]
+            }
+            
+            if nsp == "" && self.nsp != nil {
+                return
+            }
+            var mutMessageObject = RegexMutable(binaryGroup[5])
+            let placeholdersRemoved = mutMessageObject["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"]
+                ~= "\"~~$2\""
+            
+            let event = SocketEvent(event: "", args: placeholdersRemoved,
+                placeholders: numberOfPlaceholders.toInt()!, ackNum: ackNum.toInt(), justAck: true)
+            
+            self.waitingData.append(event)
         }
+        /**
+        End check for binary placeholders
+        **/
     }
     
     // Handles binary data
