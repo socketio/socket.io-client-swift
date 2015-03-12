@@ -42,7 +42,7 @@ private enum PacketType: String {
     case NOOP = "6"
 }
 
-class SocketEngine: NSObject, WebSocketDelegate {
+public class SocketEngine: NSObject, WebSocketDelegate {
     unowned let client:SocketIOClient
     private let workQueue = NSOperationQueue()
     private let emitQueue = dispatch_queue_create(
@@ -560,13 +560,13 @@ class SocketEngine: NSObject, WebSocketDelegate {
         }
     }
     
-    func websocketDidConnect(socket:WebSocket) {
+    public func websocketDidConnect(socket:WebSocket) {
         self.websocketConnected = true
         self.probing = true
         self.probeWebSocket()
     }
     
-    func websocketDidDisconnect(socket:WebSocket, error:NSError?) {
+    public func websocketDidDisconnect(socket:WebSocket, error:NSError?) {
         self.websocketConnected = false
         self.probing = false
         
@@ -581,11 +581,11 @@ class SocketEngine: NSObject, WebSocketDelegate {
         }
     }
     
-    func websocketDidReceiveMessage(socket:WebSocket, text:String) {
+    public func websocketDidReceiveMessage(socket:WebSocket, text:String) {
         self.parseEngineMessage(text)
     }
     
-    func websocketDidReceiveData(socket:WebSocket, data:NSData) {
+    public func websocketDidReceiveData(socket:WebSocket, data:NSData) {
         self.parseEngineData(data)
     }
 }

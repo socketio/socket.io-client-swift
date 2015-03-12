@@ -44,15 +44,15 @@ public class SocketIOClient: NSObject {
     private var paramConnect = false
     private var _secure = false
     private var reconnectTimer:NSTimer?
-    var closed = false
-    var connected = false
-    var connecting = false
-    var engine:SocketEngine?
-    var nsp:String?
-    var reconnects = true
-    var reconnecting = false
-    var reconnectWait = 10
-    var secure:Bool {
+    public var closed = false
+    public var connected = false
+    public var connecting = false
+    public var engine:SocketEngine?
+    public var nsp:String?
+    public var reconnects = true
+    public var reconnecting = false
+    public var reconnectWait = 10
+    public var secure:Bool {
         return self._secure
     }
     var sid:String?
@@ -640,11 +640,11 @@ public class SocketIOClient: NSObject {
         **/
         
         // Check for message with binary placeholders
-        self.parseBinaryMessage(message: stringMessage)
+        self.parseBinaryMessage(stringMessage)
     }
     
     // Tries to parse a message that contains binary
-    private func parseBinaryMessage(#message:String) {
+    private func parseBinaryMessage(message:String) {
         // println(message)
         var mutMessage = RegexMutable(message)
         
