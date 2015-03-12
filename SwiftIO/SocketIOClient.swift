@@ -55,7 +55,7 @@ public class SocketIOClient: NSObject {
     public var secure:Bool {
         return self._secure
     }
-    var sid:String?
+    public var sid:String?
     
     public init(socketURL:String, opts:[String: AnyObject]? = nil) {
         var mutURL = RegexMutable(socketURL)
