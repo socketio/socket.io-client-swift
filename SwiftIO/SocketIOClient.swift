@@ -141,6 +141,7 @@ public class SocketIOClient: NSObject {
         self.currentReconnectAttempt = 0
         self.reconnectTimer?.invalidate()
         self.reconnectTimer = nil
+        self.sid = self.engine?.sid
         
         self.handleEvent("connect", data: nil, isInternalMessage: false)
     }
