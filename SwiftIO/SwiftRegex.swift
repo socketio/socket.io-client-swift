@@ -16,10 +16,10 @@ import Foundation
 var swiftRegexCache = [String: NSRegularExpression]()
 
 public class SwiftRegex: NSObject, BooleanType {
-    
+
     var target: NSString
     var regex: NSRegularExpression
-    
+
     init(target:NSString, pattern:String, options:NSRegularExpressionOptions = nil) {
         self.target = target
         if let regex = swiftRegexCache[pattern] {
@@ -37,16 +37,16 @@ public class SwiftRegex: NSObject, BooleanType {
         }
         super.init()
     }
-    
+
     class func failure(message: String) {
         println("SwiftRegex: "+message)
         //assert(false,"SwiftRegex: failed")
     }
-    
+
     final var targetRange: NSRange {
         return NSRange(location: 0,length: target.length)
     }
-    
+
     final func substring(range: NSRange) -> NSString! {
         if ( range.location != NSNotFound ) {
             return target.substringWithRange(range)
@@ -54,23 +54,23 @@ public class SwiftRegex: NSObject, BooleanType {
             return nil
         }
     }
-    
+
     public func doesMatch(options: NSMatchingOptions = nil) -> Bool {
         return range(options: options).location != NSNotFound
     }
-    
+
     public func range(options: NSMatchingOptions = nil) -> NSRange {
         return regex.rangeOfFirstMatchInString(target as String, options: nil, range: targetRange)
     }
-    
+
     public func match(options: NSMatchingOptions = nil) -> String! {
         return substring(range(options: options)) as String
     }
-    
+
     public func groups(options: NSMatchingOptions = nil) -> [String]! {
         return groupsForMatch( regex.firstMatchInString(target as String, options: options, range: targetRange) )
     }
-    
+
     func groupsForMatch(match: NSTextCheckingResult!) -> [String]! {
         if match != nil {
             var groups = [String]()
@@ -86,7 +86,7 @@ public class SwiftRegex: NSObject, BooleanType {
             return nil
         }
     }
-    
+
     public subscript(groupno: Int) -> String! {
         get {
             return groups()[groupno]
@@ -103,30 +103,30 @@ public class SwiftRegex: NSObject, BooleanType {
             }
         }
     }
-    
+
     func matchResults(options: NSMatchingOptions = nil) -> [NSTextCheckingResult]? {
         let matches = regex.matchesInString(target as String, options: options, range: targetRange)
             as? [NSTextCheckingResult]
-        
+
         if matches != nil {
             return matches!
         } else {
             return nil
         }
     }
-    
+
     public func ranges(options: NSMatchingOptions = nil) -> [NSRange] {
         return matchResults(options: options)!.map { $0.range }
     }
-    
+
     public func matches(options: NSMatchingOptions = nil) -> [String] {
         return matchResults(options: options)!.map( { self.substring($0.range) as String } )
     }
-    
+
     public func allGroups(options: NSMatchingOptions = nil) -> [[String]] {
         return matchResults(options: options)!.map { self.groupsForMatch($0) }
     }
-    
+
     public func dictionary(options: NSMatchingOptions = nil) -> Dictionary<String,String> {
         var out = Dictionary<String,String>()
         for match in matchResults(options: options)! {
@@ -135,23 +135,23 @@ public class SwiftRegex: NSObject, BooleanType {
         }
         return out
     }
-    
+
     func substituteMatches(substitution: (NSTextCheckingResult, UnsafeMutablePointer<ObjCBool>) -> String,
         options:NSMatchingOptions = nil) -> NSMutableString {
             let out = NSMutableString()
             var pos = 0
-            
+
             regex.enumerateMatchesInString(target as String, options: options, range: targetRange ) {
                 (match: NSTextCheckingResult!, flags: NSMatchingFlags, stop: UnsafeMutablePointer<ObjCBool>) in
-                
+
                 let matchRange = match.range
                 out.appendString( self.substring( NSRange(location:pos, length:matchRange.location-pos) ) as String )
                 out.appendString( substitution(match, stop) )
                 pos = matchRange.location + matchRange.length
             }
-            
+
             out.appendString( substring( NSRange(location:pos, length:targetRange.length-pos) ) as String )
-            
+
             if let mutableTarget = target as? NSMutableString {
                 mutableTarget.setString(out as String)
                 return mutableTarget
@@ -164,23 +164,23 @@ public class SwiftRegex: NSObject, BooleanType {
     public func __conversion() -> Bool {
     return doesMatch()
     }
-    
+
     public func __conversion() -> NSRange {
     return range()
     }
-    
+
     public func __conversion() -> String {
     return match()
     }
-    
+
     public func __conversion() -> [String] {
     return matches()
     }
-    
+
     public func __conversion() -> [[String]] {
     return allGroups()
     }
-    
+
     public func __conversion() -> [String:String] {
     return dictionary()
     }
@@ -228,11 +228,11 @@ public func ~= (left: SwiftRegex, right: String) -> NSMutableString {
 public func ~= (left: SwiftRegex, right: [String]) -> NSMutableString {
     var matchNumber = 0
     return left.substituteMatches({match, stop -> String in
-        
+
         if ++matchNumber == right.count {
             stop.memory = true
         }
-        
+
         return left.regex.replacementStringForResult( match,
             inString: left.target as String, offset: 0, template: right[matchNumber-1] )
     }, options: nil)
@@ -286,11 +286,11 @@ public func & (left: [() -> Void], right: () -> Void) -> [() -> Void] {
 
 public func | (left: [() -> Void], right: () -> Void) {
     let group = dispatch_group_create()
-    
+
     for block in left {
         dispatch_group_async(group, _queue, block)
     }
-    
+
     dispatch_group_notify(group, dispatch_get_main_queue(), right)
 }
 
@@ -307,12 +307,12 @@ public func & <R> (left: [() -> R], right: () -> R) -> [() -> R] {
 
 public func | <R> (left: [() -> R], right: (results:[R!]) -> Void) {
     let group = dispatch_group_create()
-    
+
     var results = Array<R!>()
     for t in 0..<left.count {
         results += [nil]
     }
-    
+
     for t in 0..<left.count {
         //dispatch_retain(group)
         dispatch_group_enter(group)
@@ -322,7 +322,7 @@ public func | <R> (left: [() -> R], right: (results:[R!]) -> Void) {
             //dispatch_release(group)
         })
     }
-    
+
     dispatch_group_notify(group, dispatch_get_main_queue(), {
         right(results: results)
     })
