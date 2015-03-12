@@ -7,7 +7,41 @@ For Swift 1.2 use the 1.2 branch.
 
 Installation
 ============
+
+Manually (iOS 7+)
+-----------------
 1. Copy the SwiftIO folder into your Xcode project!
+
+CocoaPods (iOS 8+)
+------------------
+Install cocoapods 0.36.0 or later:
+
+```
+$ gem install cocoapods
+```
+
+Create `Podfile` and add `pod 'Socket.IO-Client-Swift'`:
+
+```ruby
+source 'https://github.com/CocoaPods/Specs.git'
+platform :ios, '8.0'
+use_frameworks!
+
+pod 'Socket.IO-Client-Swift', '~> 1.1'
+```
+
+Install pods:
+
+```
+$ pod install
+```
+
+Import in your swift file:
+
+```swift
+import Socket_IO_Client_Swift
+```
+
 
 API
 ===
