@@ -226,7 +226,7 @@ class SocketEvent {
             // We have multiple items
             // Do it live
             let argsAsArray = "[\(self.args)]"
-            if let parsedArr = SocketIOClient.parseData(argsAsArray) as? NSArray {
+            if let parsedArr = SocketParser.parseData(argsAsArray) as? NSArray {
                 var returnArr = [AnyObject](count: parsedArr.count, repeatedValue: 0)
                 
                 for i in 0..<parsedArr.count {
