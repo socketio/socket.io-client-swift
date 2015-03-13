@@ -286,7 +286,6 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         }
         
         let (urlPolling, urlWebSocket) = self.createURLs(params: opts)
-        
         self.urlPolling = urlPolling
         self.urlWebSocket = urlWebSocket
         let reqPolling = NSURLRequest(URL: NSURL(string: urlPolling + "&b64=1")!)
@@ -472,7 +471,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                     self?.sendWebSocketMessage(msg, withType: PacketType.MESSAGE, datas: datas)
                 } else {
                     // println("sending poll: \(msg):\(datas)")
-                    self?.sendPollMessage(msg, withType: PacketType.MESSAGE, datas: datas, doPoll: true)
+                    self?.sendPollMessage(msg, withType: PacketType.MESSAGE, datas: datas)
                 }
             }
         }
@@ -494,12 +493,12 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         if self.websocket {
             self.sendWebSocketMessage("", withType: PacketType.PING)
         } else {
-            self.sendPollMessage("", withType: PacketType.PING, doPoll: false)
+            self.sendPollMessage("", withType: PacketType.PING)
         }
     }
     
     private func sendPollMessage(msg:String, withType type:PacketType,
-        datas:[NSData]? = nil, doPoll poll:Bool) {
+        datas:[NSData]? = nil) {
             // println("Sending poll: \(msg) as type: \(type.rawValue)")
             let strMsg = "\(type.rawValue)\(msg)"
             
@@ -513,11 +512,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                 }
             }
             
-            if !self.waitingForPoll && self.waitingForPost && poll {
-                self.doPoll()
-            } else {
-                self.flushWaitingForPost()
-            }
+            self.flushWaitingForPost()
     }
     
     private func sendWebSocketMessage(str:String, withType type:PacketType, datas:[NSData]? = nil) {
@@ -552,7 +547,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             // Do a fast upgrade
             self.fastUpgrade = true
             self.probing = false
-            self.sendPollMessage("", withType: PacketType.NOOP, doPoll: false)
+            self.sendPollMessage("", withType: PacketType.NOOP)
         }
     }
     

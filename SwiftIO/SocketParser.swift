@@ -257,6 +257,7 @@ class SocketParser {
                         socket.handleEvent(event, data: parsed, isInternalMessage: false,
                             wantsAck: ackNum.toInt(), withAckType: 3)
                     }
+                    
                     return
                 } else if let strData = data {
                     // There are multiple items in the message
@@ -271,6 +272,7 @@ class SocketParser {
                             socket.handleEvent(event, data: parsed, isInternalMessage: false,
                                 wantsAck: ackNum.toInt(), withAckType: 3)
                         }
+                        
                         return
                     }
                 }
