@@ -160,6 +160,8 @@ public class SocketIOClient: NSObject {
         self.reconnectTimer = nil
         self._sid = self.engine?.sid
         
+        // Don't handle as internal because something crazy could happen where
+        // we disconnect before it's handled
         self.handleEvent("connect", data: nil, isInternalMessage: false)
     }
     
@@ -247,7 +249,7 @@ public class SocketIOClient: NSObject {
     }
     
     // If the server wants to know that the client received data
-    internal func emitAck(ack:Int, withData data:[AnyObject]?, withAckType ackType:Int) {
+    func emitAck(ack:Int, withData data:[AnyObject]?, withAckType ackType:Int) {
         dispatch_async(self.ackQueue) {[weak self] in
             if self == nil || !self!.connected || data == nil {
                 return
@@ -281,7 +283,7 @@ public class SocketIOClient: NSObject {
     }
     
     // Called when the socket gets an ack for something it sent
-    internal func handleAck(ack:Int, data:AnyObject?) {
+    func handleAck(ack:Int, data:AnyObject?) {
         self.ackHandlers = self.ackHandlers.filter {handler in
             if handler.ackNum != ack {
                 return true
@@ -373,7 +375,7 @@ public class SocketIOClient: NSObject {
     }
     
     // Something happened while polling
-    internal func pollingDidFail(err:NSError?) {
+    func pollingDidFail(err:NSError?) {
         if !self.reconnecting {
             self._connected = false
             self.handleEvent("reconnect", data: err?.localizedDescription, isInternalMessage: true)
@@ -382,7 +384,7 @@ public class SocketIOClient: NSObject {
     }
     
     // We lost connection and should attempt to reestablish
-    internal func tryReconnect() {
+    func tryReconnect() {
         if self.reconnectAttempts != -1 && self.currentReconnectAttempt + 1 > self.reconnectAttempts {
             self.didForceClose()
             return

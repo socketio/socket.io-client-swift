@@ -202,8 +202,6 @@ class SocketParser {
                 socket.joinNamespace()
                 return
             } else {
-                // Don't handle as internal because something crazy could happen where
-                // we disconnect before it's handled
                 socket.didConnect()
                 return
             }
@@ -225,7 +223,8 @@ class SocketParser {
             if messageGroups[3] != "" {
                 ackNum = messageGroups[3]
             } else {
-                let range = Range<String.Index>(start: mesNum.startIndex, end: advance(mesNum.startIndex, 1))
+                let range = Range<String.Index>(start: mesNum.startIndex,
+                    end: advance(mesNum.startIndex, 1))
                 mesNum.replaceRange(range, with: "")
                 ackNum = mesNum
             }

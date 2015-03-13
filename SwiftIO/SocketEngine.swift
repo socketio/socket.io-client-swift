@@ -180,8 +180,6 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             
             if let str = NSString(data: data, encoding: NSUTF8StringEncoding) as? String {
                 // println(str)
-                
-                
                 dispatch_async(self!.parseQueue) {callback(str)}
             }
             
@@ -195,8 +193,6 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             }
             }.resume()
     }
-    
-    
     
     private func flushProbeWait() {
         // println("flushing probe wait")
@@ -464,7 +460,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         }
     }
     
-    func send(msg:String, datas:[NSData]? = nil) {
+    public func send(msg:String, datas:[NSData]? = nil) {
         let _send = {[weak self] (msg:String, datas:[NSData]?) -> () -> Void in
             return {
                 if self == nil || !self!.connected {
