@@ -235,7 +235,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         let postData = postStr.dataUsingEncoding(NSUTF8StringEncoding,
             allowLossyConversion: false)!
         
-        
+        // println("posting: \(postStr)")
         req.setValue(String(postData.length), forHTTPHeaderField: "Content-Length")
         req.HTTPBody = postData
         
@@ -406,7 +406,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     }
     
     private func parseEngineMessage(var message:String) {
-        // println(message!)
+        // println("Engine got message: \(message)")
         
         var strMessage = RegexMutable(message)
         
@@ -429,7 +429,10 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                 if let data = NSData(base64EncodedString: message,
                     options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters) {
                         // println("sending \(data)")
-                        self.client.parseBinaryData(data)
+                        dispatch_async(self.client.handleQueue) {[weak self] in
+                            self?.client.parseBinaryData(data)
+                            return
+                        }
                 }
                 
                 return
@@ -448,9 +451,11 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         
         // Remove message type
         message.removeAtIndex(message.startIndex)
-        // println("sending \(messageString)")
         
-        self.client.parseSocketMessage(message)
+        dispatch_async(self.client.handleQueue) {[weak self] in
+            self?.client.parseSocketMessage(message)
+            return
+        }
     }
     
     private func probeWebSocket() {
@@ -512,7 +517,9 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                 }
             }
             
-            self.flushWaitingForPost()
+            if !self.waitingForPost {
+                self.flushWaitingForPost()
+            }
     }
     
     private func sendWebSocketMessage(str:String, withType type:PacketType, datas:[NSData]? = nil) {
