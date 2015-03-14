@@ -50,7 +50,7 @@ public class SocketIOClient: NSObject {
     
     internal var currentAck = -1
     internal var waitingData = [SocketEvent]()
-
+    
     public var closed:Bool {
         return self._closed
     }
@@ -396,6 +396,7 @@ public class SocketIOClient: NSObject {
         
         if self.reconnectTimer == nil {
             self._reconnecting = true
+            
             dispatch_async(dispatch_get_main_queue()) {[weak self] in
                 if self == nil {
                     return

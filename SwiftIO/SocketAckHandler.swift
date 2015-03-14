@@ -40,14 +40,17 @@ public typealias AckCallback = (NSArray?) -> Void
     public func onAck(timeout:UInt64, withCallback callback:AckCallback) {
         self.callback = callback
         
-        let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeout * NSEC_PER_SEC))
-        dispatch_after(time, dispatch_get_main_queue()) {[weak self] in
-            if self == nil {
-                return
-            }
-            
-            if !self!.acked {
-                self?.executeAck(["No ACK"])
+        
+        if timeout != 0 {
+            let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeout * NSEC_PER_SEC))
+            dispatch_after(time, dispatch_get_main_queue()) {[weak self] in
+                if self == nil {
+                    return
+                }
+                
+                if !self!.acked {
+                    self?.executeAck(["No ACK"])
+                }
             }
         }
     }
