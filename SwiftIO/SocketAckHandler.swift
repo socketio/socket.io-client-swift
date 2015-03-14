@@ -29,6 +29,7 @@ public typealias AckCallback = (NSArray?) -> Void
 @objc public class SocketAckHandler {
     let ackNum:Int!
     let event:String!
+    var acked = false
     var callback:AckCallback?
     
     init(event:String, ackNum:Int = 0) {
@@ -36,12 +37,24 @@ public typealias AckCallback = (NSArray?) -> Void
         self.event = event
     }
     
-    func onAck(callback:AckCallback) {
+    public func onAck(timeout:UInt64, withCallback callback:AckCallback) {
         self.callback = callback
+        
+        let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeout * NSEC_PER_SEC))
+        dispatch_after(time, dispatch_get_main_queue()) {[weak self] in
+            if self == nil {
+                return
+            }
+            
+            if !self!.acked {
+                self?.executeAck(["No ACK"])
+            }
+        }
     }
     
     func executeAck(data:NSArray?) {
-        dispatch_async(dispatch_get_main_queue()) {[cb = self.callback] in
+        dispatch_async(dispatch_get_main_queue()) {[weak self, cb = self.callback] in
+            self?.acked = true
             cb?(data)
             return
         }
