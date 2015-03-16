@@ -176,10 +176,10 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                 
                 return
             }
+            
             // println(data)
             
-            if let str = NSString(data: data, encoding: NSUTF8StringEncoding) as? String {
-                // println(str)
+            if let str = NSString(data: data, encoding: NSUTF8StringEncoding) {
                 dispatch_async(self!.parseQueue) {callback(str)}
             }
             
@@ -221,7 +221,6 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         
         for packet in self.postWait {
             let len = countElements(packet)
-            
             postStr += "\(len):\(packet)"
         }
         
@@ -230,14 +229,14 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         let req = NSMutableURLRequest(URL: NSURL(string: self.urlPolling! + "&sid=\(self.sid)")!)
         
         req.HTTPMethod = "POST"
-        req.setValue("application/html-text", forHTTPHeaderField: "Content-Type")
+        req.setValue("text/plain; charset=UTF-8", forHTTPHeaderField: "Content-Type")
         
         let postData = postStr.dataUsingEncoding(NSUTF8StringEncoding,
             allowLossyConversion: false)!
         
-        // println("posting: \(postStr)")
-        req.setValue(String(postData.length), forHTTPHeaderField: "Content-Length")
+        // NSLog("posting: \(postStr)")
         req.HTTPBody = postData
+        req.setValue(String(postData.length), forHTTPHeaderField: "Content-Length")
         
         self.waitingForPost = true
         self.session.dataTaskWithRequest(req) {[weak self] data, res, err in
@@ -299,9 +298,8 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                 return
             }
             
-            if let dataString = NSString(data: data, encoding: NSUTF8StringEncoding) {
-                var mutString = RegexMutable(dataString)
-                let parsed:[String]? = mutString["(\\d*):(\\d)(\\{.*\\})?"].groups()
+            if let dataString = NSString(data: data, encoding: NSUTF8StringEncoding) as? String {
+                let parsed:[String]? = dataString["(\\d*):(\\d)(\\{.*\\})?"].groups()
                 
                 if parsed == nil || parsed?.count != 4 {
                     return
@@ -406,17 +404,15 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     }
     
     private func parseEngineMessage(var message:String) {
-        // println("Engine got message: \(message)")
-        
-        var strMessage = RegexMutable(message)
+        // NSLog("Engine got message: \(message)")
         
         // We should upgrade
-        if strMessage == "3probe" {
+        if message == "3probe" {
             self.upgradeTransport()
             return
         }
         
-        let type = strMessage["^(\\d)"].groups()?[1]
+        let type = message["^(\\d)"].groups()?[1]
         
         if type != PacketType.MESSAGE.rawValue {
             // TODO Handle other packets

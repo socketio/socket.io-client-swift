@@ -173,8 +173,7 @@ class SocketEvent {
             } else if let dict = arr[i] as? NSDictionary {
                 newArr[i] = self.fillInDict(dict)
             } else if let str = arr[i] as? String {
-                let mut = RegexMutable(str)
-                if let num = mut["~~(\\d)"].groups() {
+                if let num = str["~~(\\d)"].groups() {
                     newArr[i] = self.datas[num[1].toInt()!]
                 } else {
                     newArr[i] = arr[i]
@@ -196,9 +195,7 @@ class SocketEvent {
             // If the value is a string we need to check
             // if it is a placeholder for data
             if let str = value as? String {
-                let mut = RegexMutable(str)
-                
-                if let num = mut["~~(\\d)"].groups() {
+                if let num = str["~~(\\d)"].groups() {
                     newDict[key as String] = self.datas[num[1].toInt()!]
                 } else {
                     newDict[key as String] = str
@@ -231,9 +228,7 @@ class SocketEvent {
                 
                 for i in 0..<parsedArr.count {
                     if let str = parsedArr[i] as? String {
-                        let mut = RegexMutable(str)
-                        
-                        if let num = mut["~~(\\d)"].groups() {
+                        if let num = str["~~(\\d)"].groups() {
                             returnArr[i] = self.datas[num[1].toInt()!]
                         } else {
                             returnArr[i] = str
