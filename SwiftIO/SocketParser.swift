@@ -186,7 +186,11 @@ class SocketParser {
 
     // Parses messages recieved
     class func parseSocketMessage(stringMessage:String, socket:SocketIOClient) {
-        // println(message!)
+        if stringMessage == "" {
+            return
+        }
+
+        // NSLog(stringMessage)
 
         // Check for successful namepsace connect
         if socket.nsp != nil {
@@ -207,21 +211,33 @@ class SocketParser {
             }
         }
 
-        var mutMessage = RegexMutable(stringMessage)
+        if stringMessage.hasPrefix("5") {
+            // Check for message with binary placeholders
+            self.parseBinaryMessage(stringMessage, socket: socket)
+            return
+        }
+
 
         /**
         Begin check for message
         **/
-        let messageGroups = mutMessage["(\\d*)\\/?(\\w*)?,?(\\d*)?(\\[.*\\])?"].groups()
+        let messageGroups = stringMessage["(\\d*)\\/?(\\w*)?,?(\\d*)?\\[\"(.*?)\",?(.*?)?\\]$"].groups()
+        if messageGroups == nil {
+            NSLog("Error in groups")
+            return
+        }
 
-        if messageGroups[1].hasPrefix("2") {
-            var mesNum = messageGroups[1]
+        //        let messageGroups = SwiftRegex(target: stringMessage as NSString,
+        //            pattern: "(\\d*)\\/?(\\w*)?,?(\\d*)?\\[\"(.*?)\",?(.*?)?\\]$",
+        //            options: NSRegularExpressionOptions.DotMatchesLineSeparators).groups()
+
+        if messageGroups![1].hasPrefix("2") {
+            var mesNum = messageGroups![1]
             var ackNum:String
             var namespace:String?
-            var messagePart:String!
 
-            if messageGroups[3] != "" {
-                ackNum = messageGroups[3]
+            if messageGroups![3] != "" {
+                ackNum = messageGroups![3]
             } else {
                 let range = Range<String.Index>(start: mesNum.startIndex,
                     end: advance(mesNum.startIndex, 1))
@@ -229,72 +245,30 @@ class SocketParser {
                 ackNum = mesNum
             }
 
-            namespace = messageGroups[2]
-            messagePart = messageGroups[4]
+            namespace = messageGroups![2]
 
             if namespace == "" && socket.nsp != nil {
                 return
             }
 
-            let messageInternals = RegexMutable(messagePart)["\\[\"(.*?)\",(.*?)?\\]$"].groups()
-            if messageInternals != nil && messageInternals.count > 2 {
-                let event = messageInternals[1]
-                var data:String?
+            let event = messageGroups![4]
+            let data = "[\(messageGroups![5])]"
 
-                if messageInternals[2] == "" {
-                    data = nil
-                } else {
-                    data = messageInternals[2]
-                }
-
-                // It would be nice if socket.io only allowed one thing
-                // per message, but alas, it doesn't.
-                if let parsed:AnyObject = self.parseData(data) {
-                    if ackNum == "" {
-                        socket.handleEvent(event, data: parsed)
-                    } else {
-                        socket.currentAck = ackNum.toInt()!
-                        socket.handleEvent(event, data: parsed, isInternalMessage: false,
-                            wantsAck: ackNum.toInt(), withAckType: 3)
-                    }
-
-                    return
-                } else if let strData = data {
-                    // There are multiple items in the message
-                    // Turn it into a String and run it through
-                    // parseData to try and get an array.
-                    let asArray = "[\(strData)]"
-                    if let parsed:AnyObject = self.parseData(asArray) {
-                        if ackNum == "" {
-                            socket.handleEvent(event, data: parsed)
-                        } else {
-                            socket.currentAck = ackNum.toInt()!
-                            socket.handleEvent(event, data: parsed, isInternalMessage: false,
-                                wantsAck: ackNum.toInt(), withAckType: 3)
-                        }
-
-                        return
-                    }
-                }
-            }
-
-            // Check for no item event
-            let noItemMessage = RegexMutable(messagePart)["\\[\"(.*?)\"]$"].groups()
-            if noItemMessage != nil && noItemMessage.count == 2 {
-                let event = noItemMessage[1]
+            if let parsed:AnyObject = self.parseData(data) {
                 if ackNum == "" {
-                    socket.handleEvent(event, data: nil)
+                    socket.handleEvent(event, data: parsed)
                 } else {
                     socket.currentAck = ackNum.toInt()!
-                    socket.handleEvent(event, data: nil, isInternalMessage: false,
+                    socket.handleEvent(event, data: parsed, isInternalMessage: false,
                         wantsAck: ackNum.toInt(), withAckType: 3)
                 }
+
                 return
             }
-        } else if messageGroups[1].hasPrefix("3") {
-            let arr = Array(messageGroups[1])
+        } else if messageGroups![1].hasPrefix("3") {
+            let arr = Array(messageGroups![1])
             var ackNum:String
-            let nsp = messageGroups[2]
+            let nsp = messageGroups![2]
 
             if nsp == "" && socket.nsp != nil {
                 return
@@ -303,10 +277,10 @@ class SocketParser {
             if nsp == "" {
                 ackNum = String(arr[1...arr.count-1])
             } else {
-                ackNum = messageGroups[3]
+                ackNum = messageGroups![3]
             }
 
-            let ackData:AnyObject? = self.parseData(messageGroups[4])
+            let ackData:AnyObject? = self.parseData(messageGroups![4])
             socket.handleAck(ackNum.toInt()!, data: ackData)
 
             return
@@ -314,13 +288,11 @@ class SocketParser {
         /**
         End Check for message
         **/
-
-        // Check for message with binary placeholders
-        self.parseBinaryMessage(stringMessage, socket: socket)
     }
 
     // Handles binary data
     class func parseBinaryData(data:NSData, socket:SocketIOClient) {
+        // NSLog(data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions.allZeros))
         let shouldExecute = socket.waitingData[0].addData(data)
 
         if shouldExecute {
@@ -366,39 +338,42 @@ class SocketParser {
 
     // Tries to parse a message that contains binary
     class func parseBinaryMessage(message:String, socket:SocketIOClient) {
-        // println(message)
-        var mutMessage = RegexMutable(message)
+        // NSLog(message)
 
         /**
         Begin check for binary placeholders
         **/
-        let binaryGroup = mutMessage["^(\\d*)-\\/?(\\w*)?,?(\\d*)?\\[(\".*?\")?,?(.*)?\\]$"].groups()
+        let binaryGroup = message["^(\\d*)-\\/?(\\w*)?,?(\\d*)?\\[(\".*?\")?,?(.*)?\\]$"].groups()
+        //    let binaryGroup = SwiftRegex(target: message,
+        //        pattern: "^(\\d*)-\\/?(\\w*)?,?(\\d*)?\\[(\".*?\")?,?(.*)?\\]$",
+        //        options: NSRegularExpressionOptions.DotMatchesLineSeparators).groups()
 
         if binaryGroup == nil {
             return
         }
 
-        if binaryGroup[1].hasPrefix("5") {
+        if binaryGroup![1].hasPrefix("5") {
             // println(binaryGroup)
             var ackNum:String
             var event:String
-            var mutMessageObject:NSMutableString
+            var mutMessageObject:String
             var namespace:String?
             var numberOfPlaceholders:String
-            let messageType = RegexMutable(binaryGroup[1])
 
-            namespace = binaryGroup[2]
-            if binaryGroup[3] != "" {
-                ackNum = binaryGroup[3] as String
-            } else if socket.nsp == nil && binaryGroup[2] != "" {
-                ackNum = binaryGroup[2]
+            let messageType = binaryGroup![1]
+
+            namespace = binaryGroup![2]
+            if binaryGroup![3] != "" {
+                ackNum = binaryGroup![3] as String
+            } else if socket.nsp == nil && binaryGroup![2] != "" {
+                ackNum = binaryGroup![2]
             } else {
                 ackNum = ""
             }
 
             numberOfPlaceholders = (messageType["5"] ~= "") as String
-            event = (RegexMutable(binaryGroup[4])["\""] ~= "") as String
-            mutMessageObject = RegexMutable(binaryGroup[5])
+            event = (binaryGroup![4]["\""] ~= "") as String
+            mutMessageObject = binaryGroup![5]
 
             if namespace == "" && socket.nsp != nil {
                 return
@@ -418,24 +393,24 @@ class SocketParser {
             }
 
             socket.waitingData.append(mes)
-        } else if binaryGroup[1].hasPrefix("6") {
-            let messageType = RegexMutable(binaryGroup[1])
+        } else if binaryGroup![1].hasPrefix("6") {
+            let messageType = binaryGroup![1]
             let numberOfPlaceholders = (messageType["6"] ~= "") as String
             var ackNum:String
             var nsp:String
 
-            if binaryGroup[3] == "" {
-                ackNum = binaryGroup[2]
+            if binaryGroup![3] == "" {
+                ackNum = binaryGroup![2]
                 nsp = ""
             } else {
-                ackNum = binaryGroup[3]
-                nsp = binaryGroup[2]
+                ackNum = binaryGroup![3]
+                nsp = binaryGroup![2]
             }
 
             if nsp == "" && socket.nsp != nil {
                 return
             }
-            var mutMessageObject = RegexMutable(binaryGroup[5])
+            var mutMessageObject = binaryGroup![5]
             let placeholdersRemoved = mutMessageObject["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"]
                 ~= "\"~~$2\""
 

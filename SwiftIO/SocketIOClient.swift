@@ -25,7 +25,7 @@
 import Foundation
 
 public class SocketIOClient: NSObject {
-    let socketURL:NSMutableString!
+    let socketURL:String!
     let ackQueue = dispatch_queue_create("ackQueue".cStringUsingEncoding(NSUTF8StringEncoding),
         DISPATCH_QUEUE_SERIAL)
     let handleQueue = dispatch_queue_create("handleQueue".cStringUsingEncoding(NSUTF8StringEncoding),
@@ -50,7 +50,7 @@ public class SocketIOClient: NSObject {
     
     internal var currentAck = -1
     internal var waitingData = [SocketEvent]()
-
+    
     public var closed:Bool {
         return self._closed
     }
@@ -74,17 +74,15 @@ public class SocketIOClient: NSObject {
         return self._sid
     }
     
-    public init(socketURL:String, opts:[String: AnyObject]? = nil) {
-        var mutURL = RegexMutable(socketURL)
-        
-        if mutURL["https://"].matches().count != 0 {
+    public init(var socketURL:String, opts:[String: AnyObject]? = nil) {
+        if socketURL["https://"].matches().count != 0 {
             self._secure = true
         }
         
-        mutURL = mutURL["http://"] ~= ""
-        mutURL = mutURL["https://"] ~= ""
+        socketURL = socketURL["http://"] ~= ""
+        socketURL = socketURL["https://"] ~= ""
         
-        self.socketURL = mutURL
+        self.socketURL = socketURL
         
         // Set options
         if opts != nil {
@@ -396,6 +394,7 @@ public class SocketIOClient: NSObject {
         
         if self.reconnectTimer == nil {
             self._reconnecting = true
+            
             dispatch_async(dispatch_get_main_queue()) {[weak self] in
                 if self == nil {
                     return
