@@ -27,7 +27,7 @@ import Foundation
 
 var memoizer = [String: UnicodeScalar]()
 
-func lookup(base:UnicodeScalar, combi:UnicodeScalar) -> UnicodeScalar {
+private func lookup(base:UnicodeScalar, combi:UnicodeScalar) -> UnicodeScalar {
     let combined = "\(base)\(combi)"
     
     if let y = memoizer[combined] {
@@ -54,13 +54,13 @@ func fixDoubleUTF8(inout name:String) {
     
     for ch in name.unicodeScalars {
         if ch.value < 0x80 {
-            y.append(UInt8(ch))
+            y.append(UInt8(ch.value))
             continue
         }
         isASCII = false
         
         if ch.value < 0x100 {
-            y.append(UInt8(ch))
+            y.append(UInt8(ch.value))
             continue
         }
         // might be a combining character that when combined with the
@@ -77,7 +77,7 @@ func fixDoubleUTF8(inout name:String) {
             return
         }
         
-        y.append(UInt8(repl))
+        y.append(UInt8(repl.value))
     }
     
     if isASCII {
@@ -92,7 +92,11 @@ func fixDoubleUTF8(inout name:String) {
         if let str = rslt.0 {
             if !rslt.hadError {
                 name = str
+            } else {
+                println("error")
             }
+        } else {
+            println("error")
         }
         
         return
