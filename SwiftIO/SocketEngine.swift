@@ -179,7 +179,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             
             // println(data)
             
-            if var str = NSString(data: data, encoding: NSUTF8StringEncoding) as? String {
+            if let str = NSString(data: data, encoding: NSUTF8StringEncoding) as? String {
                 dispatch_async(self!.parseQueue) {callback(str)}
             }
             

@@ -217,19 +217,15 @@ class SocketParser {
             return
         }
         
-        
         /**
         Begin check for message
         **/
-        let messageGroups = stringMessage["(\\d*)\\/?(\\w*)?,?(\\d*)?\\[\"(.*?)\",?(.*?)?\\]$"].groups()
+        let messageGroups = stringMessage["(\\d*)\\/?(\\w*)?,?(\\d*)?\\[\"(.*?)\",?(.*?)?\\]$",
+            NSRegularExpressionOptions.DotMatchesLineSeparators].groups()
         if messageGroups == nil {
             NSLog("Error in groups")
             return
         }
-        
-        //        let messageGroups = SwiftRegex(target: stringMessage as NSString,
-        //            pattern: "(\\d*)\\/?(\\w*)?,?(\\d*)?\\[\"(.*?)\",?(.*?)?\\]$",
-        //            options: NSRegularExpressionOptions.DotMatchesLineSeparators).groups()
         
         if messageGroups![1].hasPrefix("2") {
             var mesNum = messageGroups![1]
@@ -343,10 +339,8 @@ class SocketParser {
         /**
         Begin check for binary placeholders
         **/
-        let binaryGroup = message["^(\\d*)-\\/?(\\w*)?,?(\\d*)?\\[(\".*?\")?,?(.*)?\\]$"].groups()
-        //    let binaryGroup = SwiftRegex(target: message,
-        //        pattern: "^(\\d*)-\\/?(\\w*)?,?(\\d*)?\\[(\".*?\")?,?(.*)?\\]$",
-        //        options: NSRegularExpressionOptions.DotMatchesLineSeparators).groups()
+        let binaryGroup = message["^(\\d*)-\\/?(\\w*)?,?(\\d*)?\\[(\".*?\")?,?(.*)?\\]$",
+            NSRegularExpressionOptions.DotMatchesLineSeparators].groups()
         
         if binaryGroup == nil {
             return
@@ -359,6 +353,7 @@ class SocketParser {
             var mutMessageObject:String
             var namespace:String?
             var numberOfPlaceholders:String
+            
             let messageType = binaryGroup![1]
             
             namespace = binaryGroup![2]
