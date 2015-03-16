@@ -179,7 +179,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             
             // println(data)
             
-            if let str = NSString(data: data, encoding: NSUTF8StringEncoding) {
+            if var str = NSString(data: data, encoding: NSUTF8StringEncoding) as? String {
                 dispatch_async(self!.parseQueue) {callback(str)}
             }
             
@@ -221,6 +221,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         
         for packet in self.postWait {
             let len = countElements(packet)
+            
             postStr += "\(len):\(packet)"
         }
         
@@ -405,6 +406,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     
     private func parseEngineMessage(var message:String) {
         // NSLog("Engine got message: \(message)")
+        fixDoubleUTF8(&message)
         
         // We should upgrade
         if message == "3probe" {
