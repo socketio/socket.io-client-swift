@@ -211,7 +211,7 @@ class SocketParser {
             }
         }
         
-        if stringMessage.hasPrefix("5") {
+        if stringMessage.hasPrefix("5") || stringMessage.hasPrefix("6") {
             // Check for message with binary placeholders
             self.parseBinaryMessage(stringMessage, socket: socket)
             return
@@ -220,10 +220,16 @@ class SocketParser {
         /**
         Begin check for message
         **/
-        let messageGroups = stringMessage["(\\d*)\\/?(\\w*)?,?(\\d*)?\\[\"(.*?)\",?(.*?)?\\]$",
-            NSRegularExpressionOptions.DotMatchesLineSeparators].groups()
-        if messageGroups == nil {
-            NSLog("Error in groups")
+        var messageGroups:[String]?
+        
+        if let groups = stringMessage["(\\d*)\\/?(\\w*)?,?(\\d*)?\\[\"(.*?)\",?(.*?)?\\]$",
+            NSRegularExpressionOptions.DotMatchesLineSeparators].groups() {
+                messageGroups = groups
+        } else if let ackGroup = stringMessage["(\\d*)\\/?(\\w*)?,?(\\d*)?\\[(.*?)?\\]$",
+            NSRegularExpressionOptions.DotMatchesLineSeparators].groups() {
+                messageGroups = ackGroup
+        } else {
+            NSLog("Error parsing message: %s", stringMessage)
             return
         }
         
@@ -289,6 +295,12 @@ class SocketParser {
     // Handles binary data
     class func parseBinaryData(data:NSData, socket:SocketIOClient) {
         // NSLog(data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions.allZeros))
+        
+        if socket.waitingData.count == 0 {
+            NSLog("Got data when not remaking packet")
+            return
+        }
+        
         let shouldExecute = socket.waitingData[0].addData(data)
         
         if shouldExecute {
@@ -339,10 +351,16 @@ class SocketParser {
         /**
         Begin check for binary placeholders
         **/
-        let binaryGroup = message["^(\\d*)-\\/?(\\w*)?,?(\\d*)?\\[(\".*?\")?,?(.*)?\\]$",
-            NSRegularExpressionOptions.DotMatchesLineSeparators].groups()
+        var binaryGroup:[String]?
         
-        if binaryGroup == nil {
+        if let groups = message["^(\\d*)-\\/?(\\w*)?,?(\\d*)?\\[(\".*?\")?,?(.*)?\\]$",
+            NSRegularExpressionOptions.DotMatchesLineSeparators].groups() {
+                binaryGroup = groups
+        } else if let groups = message["^(\\d*)-\\/?(\\w*)?,?(\\d*)?\\[(.*?)?\\]$",
+            NSRegularExpressionOptions.DotMatchesLineSeparators].groups() {
+                binaryGroup = groups
+        } else {
+            NSLog("Error in parsing binary message: %s", message)
             return
         }
         
