@@ -116,6 +116,10 @@ public class SocketIOClient: NSObject {
         self.engine = SocketEngine(client: self, forcePolling: self.forcePolling)
     }
     
+    public convenience init(socketURL:String, opts:NSDictionary?) {
+        self.init(socketURL: socketURL, opts: opts)
+    }
+    
     // Closes the socket
     public func close() {
         self._closed = true
