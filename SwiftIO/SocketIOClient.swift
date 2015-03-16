@@ -74,7 +74,7 @@ public class SocketIOClient: NSObject {
         return self._sid
     }
     
-    public init(var socketURL:String, opts:[String: AnyObject]? = nil) {
+    public init(var socketURL:String, opts:NSDictionary? = nil) {
         if socketURL["https://"].matches().count != 0 {
             self._secure = true
         }
@@ -116,8 +116,8 @@ public class SocketIOClient: NSObject {
         self.engine = SocketEngine(client: self, forcePolling: self.forcePolling)
     }
     
-    public convenience init(socketURL:String, opts:NSDictionary?) {
-        self.init(socketURL: socketURL, opts: opts)
+    public convenience init(socketURL:String, options:NSDictionary?) {
+        self.init(socketURL: socketURL, opts: options)
     }
     
     // Closes the socket

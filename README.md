@@ -38,9 +38,11 @@ import Socket_IO_Client_Swift
 
 API
 ===
-Constructor
+Constructors
 -----------
-`init(socketURL: String, opts:[String: AnyObject]? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values. See example)
+`init(socketURL: String, opts:NSDictionary? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values. See example)
+
+`convenience init(socketURL: String, options:NSDictionary? = nil)` - Same as above, but meant for Objective-C. See Objective-C Example.
 Methods
 -------
 1. `socket.on(name:String, callback:((data:NSArray?, ack:AckEmitter?) -> Void))` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
@@ -124,12 +126,12 @@ socket.connect()
 Objective-C Example
 ===================
 ```objective-c
-SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8080" opts:nil];
+SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8080" options:nil];
 
 [socket on: @"connect" callback: ^(NSArray* data, void (^ack)(NSArray*)) {
     NSLog(@"connected");
     [socket emitObjc:@"echo" :@[@"echo test"]];
-    [[socket emitWithAckObjc:@"ackack" :@[@"test"]] onAck:^(NSArray* data) {
+    [[socket emitWithAckObjc:@"ackack" :@[@"test"]] onAck:0 withCallback:^(NSArray* data) {
         NSLog(@"Got data");
     }];
 }];
