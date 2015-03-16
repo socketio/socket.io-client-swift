@@ -103,7 +103,8 @@ socket.on("ackEvent") {data, ack in
         println("Got int")
     }
 
-    socket.emitWithAck("ackTest", "test").onAck {data in
+    // You can specify a custom timeout interval. 0 means no timeout.
+    socket.emitWithAck("ackTest", "test").onAck(0) {data in
         println(data?[0])
     }
 
