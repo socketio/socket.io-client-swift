@@ -42,7 +42,7 @@ Constructors
 -----------
 `init(socketURL: String, opts:NSDictionary? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values. See example)
 
-`convenience init(socketURL: String, options:NSDictionary? = nil)` - Same as above, but meant for Objective-C. See Objective-C Example.
+`convenience init(socketURL: String, options:NSDictionary?)` - Same as above, but meant for Objective-C. See Objective-C Example.
 Methods
 -------
 1. `socket.on(name:String, callback:((data:NSArray?, ack:AckEmitter?) -> Void))` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
