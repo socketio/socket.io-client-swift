@@ -32,7 +32,7 @@ class SocketEvent {
     lazy var datas = [NSData]()
     var event:String!
     var placeholders:Int!
-
+    
     init(event:String, args:AnyObject?, placeholders:Int = 0, ackNum:Int? = nil, justAck:Bool = false) {
         self.event = event
         self.args = args
@@ -40,7 +40,7 @@ class SocketEvent {
         self.ack = ackNum
         self.justAck = justAck
     }
-
+    
     func addData(data:NSData) -> Bool {
         func checkDoEvent() -> Bool {
             if self.placeholders == self.currentPlace {
@@ -49,14 +49,14 @@ class SocketEvent {
                 return false
             }
         }
-
+        
         if checkDoEvent() {
             return true
         }
-
+        
         self.datas.append(data)
         self.currentPlace++
-
+        
         if checkDoEvent() {
             self.currentPlace = 0
             return true
@@ -64,13 +64,13 @@ class SocketEvent {
             return false
         }
     }
-
+    
     class func createMessageForEvent(event:String, withArgs args:[AnyObject],
         hasBinary:Bool, withDatas datas:Int = 0, toNamespace nsp:String?, wantsAck ack:Int? = nil) -> String {
-
+            
             var message:String
             var jsonSendError:NSError?
-
+            
             if !hasBinary {
                 if nsp == nil {
                     if ack == nil {
@@ -100,14 +100,14 @@ class SocketEvent {
                     }
                 }
             }
-
+            
             return self.completeMessage(message, args: args)
     }
-
+    
     class func createAck(ack:Int, withArgs args:[AnyObject], withAckType ackType:Int,
         withNsp nsp:String, withBinary binary:Int = 0) -> String {
             var msg:String
-
+            
             if ackType == 3 {
                 if nsp == "/" {
                     msg = "3\(ack)["
@@ -121,52 +121,52 @@ class SocketEvent {
                     msg = "6\(binary)-/\(nsp),\(ack)["
                 }
             }
-
+            
             return self.completeMessage(msg, args: args, ack: true)
     }
-
+    
     private class func completeMessage(var message:String, args:[AnyObject], ack:Bool = false) -> String {
         var err:NSError?
-
+        
         if args.count == 0 {
             return message + "]"
         } else if !ack {
             message += ","
         }
-
+        
         for arg in args {
-
+            
             if arg is NSDictionary || arg is [AnyObject] {
                 let jsonSend = NSJSONSerialization.dataWithJSONObject(arg,
                     options: NSJSONWritingOptions(0), error: &err)
                 let jsonString = NSString(data: jsonSend!, encoding: NSUTF8StringEncoding)
-
+                
                 message += jsonString! as String
                 message += ","
                 continue
             }
-
+            
             if arg is String {
                 message += "\"\(arg)\""
                 message += ","
                 continue
             }
-
+            
             message += "\(arg)"
             message += ","
         }
-
+        
         if message != "" {
             message.removeAtIndex(message.endIndex.predecessor())
         }
-
+        
         return message + "]"
     }
-
+    
     private func fillInArray(arr:NSArray) -> NSArray {
         var newArr = [AnyObject](count: arr.count, repeatedValue: 0)
         // println(arr)
-
+        
         for i in 0..<arr.count {
             if let nest = arr[i] as? NSArray {
                 newArr[i] = self.fillInArray(nest)
@@ -182,21 +182,21 @@ class SocketEvent {
                 newArr[i] = arr[i]
             }
         }
-
+        
         return newArr
     }
-
+    
     private func fillInDict(dict:NSDictionary) -> NSDictionary {
         var newDict = [String: AnyObject]()
-
+        
         for (key, value) in dict {
             newDict[key as! String] = value
-
+            
             // If the value is a string we need to check
             // if it is a placeholder for data
             if let str = value as? String {
                 if let num = str["~~(\\d)"].groups() {
-                    newDict[key as String] = self.datas[num[1].toInt()!]
+                    newDict[key as! String] = self.datas[num[1].toInt()!]
                 } else {
                     newDict[key as! String] = str
                 }
@@ -206,10 +206,10 @@ class SocketEvent {
                 newDict[key as! String] = self.fillInArray(arr)
             }
         }
-
+        
         return newDict
     }
-
+    
     func fillInPlaceholders(_ args:AnyObject = true) -> AnyObject {
         if let dict = args as? NSDictionary {
             return self.fillInDict(dict)
@@ -225,7 +225,7 @@ class SocketEvent {
             let argsAsArray = "[\(self.args)]"
             if let parsedArr = SocketParser.parseData(argsAsArray) as? NSArray {
                 var returnArr = [AnyObject](count: parsedArr.count, repeatedValue: 0)
-
+                
                 for i in 0..<parsedArr.count {
                     if let str = parsedArr[i] as? String {
                         if let num = str["~~(\\d)"].groups() {
@@ -244,7 +244,7 @@ class SocketEvent {
                 return returnArr
             }
         }
-
+        
         return false
     }
 }
