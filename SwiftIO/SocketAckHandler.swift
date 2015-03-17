@@ -31,10 +31,13 @@ public typealias AckCallback = (NSArray?) -> Void
     let event:String!
     var acked = false
     var callback:AckCallback?
+    weak var socket:SocketIOClient?
+
     
-    init(event:String, ackNum:Int = 0) {
+    init(event:String, ackNum:Int = 0, socket:SocketIOClient) {
         self.ackNum = ackNum
         self.event = event
+        self.socket = socket
     }
     
     public func onAck(timeout:UInt64, withCallback callback:AckCallback) {
@@ -50,6 +53,7 @@ public typealias AckCallback = (NSArray?) -> Void
                 
                 if !self!.acked {
                     self?.executeAck(["No ACK"])
+                    self?.socket?.removeAck(self!)
                 }
             }
         }
