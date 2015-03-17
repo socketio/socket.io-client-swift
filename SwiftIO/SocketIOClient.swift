@@ -198,15 +198,16 @@ public class SocketIOClient: NSObject {
     
     public func emitWithAck(event:String, _ args:AnyObject...) -> SocketAckHandler {
         if !self.connected {
-            return SocketAckHandler(event: "fail")
+            return SocketAckHandler(event: "fail", socket: self)
         }
         
         self.currentAck++
-        let ackHandler = SocketAckHandler(event: event, ackNum: self.currentAck)
+        let ackHandler = SocketAckHandler(event: event,
+            ackNum: self.currentAck, socket: self)
         self.ackHandlers.append(ackHandler)
         
-        dispatch_async(self.emitQueue) {[weak self] in
-            self?._emit(event, args, ack: true)
+        dispatch_async(self.emitQueue) {[weak self, ack = self.currentAck] in
+            self?._emit(event, args, ack: ack)
             return
         }
         
@@ -217,7 +218,7 @@ public class SocketIOClient: NSObject {
         return self.emitWithAck(event, args)
     }
     
-    private func _emit(event:String, _ args:[AnyObject], ack:Bool = false) {
+    private func _emit(event:String, _ args:[AnyObject], ack:Int? = nil) {
         var frame:SocketEvent
         var str:String
         
@@ -228,22 +229,22 @@ public class SocketIOClient: NSObject {
         }
         
         if hasBinary {
-            if !ack {
+            if ack == nil {
                 str = SocketEvent.createMessageForEvent(event, withArgs: items,
                     hasBinary: true, withDatas: emitDatas.count, toNamespace: self.nsp)
             } else {
                 str = SocketEvent.createMessageForEvent(event, withArgs: items,
-                    hasBinary: true, withDatas: emitDatas.count, toNamespace: self.nsp, wantsAck: self.currentAck)
+                    hasBinary: true, withDatas: emitDatas.count, toNamespace: self.nsp, wantsAck: ack)
             }
             
             self.engine?.send(str, datas: emitDatas)
         } else {
-            if !ack {
+            if ack == nil {
                 str = SocketEvent.createMessageForEvent(event, withArgs: items, hasBinary: false,
                     withDatas: 0, toNamespace: self.nsp)
             } else {
                 str = SocketEvent.createMessageForEvent(event, withArgs: items, hasBinary: false,
-                    withDatas: 0, toNamespace: self.nsp, wantsAck: self.currentAck)
+                    withDatas: 0, toNamespace: self.nsp, wantsAck: ack)
             }
             
             self.engine?.send(str)
@@ -383,6 +384,10 @@ public class SocketIOClient: NSObject {
             self.handleEvent("reconnect", data: err?.localizedDescription, isInternalMessage: true)
             self.tryReconnect()
         }
+    }
+    
+    func removeAck(ack:SocketAckHandler) {
+        self.ackHandlers = self.ackHandlers.filter {$0 === ack ? false : true}
     }
     
     // We lost connection and should attempt to reestablish
