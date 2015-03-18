@@ -67,6 +67,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     var connected:Bool {
         return self._connected
     }
+    var cookies:[NSHTTPCookie]?
     var pingInterval:Int?
     var polling:Bool {
         return self._polling
@@ -79,9 +80,10 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     }
     var ws:WebSocket?
     
-    init(client:SocketIOClient, forcePolling:Bool = false) {
+    init(client:SocketIOClient, forcePolling:Bool = false, withCookies cookies:[NSHTTPCookie]?) {
         self.client = client
         self.forcePolling = forcePolling
+        self.cookies = cookies
         self.session = NSURLSession(configuration: NSURLSessionConfiguration.ephemeralSessionConfiguration(),
             delegate: nil, delegateQueue: self.workQueue)
     }
@@ -288,7 +290,13 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         let (urlPolling, urlWebSocket) = self.createURLs(params: opts)
         self.urlPolling = urlPolling
         self.urlWebSocket = urlWebSocket
-        let reqPolling = NSURLRequest(URL: NSURL(string: urlPolling + "&b64=1")!)
+        let reqPolling = NSMutableURLRequest(URL: NSURL(string: urlPolling + "&b64=1")!)
+        
+        if self.cookies != nil {
+            let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(self.cookies!)
+            reqPolling.allHTTPHeaderFields = headers
+        }
+        
         
         self.session.dataTaskWithRequest(reqPolling) {[weak self] data, res, err in
             var err2:NSError?
@@ -470,10 +478,10 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                 }
                 
                 if self!.websocket {
-                    // println("sending ws: \(msg):\(datas)")
+                    // NSLog("sending ws: \(msg):\(datas)")
                     self?.sendWebSocketMessage(msg, withType: PacketType.MESSAGE, datas: datas)
                 } else {
-                    // println("sending poll: \(msg):\(datas)")
+                    // NSLog("sending poll: \(msg):\(datas)")
                     self?.sendPollMessage(msg, withType: PacketType.MESSAGE, datas: datas)
                 }
             }
