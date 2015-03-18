@@ -68,11 +68,12 @@ Example
 ```swift
 // opts can be omitted, will use default values
 let socket = SocketIOClient(socketURL: "https://localhost:8080", opts: [
-    "reconnects": true, // default true
-    "reconnectAttempts": 5, // default -1 (infinite tries)
-    "reconnectWait": 5, // default 10
+    "reconnects": true, // Default is true
+    "reconnectAttempts": 5, // Default is -1 (infinite tries)
+    "reconnectWait": 5, // Default is 10
     "nsp": "swift", // connects to the specified namespace. Default is /
-    "forcePolling": true // if true, the socket will only use XHR polling, default is false (polling/WebSockets)
+    "forcePolling": true, // if true, the socket will only use XHR polling, Default is false (polling/WebSockets)
+    "cookies": nil // An array of NSHTTPCookies. Passed during handshake. Default is nil
 ])
 
 // Called on every event
