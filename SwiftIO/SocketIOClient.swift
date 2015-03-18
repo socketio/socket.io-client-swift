@@ -175,13 +175,13 @@ public class SocketIOClient: NSObject {
     }
     
     // Server wants us to die
-    func didForceClose() {
+    func didForceClose(#message:String) {
         self._closed = true
         self._connected = false
         self.reconnects = false
         self._connecting = false
         self._reconnecting = false
-        self.handleEvent("disconnect", data: "closed", isInternalMessage: true)
+        self.handleEvent("disconnect", data: message, isInternalMessage: true)
     }
     
     // Sends a message with multiple args
@@ -199,8 +199,8 @@ public class SocketIOClient: NSObject {
     }
     
     // Objc doesn't have variadics
-    public func emitObjc(event:String, _ args:[AnyObject]) {
-        self.emit(event, args)
+    public func emitObjc(event:String, withItems items:[AnyObject]) {
+        self.emit(event, items)
     }
     
     public func emitWithAck(event:String, _ args:AnyObject...) -> SocketAckHandler {
@@ -221,8 +221,8 @@ public class SocketIOClient: NSObject {
         return ackHandler
     }
     
-    public func emitWithAckObjc(event:String, _ args:[AnyObject]) -> SocketAckHandler {
-        return self.emitWithAck(event, args)
+    public func emitWithAckObjc(event:String, withItems items:[AnyObject]) -> SocketAckHandler {
+        return self.emitWithAck(event, items)
     }
     
     private func _emit(event:String, _ args:[AnyObject], ack:Int? = nil) {
@@ -319,10 +319,13 @@ public class SocketIOClient: NSObject {
                 return
             }
             
-            dispatch_async(dispatch_get_main_queue()) {[weak self] in
-                self?.anyHandler?((event, data))
-                return
+            if self.anyHandler != nil {
+                dispatch_async(dispatch_get_main_queue()) {[weak self] in
+                    self?.anyHandler?((event, data))
+                    return
+                }
             }
+            
             for handler in self.handlers {
                 if handler.event == event {
                     if data is NSArray {
@@ -400,7 +403,7 @@ public class SocketIOClient: NSObject {
     // We lost connection and should attempt to reestablish
     func tryReconnect() {
         if self.reconnectAttempts != -1 && self.currentReconnectAttempt + 1 > self.reconnectAttempts {
-            self.didForceClose()
+            self.didForceClose(message: "Reconnect Failed")
             return
         } else if self.connected {
             self._connecting = false
@@ -438,7 +441,7 @@ public class SocketIOClient: NSObject {
         self._connected = false
         self._connecting = false
         if self.closed || !self.reconnects {
-            self.didForceClose()
+            self.didForceClose(message: "WebSocket closed")
         } else {
             self.handleEvent("reconnect", data: reason, isInternalMessage: true)
             self.tryReconnect()
@@ -451,7 +454,7 @@ public class SocketIOClient: NSObject {
         self._connecting = false
         self.handleEvent("error", data: error.localizedDescription, isInternalMessage: true)
         if self.closed || !self.reconnects {
-            self.didForceClose()
+            self.didForceClose(message: "WebSocket closed with an error \(error)")
         } else if !self.reconnecting {
             self.handleEvent("reconnect", data: error.localizedDescription, isInternalMessage: true)
             self.tryReconnect()
