@@ -225,15 +225,22 @@ class SocketParser {
         **/
         var messageGroups:[String]?
         
-        if let groups = stringMessage["(\\d*)\\/?(\\w*)?,?(\\d*)?\\[\"(.*?)\",?(.*?)?\\]$",
-            NSRegularExpressionOptions.DotMatchesLineSeparators].groups() {
-                messageGroups = groups
-        } else if let ackGroup = stringMessage["(\\d*)\\/?(\\w*)?,?(\\d*)?\\[(.*?)?\\]$",
-            NSRegularExpressionOptions.DotMatchesLineSeparators].groups() {
-                messageGroups = ackGroup
+        if stringMessage.hasPrefix("3") {
+            if let ackGroup = stringMessage["(\\d*)\\/?(\\w*)?,?(\\d*)?\\[(.*?)?\\]$",
+                NSRegularExpressionOptions.DotMatchesLineSeparators].groups() {
+                    messageGroups = ackGroup
+            } else {
+                NSLog("Error parsing message: %s", stringMessage)
+                return
+            }
         } else {
-            NSLog("Error parsing message: %s", stringMessage)
-            return
+            if let groups = stringMessage["(\\d*)\\/?(\\w*)?,?(\\d*)?\\[\"(.*?)\",?(.*?)?\\]$",
+                NSRegularExpressionOptions.DotMatchesLineSeparators].groups() {
+                    messageGroups = groups
+            } else {
+                NSLog("Error parsing message: %s", stringMessage)
+                return
+            }
         }
         
         if messageGroups![1].hasPrefix("2") {
