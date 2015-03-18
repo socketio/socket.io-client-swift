@@ -185,7 +185,7 @@ class SocketParser {
     }
     
     // Parses messages recieved
-    class func parseSocketMessage(stringMessage:String, socket:SocketIOClient) {
+    class func parseSocketMessage(var stringMessage:String, socket:SocketIOClient) {
         if stringMessage == "" {
             return
         }
@@ -225,70 +225,74 @@ class SocketParser {
         **/
         var messageGroups:[String]?
         
-        if let groups = stringMessage["(\\d*)\\/?(\\w*)?,?(\\d*)?\\[\"(.*?)\",?(.*?)?\\]$",
-            NSRegularExpressionOptions.DotMatchesLineSeparators].groups() {
-                messageGroups = groups
-        } else if let ackGroup = stringMessage["(\\d*)\\/?(\\w*)?,?(\\d*)?\\[(.*?)?\\]$",
-            NSRegularExpressionOptions.DotMatchesLineSeparators].groups() {
-                messageGroups = ackGroup
-        } else {
-            NSLog("Error parsing message: %s", stringMessage)
-            return
-        }
+        let type = stringMessage.removeAtIndex(stringMessage.startIndex)
         
-        if messageGroups![1].hasPrefix("2") {
-            var mesNum = messageGroups![1]
-            var ackNum:String
-            var namespace:String?
-            
-            if messageGroups![3] != "" {
-                ackNum = messageGroups![3]
-            } else {
-                let range = Range<String.Index>(start: mesNum.startIndex,
-                    end: advance(mesNum.startIndex, 1))
-                mesNum.replaceRange(range, with: "")
-                ackNum = mesNum
+        if type == "2" {
+            if let groups = stringMessage["(\\d*)\\/?(\\w*)?,?(\\d*)?\\[\"(.*?)\",?(.*?)?\\]$",
+                NSRegularExpressionOptions.DotMatchesLineSeparators].groups() {
+                    messageGroups = groups
+
+                    var mesNum = messageGroups![1]
+                    var ackNum:String
+                    var namespace:String?
+                    
+                    if mesNum == "" {
+                        ackNum = ""
+                    } else if messageGroups![3] != "" {
+                        ackNum = messageGroups![3]
+                    } else {
+                        let range = Range<String.Index>(start: mesNum.startIndex,
+                            end: advance(mesNum.startIndex, 1))
+                        mesNum.replaceRange(range, with: "")
+                        ackNum = mesNum
+                    }
+                    
+                    namespace = messageGroups![2]
+                    
+                    if namespace == "" && socket.nsp != nil {
+                        return
+                    }
+                    
+                    let event = messageGroups![4]
+                    let data = "[\(messageGroups![5])]"
+                    
+                    if let parsed:AnyObject = self.parseData(data) {
+                        if ackNum == "" {
+                            socket.handleEvent(event, data: parsed)
+                        } else {
+                            socket.currentAck = ackNum.toInt()!
+                            socket.handleEvent(event, data: parsed, isInternalMessage: false,
+                                wantsAck: ackNum.toInt(), withAckType: 3)
+                        }
+                        
+                        return
+                    }
+                    
             }
-            
-            namespace = messageGroups![2]
-            
-            if namespace == "" && socket.nsp != nil {
-                return
+        } else if type == "3" {
+            if let ackGroup = stringMessage["(\\d*)\\/?(\\w*)?,?(\\d*)?\\[(.*?)?\\]$",
+                NSRegularExpressionOptions.DotMatchesLineSeparators].groups() {
+                    messageGroups = ackGroup
+                    
+                    let arr = Array(messageGroups![1])
+                    var ackNum:String
+                    let nsp = messageGroups![2]
+                    
+                    if nsp == "" && socket.nsp != nil {
+                        return
+                    }
+                    
+                    if nsp == "" {
+                        ackNum = String(arr[0...arr.count-1])
+                    } else {
+                        ackNum = messageGroups![3]
+                    }
+                    
+                    let ackData:AnyObject? = self.parseData("[\(messageGroups![4])]")
+                    socket.handleAck(ackNum.toInt()!, data: ackData)
+                    
+                    return
             }
-            
-            let event = messageGroups![4]
-            let data = "[\(messageGroups![5])]"
-            
-            if let parsed:AnyObject = self.parseData(data) {
-                if ackNum == "" {
-                    socket.handleEvent(event, data: parsed)
-                } else {
-                    socket.currentAck = ackNum.toInt()!
-                    socket.handleEvent(event, data: parsed, isInternalMessage: false,
-                        wantsAck: ackNum.toInt(), withAckType: 3)
-                }
-                
-                return
-            }
-        } else if messageGroups![1].hasPrefix("3") {
-            let arr = Array(messageGroups![1])
-            var ackNum:String
-            let nsp = messageGroups![2]
-            
-            if nsp == "" && socket.nsp != nil {
-                return
-            }
-            
-            if nsp == "" {
-                ackNum = String(arr[1...arr.count-1])
-            } else {
-                ackNum = messageGroups![3]
-            }
-            
-            let ackData:AnyObject? = self.parseData(messageGroups![4])
-            socket.handleAck(ackNum.toInt()!, data: ackData)
-            
-            return
         }
         /**
         End Check for message
