@@ -43,7 +43,7 @@ public class SwiftRegex: NSObject, BooleanType {
     }
     
     final var targetRange: NSRange {
-        return NSRange(location: 0,length: countElements(target))
+        return NSRange(location: 0,length: target.utf16Count)
     }
     
     final func substring(range: NSRange) -> String? {
@@ -102,7 +102,7 @@ public class SwiftRegex: NSObject, BooleanType {
                 let mut = NSMutableString(string: target)
                 mut.replaceCharactersInRange(match.rangeAtIndex(groupno), withString: replacement)
                 
-                target = mut
+                target = mut as String
             }
         }
     }
@@ -154,7 +154,7 @@ public class SwiftRegex: NSObject, BooleanType {
             
             out.appendString(substring( NSRange(location:pos, length:targetRange.length-pos))!)
             
-            return out
+            return out as String
     }
     
     public var boolValue: Bool {
