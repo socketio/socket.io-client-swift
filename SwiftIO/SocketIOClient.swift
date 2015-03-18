@@ -60,6 +60,7 @@ public class SocketIOClient: NSObject {
     public var connecting:Bool {
         return self._connecting
     }
+    public var cookies:[NSHTTPCookie]?
     public var engine:SocketEngine?
     public var nsp:String?
     public var reconnects = true
@@ -107,13 +108,19 @@ public class SocketIOClient: NSObject {
             if let polling = opts!["forcePolling"] as? Bool {
                 self.forcePolling = polling
             }
+            
+            if let cookies = opts!["cookies"] as? [NSHTTPCookie] {
+                self.cookies = cookies
+            }
         } else {
             self.reconnectAttempts = -1
         }
         
         super.init()
         
-        self.engine = SocketEngine(client: self, forcePolling: self.forcePolling)
+        self.engine = SocketEngine(client: self,
+            forcePolling: self.forcePolling,
+            withCookies: self.cookies)
     }
     
     public convenience init(socketURL:String, options:NSDictionary?) {
