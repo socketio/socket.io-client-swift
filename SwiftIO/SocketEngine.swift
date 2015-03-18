@@ -406,7 +406,9 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     
     private func parseEngineMessage(var message:String) {
         // NSLog("Engine got message: \(message)")
-        fixDoubleUTF8(&message)
+        if self.polling {
+            fixDoubleUTF8(&message)
+        }
         
         // We should upgrade
         if message == "3probe" {
@@ -500,9 +502,11 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         }
     }
     
-    private func sendPollMessage(msg:String, withType type:PacketType,
+    private func sendPollMessage(var msg:String, withType type:PacketType,
         datas:[NSData]? = nil) {
             // println("Sending poll: \(msg) as type: \(type.rawValue)")
+            
+            doubleEncodeUTF8(&msg)
             let strMsg = "\(type.rawValue)\(msg)"
             
             self.postWait.append(strMsg)

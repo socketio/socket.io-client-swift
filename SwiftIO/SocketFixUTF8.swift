@@ -21,80 +21,17 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 //
-// Adapted from: https://github.com/durbrow/fix-double-utf8.swift
 
 import Foundation
 
-var memoizer = [String: UnicodeScalar]()
-
-func lookup(base:UnicodeScalar, combi:UnicodeScalar) -> UnicodeScalar {
-    let combined = "\(base)\(combi)"
-    
-    if let y = memoizer[combined] {
-        return y
-    }
-    
-    for i in 0x80...0xFF {
-        let ch = UnicodeScalar(i)
-        
-        if String(ch) == combined {
-            memoizer[combined] = ch
-            return ch
-        }
-    }
-    let ch = UnicodeScalar(0xFFFD) // Unicode replacement character �
-    
-    memoizer[combined] = ch
-    return ch
+func fixDoubleUTF8(inout name:String) {
+    let utf8 = name.dataUsingEncoding(NSISOLatin1StringEncoding, allowLossyConversion: false)!
+    let latin1 = NSString(data: utf8, encoding: NSUTF8StringEncoding)!
+    name = latin1 as String
 }
 
-func fixDoubleUTF8(inout name:String) {
-    var isASCII = true
-    var y = [UInt8]()
-    
-    for ch in name.unicodeScalars {
-        if ch.value < 0x80 {
-            y.append(UInt8(ch))
-            continue
-        }
-        isASCII = false
-        
-        if ch.value < 0x100 {
-            y.append(UInt8(ch))
-            continue
-        }
-        // might be a combining character that when combined with the
-        // preceeding character maps to a codepoint in the UTF8 range
-        if y.count == 0 {
-            return
-        }
-        
-        let last = y.removeLast()
-        let repl = lookup(UnicodeScalar(last), ch)
-        
-        // the replacement needs to be in the UTF8 range
-        if repl.value >= 0x100 {
-            return
-        }
-        
-        y.append(UInt8(repl))
-    }
-    
-    if isASCII {
-        return
-    }
-    
-    y.append(0) // null terminator
-    
-    return y.withUnsafeBufferPointer {
-        let cstr = UnsafePointer<CChar>($0.baseAddress) // typecase from uint8_t * to char *
-        let rslt = String.fromCStringRepairingIllFormedUTF8(cstr) // -> (String, Bool)
-        if let str = rslt.0 {
-            if !rslt.hadError {
-                name = str
-            }
-        }
-        
-        return
-    }
+func doubleEncodeUTF8(inout str:String) {
+    let latin1 = str.dataUsingEncoding(NSUTF8StringEncoding)!
+    let utf8 = NSString(data: latin1, encoding: NSISOLatin1StringEncoding)!
+    str = utf8 as String
 }
