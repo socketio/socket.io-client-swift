@@ -109,7 +109,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         }
     }
 
-    private func createURLs(params:[String: AnyObject]? = nil) -> (String, String) {
+    private func createURLs(params:[String: AnyObject]?) -> (String, String) {
         var url = "\(self.client.socketURL)/socket.io/?transport="
         var urlPolling:String
         var urlWebSocket:String
@@ -288,7 +288,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             assert(false, "We're in a bad state, this shouldn't happen.")
         }
 
-        let (urlPolling, urlWebSocket) = self.createURLs(params: opts)
+        let (urlPolling, urlWebSocket) = self.createURLs(opts)
         self.urlPolling = urlPolling
         self.urlWebSocket = urlWebSocket
         let reqPolling = NSMutableURLRequest(URL: NSURL(string: urlPolling + "&b64=1")!)

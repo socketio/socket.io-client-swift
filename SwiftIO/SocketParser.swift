@@ -209,6 +209,9 @@ class SocketParser {
                 socket.didConnect()
                 return
             }
+        } else if stringMessage == "1" {
+            socket.didForceClose(message: "Got disconnect")
+            return
         }
         
         if stringMessage.hasPrefix("5") || stringMessage.hasPrefix("6") {
