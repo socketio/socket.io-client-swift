@@ -43,7 +43,7 @@ public class SwiftRegex: NSObject, BooleanType {
     }
 
     final var targetRange: NSRange {
-        return NSRange(location: 0,length: countElements(target.utf16))
+        return NSRange(location: 0,length: count(target.utf16))
     }
 
     final func substring(range: NSRange) -> String? {
