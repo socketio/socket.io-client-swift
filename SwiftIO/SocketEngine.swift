@@ -557,16 +557,22 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     }
     
     public func write(msg:String, withType type:PacketType, withData data:[NSData]?) {
-        if !self.connected {
-            return
-        }
-        
-        if self.websocket {
-            // NSLog("writing ws: \(msg):\(datas)")
-            self.sendWebSocketMessage(msg, withType: type, datas: data)
-        } else {
-            // NSLog("writing poll: \(msg):\(datas)")
-            self.sendPollMessage(msg, withType: type, datas: data)
+        dispatch_async(self.emitQueue) {[weak self] in
+            if self == nil {
+                return
+            }
+            
+            if !self!.connected {
+                return
+            }
+            
+            if self!.websocket {
+                // NSLog("writing ws: \(msg):\(datas)")
+                self?.sendWebSocketMessage(msg, withType: type, datas: data)
+            } else {
+                // NSLog("writing poll: \(msg):\(datas)")
+                self?.sendPollMessage(msg, withType: type, datas: data)
+            }
         }
     }
     
