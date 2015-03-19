@@ -24,14 +24,7 @@
 
 import Foundation
 
-public class SocketIOClient: NSObject {
-    let socketURL:String!
-    let ackQueue = dispatch_queue_create("ackQueue".cStringUsingEncoding(NSUTF8StringEncoding),
-        DISPATCH_QUEUE_SERIAL)
-    let handleQueue = dispatch_queue_create("handleQueue".cStringUsingEncoding(NSUTF8StringEncoding),
-        DISPATCH_QUEUE_SERIAL)
-    let emitQueue = dispatch_queue_create("emitQueue".cStringUsingEncoding(NSUTF8StringEncoding),
-        DISPATCH_QUEUE_SERIAL)
+public class SocketIOClient: NSObject, SocketEngineClient {
     let reconnectAttempts:Int!
     private lazy var params = [String: AnyObject]()
     private var ackHandlers = [SocketAckHandler]()
@@ -51,6 +44,13 @@ public class SocketIOClient: NSObject {
     internal var currentAck = -1
     internal var waitingData = [SocketEvent]()
     
+    public let socketURL:String
+    public let ackQueue = dispatch_queue_create("ackQueue".cStringUsingEncoding(NSUTF8StringEncoding),
+        DISPATCH_QUEUE_SERIAL)
+    public let handleQueue = dispatch_queue_create("handleQueue".cStringUsingEncoding(NSUTF8StringEncoding),
+        DISPATCH_QUEUE_SERIAL)
+    public let emitQueue = dispatch_queue_create("emitQueue".cStringUsingEncoding(NSUTF8StringEncoding),
+        DISPATCH_QUEUE_SERIAL)
     public var closed:Bool {
         return self._closed
     }
@@ -379,16 +379,16 @@ public class SocketIOClient: NSObject {
         self.connect()
     }
     
-    func parseSocketMessage(msg:String) {
+    public func parseSocketMessage(msg:String) {
         SocketParser.parseSocketMessage(msg, socket: self)
     }
     
-    func parseBinaryData(data:NSData) {
+    public func parseBinaryData(data:NSData) {
         SocketParser.parseBinaryData(data, socket: self)
     }
     
     // Something happened while polling
-    func pollingDidFail(err:NSError?) {
+    public func pollingDidFail(err:NSError?) {
         if !self.reconnecting {
             self._connected = false
             self.handleEvent("reconnect", data: err?.localizedDescription, isInternalMessage: true)
@@ -437,7 +437,7 @@ public class SocketIOClient: NSObject {
     }
     
     // Called when the socket is closed
-    func webSocketDidCloseWithCode(code:Int, reason:String!, wasClean:Bool) {
+    public func webSocketDidCloseWithCode(code:Int, reason:String, wasClean:Bool) {
         self._connected = false
         self._connecting = false
         if self.closed || !self.reconnects {
@@ -449,7 +449,7 @@ public class SocketIOClient: NSObject {
     }
     
     // Called when an error occurs.
-    func webSocketDidFailWithError(error:NSError!) {
+    public func webSocketDidFailWithError(error:NSError) {
         self._connected = false
         self._connecting = false
         self.handleEvent("error", data: error.localizedDescription, isInternalMessage: true)

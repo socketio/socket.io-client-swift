@@ -30,9 +30,10 @@ extension String {
     }
 }
 
-private typealias PollWaitQueue = [() -> Void]
+private typealias Probe = (msg:String, type:PacketType, data:[NSData]?)
+private typealias ProbeWaitQueue = [Probe]
 
-private enum PacketType: String {
+public enum PacketType: String {
     case OPEN = "0"
     case CLOSE = "1"
     case PING = "2"
@@ -43,7 +44,7 @@ private enum PacketType: String {
 }
 
 public class SocketEngine: NSObject, WebSocketDelegate {
-    unowned let client:SocketIOClient
+    unowned let client:SocketEngineClient
     private let workQueue = NSOperationQueue()
     private let emitQueue = dispatch_queue_create(
         "emitQueue".cStringUsingEncoding(NSUTF8StringEncoding), DISPATCH_QUEUE_SERIAL)
@@ -59,7 +60,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     private var postWait = [String]()
     private var _polling = true
     private var probing = false
-    private var probeWait = PollWaitQueue()
+    private var probeWait = ProbeWaitQueue()
     private var waitingForPoll = false
     private var waitingForPost = false
     private var _websocket = false
@@ -80,7 +81,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     }
     var ws:WebSocket?
 
-    init(client:SocketIOClient, forcePolling:Bool = false, withCookies cookies:[NSHTTPCookie]?) {
+    init(client:SocketEngineClient, forcePolling:Bool = false, withCookies cookies:[NSHTTPCookie]?) {
         self.client = client
         self.forcePolling = forcePolling
         self.cookies = cookies
@@ -205,7 +206,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             }
 
             for waiter in self!.probeWait {
-                waiter()
+                self?.write(waiter.msg, withType: waiter.type, withData: waiter.data)
             }
 
             self?.probeWait.removeAll(keepCapacity: false)
@@ -477,33 +478,14 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         }
     }
 
+    /*
+    Send a message with type 4
+    */
     public func send(msg:String, datas:[NSData]? = nil) {
-        let _send = {[weak self] (msg:String, datas:[NSData]?) -> () -> Void in
-            return {
-                if self == nil || !self!.connected {
-                    return
-                }
-
-                if self!.websocket {
-                    // NSLog("sending ws: \(msg):\(datas)")
-                    self?.sendWebSocketMessage(msg, withType: PacketType.MESSAGE, datas: datas)
-                } else {
-                    // NSLog("sending poll: \(msg):\(datas)")
-                    self?.sendPollMessage(msg, withType: PacketType.MESSAGE, datas: datas)
-                }
-            }
-        }
-
-        dispatch_async(self.emitQueue) {[weak self] in
-            if self == nil {
-                return
-            }
-
-            if self!.probing {
-                self?.probeWait.append(_send(msg, datas))
-            } else {
-                _send(msg, datas)()
-            }
+        if self.probing {
+            self.probeWait.append((msg, PacketType.MESSAGE, datas))
+        } else {
+            self.write(msg, withType: PacketType.MESSAGE, withData: datas)
         }
     }
 
@@ -559,7 +541,8 @@ public class SocketEngine: NSObject, WebSocketDelegate {
 
         self.pingTimer?.invalidate()
         dispatch_async(dispatch_get_main_queue()) {
-            self.pingTimer = NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(self.pingInterval!), target: self,
+            self.pingTimer = NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(self.pingInterval!),
+                target: self,
                 selector: Selector("sendPing"), userInfo: nil, repeats: true)
         }
     }
@@ -572,6 +555,28 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             self.sendPollMessage("", withType: PacketType.NOOP)
         }
     }
+
+    public func write(msg:String, withType type:PacketType, withData data:[NSData]?) {
+        dispatch_async(self.emitQueue) {[weak self] in
+            if self == nil {
+                return
+            }
+
+            if !self!.connected {
+                return
+            }
+
+            if self!.websocket {
+                // NSLog("writing ws: \(msg):\(datas)")
+                self?.sendWebSocketMessage(msg, withType: type, datas: data)
+            } else {
+                // NSLog("writing poll: \(msg):\(datas)")
+                self?.sendPollMessage(msg, withType: type, datas: data)
+            }
+        }
+    }
+
+    // Delagate methods
 
     public func websocketDidConnect(socket:WebSocket) {
         self.websocketConnected = true
