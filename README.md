@@ -21,7 +21,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 platform :ios, '8.0'
 use_frameworks!
 
-pod 'Socket.IO-Client-Swift', '~> 1.1'
+pod 'Socket.IO-Client-Swift', '~> 1.3.2' # Or latest version
 ```
 
 Install pods:
