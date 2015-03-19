@@ -346,7 +346,6 @@ class SocketParser {
     // Tries to parse a message that contains binary
     class func parseBinaryMessage(var message:String, socket:SocketIOClient) {
         // NSLog(message)
-        
         var binaryGroup:[String]?
         
         let type = message.removeAtIndex(message.startIndex)
@@ -413,7 +412,7 @@ class SocketParser {
                     if nsp == "" && socket.nsp != nil {
                         return
                     }
-                    var mutMessageObject = binaryGroup![5]
+                    var mutMessageObject = binaryGroup![4]
                     let placeholdersRemoved = mutMessageObject["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"]
                         ~= "\"~~$2\""
                     
