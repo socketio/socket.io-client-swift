@@ -30,7 +30,8 @@ extension String {
     }
 }
 
-private typealias PollWaitQueue = [() -> Void]
+private typealias Probe = (msg:String, type:PacketType, data:[NSData]?)
+private typealias ProbeWaitQueue = [Probe]
 
 public enum PacketType: String {
     case OPEN = "0"
@@ -59,7 +60,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     private var postWait = [String]()
     private var _polling = true
     private var probing = false
-    private var probeWait = PollWaitQueue()
+    private var probeWait = ProbeWaitQueue()
     private var waitingForPoll = false
     private var waitingForPost = false
     private var _websocket = false
@@ -204,7 +205,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             }
             
             for waiter in self!.probeWait {
-                waiter()
+                self?.write(waiter.msg, withType: waiter.type, withData: waiter.data)
             }
             
             self?.probeWait.removeAll(keepCapacity: false)
@@ -481,23 +482,10 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     Send a message with type 4
     */
     public func send(msg:String, datas:[NSData]? = nil) {
-        let _send = {[weak self] (msg:String, datas:[NSData]?) -> () -> Void in
-            return {
-                self?.write(msg, withType: PacketType.MESSAGE, withData: datas)
-                return
-            }
-        }
-        
-        dispatch_async(self.emitQueue) {[weak self] in
-            if self == nil {
-                return
-            }
-            
-            if self!.probing {
-                self?.probeWait.append(_send(msg, datas))
-            } else {
-                _send(msg, datas)()
-            }
+        if self.probing {
+            self.probeWait.append((msg, PacketType.MESSAGE, datas))
+        } else {
+            self.write(msg, withType: PacketType.MESSAGE, withData: datas)
         }
     }
     
