@@ -409,7 +409,10 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     }
 
     private func parseEngineData(data:NSData) {
-        self.client.parseBinaryData(data.subdataWithRange(NSMakeRange(1, data.length - 1)))
+        dispatch_async(self.client.handleQueue) {[weak self] in
+            self?.client.parseBinaryData(data.subdataWithRange(NSMakeRange(1, data.length - 1)))
+            return
+        }
     }
 
     private func parseEngineMessage(var message:String) {
@@ -446,6 +449,8 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                 return
             } else if type == PacketType.NOOP.rawValue {
                 self.doPoll()
+                return
+            } else if type == PacketType.PONG.rawValue {
                 return
             }
 
