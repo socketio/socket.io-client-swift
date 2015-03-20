@@ -28,12 +28,10 @@ public typealias NormalCallback = (NSArray?, AckEmitter?) -> Void
 public typealias AnyHandler = (event:String, items:AnyObject?)
 public typealias AckEmitter = (AnyObject...) -> Void
 
-private func emitAckCallback(socket:SocketIOClient, num:Int, type:Int) -> AckEmitter {
-    func emitter(items:AnyObject...) {
+private func emitAckCallback(socket:SocketIOClient, num:Int, type:Int)
+    // Curried
+    (items:AnyObject...) -> Void {
         socket.emitAck(num, withData: items, withAckType: type)
-    }
-    
-    return emitter
 }
 
 class SocketEventHandler {
