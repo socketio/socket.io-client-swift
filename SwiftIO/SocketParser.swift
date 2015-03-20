@@ -231,13 +231,11 @@ class SocketParser {
         } else if type == "6" {
             self.parseBinaryMessage(stringMessage, socket: socket, type: "6")
         } else if type == "0" {
-            if socket.nsp != nil {
-                // Join namespace
-                socket.joinNamespace()
-                return
-            } else if socket.nsp != nil && stringMessage == "/\(socket.nsp!)" {
+            if socket.nsp != nil && stringMessage == "/\(socket.nsp!)" {
                 socket.didConnect()
                 return
+            } else if socket.nsp != nil {
+                socket.joinNamespace()
             } else {
                 socket.didConnect()
                 return
