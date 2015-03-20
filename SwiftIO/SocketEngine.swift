@@ -81,7 +81,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     }
     var ws:WebSocket?
 
-    init(client:SocketEngineClient, forcePolling:Bool = false, withCookies cookies:[NSHTTPCookie]?) {
+    init(client:SocketEngineClient, forcePolling:Bool, withCookies cookies:[NSHTTPCookie]?) {
         self.client = client
         self.forcePolling = forcePolling
         self.cookies = cookies

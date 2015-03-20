@@ -75,6 +75,9 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         return self._sid
     }
     
+    /**
+    Create a new SocketIOClient. opts can be omitted
+    */
     public init(var socketURL:String, opts:NSDictionary? = nil) {
         if socketURL["https://"].matches().count != 0 {
             self._secure = true
@@ -127,7 +130,9 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         self.init(socketURL: socketURL, opts: options)
     }
     
-    // Closes the socket
+    /**
+    Closes the socket. Only reopen the same socket if you know what you're doing.
+    */
     public func close() {
         self._closed = true
         self._connecting = false
@@ -136,7 +141,9 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         self.engine?.close()
     }
     
-    // Connects to the server
+    /**
+    Connect to the server.
+    */
     public func connect() {
         if self.closed {
             println("Warning! This socket was previously closed. This might be dangerous!")
@@ -146,7 +153,9 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         self.engine?.open()
     }
     
-    // Connect to the server using params
+    /**
+    Connect to the server with params that will be passed on connection.
+    */
     public func connectWithParams(params:[String: AnyObject]) {
         if self.closed {
             println("Warning! This socket was previously closed. This might be dangerous!")
@@ -174,7 +183,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         self.handleEvent("connect", data: nil, isInternalMessage: false)
     }
     
-    // Server wants us to die
+    /// Server wants us to die
     func didForceClose(#message:String) {
         self._closed = true
         self._connected = false
@@ -184,9 +193,9 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         self.handleEvent("disconnect", data: message, isInternalMessage: true)
     }
     
-    // Sends a message with multiple args
-    // If a message contains binary we have to send those
-    // seperately.
+    /**
+    Send a message to the server
+    */
     public func emit(event:String, _ args:AnyObject...) {
         if !self.connected {
             return
@@ -198,11 +207,17 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         }
     }
     
-    // Objc doesn't have variadics
+    /**
+    Same as emit, but meant for Objective-C
+    */
     public func emitObjc(event:String, withItems items:[AnyObject]) {
         self.emit(event, items)
     }
     
+    /**
+    Sends a message to the server, requesting an ack. Use the onAck method of SocketAckHandler to add
+    an ack.
+    */
     public func emitWithAck(event:String, _ args:AnyObject...) -> SocketAckHandler {
         if !self.connected {
             return SocketAckHandler(event: "fail", socket: self)
@@ -221,6 +236,9 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         return ackHandler
     }
     
+    /**
+    Same as emitWithAck, but for Objective-C
+    */
     public func emitWithAckObjc(event:String, withItems items:[AnyObject]) -> SocketAckHandler {
         return self.emitWithAck(event, items)
     }
@@ -265,6 +283,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
                 return
             }
             
+            // println("sending ack: \(ack) \(data)")
             let (items, hasBinary, emitDatas) = SocketParser.parseEmitArgs(data!)
             var str:String
             
@@ -311,7 +330,9 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         }
     }
     
-    // Handles events
+    /**
+    Causes an event to be handled. Only use if you know what you're doing.
+    */
     public func handleEvent(event:String, data:AnyObject?, isInternalMessage:Bool = false,
         wantsAck ack:Int? = nil, withAckType ackType:Int = 3) {
             // println("Should do event: \(event) with data: \(data)")
@@ -363,18 +384,24 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         }
     }
     
-    // Adds handler for an event
+    /**
+    Adds a handler for an event.
+    */
     public func on(name:String, callback:NormalCallback) {
         let handler = SocketEventHandler(event: name, callback: callback)
         self.handlers.append(handler)
     }
     
-    // Adds a handler for any event
+    /**
+    Adds a handler that will be called on every event.
+    */
     public func onAny(handler:(AnyHandler) -> Void) {
         self.anyHandler = handler
     }
     
-    // Opens the connection to the socket
+    /**
+    Same as connect
+    */
     public func open() {
         self.connect()
     }
