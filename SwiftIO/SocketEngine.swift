@@ -47,11 +47,11 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     unowned let client:SocketEngineClient
     private let workQueue = NSOperationQueue()
     private let emitQueue = dispatch_queue_create(
-        "emitQueue".cStringUsingEncoding(NSUTF8StringEncoding), DISPATCH_QUEUE_SERIAL)
+        "engineEmitQueue".cStringUsingEncoding(NSUTF8StringEncoding), DISPATCH_QUEUE_SERIAL)
     private let parseQueue = dispatch_queue_create(
-        "parseQueue".cStringUsingEncoding(NSUTF8StringEncoding), DISPATCH_QUEUE_SERIAL)
+        "engineParseQueue".cStringUsingEncoding(NSUTF8StringEncoding), DISPATCH_QUEUE_SERIAL)
     private let handleQueue = dispatch_queue_create(
-        "handleQueue".cStringUsingEncoding(NSUTF8StringEncoding), DISPATCH_QUEUE_SERIAL)
+        "engineHandleQueue".cStringUsingEncoding(NSUTF8StringEncoding), DISPATCH_QUEUE_SERIAL)
     private let session:NSURLSession!
     private var _connected = false
     private var fastUpgrade = false
@@ -91,7 +91,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     
     func close() {
         self.pingTimer?.invalidate()
-        self.send(PacketType.CLOSE.rawValue)
+        self.send(PacketType.CLOSE.rawValue, withData: nil)
     }
     
     private func createBinaryDataForSend(data:NSData) -> (NSData?, String?) {
@@ -270,7 +270,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     }
     
     // A poll failed, tell the client about it
-    private func handlePollingFailed(reason:NSError?) {
+    private func handlePollingFailed(reason:NSError) {
         assert(self.polling, "Polling failed when we're not polling")
         
         if !self.client.reconnecting {
@@ -422,12 +422,6 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             fixDoubleUTF8(&message)
         }
         
-        // We should upgrade
-        if message == "3probe" {
-            self.upgradeTransport()
-            return
-        }
-        
         let type = message["^(\\d)"].groups()?[1]
         
         if type != PacketType.MESSAGE.rawValue {
@@ -452,7 +446,11 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                 self.doPoll()
                 return
             } else if type == PacketType.PONG.rawValue {
-                return
+                // We should upgrade
+                if message == "3probe" {
+                    self.upgradeTransport()
+                    return
+                }
             }
             
             if message == PacketType.CLOSE.rawValue {
@@ -481,7 +479,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     /*
     Send a message with type 4
     */
-    public func send(msg:String, datas:[NSData]? = nil) {
+    public func send(msg:String, withData datas:[NSData]?) {
         if self.probing {
             self.probeWait.append((msg, PacketType.MESSAGE, datas))
         } else {

@@ -210,41 +210,29 @@ class SocketEvent {
         return newDict
     }
     
-    func fillInPlaceholders(_ args:AnyObject = true) -> AnyObject {
-        if let dict = args as? NSDictionary {
-            return self.fillInDict(dict)
-        } else if let arr = args as? NSArray {
-            return self.fillInArray(args as NSArray)
-        } else if let string = args as? String {
-            if string == "~~\(self.currentPlace)" {
-                return self.datas[0]
-            }
-        } else if args is Bool {
-            // We have multiple items
-            // Do it live
-            let argsAsArray = "[\(self.args)]"
-            if let parsedArr = SocketParser.parseData(argsAsArray) as? NSArray {
-                var returnArr = [AnyObject](count: parsedArr.count, repeatedValue: 0)
-                
-                for i in 0..<parsedArr.count {
-                    if let str = parsedArr[i] as? String {
-                        if let num = str["~~(\\d)"].groups() {
-                            returnArr[i] = self.datas[num[1].toInt()!]
-                        } else {
-                            returnArr[i] = str
-                        }
-                    } else if let arr = parsedArr[i] as? NSArray {
-                        returnArr[i] = self.fillInArray(arr)
-                    } else if let dict = parsedArr[i] as? NSDictionary {
-                        returnArr[i] = self.fillInDict(dict)
+    func fillInPlaceholders() -> NSArray? {
+        let argsAsArray = "[\(self.args)]"
+        if let parsedArr:AnyObject = SocketParser.parseData(argsAsArray) {
+            var returnArr = [AnyObject](count: parsedArr.count, repeatedValue: 0)
+            
+            for i in 0..<parsedArr.count {
+                if let str = parsedArr[i] as? String {
+                    if let num = str["~~(\\d)"].groups() {
+                        returnArr[i] = self.datas[num[1].toInt()!]
                     } else {
-                        returnArr[i] = parsedArr[i]
+                        returnArr[i] = str
                     }
+                } else if let arr = parsedArr[i] as? NSArray {
+                    returnArr[i] = self.fillInArray(arr)
+                } else if let dict = parsedArr[i] as? NSDictionary {
+                    returnArr[i] = self.fillInDict(dict)
+                } else {
+                    returnArr[i] = parsedArr[i]
                 }
-                return returnArr
             }
+            return returnArr
         }
         
-        return false
+        return nil
     }
 }

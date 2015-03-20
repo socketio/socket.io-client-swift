@@ -190,7 +190,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         self.reconnects = false
         self._connecting = false
         self._reconnecting = false
-        self.handleEvent("disconnect", data: message, isInternalMessage: true)
+        self.handleEvent("disconnect", data: [message], isInternalMessage: true)
     }
     
     /**
@@ -262,7 +262,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
                     hasBinary: true, withDatas: emitDatas.count, toNamespace: self.nsp, wantsAck: ack)
             }
             
-            self.engine?.send(str, datas: emitDatas)
+            self.engine?.send(str, withData: emitDatas)
         } else {
             if ack == nil {
                 str = SocketEvent.createMessageForEvent(event, withArgs: items, hasBinary: false,
@@ -272,7 +272,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
                     withDatas: 0, toNamespace: self.nsp, wantsAck: ack)
             }
             
-            self.engine?.send(str)
+            self.engine?.send(str, withData: nil)
         }
     }
     
@@ -296,7 +296,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
                         withAckType: 3, withNsp: self!.nsp!)
                 }
                 
-                self?.engine?.send(str)
+                self?.engine?.send(str, withData: nil)
             } else {
                 if self?.nsp == nil {
                     str = SocketEvent.createAck(ack, withArgs: items,
@@ -306,7 +306,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
                         withAckType: 6, withNsp: self!.nsp!, withBinary: emitDatas.count)
                 }
                 
-                self?.engine?.send(str, datas: emitDatas)
+                self?.engine?.send(str, withData: emitDatas)
             }
         }
     }
@@ -333,7 +333,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     /**
     Causes an event to be handled. Only use if you know what you're doing.
     */
-    public func handleEvent(event:String, data:AnyObject?, isInternalMessage:Bool = false,
+    public func handleEvent(event:String, data:NSArray?, isInternalMessage:Bool = false,
         wantsAck ack:Int? = nil, withAckType ackType:Int = 3) {
             // println("Should do event: \(event) with data: \(data)")
             if !self.connected && !isInternalMessage {
@@ -349,29 +349,11 @@ public class SocketIOClient: NSObject, SocketEngineClient {
             
             for handler in self.handlers {
                 if handler.event == event {
-                    if data is NSArray {
-                        if ack != nil {
-                            handler.executeCallback(data as? NSArray, withAck: ack!,
-                                withAckType: ackType, withSocket: self)
-                        } else {
-                            handler.executeCallback(data as? NSArray)
-                        }
+                    if ack != nil {
+                        handler.executeCallback(data, withAck: ack!,
+                            withAckType: ackType, withSocket: self)
                     } else {
-                        
-                        // Trying to do a ternary expression in the executeCallback method
-                        // seemed to crash Swift
-                        var dataArr:NSArray? = nil
-                        
-                        if let data:AnyObject = data {
-                            dataArr = [data]
-                        }
-                        
-                        if ack != nil {
-                            handler.executeCallback(dataArr, withAck: ack!,
-                                withAckType: ackType, withSocket: self)
-                        } else {
-                            handler.executeCallback(dataArr)
-                        }
+                        handler.executeCallback(data)
                     }
                 }
             }
@@ -380,7 +362,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     // Should be removed and moved to SocketEngine
     func joinNamespace() {
         if self.nsp != nil {
-            self.engine?.send("0/\(self.nsp!)")
+            self.engine?.send("0/\(self.nsp!)", withData: nil)
         }
     }
     
@@ -415,10 +397,10 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     }
     
     // Something happened while polling
-    public func pollingDidFail(err:NSError?) {
+    public func pollingDidFail(err:NSError) {
         if !self.reconnecting {
             self._connected = false
-            self.handleEvent("reconnect", data: err?.localizedDescription, isInternalMessage: true)
+            self.handleEvent("reconnect", data: [err.localizedDescription], isInternalMessage: true)
             self.tryReconnect()
         }
     }
@@ -452,7 +434,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
             }
         }
         
-        self.handleEvent("reconnectAttempt", data: self.reconnectAttempts - self.currentReconnectAttempt,
+        self.handleEvent("reconnectAttempt", data: [self.reconnectAttempts - self.currentReconnectAttempt],
             isInternalMessage: true)
         
         self.currentReconnectAttempt++
@@ -470,7 +452,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         if self.closed || !self.reconnects {
             self.didForceClose(message: "WebSocket closed")
         } else {
-            self.handleEvent("reconnect", data: reason, isInternalMessage: true)
+            self.handleEvent("reconnect", data: [reason], isInternalMessage: true)
             self.tryReconnect()
         }
     }
@@ -479,11 +461,11 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     public func webSocketDidFailWithError(error:NSError) {
         self._connected = false
         self._connecting = false
-        self.handleEvent("error", data: error.localizedDescription, isInternalMessage: true)
+        self.handleEvent("error", data: [error.localizedDescription], isInternalMessage: true)
         if self.closed || !self.reconnects {
             self.didForceClose(message: "WebSocket closed with an error \(error)")
         } else if !self.reconnecting {
-            self.handleEvent("reconnect", data: error.localizedDescription, isInternalMessage: true)
+            self.handleEvent("reconnect", data: [error.localizedDescription], isInternalMessage: true)
             self.tryReconnect()
         }
     }

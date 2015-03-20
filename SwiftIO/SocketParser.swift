@@ -72,13 +72,9 @@ class SocketParser {
     }
     
     // Parses data for events
-    class func parseData(data:String?) -> AnyObject? {
-        if data == nil {
-            return nil
-        }
-        
+    class func parseData(data:String) -> AnyObject? {
         var err:NSError?
-        let stringData = data!.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)
+        let stringData = data.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)
         let parsed:AnyObject? = NSJSONSerialization.JSONObjectWithData(stringData!,
             options: NSJSONReadingOptions.AllowFragments, error: &err)
         
@@ -192,34 +188,6 @@ class SocketParser {
         
         // NSLog(stringMessage)
         
-        // Check for successful namepsace connect
-        if socket.nsp != nil {
-            if stringMessage == "0/\(socket.nsp!)" {
-                socket.didConnect()
-                return
-            }
-        }
-        
-        if stringMessage == "0" {
-            if socket.nsp != nil {
-                // Join namespace
-                socket.joinNamespace()
-                return
-            } else {
-                socket.didConnect()
-                return
-            }
-        } else if stringMessage == "1" {
-            socket.didForceClose(message: "Got disconnect")
-            return
-        }
-        
-        if stringMessage.hasPrefix("5") || stringMessage.hasPrefix("6") {
-            // Check for message with binary placeholders
-            self.parseBinaryMessage(stringMessage, socket: socket)
-            return
-        }
-        
         let type = stringMessage.removeAtIndex(stringMessage.startIndex)
         
         if type == "2" {
@@ -234,13 +202,12 @@ class SocketParser {
                         return
                     }
                     
-                    if let parsed:AnyObject = self.parseData(data) {
+                    if let parsed:AnyObject? = self.parseData(data) {
                         if ackNum == "" {
-                            socket.handleEvent(event, data: parsed)
+                            socket.handleEvent(event, data: parsed as? NSArray)
                         } else {
                             socket.currentAck = ackNum.toInt()!
-                            socket.handleEvent(event, data: parsed, isInternalMessage: false,
-                                wantsAck: ackNum.toInt(), withAckType: 3)
+                            socket.handleEvent(event, data: parsed as? NSArray, wantsAck: ackNum.toInt(), withAckType: 3)
                         }
                     }
             }
@@ -257,9 +224,28 @@ class SocketParser {
                     
                     socket.handleAck(ackNum.toInt()!, data: ackData)
             }
+        } else if type == "4" {
+            NSLog("Got Error packet")
+        } else if type == "5" {
+            self.parseBinaryMessage(stringMessage, socket: socket, type: "5")
+        } else if type == "6" {
+            self.parseBinaryMessage(stringMessage, socket: socket, type: "6")
+        } else if type == "0" {
+            if socket.nsp != nil {
+                // Join namespace
+                socket.joinNamespace()
+                return
+            } else if socket.nsp != nil && stringMessage == "/\(socket.nsp!)" {
+                socket.didConnect()
+                return
+            } else {
+                socket.didConnect()
+                return
+            }
+        } else if type == "1" {
+            socket.didForceClose(message: "Got disconnect")
         } else {
             NSLog("Error in parsing message: %s", stringMessage)
-            return
         }
     }
     
@@ -277,10 +263,9 @@ class SocketParser {
         if shouldExecute {
             let socketEvent = socket.waitingData.removeAtIndex(0)
             var event = socketEvent.event
-            var parsedArgs:AnyObject? = self.parseData(socketEvent.args as? String)
             
-            if let args:AnyObject = parsedArgs {
-                let filledInArgs:AnyObject = socketEvent.fillInPlaceholders(args)
+            if let args:AnyObject = self.parseData(socketEvent.args as String) {
+                let filledInArgs = socketEvent.fillInPlaceholders()
                 
                 if socketEvent.justAck! {
                     // Should handle ack
@@ -296,7 +281,7 @@ class SocketParser {
                     socket.handleEvent(event, data: filledInArgs)
                 }
             } else {
-                let filledInArgs:AnyObject = socketEvent.fillInPlaceholders()
+                let filledInArgs = socketEvent.fillInPlaceholders()
                 
                 // Should handle ack
                 if socketEvent.justAck! {
@@ -316,13 +301,11 @@ class SocketParser {
     }
     
     // Tries to parse a message that contains binary
-    class func parseBinaryMessage(var message:String, socket:SocketIOClient) {
+    class func parseBinaryMessage(stringMessage:String, socket:SocketIOClient, type:String) {
         // NSLog(message)
         
-        let type = message.removeAtIndex(message.startIndex)
-        
         if type == "5" {
-            if let groups = message["^(\\d*)-(\\/(\\w*))?,?(\\d*)?\\[\"(.*?)\",?(.*)?\\]$",
+            if let groups = stringMessage["^(\\d*)-(\\/(\\w*))?,?(\\d*)?\\[\"(.*?)\",?(.*)?\\]$",
                 NSRegularExpressionOptions.DotMatchesLineSeparators].groups() {
                     let numberOfPlaceholders = groups[1]
                     let namespace = groups[3]
@@ -350,7 +333,7 @@ class SocketParser {
                     socket.waitingData.append(mes)
             }
         } else if type == "6" {
-            if let groups = message["^(\\d*)-(\\/(\\w*))?,?(\\d*)?\\[(.*?)?\\]$",
+            if let groups = stringMessage["^(\\d*)-(\\/(\\w*))?,?(\\d*)?\\[(.*?)?\\]$",
                 NSRegularExpressionOptions.DotMatchesLineSeparators].groups() {
                     let numberOfPlaceholders = groups[1]
                     let namespace = groups[3]
@@ -369,7 +352,7 @@ class SocketParser {
                     socket.waitingData.append(event)
             }
         } else {
-            NSLog("Error in parsing binary message: %s", message)
+            NSLog("Error in parsing binary message: %s", stringMessage)
             return
         }
     }
