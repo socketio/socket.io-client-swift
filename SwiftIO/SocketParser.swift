@@ -287,7 +287,6 @@ class SocketParser {
                 return
             }
             
-            p.justAck = true
             socket.handleAck(p.id!, data: p.data)
         } else if p.type == SocketPacketType.BINARY_EVENT {
             if checkNSP(p.nsp) {
