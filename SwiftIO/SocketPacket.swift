@@ -68,7 +68,7 @@ class SocketPacket {
     }
 
     func getEvent() -> String {
-        return data?.removeAtIndex(0) as String
+        return data?.removeAtIndex(0) as! String
     }
 
     func addData(data:NSData) -> Bool {
@@ -226,7 +226,7 @@ class SocketPacket {
             // if it is a placeholder for data
             if let str = value as? String {
                 if let num = str["~~(\\d)"].groups() {
-                    newDict[key as! String] = self.datas[num[1].toInt()!]
+                    newDict[key as! String] = self.binary[num[1].toInt()!]
                 } else {
                     newDict[key as! String] = str
                 }

@@ -93,7 +93,7 @@ class SocketParser {
             let d = String(arr[++i...arr.count-1])
             let noPlaceholders = d["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] ~= "\"~~$2\""
             
-            let data = SocketParser.parseData(noPlaceholders) as [AnyObject]
+            let data = SocketParser.parseData(noPlaceholders) as! [AnyObject]
             
             return SocketPacket(type: SocketPacketType(str: type), data: data,
                 nsp: nsp, placeholders: placeholders, id: id)
