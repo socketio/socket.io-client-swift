@@ -587,6 +587,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         self.probing = false
         
         if self.websocket {
+            println(error)
             self.pingTimer?.invalidate()
             self._connected = false
             self._websocket = false

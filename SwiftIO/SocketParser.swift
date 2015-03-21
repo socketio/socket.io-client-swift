@@ -23,6 +23,85 @@
 import Foundation
 
 class SocketParser {
+    // Translation of socket.io-client#decodeString
+    class func parseString(str:String) -> SocketPacket? {
+        let arr = Array(str)
+        let type = String(arr[0])
+        
+        if arr.count == 1 {
+            return SocketPacket(type: SocketPacketType(str: type))
+        }
+        
+        var id = nil as Int?
+        var nsp = ""
+        var i = 0
+        var placeholders = -1
+        
+        if type == "5" || type == "6" {
+            var buf = ""
+            
+            while arr[++i] != "-" {
+                buf += String(arr[i])
+                if i == arr.count {
+                    break
+                }
+            }
+            
+            if buf.toInt() == nil || arr[i] != "-" {
+                println(buf)
+                NSLog("Error parsing \(str)")
+                return nil
+            } else {
+                placeholders = buf.toInt()!
+            }
+        }
+        
+        if arr[i + 1] == "/" {
+            while ++i < arr.count {
+                let c = arr[i]
+                
+                if c == "," {
+                    break
+                }
+                
+                nsp += String(c)
+            }
+        }
+        
+        if i + 1 >= arr.count {
+            return SocketPacket(type: SocketPacketType(str: type),
+                nsp: nsp, placeholders: placeholders, id: id)
+        }
+        
+        let next = String(arr[i + 1])
+        
+        if next.toInt() != nil {
+            var c = ""
+            while ++i < arr.count {
+                if let int = String(arr[i]).toInt() {
+                    c += String(arr[i])
+                } else {
+                    --i
+                    break
+                }
+            }
+            
+            id = c.toInt()
+        }
+        
+        if i + 1 < arr.count {
+            let d = String(arr[++i...arr.count-1])
+            let noPlaceholders = d["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] ~= "\"~~$2\""
+            
+            let data = SocketParser.parseData(noPlaceholders) as [AnyObject]
+            
+            return SocketPacket(type: SocketPacketType(str: type), data: data,
+                nsp: nsp, placeholders: placeholders, id: id)
+        }
+        
+        return nil
+    }
+    
     // Parse an NSArray looking for binary data
     class func parseArray(arr:NSArray, var currentPlaceholder:Int) -> (NSArray, Bool, [NSData]) {
         var replacementArr = [AnyObject](count: arr.count, repeatedValue: 1)
@@ -186,64 +265,51 @@ class SocketParser {
             return
         }
         
-        // NSLog(stringMessage)
-        
-        let type = stringMessage.removeAtIndex(stringMessage.startIndex)
-        
-        if type == "2" {
-            if let groups = stringMessage["(\\/(\\w*))?,?(\\d*)?\\[\"(.*?)\",?(.*?)?\\]$",
-                NSRegularExpressionOptions.DotMatchesLineSeparators].groups() {
-                    let namespace = groups[2]
-                    let ackNum = groups[3]
-                    let event = groups[4]
-                    let data = "[\(groups[5])]"
-                    
-                    if namespace == "" && socket.nsp != nil {
-                        return
-                    }
-                    
-                    if let parsed:AnyObject? = self.parseData(data) {
-                        if ackNum == "" {
-                            socket.handleEvent(event, data: parsed as? NSArray)
-                        } else {
-                            socket.currentAck = ackNum.toInt()!
-                            socket.handleEvent(event, data: parsed as? NSArray, wantsAck: ackNum.toInt(), withAckType: 3)
-                        }
-                    }
+        func checkNSP(nsp:String) -> Bool {
+            if nsp == "" && socket.nsp != nil {
+                return true
+            } else {
+                return false
             }
-        } else if type == "3" {
-            if let ackGroup = stringMessage["(\\/(\\w*))?,?(\\d*)?\\[(.*?)?\\]$",
-                NSRegularExpressionOptions.DotMatchesLineSeparators].groups() {
-                    let nsp = ackGroup[2]
-                    let ackNum = ackGroup[3]
-                    let ackData:AnyObject? = self.parseData("[\(ackGroup[4])]")
-                    
-                    if nsp == "" && socket.nsp != nil {
-                        return
-                    }
-                    
-                    socket.handleAck(ackNum.toInt()!, data: ackData)
-            }
-        } else if type == "4" {
-            NSLog("Got Error packet")
-        } else if type == "5" {
-            self.parseBinaryMessage(stringMessage, socket: socket, type: "5")
-        } else if type == "6" {
-            self.parseBinaryMessage(stringMessage, socket: socket, type: "6")
-        } else if type == "0" {
-            if socket.nsp != nil && stringMessage == "/\(socket.nsp!)" {
-                socket.didConnect()
+        }
+        
+        var p = parseString(stringMessage) as SocketPacket!
+        
+        
+        if p.type == SocketPacketType.EVENT {
+            if checkNSP(p.nsp) {
                 return
-            } else if socket.nsp != nil {
+            }
+            
+            socket.handleEvent(p.getEvent(), data: p.data, isInternalMessage: false, wantsAck: p.id, withAckType: 3)
+        } else if p.type == SocketPacketType.ACK {
+            if checkNSP(p.nsp) {
+                return
+            }
+            
+            socket.handleAck(p.id!, data: p.data)
+        } else if p.type == SocketPacketType.BINARY_EVENT {
+            if checkNSP(p.nsp) {
+                return
+            }
+            
+            socket.waitingData.append(p)
+        } else if p.type == SocketPacketType.BINARY_ACK {
+            if checkNSP(p.nsp) {
+                return
+            }
+            
+            socket.waitingData.append(p)
+        } else if p.type == SocketPacketType.CONNECT {
+            if p.nsp == "" && socket.nsp != nil {
                 socket.joinNamespace()
+            } else if p.nsp != "" && socket.nsp == nil {
+                socket.didConnect()
             } else {
                 socket.didConnect()
-                return
             }
-        } else if type == "1" {
-            socket.didForceClose(message: "Got disconnect")
-        } else {
-            NSLog("Error in parsing message: %s", stringMessage)
+        } else if p.type == SocketPacketType.DISCONNECT {
+            socket.didForceClose(message: "Got Disconnect")
         }
     }
     
@@ -258,100 +324,18 @@ class SocketParser {
         
         let shouldExecute = socket.waitingData[0].addData(data)
         
-        if shouldExecute {
-            let socketEvent = socket.waitingData.removeAtIndex(0)
-            var event = socketEvent.event
-            
-            if let args:AnyObject = self.parseData(socketEvent.args as String) {
-                let filledInArgs = socketEvent.fillInPlaceholders()
-                
-                if socketEvent.justAck! {
-                    // Should handle ack
-                    socket.handleAck(socketEvent.ack!, data: filledInArgs)
-                    return
-                }
-                
-                // Should do event
-                if socketEvent.ack != nil {
-                    socket.handleEvent(event, data: filledInArgs, isInternalMessage: false,
-                        wantsAck: socketEvent.ack!, withAckType: 6)
-                } else {
-                    socket.handleEvent(event, data: filledInArgs)
-                }
-            } else {
-                let filledInArgs = socketEvent.fillInPlaceholders()
-                
-                // Should handle ack
-                if socketEvent.justAck! {
-                    socket.handleAck(socketEvent.ack!, data: filledInArgs)
-                    return
-                }
-                
-                // Should handle ack
-                if socketEvent.ack != nil {
-                    socket.handleEvent(event, data: filledInArgs, isInternalMessage: false,
-                        wantsAck: socketEvent.ack!, withAckType: 6)
-                } else {
-                    socket.handleEvent(event, data: filledInArgs)
-                }
-            }
-        }
-    }
-    
-    // Tries to parse a message that contains binary
-    class func parseBinaryMessage(stringMessage:String, socket:SocketIOClient, type:String) {
-        // NSLog(message)
-        
-        if type == "5" {
-            if let groups = stringMessage["^(\\d*)-(\\/(\\w*))?,?(\\d*)?\\[\"(.*?)\",?(.*)?\\]$",
-                NSRegularExpressionOptions.DotMatchesLineSeparators].groups() {
-                    let numberOfPlaceholders = groups[1]
-                    let namespace = groups[3]
-                    let ackNum = groups[4]
-                    let event = groups[5]
-                    let mutMessageObject = groups[6]
-                    
-                    if namespace == "" && socket.nsp != nil {
-                        return
-                    }
-                    
-                    let placeholdersRemoved = mutMessageObject["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"]
-                        ~= "\"~~$2\""
-                    
-                    var mes:SocketEvent
-                    if ackNum == "" {
-                        mes = SocketEvent(event: event, args: placeholdersRemoved,
-                            placeholders: numberOfPlaceholders.toInt()!)
-                    } else {
-                        socket.currentAck = ackNum.toInt()!
-                        mes = SocketEvent(event: event, args: placeholdersRemoved,
-                            placeholders: numberOfPlaceholders.toInt()!, ackNum: ackNum.toInt())
-                    }
-                    
-                    socket.waitingData.append(mes)
-            }
-        } else if type == "6" {
-            if let groups = stringMessage["^(\\d*)-(\\/(\\w*))?,?(\\d*)?\\[(.*?)?\\]$",
-                NSRegularExpressionOptions.DotMatchesLineSeparators].groups() {
-                    let numberOfPlaceholders = groups[1]
-                    let namespace = groups[3]
-                    let ackNum = groups[4]
-                    let mutMessageObject = groups[5]
-                    
-                    if namespace == "" && socket.nsp != nil {
-                        return
-                    }
-                    let placeholdersRemoved = mutMessageObject["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"]
-                        ~= "\"~~$2\""
-                    
-                    let event = SocketEvent(event: "", args: placeholdersRemoved,
-                        placeholders: numberOfPlaceholders.toInt()!, ackNum: ackNum.toInt(), justAck: true)
-                    
-                    socket.waitingData.append(event)
-            }
-        } else {
-            NSLog("Error in parsing binary message: %s", stringMessage)
+        if !shouldExecute {
             return
+        }
+        
+        let packet = socket.waitingData.removeAtIndex(0)
+        packet.fillInPlaceholders()
+        
+        if !packet.justAck {
+            socket.handleEvent(packet.getEvent(), data: packet.data,
+                wantsAck: packet.id, withAckType: 6)
+        } else {
+            socket.handleAck(packet.id!, data: packet.data)
         }
     }
 }

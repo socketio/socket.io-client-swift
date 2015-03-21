@@ -42,7 +42,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     private var reconnectTimer:NSTimer?
     
     internal var currentAck = -1
-    internal var waitingData = [SocketEvent]()
+    internal var waitingData = [SocketPacket]()
     
     public let socketURL:String
     public let ackQueue = dispatch_queue_create("ackQueue".cStringUsingEncoding(NSUTF8StringEncoding),
@@ -244,7 +244,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     }
     
     private func _emit(event:String, _ args:[AnyObject], ack:Int? = nil) {
-        var frame:SocketEvent
+        var frame:SocketPacket
         var str:String
         
         let (items, hasBinary, emitDatas) = SocketParser.parseEmitArgs(args)
@@ -255,20 +255,20 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         
         if hasBinary {
             if ack == nil {
-                str = SocketEvent.createMessageForEvent(event, withArgs: items,
+                str = SocketPacket.createMessageForEvent(event, withArgs: items,
                     hasBinary: true, withDatas: emitDatas.count, toNamespace: self.nsp)
             } else {
-                str = SocketEvent.createMessageForEvent(event, withArgs: items,
+                str = SocketPacket.createMessageForEvent(event, withArgs: items,
                     hasBinary: true, withDatas: emitDatas.count, toNamespace: self.nsp, wantsAck: ack)
             }
             
             self.engine?.send(str, withData: emitDatas)
         } else {
             if ack == nil {
-                str = SocketEvent.createMessageForEvent(event, withArgs: items, hasBinary: false,
+                str = SocketPacket.createMessageForEvent(event, withArgs: items, hasBinary: false,
                     withDatas: 0, toNamespace: self.nsp)
             } else {
-                str = SocketEvent.createMessageForEvent(event, withArgs: items, hasBinary: false,
+                str = SocketPacket.createMessageForEvent(event, withArgs: items, hasBinary: false,
                     withDatas: 0, toNamespace: self.nsp, wantsAck: ack)
             }
             
@@ -289,20 +289,20 @@ public class SocketIOClient: NSObject, SocketEngineClient {
             
             if !hasBinary {
                 if self?.nsp == nil {
-                    str = SocketEvent.createAck(ack, withArgs: items,
+                    str = SocketPacket.createAck(ack, withArgs: items,
                         withAckType: 3, withNsp: "/")
                 } else {
-                    str = SocketEvent.createAck(ack, withArgs: items,
+                    str = SocketPacket.createAck(ack, withArgs: items,
                         withAckType: 3, withNsp: self!.nsp!)
                 }
                 
                 self?.engine?.send(str, withData: nil)
             } else {
                 if self?.nsp == nil {
-                    str = SocketEvent.createAck(ack, withArgs: items,
+                    str = SocketPacket.createAck(ack, withArgs: items,
                         withAckType: 6, withNsp: "/", withBinary: emitDatas.count)
                 } else {
-                    str = SocketEvent.createAck(ack, withArgs: items,
+                    str = SocketPacket.createAck(ack, withArgs: items,
                         withAckType: 6, withNsp: self!.nsp!, withBinary: emitDatas.count)
                 }
                 
@@ -333,7 +333,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     /**
     Causes an event to be handled. Only use if you know what you're doing.
     */
-    public func handleEvent(event:String, data:NSArray?, isInternalMessage:Bool = false,
+    public func handleEvent(event:String, data:[AnyObject]?, isInternalMessage:Bool = false,
         wantsAck ack:Int? = nil, withAckType ackType:Int = 3) {
             // println("Should do event: \(event) with data: \(data)")
             if !self.connected && !isInternalMessage {
