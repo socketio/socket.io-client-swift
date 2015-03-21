@@ -22,7 +22,64 @@
 
 import Foundation
 
+private let shredder = SocketParser.Deconstructor()
+
 class SocketParser {
+    // Translation of socket.io-parser#deconstructPacket
+    private class Deconstructor {
+        var buf = [NSData]()
+        
+        func ripAndTear(data:AnyObject) -> AnyObject {
+            if let bin = data as? NSData {
+                let placeholder = ["_placeholder" :true, "num": buf.count]
+                
+                buf.append(bin)
+                
+                return placeholder
+            }
+            
+            if var arr = data as? [AnyObject] {
+                // var arr = data as [AnyObject]
+                for i in 0..<arr.count {
+                    arr[i] = ripAndTear(arr[i])
+                }
+                
+                return arr
+            } else if var newDict = data as? [String: AnyObject] {
+                // var newDict = data as [String: AnyObject]
+                
+                for (key, value) in newDict {
+                    newDict[key] = ripAndTear(value)
+                }
+                
+                return newDict
+            } else {
+                return data
+            }
+        }
+        
+        func deconstructPacket(packet:SocketPacket) {
+            if packet.data == nil {
+                return
+            }
+            
+            var data = packet.data!
+            
+            for i in 0..<data.count {
+                if data[i] is NSArray || data[i] is NSDictionary {
+                    data[i] = ripAndTear(data[i])
+                } else if let bin = data[i] as? NSData {
+                    data[i] = ["_placeholder" :true, "num": buf.count]
+                    buf.append(bin)
+                }
+            }
+            
+            packet.data = data
+            packet.binary = buf
+            buf.removeAll(keepCapacity: true)
+        }
+    }
+    
     // Translation of socket.io-client#decodeString
     class func parseString(str:String) -> SocketPacket? {
         let arr = Array(str)
@@ -48,7 +105,6 @@ class SocketParser {
             }
             
             if buf.toInt() == nil || arr[i] != "-" {
-                println(buf)
                 NSLog("Error parsing \(str)")
                 return nil
             } else {
@@ -102,54 +158,6 @@ class SocketParser {
         return nil
     }
     
-    // Parse an NSArray looking for binary data
-    class func parseArray(arr:NSArray, var currentPlaceholder:Int) -> (NSArray, Bool, [NSData]) {
-        var replacementArr = [AnyObject](count: arr.count, repeatedValue: 1)
-        var hasBinary = false
-        var arrayDatas = [NSData]()
-        
-        for g in 0..<arr.count {
-            if arr[g] is NSData {
-                hasBinary = true
-                currentPlaceholder++
-                let sendData = arr[g] as NSData
-                
-                arrayDatas.append(sendData)
-                replacementArr[g] = ["_placeholder": true,
-                    "num": currentPlaceholder]
-            } else if let dict = arr[g] as? NSDictionary {
-                let (nestDict, hadBinary, dictArrs) = self.parseNSDictionary(dict,
-                    currentPlaceholder: currentPlaceholder)
-                
-                if hadBinary {
-                    hasBinary = true
-                    currentPlaceholder += dictArrs.count
-                    replacementArr[g] = nestDict
-                    arrayDatas.extend(dictArrs)
-                } else {
-                    replacementArr[g] = dict
-                }
-            } else if let nestArr = arr[g] as? NSArray {
-                // Recursive
-                let (nested, hadBinary, nestDatas) = self.parseArray(nestArr,
-                    currentPlaceholder: currentPlaceholder)
-                
-                if hadBinary {
-                    hasBinary = true
-                    currentPlaceholder += nestDatas.count
-                    replacementArr[g] = nested
-                    arrayDatas.extend(nestDatas)
-                } else {
-                    replacementArr[g] = arr[g]
-                }
-            } else {
-                replacementArr[g] = arr[g]
-            }
-        }
-        
-        return (replacementArr, hasBinary, arrayDatas)
-    }
-    
     // Parses data for events
     class func parseData(data:String) -> AnyObject? {
         var err:NSError?
@@ -165,116 +173,25 @@ class SocketParser {
         return parsed
     }
     
-    class func parseEmitArgs(args:[AnyObject]) -> ([AnyObject], Bool, [NSData]) {
-        var items = [AnyObject](count: args.count, repeatedValue: 1)
-        var currentPlaceholder = -1
-        var hasBinary = false
-        var emitDatas = [NSData]()
-        
-        for i in 0..<args.count {
-            if let dict = args[i] as? NSDictionary {
-                // Check for binary data
-                let (newDict, hadBinary, binaryDatas) = self.parseNSDictionary(dict,
-                    currentPlaceholder: currentPlaceholder)
-                if hadBinary {
-                    currentPlaceholder += binaryDatas.count
-                    emitDatas.extend(binaryDatas)
-                    hasBinary = true
-                    items[i] = newDict
-                } else {
-                    items[i] = dict
-                }
-            } else if let arr = args[i] as? NSArray {
-                // arg is array, check for binary
-                let (replace, hadData, newDatas) = self.parseArray(arr,
-                    currentPlaceholder: currentPlaceholder)
-                
-                if hadData {
-                    hasBinary = true
-                    currentPlaceholder += newDatas.count
-                    
-                    for data in newDatas {
-                        emitDatas.append(data)
-                    }
-                    
-                    items[i] = replace
-                } else {
-                    items[i] = arr
-                }
-            } else if let binaryData = args[i] as? NSData {
-                // args is just binary
-                hasBinary = true
-                
-                currentPlaceholder++
-                items[i] = ["_placeholder": true, "num": currentPlaceholder]
-                emitDatas.append(binaryData)
-            } else {
-                items[i] = args[i]
-            }
-        }
-        
-        return (items, hasBinary, emitDatas)
-    }
-    
-    // Parses a NSDictionary, looking for NSData objects
-    class func parseNSDictionary(dict:NSDictionary, var currentPlaceholder:Int) -> (NSDictionary, Bool, [NSData]) {
-        var returnDict = NSMutableDictionary()
-        var hasBinary = false
-        var returnDatas = [NSData]()
-        
-        for (key, value) in dict {
-            if let binaryData = value as? NSData {
-                currentPlaceholder++
-                hasBinary = true
-                returnDatas.append(binaryData)
-                returnDict[key as String] = ["_placeholder": true, "num": currentPlaceholder]
-            } else if let arr = value as? NSArray {
-                let (replace, hadBinary, arrDatas) = self.parseArray(arr, currentPlaceholder: currentPlaceholder)
-                
-                if hadBinary {
-                    hasBinary = true
-                    returnDict[key as String] = replace
-                    currentPlaceholder += arrDatas.count
-                    returnDatas.extend(arrDatas)
-                } else {
-                    returnDict[key as String] = arr
-                }
-            } else if let dict = value as? NSDictionary {
-                // Recursive
-                let (nestDict, hadBinary, nestDatas) = self.parseNSDictionary(dict, currentPlaceholder: currentPlaceholder)
-                
-                if hadBinary {
-                    hasBinary = true
-                    returnDict[key as String] = nestDict
-                    currentPlaceholder += nestDatas.count
-                    returnDatas.extend(nestDatas)
-                } else {
-                    returnDict[key as String] = dict
-                }
-            } else {
-                returnDict[key as String] = value
-            }
-        }
-        
-        return (returnDict, hasBinary, returnDatas)
+    class func parseForEmit(packet:SocketPacket) {
+        shredder.deconstructPacket(packet)
     }
     
     // Parses messages recieved
-    class func parseSocketMessage(var stringMessage:String, socket:SocketIOClient) {
+    class func parseSocketMessage(stringMessage:String, socket:SocketIOClient) {
         if stringMessage == "" {
             return
         }
         
         func checkNSP(nsp:String) -> Bool {
-            if nsp == "" && socket.nsp != nil {
+            if nsp == "" && socket.nsp != "/" {
                 return true
             } else {
                 return false
             }
         }
         
-        var p = parseString(stringMessage) as SocketPacket!
-        
+        let p = parseString(stringMessage) as SocketPacket!
         
         if p.type == SocketPacketType.EVENT {
             if checkNSP(p.nsp) {
@@ -302,9 +219,9 @@ class SocketParser {
             p.justAck = true
             socket.waitingData.append(p)
         } else if p.type == SocketPacketType.CONNECT {
-            if p.nsp == "" && socket.nsp != nil {
+            if p.nsp == "" && socket.nsp != "/" {
                 socket.joinNamespace()
-            } else if p.nsp != "" && socket.nsp == nil {
+            } else if p.nsp != "" && socket.nsp == "/" {
                 socket.didConnect()
             } else {
                 socket.didConnect()

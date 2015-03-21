@@ -476,9 +476,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         }
     }
     
-    /*
-    Send a message with type 4
-    */
+    /// Send an engine message (4)
     public func send(msg:String, withData datas:[NSData]?) {
         if self.probing {
             self.probeWait.append((msg, PacketType.MESSAGE, datas))
@@ -565,10 +563,10 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             }
             
             if self!.websocket {
-                // NSLog("writing ws: \(msg):\(datas)")
+                // NSLog("writing ws: \(msg):\(data)")
                 self?.sendWebSocketMessage(msg, withType: type, datas: data)
             } else {
-                // NSLog("writing poll: \(msg):\(datas)")
+                // NSLog("writing poll: \(msg):\(data)")
                 self?.sendPollMessage(msg, withType: type, datas: data)
             }
         }
