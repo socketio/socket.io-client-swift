@@ -22,29 +22,33 @@
 
 import Foundation
 
-private let shredder = SocketParser.Deconstructor()
+private let shredder = SocketParser.PacketShredder()
 
 class SocketParser {
     // Translation of socket.io-parser#deconstructPacket
-    private class Deconstructor {
+    private class PacketShredder {
         var buf = ContiguousArray<NSData>()
-
-        func ripAndTear(data:AnyObject) -> AnyObject {
+        
+        func shred(data:AnyObject) -> AnyObject {
             if let bin = data as? NSData {
                 let placeholder = ["_placeholder" :true, "num": buf.count]
                 
                 buf.append(bin)
                 
                 return placeholder
-            } else if var arr = data as? [AnyObject] {
+            } else if let arr = data as? NSArray {
+                var newArr = NSMutableArray(array: arr)
+                
                 for i in 0..<arr.count {
-                    arr[i] = ripAndTear(arr[i])
+                    newArr[i] = shred(arr[i])
                 }
                 
-                return arr
-            } else if var newDict = data as? [String: AnyObject] {
+                return newArr
+            } else if let dict = data as? NSDictionary {
+                var newDict = NSMutableDictionary(dictionary: dict)
+                
                 for (key, value) in newDict {
-                    newDict[key] = ripAndTear(value)
+                    newDict[key as NSCopying] = shred(value)
                 }
                 
                 return newDict
@@ -62,7 +66,7 @@ class SocketParser {
             
             for i in 0..<data.count {
                 if data[i] is NSArray || data[i] is NSDictionary {
-                    data[i] = ripAndTear(data[i])
+                    data[i] = shred(data[i])
                 } else if let bin = data[i] as? NSData {
                     data[i] = ["_placeholder" :true, "num": buf.count]
                     buf.append(bin)
