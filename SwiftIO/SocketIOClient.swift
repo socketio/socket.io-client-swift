@@ -45,8 +45,6 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     var waitingData = ContiguousArray<SocketPacket>()
     
     public let socketURL:String
-    public let ackQueue = dispatch_queue_create("ackQueue".cStringUsingEncoding(NSUTF8StringEncoding),
-        DISPATCH_QUEUE_SERIAL)
     public let handleQueue = dispatch_queue_create("handleQueue".cStringUsingEncoding(NSUTF8StringEncoding),
         DISPATCH_QUEUE_SERIAL)
     public let emitQueue = dispatch_queue_create("emitQueue".cStringUsingEncoding(NSUTF8StringEncoding),
@@ -263,7 +261,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     
     // If the server wants to know that the client received data
     func emitAck(ack:Int, withData args:[AnyObject]?) {
-        dispatch_async(self.ackQueue) {[weak self] in
+        dispatch_async(self.emitQueue) {[weak self] in
             if self == nil || !self!.connected || args == nil {
                 return
             }
