@@ -30,7 +30,7 @@ extension String {
     }
 }
 
-private typealias Probe = (msg:String, type:PacketType, data:[NSData]?)
+private typealias Probe = (msg:String, type:PacketType, data:ContiguousArray<NSData>?)
 private typealias ProbeWaitQueue = [Probe]
 
 public enum PacketType: String {
@@ -476,10 +476,8 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         }
     }
 
-    /*
-    Send a message with type 4
-    */
-    public func send(msg:String, withData datas:[NSData]?) {
+    /// Send an engine message (4)
+    public func send(msg:String, withData datas:ContiguousArray<NSData>?) {
         if self.probing {
             self.probeWait.append((msg, PacketType.MESSAGE, datas))
         } else {
@@ -496,9 +494,8 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     }
 
     private func sendPollMessage(var msg:String, withType type:PacketType,
-        datas:[NSData]? = nil) {
+        datas:ContiguousArray<NSData>? = nil) {
             // println("Sending poll: \(msg) as type: \(type.rawValue)")
-
             doubleEncodeUTF8(&msg)
             let strMsg = "\(type.rawValue)\(msg)"
 
@@ -517,18 +514,19 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             }
     }
 
-    private func sendWebSocketMessage(str:String, withType type:PacketType, datas:[NSData]? = nil) {
-        // println("Sending ws: \(str) as type: \(type.rawValue)")
-        self.ws?.writeString("\(type.rawValue)\(str)")
+    private func sendWebSocketMessage(str:String, withType type:PacketType,
+        datas:ContiguousArray<NSData>? = nil) {
+            // println("Sending ws: \(str) as type: \(type.rawValue)")
+            self.ws?.writeString("\(type.rawValue)\(str)")
 
-        if datas != nil {
-            for data in datas! {
-                let (data, nilString) = self.createBinaryDataForSend(data)
-                if data != nil {
-                    self.ws?.writeData(data!)
+            if datas != nil {
+                for data in datas! {
+                    let (data, nilString) = self.createBinaryDataForSend(data)
+                    if data != nil {
+                        self.ws?.writeData(data!)
+                    }
                 }
             }
-        }
     }
 
     // Starts the ping timer
@@ -554,7 +552,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         }
     }
 
-    public func write(msg:String, withType type:PacketType, withData data:[NSData]?) {
+    public func write(msg:String, withType type:PacketType, withData data:ContiguousArray<NSData>?) {
         dispatch_async(self.emitQueue) {[weak self] in
             if self == nil {
                 return
@@ -565,10 +563,10 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             }
 
             if self!.websocket {
-                // NSLog("writing ws: \(msg):\(datas)")
+                // NSLog("writing ws: \(msg):\(data)")
                 self?.sendWebSocketMessage(msg, withType: type, datas: data)
             } else {
-                // NSLog("writing poll: \(msg):\(datas)")
+                // NSLog("writing poll: \(msg):\(data)")
                 self?.sendPollMessage(msg, withType: type, datas: data)
             }
         }

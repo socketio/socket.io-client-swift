@@ -28,10 +28,10 @@ public typealias NormalCallback = (NSArray?, AckEmitter?) -> Void
 public typealias AnyHandler = (event:String, items:AnyObject?)
 public typealias AckEmitter = (AnyObject...) -> Void
 
-private func emitAckCallback(socket:SocketIOClient, num:Int, type:Int)
+private func emitAckCallback(socket:SocketIOClient, num:Int)
     // Curried
     (items:AnyObject...) -> Void {
-        socket.emitAck(num, withData: items, withAckType: type)
+        socket.emitAck(num, withData: items)
 }
 
 class SocketEventHandler {
@@ -46,7 +46,7 @@ class SocketEventHandler {
     func executeCallback(_ items:NSArray? = nil, withAck ack:Int? = nil, withAckType type:Int? = nil,
         withSocket socket:SocketIOClient? = nil) {
             dispatch_async(dispatch_get_main_queue()) {[weak self] in
-                self?.callback?(items, ack != nil ? emitAckCallback(socket!, ack!, type!) : nil)
+                self?.callback?(items, ack != nil ? emitAckCallback(socket!, ack!) : nil)
                 return
             }
     }

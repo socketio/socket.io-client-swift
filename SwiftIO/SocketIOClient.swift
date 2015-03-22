@@ -27,26 +27,24 @@ import Foundation
 public class SocketIOClient: NSObject, SocketEngineClient {
     let reconnectAttempts:Int!
     private lazy var params = [String: AnyObject]()
-    private var ackHandlers = [SocketAckHandler]()
+    private var ackHandlers = ContiguousArray<SocketAckHandler>()
     private var anyHandler:((AnyHandler) -> Void)?
     private var _closed = false
     private var _connected = false
     private var _connecting = false
     private var currentReconnectAttempt = 0
     private var forcePolling = false
-    private var handlers = [SocketEventHandler]()
+    private var handlers = ContiguousArray<SocketEventHandler>()
     private var paramConnect = false
     private var _secure = false
     private var _sid:String?
     private var _reconnecting = false
     private var reconnectTimer:NSTimer?
     
-    internal var currentAck = -1
-    internal var waitingData = [SocketPacket]()
+    var currentAck = -1
+    var waitingData = ContiguousArray<SocketPacket>()
     
     public let socketURL:String
-    public let ackQueue = dispatch_queue_create("ackQueue".cStringUsingEncoding(NSUTF8StringEncoding),
-        DISPATCH_QUEUE_SERIAL)
     public let handleQueue = dispatch_queue_create("handleQueue".cStringUsingEncoding(NSUTF8StringEncoding),
         DISPATCH_QUEUE_SERIAL)
     public let emitQueue = dispatch_queue_create("emitQueue".cStringUsingEncoding(NSUTF8StringEncoding),
@@ -62,7 +60,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     }
     public var cookies:[NSHTTPCookie]?
     public var engine:SocketEngine?
-    public var nsp:String?
+    public var nsp = "/"
     public var reconnects = true
     public var reconnecting:Bool {
         return self._reconnecting
@@ -244,69 +242,40 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     }
     
     private func _emit(event:String, _ args:[AnyObject], ack:Int? = nil) {
-        var frame:SocketPacket
-        var str:String
-        
-        let (items, hasBinary, emitDatas) = SocketParser.parseEmitArgs(args)
-        
         if !self.connected {
             return
         }
         
-        if hasBinary {
-            if ack == nil {
-                str = SocketPacket.createMessageForEvent(event, withArgs: items,
-                    hasBinary: true, withDatas: emitDatas.count, toNamespace: self.nsp)
-            } else {
-                str = SocketPacket.createMessageForEvent(event, withArgs: items,
-                    hasBinary: true, withDatas: emitDatas.count, toNamespace: self.nsp, wantsAck: ack)
-            }
-            
-            self.engine?.send(str, withData: emitDatas)
+        let packet = SocketPacket(type: nil, data: args, nsp: self.nsp, id: ack)
+        var str:String
+        
+        SocketParser.parseForEmit(packet)
+        str = packet.createMessageForEvent(event)
+        
+        if packet.type == SocketPacketType.BINARY_EVENT {
+            self.engine?.send(str, withData: packet.binary)
         } else {
-            if ack == nil {
-                str = SocketPacket.createMessageForEvent(event, withArgs: items, hasBinary: false,
-                    withDatas: 0, toNamespace: self.nsp)
-            } else {
-                str = SocketPacket.createMessageForEvent(event, withArgs: items, hasBinary: false,
-                    withDatas: 0, toNamespace: self.nsp, wantsAck: ack)
-            }
-            
             self.engine?.send(str, withData: nil)
         }
     }
     
     // If the server wants to know that the client received data
-    func emitAck(ack:Int, withData data:[AnyObject]?, withAckType ackType:Int) {
-        dispatch_async(self.ackQueue) {[weak self] in
-            if self == nil || !self!.connected || data == nil {
+    func emitAck(ack:Int, withData args:[AnyObject]) {
+        dispatch_async(self.emitQueue) {[weak self] in
+            if self == nil || !self!.connected {
                 return
             }
             
-            // println("sending ack: \(ack) \(data)")
-            let (items, hasBinary, emitDatas) = SocketParser.parseEmitArgs(data!)
+            let packet = SocketPacket(type: nil, data: args, nsp: self!.nsp, id: ack)
             var str:String
             
-            if !hasBinary {
-                if self?.nsp == nil {
-                    str = SocketPacket.createAck(ack, withArgs: items,
-                        withAckType: 3, withNsp: "/")
-                } else {
-                    str = SocketPacket.createAck(ack, withArgs: items,
-                        withAckType: 3, withNsp: self!.nsp!)
-                }
-                
-                self?.engine?.send(str, withData: nil)
+            SocketParser.parseForEmit(packet)
+            str = packet.createAck()
+            
+            if packet.type == SocketPacketType.BINARY_ACK {
+                self?.engine?.send(str, withData: packet.binary)
             } else {
-                if self?.nsp == nil {
-                    str = SocketPacket.createAck(ack, withArgs: items,
-                        withAckType: 6, withNsp: "/", withBinary: emitDatas.count)
-                } else {
-                    str = SocketPacket.createAck(ack, withArgs: items,
-                        withAckType: 6, withNsp: self!.nsp!, withBinary: emitDatas.count)
-                }
-                
-                self?.engine?.send(str, withData: emitDatas)
+                self?.engine?.send(str, withData: nil)
             }
         }
     }
@@ -361,8 +330,8 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     
     // Should be removed and moved to SocketEngine
     func joinNamespace() {
-        if self.nsp != nil {
-            self.engine?.send("0/\(self.nsp!)", withData: nil)
+        if self.nsp != "/" {
+            self.engine?.send("0/\(self.nsp)", withData: nil)
         }
     }
     

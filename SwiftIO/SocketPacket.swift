@@ -43,28 +43,22 @@ enum SocketPacketType: Int {
 }
 
 class SocketPacket {
-    let type:SocketPacketType
-    var binary = [NSData]()
+    var binary = ContiguousArray<NSData>()
     var currentPlace = 0
     var data:[AnyObject]?
     var id:Int?
     var justAck = false
     var nsp = ""
     var placeholders:Int?
+    var type:SocketPacketType?
 
-    init(type:SocketPacketType, data:[AnyObject]? = nil, nsp:String = "",
+    init(type:SocketPacketType?, data:[AnyObject]? = nil, nsp:String = "",
         placeholders:Int? = nil, id:Int? = nil) {
             self.type = type
             self.data = data
             self.nsp = nsp
             self.placeholders = placeholders
             self.id = id
-    }
-
-    /// Only call if you know data is not nil
-    func createBinaryPlaceHolders() {
-        var strData = "\(self.data!)"
-        println(strData)
     }
 
     func getEvent() -> String {
@@ -95,77 +89,77 @@ class SocketPacket {
         }
     }
 
-    class func createMessageForEvent(event:String, withArgs args:[AnyObject],
-        hasBinary:Bool, withDatas datas:Int = 0, toNamespace nsp:String?, wantsAck ack:Int? = nil) -> String {
-
+    func createMessageForEvent(event:String) -> String {
             var message:String
             var jsonSendError:NSError?
 
-            if !hasBinary {
-                if nsp == nil {
-                    if ack == nil {
+            if self.binary.count == 0 {
+                self.type = SocketPacketType.EVENT
+
+                if self.nsp == "/" {
+                    if self.id == nil {
                         message = "2[\"\(event)\""
                     } else {
-                        message = "2\(ack!)[\"\(event)\""
+                        message = "2\(self.id!)[\"\(event)\""
                     }
                 } else {
-                    if ack == nil {
-                        message = "2/\(nsp!),[\"\(event)\""
+                    if self.id == nil {
+                        message = "2/\(self.nsp),[\"\(event)\""
                     } else {
-                        message = "2/\(nsp!),\(ack!)[\"\(event)\""
+                        message = "2/\(self.nsp),\(self.id!)[\"\(event)\""
                     }
                 }
             } else {
-                if nsp == nil {
-                    if ack == nil {
-                        message = "5\(datas)-[\"\(event)\""
+                self.type = SocketPacketType.BINARY_EVENT
+
+                if self.nsp == "/" {
+                    if self.id == nil {
+                        message = "5\(self.binary.count)-[\"\(event)\""
                     } else {
-                        message = "5\(datas)-\(ack!)[\"\(event)\""
+                        message = "5\(self.binary.count)-\(self.id!)[\"\(event)\""
                     }
                 } else {
-                    if ack == nil {
-                        message = "5\(datas)-/\(nsp!),[\"\(event)\""
+                    if self.id == nil {
+                        message = "5\(self.binary.count)-/\(self.nsp),[\"\(event)\""
                     } else {
-                        message = "5\(datas)-/\(nsp!),\(ack!)[\"\(event)\""
+                        message = "5\(self.binary.count)-/\(self.nsp),\(self.id!)[\"\(event)\""
                     }
                 }
             }
 
-            return self.completeMessage(message, args: args)
+            return self.completeMessage(message)
     }
 
-    class func createAck(ack:Int, withArgs args:[AnyObject], withAckType ackType:Int,
-        withNsp nsp:String, withBinary binary:Int = 0) -> String {
+    func createAck() -> String {
             var msg:String
 
-            if ackType == 3 {
+            if self.binary.count == 0 {
                 if nsp == "/" {
-                    msg = "3\(ack)["
+                    msg = "3\(self.id!)["
                 } else {
-                    msg = "3/\(nsp),\(ack)["
+                    msg = "3/\(self.nsp),\(self.id!)["
                 }
             } else {
                 if nsp == "/" {
-                    msg = "6\(binary)-\(ack)["
+                    msg = "6\(self.binary.count)-\(self.id!)["
                 } else {
-                    msg = "6\(binary)-/\(nsp),\(ack)["
+                    msg = "6\(self.binary.count)-/\(self.nsp),\(self.id!)["
                 }
             }
 
-            return self.completeMessage(msg, args: args, ack: true)
+            return self.completeMessage(msg, ack: true)
     }
 
-    private class func completeMessage(var message:String, args:[AnyObject], ack:Bool = false) -> String {
+    func completeMessage(var message:String, ack:Bool = false) -> String {
         var err:NSError?
 
-        if args.count == 0 {
+        if self.data == nil || self.data!.count == 0 {
             return message + "]"
         } else if !ack {
             message += ","
         }
 
-        for arg in args {
-
+        for arg in self.data! {    
             if arg is NSDictionary || arg is [AnyObject] {
                 let jsonSend = NSJSONSerialization.dataWithJSONObject(arg,
                     options: NSJSONWritingOptions(0), error: &err)
