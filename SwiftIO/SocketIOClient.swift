@@ -260,9 +260,9 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     }
     
     // If the server wants to know that the client received data
-    func emitAck(ack:Int, withData args:[AnyObject]?) {
+    func emitAck(ack:Int, withData args:[AnyObject]) {
         dispatch_async(self.emitQueue) {[weak self] in
-            if self == nil || !self!.connected || args == nil {
+            if self == nil || !self!.connected {
                 return
             }
             
