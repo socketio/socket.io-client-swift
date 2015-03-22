@@ -22,9 +22,9 @@
 
 import Foundation
 
-private let shredder = SocketParser.PacketShredder()
-
 class SocketParser {
+    private static let shredder = SocketParser.PacketShredder()
+    
     // Translation of socket.io-parser#deconstructPacket
     private class PacketShredder {
         var buf = ContiguousArray<NSData>()
