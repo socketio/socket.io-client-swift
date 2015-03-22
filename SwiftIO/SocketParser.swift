@@ -48,7 +48,7 @@ class SocketParser {
                 var newDict = NSMutableDictionary(dictionary: dict)
 
                 for (key, value) in newDict {
-                    newDict[key as NSCopying] = shred(value)
+                    newDict[key as! NSCopying] = shred(value)
                 }
 
                 return newDict
