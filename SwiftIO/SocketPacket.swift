@@ -43,7 +43,7 @@ enum SocketPacketType: Int {
 }
 
 class SocketPacket {
-    var binary = [NSData]()
+    var binary = ContiguousArray<NSData>()
     var currentPlace = 0
     var data:[AnyObject]?
     var id:Int?

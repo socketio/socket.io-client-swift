@@ -27,8 +27,8 @@ private let shredder = SocketParser.Deconstructor()
 class SocketParser {
     // Translation of socket.io-parser#deconstructPacket
     private class Deconstructor {
-        var buf = [NSData]()
-        
+        var buf = ContiguousArray<NSData>()
+
         func ripAndTear(data:AnyObject) -> AnyObject {
             if let bin = data as? NSData {
                 let placeholder = ["_placeholder" :true, "num": buf.count]
@@ -36,9 +36,7 @@ class SocketParser {
                 buf.append(bin)
                 
                 return placeholder
-            }
-            
-            if var arr = data as? [AnyObject] {
+            } else if var arr = data as? [AnyObject] {
                 for i in 0..<arr.count {
                     arr[i] = ripAndTear(arr[i])
                 }
