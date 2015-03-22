@@ -61,11 +61,6 @@ class SocketPacket {
             self.id = id
     }
     
-    /// Only call if you know data is not nil
-//    func createBinaryPlaceHolders() {
-//        var strData = "\(self.data!)"
-//    }
-    
     func getEvent() -> String {
         return data?.removeAtIndex(0) as String
     }

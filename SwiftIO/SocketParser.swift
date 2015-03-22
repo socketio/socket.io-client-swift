@@ -39,15 +39,12 @@ class SocketParser {
             }
             
             if var arr = data as? [AnyObject] {
-                // var arr = data as [AnyObject]
                 for i in 0..<arr.count {
                     arr[i] = ripAndTear(arr[i])
                 }
                 
                 return arr
             } else if var newDict = data as? [String: AnyObject] {
-                // var newDict = data as [String: AnyObject]
-                
                 for (key, value) in newDict {
                     newDict[key] = ripAndTear(value)
                 }
