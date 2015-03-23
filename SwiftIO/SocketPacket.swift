@@ -159,7 +159,7 @@ class SocketPacket {
             message += ","
         }
 
-        for arg in self.data! {    
+        for arg in self.data! {
             if arg is NSDictionary || arg is [AnyObject] {
                 let jsonSend = NSJSONSerialization.dataWithJSONObject(arg,
                     options: NSJSONWritingOptions(0), error: &err)
@@ -187,55 +187,8 @@ class SocketPacket {
         return message + "]"
     }
 
-    private func fillInArray(arr:NSArray) -> NSArray {
-        var newArr = [AnyObject](count: arr.count, repeatedValue: 0)
-        // println(arr)
-
-        for i in 0..<arr.count {
-            if let nest = arr[i] as? NSArray {
-                newArr[i] = self.fillInArray(nest)
-            } else if let dict = arr[i] as? NSDictionary {
-                newArr[i] = self.fillInDict(dict)
-            } else if let str = arr[i] as? String {
-                if let num = str["~~(\\d)"].groups() {
-                    newArr[i] = self.binary[num[1].toInt()!]
-                } else {
-                    newArr[i] = arr[i]
-                }
-            } else {
-                newArr[i] = arr[i]
-            }
-        }
-
-        return newArr
-    }
-
-    private func fillInDict(dict:NSDictionary) -> NSDictionary {
-        var newDict = [String: AnyObject]()
-
-        for (key, value) in dict {
-            newDict[key as! String] = value
-
-            // If the value is a string we need to check
-            // if it is a placeholder for data
-            if let str = value as? String {
-                if let num = str["~~(\\d)"].groups() {
-                    newDict[key as! String] = self.binary[num[1].toInt()!]
-                } else {
-                    newDict[key as! String] = str
-                }
-            } else if let nestDict = value as? NSDictionary {
-                newDict[key as! String] = self.fillInDict(nestDict)
-            } else if let arr = value as? NSArray {
-                newDict[key as! String] = self.fillInArray(arr)
-            }
-        }
-
-        return newDict
-    }
-
     func fillInPlaceholders() {
-        var newArr = [AnyObject](count: self.data!.count, repeatedValue: 0)
+        var newArr = NSMutableArray(array: self.data!)
 
         for i in 0..<self.data!.count {
             if let str = self.data?[i] as? String {
@@ -244,15 +197,39 @@ class SocketPacket {
                 } else {
                     newArr[i] = str
                 }
-            } else if let arr = self.data?[i] as? NSArray {
-                newArr[i] = self.fillInArray(arr)
-            } else if let dict = self.data?[i] as? NSDictionary {
-                newArr[i] = self.fillInDict(dict)
-            } else {
-                newArr[i] = self.data![i]
+            } else if self.data?[i] is NSDictionary || self.data?[i] is NSArray {
+                newArr[i] = self._fillInPlaceholders(self.data![i])
             }
         }
 
         self.data = newArr
+    }
+
+    private func _fillInPlaceholders(data:AnyObject) -> AnyObject {
+        if let str = data as? String {
+            if let num = str["~~(\\d)"].groups() {
+                return self.binary[num[1].toInt()!]
+            } else {
+                return str
+            }
+        } else if let dict = data as? NSDictionary {
+            var newDict = NSMutableDictionary(dictionary: dict)
+
+            for (key, value) in dict {
+                newDict[key as! NSCopying] = _fillInPlaceholders(value)
+            }
+
+            return newDict
+        } else if let arr = data as? NSArray {
+            var newArr = NSMutableArray(array: arr)
+
+            for i in 0..<arr.count {
+                newArr[i] = _fillInPlaceholders(arr[i])
+            }
+
+            return newArr
+        } else {
+            return data
+        }
     }
 }
