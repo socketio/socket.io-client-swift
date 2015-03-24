@@ -339,7 +339,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     Removes handler(s)
     */
     public func off(event:String) {
-            self.handlers = self.handlers.filter {$0.event == event ? false : true}
+        self.handlers = self.handlers.filter {$0.event == event ? false : true}
     }
     
     /**
