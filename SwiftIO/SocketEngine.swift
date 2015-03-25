@@ -53,6 +53,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     private let handleQueue = dispatch_queue_create(
         "engineHandleQueue".cStringUsingEncoding(NSUTF8StringEncoding), DISPATCH_QUEUE_SERIAL)
     private let session:NSURLSession!
+    private var closed = false
     private var _connected = false
     private var fastUpgrade = false
     private var forcePolling = false
@@ -81,7 +82,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     }
     var ws:WebSocket?
     
-    init(client:SocketEngineClient, forcePolling:Bool, withCookies cookies:[NSHTTPCookie]?) {
+    public init(client:SocketEngineClient, forcePolling:Bool, withCookies cookies:[NSHTTPCookie]?) {
         self.client = client
         self.forcePolling = forcePolling
         self.cookies = cookies
@@ -89,9 +90,20 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             delegate: nil, delegateQueue: self.workQueue)
     }
     
-    func close() {
+    public func close(#fast:Bool) {
         self.pingTimer?.invalidate()
-        self.send(PacketType.CLOSE.rawValue, withData: nil)
+        self.closed = true
+        
+        if self.polling {
+            self.write("", withType: PacketType.CLOSE, withData: nil)
+            self.client.didForceClose("Disconnect")
+        } else {
+            self.ws?.disconnect()
+            
+            if fast {
+                self.client.didForceClose("Fast Disconnect")
+            }
+        }
     }
     
     private func createBinaryDataForSend(data:NSData) -> (NSData?, String?) {
@@ -174,7 +186,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                 return
             } else if err != nil {
                 if self!.polling {
-                    self?.handlePollingFailed(err)
+                    self?.handlePollingFailed(err.localizedDescription)
                 }
                 
                 return
@@ -191,7 +203,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             if self!.fastUpgrade {
                 self?.doFastUpgrade()
                 return
-            } else {
+            } else if !self!.closed {
                 self?.doPoll()
             }
             }.resume()
@@ -247,7 +259,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             if self == nil {
                 return
             } else if err != nil && self!.polling {
-                self?.handlePollingFailed(err)
+                self?.handlePollingFailed(err.localizedDescription)
                 return
             }
             
@@ -270,24 +282,26 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     }
     
     // A poll failed, tell the client about it
-    private func handlePollingFailed(reason:NSError) {
-        assert(self.polling, "Polling failed when we're not polling")
+    private func handlePollingFailed(reason:String) {
+        self._connected = false
+        self.ws?.disconnect()
+        self.pingTimer?.invalidate()
+        self.waitingForPoll = false
+        self.waitingForPost = false
         
-        if !self.client.reconnecting {
-            self._connected = false
-            self.ws?.disconnect()
-            self.pingTimer?.invalidate()
-            self.waitingForPoll = false
-            self.waitingForPost = false
+        if !self.closed && !self.client.reconnecting {
             self.client.pollingDidFail(reason)
+        } else if !self.client.reconnecting {
+            self.client.didForceClose(reason)
         }
     }
     
-    func open(opts:[String: AnyObject]? = nil) {
+    public func open(opts:[String: AnyObject]? = nil) {
         if self.connected {
-            assert(false, "We're in a bad state, this shouldn't happen.")
+            fatalError("Engine tried to open while connected")
         }
         
+        self.closed = false
         let (urlPolling, urlWebSocket) = self.createURLs(opts)
         self.urlPolling = urlPolling
         self.urlWebSocket = urlWebSocket
@@ -304,7 +318,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             if self == nil {
                 return
             } else if err != nil || data == nil {
-                self?.handlePollingFailed(err)
+                self?.handlePollingFailed(err.localizedDescription)
                 return
             }
             
@@ -382,7 +396,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                 length += chr
             } else {
                 if length == "" || testLength(length, &n) {
-                    println("failure in parsePollingMessage")
+                    self.handlePollingFailed("Error parsing XHR message")
                     return
                 }
                 
@@ -451,10 +465,11 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                     self.upgradeTransport()
                     return
                 }
-            }
-            
-            if message == PacketType.CLOSE.rawValue {
-                // do nothing
+            } else if type == PacketType.CLOSE.rawValue {
+                if self.polling {
+                    self.client.didForceClose("Disconnect")
+                }
+                
                 return
             }
             // println("Got something idk what to do with")
@@ -554,11 +569,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     
     public func write(msg:String, withType type:PacketType, withData data:ContiguousArray<NSData>?) {
         dispatch_async(self.emitQueue) {[weak self] in
-            if self == nil {
-                return
-            }
-            
-            if !self!.connected {
+            if self == nil || !self!.connected {
                 return
             }
             
