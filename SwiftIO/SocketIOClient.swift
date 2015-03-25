@@ -133,7 +133,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     Will turn off automatic reconnects.
     Pass true to fast if you're closing from a background task
     */
-    public func close(fast:Bool = false) {
+    public func close(#fast:Bool) {
         self.reconnects = false
         self._connecting = false
         self._connected = false

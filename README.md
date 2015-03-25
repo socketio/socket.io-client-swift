@@ -53,7 +53,7 @@ Methods
 6. `socket.emitWithAckObjc(event:String, withItems items:[AnyObject]) -> SocketAckHandler` - `emitWithAck` for Objective-C.
 7. `socket.connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
 8. `socket.connectWithParams(params:[String: AnyObject])` - Establishes a connection to the server passing the specified params. A "connect" event is fired upon successful connection.
-9. `socket.close(fast:Bool)` - Closes the socket. Once a socket is closed it should not be reopened. Pass true to fast if you're closing from a background task.
+9. `socket.close(#fast:Bool)` - Closes the socket. Once a socket is closed it should not be reopened. Pass true to fast if you're closing from a background task.
 
 Events
 ------
