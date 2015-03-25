@@ -130,13 +130,15 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     
     /**
     Closes the socket. Only reopen the same socket if you know what you're doing.
+    Will turn off automatic reconnects.
+    Pass true to fast if you're closing from a background task
     */
-    public func close() {
-        self._closed = true
+    public func close(#fast:Bool) {
+        self.reconnects = false
         self._connecting = false
         self._connected = false
         self._reconnecting = false
-        self.engine?.close()
+        self.engine?.close(fast: fast)
     }
     
     /**
@@ -182,13 +184,17 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     }
     
     /// Server wants us to die
-    func didForceClose(#message:String) {
+    public func didForceClose(reason:String) {
+        if self.closed {
+            return
+        }
+        
         self._closed = true
         self._connected = false
         self.reconnects = false
         self._connecting = false
         self._reconnecting = false
-        self.handleEvent("disconnect", data: [message], isInternalMessage: true)
+        self.handleEvent("disconnect", data: [reason], isInternalMessage: true)
     }
     
     /**
@@ -328,7 +334,6 @@ public class SocketIOClient: NSObject, SocketEngineClient {
             }
     }
     
-    // Should be removed and moved to SocketEngine
     func joinNamespace() {
         if self.nsp != "/" {
             self.engine?.send("0/\(self.nsp)", withData: nil)
@@ -339,7 +344,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     Removes handler(s)
     */
     public func off(event:String) {
-            self.handlers = self.handlers.filter {$0.event == event ? false : true}
+        self.handlers = self.handlers.filter {$0.event == event ? false : true}
     }
     
     /**
@@ -373,10 +378,10 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     }
     
     // Something happened while polling
-    public func pollingDidFail(err:NSError) {
+    public func pollingDidFail(err:String) {
         if !self.reconnecting {
             self._connected = false
-            self.handleEvent("reconnect", data: [err.localizedDescription], isInternalMessage: true)
+            self.handleEvent("reconnect", data: [err], isInternalMessage: true)
             self.tryReconnect()
         }
     }
@@ -388,7 +393,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     // We lost connection and should attempt to reestablish
     func tryReconnect() {
         if self.reconnectAttempts != -1 && self.currentReconnectAttempt + 1 > self.reconnectAttempts {
-            self.didForceClose(message: "Reconnect Failed")
+            self.didForceClose("Reconnect Failed")
             return
         } else if self.connected {
             self._connecting = false
@@ -426,7 +431,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         self._connected = false
         self._connecting = false
         if self.closed || !self.reconnects {
-            self.didForceClose(message: "WebSocket closed")
+            self.didForceClose("WebSocket closed")
         } else {
             self.handleEvent("reconnect", data: [reason], isInternalMessage: true)
             self.tryReconnect()
@@ -439,7 +444,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         self._connecting = false
         self.handleEvent("error", data: [error.localizedDescription], isInternalMessage: true)
         if self.closed || !self.reconnects {
-            self.didForceClose(message: "WebSocket closed with an error \(error)")
+            self.didForceClose("WebSocket closed with an error \(error)")
         } else if !self.reconnecting {
             self.handleEvent("reconnect", data: [error.localizedDescription], isInternalMessage: true)
             self.tryReconnect()

@@ -32,9 +32,10 @@ import Foundation
     var socketURL:String {get}
     var secure:Bool {get}
     
+    func didForceClose(reason:String)
     func parseSocketMessage(msg:String)
     func parseBinaryData(data:NSData)
-    func pollingDidFail(err:NSError)
+    func pollingDidFail(err:String)
     func webSocketDidCloseWithCode(code:Int, reason:String, wasClean:Bool)
     func webSocketDidFailWithError(error:NSError)
 }
