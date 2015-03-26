@@ -200,13 +200,13 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     /**
     Send a message to the server
     */
-    public func emit(event:String, _ args:AnyObject...) {
+    public func emit(event:String, _ items:AnyObject...) {
         if !self.connected {
             return
         }
         
         dispatch_async(self.emitQueue) {[weak self] in
-            self?._emit(event, args)
+            self?._emit(event, items)
             return
         }
     }
@@ -215,14 +215,21 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     Same as emit, but meant for Objective-C
     */
     public func emitObjc(event:String, withItems items:[AnyObject]) {
-        self.emit(event, items)
+        if !self.connected {
+            return
+        }
+        
+        dispatch_async(self.emitQueue) {[weak self] in
+            self?._emit(event, items)
+            return
+        }
     }
     
     /**
     Sends a message to the server, requesting an ack. Use the onAck method of SocketAckHandler to add
     an ack.
     */
-    public func emitWithAck(event:String, _ args:AnyObject...) -> SocketAckHandler {
+    public func emitWithAck(event:String, _ items:AnyObject...) -> SocketAckHandler {
         if !self.connected {
             return SocketAckHandler(event: "fail", socket: self)
         }
@@ -233,7 +240,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         self.ackHandlers.append(ackHandler)
         
         dispatch_async(self.emitQueue) {[weak self, ack = self.currentAck] in
-            self?._emit(event, args, ack: ack)
+            self?._emit(event, items, ack: ack)
             return
         }
         
@@ -244,7 +251,21 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     Same as emitWithAck, but for Objective-C
     */
     public func emitWithAckObjc(event:String, withItems items:[AnyObject]) -> SocketAckHandler {
-        return self.emitWithAck(event, items)
+        if !self.connected {
+            return SocketAckHandler(event: "fail", socket: self)
+        }
+        
+        self.currentAck++
+        let ackHandler = SocketAckHandler(event: event,
+            ackNum: self.currentAck, socket: self)
+        self.ackHandlers.append(ackHandler)
+        
+        dispatch_async(self.emitQueue) {[weak self, ack = self.currentAck] in
+            self?._emit(event, items, ack: ack)
+            return
+        }
+        
+        return ackHandler
     }
     
     private func _emit(event:String, _ args:[AnyObject], ack:Int? = nil) {
