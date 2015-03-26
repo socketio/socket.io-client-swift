@@ -118,14 +118,16 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         }
         
         super.init()
-        
-        self.engine = SocketEngine(client: self,
-            forcePolling: self.forcePolling,
-            withCookies: self.cookies)
     }
     
     public convenience init(socketURL:String, options:NSDictionary?) {
         self.init(socketURL: socketURL, opts: options)
+    }
+    
+    private func addEngine() {
+        self.engine = SocketEngine(client: self,
+            forcePolling: self.forcePolling,
+            withCookies: self.cookies)
     }
     
     /**
@@ -150,6 +152,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
             self._closed = false
         }
         
+        self.addEngine()
         self.engine?.open()
     }
     
@@ -165,6 +168,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         self.params = params
         self.paramConnect = true
         
+        self.addEngine()
         self.engine?.open(opts: params)
     }
     
