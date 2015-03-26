@@ -7,6 +7,7 @@ For Swift 1.2 use the 1.2 branch.
 
 Installation
 ============
+[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 
 Manually (iOS 7+)
 -----------------
@@ -35,6 +36,20 @@ Import in your swift file:
 ```swift
 import Socket_IO_Client_Swift
 ```
+
+Carthage
+--------------
+Add this line to your Cartfile
+```
+github "https://github.com/SocketIO/Socket.IO-client-swift >= 1.4.2
+```
+
+In your project directory
+```bash
+$ carthage update
+```
+
+Add the `SocketIO.framework` from Carthage/Build/iOS or Carthage/Build/OSX to your project
 
 API
 ===
