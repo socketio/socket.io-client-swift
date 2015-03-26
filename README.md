@@ -41,7 +41,7 @@ Carthage
 --------------
 Add this line to your Cartfile
 ```
-github "https://github.com/SocketIO/Socket.IO-client-swift >= 1.4.2
+github "SocketIO/Socket.IO-client-swift" >= 1.4.2
 ```
 
 In your project directory
