@@ -348,7 +348,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     Causes an event to be handled. Only use if you know what you're doing.
     */
     public func handleEvent(event:String, data:[AnyObject]?, isInternalMessage:Bool = false,
-        wantsAck ack:Int? = nil, withAckType ackType:Int = 3) {
+        wantsAck ack:Int? = nil) {
             // println("Should do event: \(event) with data: \(data)")
             if !self.connected && !isInternalMessage {
                 return
@@ -364,8 +364,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
             for handler in self.handlers {
                 if handler.event == event {
                     if ack != nil {
-                        handler.executeCallback(data, withAck: ack!,
-                            withAckType: ackType, withSocket: self)
+                        handler.executeCallback(data, withAck: ack!, withSocket: self)
                     } else {
                         handler.executeCallback(data)
                     }

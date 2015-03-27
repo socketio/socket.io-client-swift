@@ -460,16 +460,16 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                         
                         if let pingInterval = json["pingInterval"] as? Int {
                             self.pingInterval = pingInterval / 1000
-                        }
+                         }
                 } else {
                     fatalError("Error parsing engine connect")
                 }
                 
+                self.startPingTimer()
+                
                 if !self.forceWebsockets {
                     self.doPoll()
                 }
-                
-                self.startPingTimer()
                 
                 return
             } else if type == PacketType.CLOSE.rawValue {
