@@ -34,6 +34,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     private var _connecting = false
     private var currentReconnectAttempt = 0
     private var forcePolling = false
+    private var forceWebsockets = false
     private var handlers = ContiguousArray<SocketEventHandler>()
     private var paramConnect = false
     private var _secure = false
@@ -110,6 +111,10 @@ public class SocketIOClient: NSObject, SocketEngineClient {
                 self.forcePolling = polling
             }
             
+            if let ws = opts!["forceWebsockets"] as? Bool {
+                self.forceWebsockets = ws
+            }
+            
             if let cookies = opts!["cookies"] as? [NSHTTPCookie] {
                 self.cookies = cookies
             }
@@ -127,6 +132,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     private func addEngine() {
         self.engine = SocketEngine(client: self,
             forcePolling: self.forcePolling,
+            forceWebsockets: self.forceWebsockets,
             withCookies: self.cookies)
     }
     
@@ -152,6 +158,10 @@ public class SocketIOClient: NSObject, SocketEngineClient {
             self._closed = false
         }
         
+        if self.connected {
+            return
+        }
+        
         self.addEngine()
         self.engine?.open()
     }
@@ -163,6 +173,10 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         if self.closed {
             println("Warning! This socket was previously closed. This might be dangerous!")
             self._closed = false
+        }
+        
+        if self.connected {
+            return
         }
         
         self.params = params
@@ -452,12 +466,12 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     }
     
     // Called when the socket is closed
-    public func webSocketDidCloseWithCode(code:Int, reason:String, wasClean:Bool) {
+    public func webSocketDidCloseWithCode(code:Int, reason:String) {
         self._connected = false
         self._connecting = false
         if self.closed || !self.reconnects {
             self.didForceClose("WebSocket closed")
-        } else {
+        } else if !self.reconnecting {
             self.handleEvent("reconnect", data: [reason], isInternalMessage: true)
             self.tryReconnect()
         }

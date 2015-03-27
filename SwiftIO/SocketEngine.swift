@@ -57,6 +57,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     private var _connected = false
     private var fastUpgrade = false
     private var forcePolling = false
+    private var forceWebsockets = false
     private var pingTimer:NSTimer?
     private var postWait = [String]()
     private var _polling = true
@@ -82,12 +83,14 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     }
     var ws:WebSocket?
     
-    public init(client:SocketEngineClient, forcePolling:Bool, withCookies cookies:[NSHTTPCookie]?) {
-        self.client = client
-        self.forcePolling = forcePolling
-        self.cookies = cookies
-        self.session = NSURLSession(configuration: NSURLSessionConfiguration.ephemeralSessionConfiguration(),
-            delegate: nil, delegateQueue: self.workQueue)
+    public init(client:SocketEngineClient, forcePolling:Bool,
+        forceWebsockets:Bool, withCookies cookies:[NSHTTPCookie]?) {
+            self.client = client
+            self.forcePolling = forcePolling
+            self.forceWebsockets = forceWebsockets
+            self.cookies = cookies
+            self.session = NSURLSession(configuration: NSURLSessionConfiguration.ephemeralSessionConfiguration(),
+                delegate: nil, delegateQueue: self.workQueue)
     }
     
     public func close(#fast:Bool) {
@@ -157,6 +160,16 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         return (urlPolling, urlWebSocket)
     }
     
+    private func createWebsocket(andConnect connect:Bool) {
+        self.ws = WebSocket(url: NSURL(string: self.urlWebSocket! + "&sid=\(self.sid)")!)
+        self.ws?.queue = self.handleQueue
+        self.ws?.delegate = self
+        
+        if connect {
+            self.ws?.connect()
+        }
+    }
+    
     private func doFastUpgrade() {
         self.sendWebSocketMessage("", withType: PacketType.UPGRADE)
         self._websocket = true
@@ -171,15 +184,15 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         }
         
         self.waitingForPoll = true
-        self.doRequest(self.parsePollingMessage)
+        let req = NSURLRequest(URL: NSURL(string: self.urlPolling! + "&sid=\(self.sid)&b64=1")!)
+        
+        self.doRequest(req)
     }
     
-    private func doRequest(callback:(String) -> Void) {
+    private func doRequest(req:NSURLRequest) {
         if !self.polling {
             return
         }
-        
-        let req = NSURLRequest(URL: NSURL(string: self.urlPolling! + "&sid=\(self.sid)")!)
         
         self.session.dataTaskWithRequest(req) {[weak self] data, res, err in
             if self == nil {
@@ -195,7 +208,10 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             // println(data)
             
             if let str = NSString(data: data, encoding: NSUTF8StringEncoding) as? String {
-                dispatch_async(self!.parseQueue) {callback(str)}
+                dispatch_async(self!.parseQueue) {
+                    self?.parsePollingMessage(str)
+                    return
+                }
             }
             
             self?.waitingForPoll = false
@@ -305,6 +321,14 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         let (urlPolling, urlWebSocket) = self.createURLs(opts)
         self.urlPolling = urlPolling
         self.urlWebSocket = urlWebSocket
+        
+        if self.forceWebsockets {
+            self._polling = false
+            self._websocket = true
+            self.createWebsocket(andConnect: true)
+            return
+        }
+        
         let reqPolling = NSMutableURLRequest(URL: NSURL(string: urlPolling + "&b64=1")!)
         
         if self.cookies != nil {
@@ -312,58 +336,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             reqPolling.allHTTPHeaderFields = headers
         }
         
-        
-        self.session.dataTaskWithRequest(reqPolling) {[weak self] data, res, err in
-            var err2:NSError?
-            if self == nil {
-                return
-            } else if err != nil || data == nil {
-                self?.handlePollingFailed(err.localizedDescription)
-                return
-            }
-            
-            if let dataString = NSString(data: data, encoding: NSUTF8StringEncoding) as? String {
-                let parsed:[String]? = dataString["(\\d*):(\\d)(\\{.*\\})?"].groups()
-                
-                if parsed == nil || parsed?.count != 4 {
-                    return
-                }
-                
-                let length = parsed![1]
-                let type = parsed![2]
-                let jsonData = parsed![3].dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)
-                
-                if type != "0" {
-                    NSLog("Error handshaking")
-                    return
-                }
-                
-                if let json = NSJSONSerialization.JSONObjectWithData(jsonData!,
-                    options: NSJSONReadingOptions.AllowFragments, error: &err2) as? NSDictionary {
-                        if let sid = json["sid"] as? String {
-                            // println(json)
-                            self?.sid = sid
-                            self?._connected = true
-                            
-                            if !self!.forcePolling {
-                                self?.ws = WebSocket(url: NSURL(string: urlWebSocket + "&sid=\(self!.sid)")!)
-                                self?.ws?.queue = self?.handleQueue
-                                self?.ws?.delegate = self
-                                self?.ws?.connect()
-                            }
-                        } else {
-                            NSLog("Error handshaking")
-                            return
-                        }
-                        
-                        if let pingInterval = json["pingInterval"] as? Int {
-                            self?.pingInterval = pingInterval / 1000
-                        }
-                }
-                
-                self?.doPoll()
-                self?.startPingTimer()
-            }}.resume()
+        self.doRequest(reqPolling)
     }
     
     // Translatation of engine.io-parser#decodePayload
@@ -465,6 +438,40 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                     self.upgradeTransport()
                     return
                 }
+            } else if type == PacketType.OPEN.rawValue {
+                var err:NSError?
+                
+                message.removeAtIndex(message.startIndex)
+                let mesData = message.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!
+                
+                if let json = NSJSONSerialization.JSONObjectWithData(mesData,
+                    options: NSJSONReadingOptions.AllowFragments, error: &err) as? NSDictionary {
+                        if let sid = json["sid"] as? String {
+                            // println(json)
+                            self.sid = sid
+                            self._connected = true
+                            if !self.forcePolling && !self.forceWebsockets {
+                                self.createWebsocket(andConnect: true)
+                            }
+                        } else {
+                            NSLog("Error handshaking")
+                            return
+                        }
+                        
+                        if let pingInterval = json["pingInterval"] as? Int {
+                            self.pingInterval = pingInterval / 1000
+                        }
+                } else {
+                    fatalError("Error parsing engine connect")
+                }
+                
+                if !self.forceWebsockets {
+                    self.doPoll()
+                }
+                
+                self.startPingTimer()
+                
+                return
             } else if type == PacketType.CLOSE.rawValue {
                 if self.polling {
                     self.client.didForceClose("Disconnect")
@@ -587,8 +594,15 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     
     public func websocketDidConnect(socket:WebSocket) {
         self.websocketConnected = true
-        self.probing = true
-        self.probeWebSocket()
+        
+        if !self.forceWebsockets {
+            self.probing = true
+            self.probeWebSocket()
+        } else {
+            self._connected = true
+            self.probing = false
+            self._polling = false
+        }
     }
     
     public func websocketDidDisconnect(socket:WebSocket, error:NSError?) {
@@ -599,8 +613,10 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             self.pingTimer?.invalidate()
             self._connected = false
             self._websocket = false
-            self._polling = true
-            self.client.webSocketDidCloseWithCode(1, reason: "Socket Disconnect", wasClean: true)
+            
+            let reason = error?.localizedDescription
+            self.client.webSocketDidCloseWithCode(1,
+                reason: reason == nil ? "Socket Disconnected" : reason!)
         } else {
             self.flushProbeWait()
         }
