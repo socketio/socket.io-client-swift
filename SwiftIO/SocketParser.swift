@@ -197,8 +197,8 @@ class SocketParser {
                 return
             }
             
-            socket.handleEvent(p.getEvent(), data: p.data, isInternalMessage: false,
-                wantsAck: p.id)
+            socket.handleEvent(p.getEvent(), data: p.data,
+                isInternalMessage: false, wantsAck: p.id)
         } else if p.type == SocketPacketType.ACK {
             if checkNSP(p.nsp) {
                 return
