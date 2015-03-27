@@ -103,7 +103,11 @@ public class SocketIOClient: NSObject, SocketEngineClient {
                 self.reconnectWait = abs(reconnectWait)
             }
             
-            if let nsp = opts!["nsp"] as? String {
+            if var nsp = opts!["nsp"] as? String {
+                if nsp.hasPrefix("/") {
+                    nsp.removeAtIndex(nsp.startIndex)
+                }
+                
                 self.nsp = nsp
             }
             
