@@ -202,7 +202,7 @@ class SocketPacket {
             }
         }
 
-        self.data = newArr
+        self.data = newArr as [AnyObject]
     }
 
     private func _fillInPlaceholders(data:AnyObject) -> AnyObject {
