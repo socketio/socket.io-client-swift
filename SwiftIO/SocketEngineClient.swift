@@ -36,6 +36,6 @@ import Foundation
     func parseSocketMessage(msg:String)
     func parseBinaryData(data:NSData)
     func pollingDidFail(err:String)
-    func webSocketDidCloseWithCode(code:Int, reason:String, wasClean:Bool)
+    func webSocketDidCloseWithCode(code:Int, reason:String)
     func webSocketDidFailWithError(error:NSError)
 }

@@ -34,6 +34,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     private var _connecting = false
     private var currentReconnectAttempt = 0
     private var forcePolling = false
+    private var forceWebsockets = false
     private var handlers = ContiguousArray<SocketEventHandler>()
     private var paramConnect = false
     private var _secure = false
@@ -102,12 +103,20 @@ public class SocketIOClient: NSObject, SocketEngineClient {
                 self.reconnectWait = abs(reconnectWait)
             }
             
-            if let nsp = opts!["nsp"] as? String {
+            if var nsp = opts!["nsp"] as? String {
+                if nsp != "/" && nsp.hasPrefix("/") {
+                    nsp.removeAtIndex(nsp.startIndex)
+                }
+                
                 self.nsp = nsp
             }
             
             if let polling = opts!["forcePolling"] as? Bool {
                 self.forcePolling = polling
+            }
+            
+            if let ws = opts!["forceWebsockets"] as? Bool {
+                self.forceWebsockets = ws
             }
             
             if let cookies = opts!["cookies"] as? [NSHTTPCookie] {
@@ -127,6 +136,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     private func addEngine() {
         self.engine = SocketEngine(client: self,
             forcePolling: self.forcePolling,
+            forceWebsockets: self.forceWebsockets,
             withCookies: self.cookies)
     }
     
@@ -152,6 +162,10 @@ public class SocketIOClient: NSObject, SocketEngineClient {
             self._closed = false
         }
         
+        if self.connected {
+            return
+        }
+        
         self.addEngine()
         self.engine?.open()
     }
@@ -163,6 +177,10 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         if self.closed {
             println("Warning! This socket was previously closed. This might be dangerous!")
             self._closed = false
+        }
+        
+        if self.connected {
+            return
         }
         
         self.params = params
@@ -334,7 +352,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     Causes an event to be handled. Only use if you know what you're doing.
     */
     public func handleEvent(event:String, data:[AnyObject]?, isInternalMessage:Bool = false,
-        wantsAck ack:Int? = nil, withAckType ackType:Int = 3) {
+        wantsAck ack:Int? = nil) {
             // println("Should do event: \(event) with data: \(data)")
             if !self.connected && !isInternalMessage {
                 return
@@ -350,8 +368,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
             for handler in self.handlers {
                 if handler.event == event {
                     if ack != nil {
-                        handler.executeCallback(data, withAck: ack!,
-                            withAckType: ackType, withSocket: self)
+                        handler.executeCallback(data, withAck: ack!, withSocket: self)
                     } else {
                         handler.executeCallback(data)
                     }
@@ -452,12 +469,12 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     }
     
     // Called when the socket is closed
-    public func webSocketDidCloseWithCode(code:Int, reason:String, wasClean:Bool) {
+    public func webSocketDidCloseWithCode(code:Int, reason:String) {
         self._connected = false
         self._connecting = false
         if self.closed || !self.reconnects {
             self.didForceClose("WebSocket closed")
-        } else {
+        } else if !self.reconnecting {
             self.handleEvent("reconnect", data: [reason], isInternalMessage: true)
             self.tryReconnect()
         }

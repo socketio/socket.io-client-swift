@@ -134,12 +134,16 @@ class SocketPacket {
             var msg:String
 
             if self.binary.count == 0 {
+                self.type = SocketPacketType.ACK
+                
                 if nsp == "/" {
                     msg = "3\(self.id!)["
                 } else {
                     msg = "3/\(self.nsp),\(self.id!)["
                 }
             } else {
+                self.type = SocketPacketType.BINARY_ACK
+
                 if nsp == "/" {
                     msg = "6\(self.binary.count)-\(self.id!)["
                 } else {
@@ -194,8 +198,6 @@ class SocketPacket {
             if let str = self.data?[i] as? String {
                 if let num = str["~~(\\d)"].groups() {
                     newArr[i] = self.binary[num[1].toInt()!]
-                } else {
-                    newArr[i] = str
                 }
             } else if self.data?[i] is NSDictionary || self.data?[i] is NSArray {
                 newArr[i] = self._fillInPlaceholders(self.data![i])

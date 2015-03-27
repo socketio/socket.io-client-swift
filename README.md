@@ -72,7 +72,8 @@ let socket = SocketIOClient(socketURL: "https://localhost:8080", opts: [
     "reconnectAttempts": 5, // Default is -1 (infinite tries)
     "reconnectWait": 5, // Default is 10
     "nsp": "swift", // connects to the specified namespace. Default is /
-    "forcePolling": true, // if true, the socket will only use XHR polling, Default is false (polling/WebSockets)
+    "forcePolling": true, // if true the client will only use XHR polling, Default is false (polling/WebSockets)
+    "forceWebsockets": false, // if true the client will only use WebSockets. Trumps forcePolling. Default is false. (polling/WebSockets)
     "cookies": nil // An array of NSHTTPCookies. Passed during handshake. Default is nil
 ])
 

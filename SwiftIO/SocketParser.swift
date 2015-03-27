@@ -24,7 +24,7 @@ import Foundation
 
 class SocketParser {
     private static let shredder = SocketParser.PacketShredder()
-    
+
     // Translation of socket.io-parser#deconstructPacket
     private class PacketShredder {
         var buf = ContiguousArray<NSData>()
@@ -197,7 +197,8 @@ class SocketParser {
                 return
             }
 
-            socket.handleEvent(p.getEvent(), data: p.data, isInternalMessage: false, wantsAck: p.id, withAckType: 3)
+            socket.handleEvent(p.getEvent(), data: p.data,
+                isInternalMessage: false, wantsAck: p.id)
         } else if p.type == SocketPacketType.ACK {
             if checkNSP(p.nsp) {
                 return
@@ -250,7 +251,7 @@ class SocketParser {
 
         if !packet.justAck {
             socket.handleEvent(packet.getEvent(), data: packet.data,
-                wantsAck: packet.id, withAckType: 6)
+                wantsAck: packet.id)
         } else {
             socket.handleAck(packet.id!, data: packet.data)
         }
