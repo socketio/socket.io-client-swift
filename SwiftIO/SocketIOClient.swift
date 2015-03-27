@@ -104,7 +104,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
             }
             
             if var nsp = opts!["nsp"] as? String {
-                if nsp.hasPrefix("/") {
+                if nsp != "/" && nsp.hasPrefix("/") {
                     nsp.removeAtIndex(nsp.startIndex)
                 }
                 
