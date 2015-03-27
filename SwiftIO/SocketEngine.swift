@@ -385,7 +385,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                 if msg.length != 0 {
                     // Be sure to capture the value of the msg
                     dispatch_async(self.handleQueue) {[weak self, msg] in
-                        self?.parseEngineMessage(msg)
+                        self?.parseEngineMessage(msg, fromPolling: true)
                         return
                     }
                 }
@@ -403,9 +403,9 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         }
     }
     
-    private func parseEngineMessage(var message:String) {
+    private func parseEngineMessage(var message:String, fromPolling:Bool) {
         // NSLog("Engine got message: \(message)")
-        if self.polling {
+        if fromPolling {
             fixDoubleUTF8(&message)
         }
         
@@ -623,7 +623,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     }
     
     public func websocketDidReceiveMessage(socket:WebSocket, text:String) {
-        self.parseEngineMessage(text)
+        self.parseEngineMessage(text, fromPolling: false)
     }
     
     public func websocketDidReceiveData(socket:WebSocket, data:NSData) {
