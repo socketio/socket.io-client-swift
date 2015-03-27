@@ -47,9 +47,9 @@ Methods
 -------
 1. `socket.on(name:String, callback:((data:NSArray?, ack:AckEmitter?) -> Void))` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
 2. `socket.onAny(callback:((event:String, items:AnyObject?)) -> Void)` - Adds a handler for all events. It will be called on any received event.
-3. `socket.emit(event:String, _ args:AnyObject...)` - Sends a message. Can send multiple args.
+3. `socket.emit(event:String, _ items:AnyObject...)` - Sends a message. Can send multiple items.
 4. `socket.emitObjc(event:String, withItems items:[AnyObject])` - `emit` for Objective-C
-5. `socket.emitWithAck(event:String, _ args:AnyObject...) -> SocketAckHandler` - Sends a message that requests an acknowledgement from the server. Returns a SocketAckHandler which you can use to add an onAck handler. See example.
+5. `socket.emitWithAck(event:String, _ items:AnyObject...) -> SocketAckHandler` - Sends a message that requests an acknowledgement from the server. Returns a SocketAckHandler which you can use to add an onAck handler. See example.
 6. `socket.emitWithAckObjc(event:String, withItems items:[AnyObject]) -> SocketAckHandler` - `emitWithAck` for Objective-C.
 7. `socket.connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
 8. `socket.connectWithParams(params:[String: AnyObject])` - Establishes a connection to the server passing the specified params. A "connect" event is fired upon successful connection.
