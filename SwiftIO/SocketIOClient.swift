@@ -28,7 +28,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     let reconnectAttempts:Int!
     private lazy var params = [String: AnyObject]()
     private var ackHandlers = ContiguousArray<SocketAckHandler>()
-    private var anyHandler:((AnyHandler) -> Void)?
+    private var anyHandler:((SocketAnyEvent) -> Void)?
     private var _closed = false
     private var _connected = false
     private var _connecting = false
@@ -360,7 +360,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
             
             if self.anyHandler != nil {
                 dispatch_async(dispatch_get_main_queue()) {[weak self] in
-                    self?.anyHandler?((event, data))
+                    self?.anyHandler?(SocketAnyEvent(event: event, items: data))
                     return
                 }
             }
@@ -400,7 +400,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     /**
     Adds a handler that will be called on every event.
     */
-    public func onAny(handler:(AnyHandler) -> Void) {
+    public func onAny(handler:(SocketAnyEvent) -> Void) {
         self.anyHandler = handler
     }
     

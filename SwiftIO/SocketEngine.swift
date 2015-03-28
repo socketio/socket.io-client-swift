@@ -184,16 +184,19 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         }
 
         self.waitingForPoll = true
-        let req = NSURLRequest(URL: NSURL(string: self.urlPolling! + "&sid=\(self.sid)&b64=1")!)
+        let req = NSMutableURLRequest(URL: NSURL(string: self.urlPolling! + "&sid=\(self.sid)&b64=1")!)
 
         self.doRequest(req)
     }
 
-    private func doRequest(req:NSURLRequest) {
+    private func doRequest(req:NSMutableURLRequest) {
         if !self.polling {
             return
         }
 
+        req.cachePolicy = NSURLRequestCachePolicy.ReloadIgnoringLocalAndRemoteCacheData
+
+        // NSLog("Doing request: \(req)")
         self.session.dataTaskWithRequest(req) {[weak self] data, res, err in
             if self == nil {
                 return
@@ -205,8 +208,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                 return
             }
 
-            // println(data)
-
+            // NSLog("Got response: \(res)")
 
             if let str = NSString(data: data, encoding: NSUTF8StringEncoding) as? String {
                 dispatch_async(self!.parseQueue) {
@@ -220,7 +222,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             if self!.fastUpgrade {
                 self?.doFastUpgrade()
                 return
-            } else if !self!.closed {
+            } else if !self!.closed && !self!.websocket {
                 self?.doPoll()
             }
             }.resume()
@@ -371,6 +373,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                 length += chr
             } else {
                 if length == "" || testLength(length, &n) {
+                    NSLog("parsing error: \(str)")
                     self.handlePollingFailed("Error parsing XHR message")
                     return
                 }
@@ -379,7 +382,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
 
                 if let lengthInt = length.toInt() {
                     if lengthInt != msg.length {
-                        println("parsing error")
+                        NSLog("parsing error: \(str)")
                         return
                     }
                 }
