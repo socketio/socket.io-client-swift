@@ -33,7 +33,7 @@ extension String {
 private typealias Probe = (msg:String, type:PacketType, data:ContiguousArray<NSData>?)
 private typealias ProbeWaitQueue = [Probe]
 
-public enum PacketType: String {
+public enum PacketType:String {
     case OPEN = "0"
     case CLOSE = "1"
     case PING = "2"
@@ -442,6 +442,8 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                     self.upgradeTransport()
                     return
                 }
+                
+                return
             } else if type == PacketType.OPEN.rawValue {
                 var err:NSError?
                 
@@ -593,7 +595,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             }
         }
     }
-    
+
     // Delagate methods
     
     public func websocketDidConnect(socket:WebSocket) {
