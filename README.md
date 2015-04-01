@@ -77,6 +77,7 @@ import Socket_IO_Client_Swift
 Constructors
 -----------
 `init(socketURL: String, opts:NSDictionary? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values)
+
 `convenience init(socketURL: String, options:NSDictionary?)` - Same as above, but meant for Objective-C. See Objective-C Example.
 
 Options
