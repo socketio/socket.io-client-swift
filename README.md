@@ -1,5 +1,5 @@
 #Socket.IO-Client-Swift
-Socket.IO-client for Swift.
+Socket.IO-client for iOS/OS X.
 
 ##Example
 ```swift
