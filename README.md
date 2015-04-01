@@ -1,9 +1,53 @@
 Socket.IO-Client-Swift
 ======================
 
-Socket.IO-client for Swift. Supports ws/wss/polling connections and binary. For socket.io 1.0+ and Swift 1.1.
+Socket.IO-client for Swift.
 
-For Swift 1.2 use the 1.2 branch.
+Example
+=======
+```swift
+let socket = SocketIOClient(socketURL: "localhost:8080")
+
+socket.on("connect") {data, ack in
+    println("socket connected")
+}
+
+socket.on("currentAmount") {data, ack in
+    if let cur = data?[0] as? Double {
+        socket.emitWithAck("canUpdate", cur).onAck(0) {data in
+            socket.emit("update", ["amount": cur + 2.50])
+        }
+
+        ack?("Got your currentAmount", "dude")
+    }
+}
+
+// Connect
+socket.connect()
+```
+
+Objective-C Example
+===================
+```objective-c
+SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8080" options:nil];
+
+[socket on: @"connect" callback: ^(NSArray* data, void (^ack)(NSArray*)) {
+    NSLog(@"connected");
+    [socket emitObjc:@"echo" withItems:@[@"echo test"]];
+    [[socket emitWithAckObjc:@"ackack" withItems:@[@"test"]] onAck:0 withCallback:^(NSArray* data) {
+        NSLog(@"Got data");
+    }];
+}];
+
+```
+
+Features
+========
+- Supports socket.io 1.0+
+- Supports binary
+- Supports Polling and WebSockets
+- Supports TLS/SSL
+- Can be used from Objective-C
 
 Installation
 ============
@@ -62,83 +106,6 @@ Events
 3. `error` - Emitted if the websocket encounters an error.
 4. `reconnect` - Emitted when the connection is starting to reconnect.
 5. `reconnectAttempt` - Emitted when attempting to reconnect.
-
-Example
-=======
-```swift
-// opts can be omitted, will use default values
-let socket = SocketIOClient(socketURL: "https://localhost:8080", opts: [
-    "reconnects": true, // Default is true
-    "reconnectAttempts": 5, // Default is -1 (infinite tries)
-    "reconnectWait": 5, // Default is 10
-    "nsp": "swift", // connects to the specified namespace. Default is /
-    "forcePolling": true, // if true the client will only use XHR polling, Default is false (polling/WebSockets)
-    "forceWebsockets": false, // if true the client will only use WebSockets. Trumps forcePolling. Default is false. (polling/WebSockets)
-    "cookies": nil // An array of NSHTTPCookies. Passed during handshake. Default is nil
-])
-
-// Called on every event
-socket.onAny {println("got event: \($0.event) with items \($0.items)")}
-
-// Socket Events
-socket.on("connect") {data, ack in
-    println("socket connected")
-
-    // Sending messages
-    socket.emit("testEcho")
-
-    socket.emit("testObject", [
-        "data": true
-        ])
-
-    // Sending multiple items per message
-    socket.emit("multTest", [1], 1.4, 1, "true",
-        true, ["test": "foo"], "bar")
-}
-
-// Requesting acks, and responding to acks
-socket.on("ackEvent") {data, ack in
-    if let str = data?[0] as? String {
-        println("Got ackEvent")
-    }
-
-    // data is an array
-    if let int = data?[1] as? Int {
-        println("Got int")
-    }
-
-    // You can specify a custom timeout interval. 0 means no timeout.
-    socket.emitWithAck("ackTest", "test").onAck(0) {data in
-        println(data?[0])
-    }
-
-    ack?("Got your event", "dude")
-}
-
-socket.on("jsonTest") {data, ack in
-    if let json = data?[0] as? NSDictionary {
-       println(json["test"]!) // foo bar
-    }
-}
-
-// Connecting
-socket.connect()
-```
-
-Objective-C Example
-===================
-```objective-c
-SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8080" options:nil];
-
-[socket on: @"connect" callback: ^(NSArray* data, void (^ack)(NSArray*)) {
-    NSLog(@"connected");
-    [socket emitObjc:@"echo" withItems:@[@"echo test"]];
-    [[socket emitWithAckObjc:@"ackack" withItems:@[@"test"]] onAck:0 withCallback:^(NSArray* data) {
-        NSLog(@"Got data");
-    }];
-}];
-
-```
 
 Detailed Example
 ================
