@@ -514,11 +514,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     }
     
     func sendPing() {
-        if self.websocket {
-            self.sendWebSocketMessage("", withType: PacketType.PING)
-        } else {
-            self.sendPollMessage("", withType: PacketType.PING)
-        }
+        self.write("", withType: PacketType.PING, withData: nil)
     }
     
     private func sendPollMessage(var msg:String, withType type:PacketType,
