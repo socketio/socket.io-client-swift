@@ -1,10 +1,7 @@
-Socket.IO-Client-Swift
-======================
-
+#Socket.IO-Client-Swift
 Socket.IO-client for Swift.
 
-Example
-=======
+##Example
 ```swift
 let socket = SocketIOClient(socketURL: "localhost:8080")
 
@@ -26,8 +23,7 @@ socket.on("currentAmount") {data, ack in
 socket.connect()
 ```
 
-Objective-C Example
-===================
+##Objective-C Example
 ```objective-c
 SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8080" options:nil];
 
@@ -41,17 +37,14 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8
 
 ```
 
-Features
-========
+##Features
 - Supports socket.io 1.0+
 - Supports binary
 - Supports Polling and WebSockets
 - Supports TLS/SSL
 - Can be used from Objective-C
 
-Installation
-============
-
+##Installation
 Manually (iOS 7+)
 -----------------
 1. Copy the SwiftIO folder into your Xcode project!
@@ -80,8 +73,7 @@ Import in your swift file:
 import Socket_IO_Client_Swift
 ```
 
-API
-===
+##API
 Constructors
 -----------
 `init(socketURL: String, opts:NSDictionary? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values. See example)
@@ -107,10 +99,8 @@ Events
 4. `reconnect` - Emitted when the connection is starting to reconnect.
 5. `reconnectAttempt` - Emitted when attempting to reconnect.
 
-Detailed Example
-================
+##Detailed Example
 A more detailed example can be found [here](https://github.com/nuclearace/socket.io-client-swift-example)
 
-License
-=======
+##License
 MIT
