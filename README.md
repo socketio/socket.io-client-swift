@@ -76,7 +76,17 @@ import Socket_IO_Client_Swift
 ##API
 Constructors
 -----------
-`init(socketURL: String, opts:NSDictionary? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values. See example)
+`init(socketURL: String, opts:NSDictionary? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values)
+
+Options
+-------
+- `reconnects: Bool` Default is `true`
+- `reconnectAttempts: Int` Default is `-1` (infinite tries)
+- `reconnectWait: Int` Default is `10`
+- `forcePolling: Bool` Default is `false`. `true` forces the client to use xhr-polling.
+- `forceWebsockets: Bool` Default is `false`. `true` forces the client to use WebSockets.
+- `nsp: String` Default is `"/"`
+- `cookies: [NSHTTPCookie]?` An array of NSHTTPCookies. Passed during the handshake. Default is nil.
 
 `convenience init(socketURL: String, options:NSDictionary?)` - Same as above, but meant for Objective-C. See Objective-C Example.
 Methods
