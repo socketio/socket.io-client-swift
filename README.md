@@ -11,7 +11,7 @@ socket.on("connect") {data, ack in
 
 socket.on("currentAmount") {data, ack in
     if let cur = data?[0] as? Double {
-        socket.emitWithAck("canUpdate", cur).onAck(0) {data in
+        socket.emitWithAck("canUpdate", cur)(timeout: 0) {data in
             socket.emit("update", ["amount": cur + 2.50])
         }
 
@@ -30,9 +30,9 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8
 [socket on: @"connect" callback: ^(NSArray* data, void (^ack)(NSArray*)) {
     NSLog(@"connected");
     [socket emitObjc:@"echo" withItems:@[@"echo test"]];
-    [[socket emitWithAckObjc:@"ackack" withItems:@[@"test"]] onAck:0 withCallback:^(NSArray* data) {
-        NSLog(@"Got data");
-    }];
+    [socket emitWithAckObjc:@"ackack" withItems:@[@1]](10, ^(NSArray* data) {
+        NSLog(@"Got ack");
+    });
 }];
 
 ```

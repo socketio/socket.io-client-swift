@@ -25,9 +25,7 @@
 import Foundation
 
 public class SocketIOClient: NSObject, SocketEngineClient {
-    let reconnectAttempts:Int!
     private lazy var params = [String: AnyObject]()
-    private var ackHandlers = ContiguousArray<SocketAckHandler>()
     private var anyHandler:((SocketAnyEvent) -> Void)?
     private var _closed = false
     private var _connected = false
@@ -42,14 +40,15 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     private var _reconnecting = false
     private var reconnectTimer:NSTimer?
     
+    let reconnectAttempts:Int!
+    var ackHandlers = SocketAckMap()
     var currentAck = -1
     var waitingData = ContiguousArray<SocketPacket>()
     
     public let socketURL:String
-    public let handleQueue = dispatch_queue_create("handleQueue".cStringUsingEncoding(NSUTF8StringEncoding),
-        DISPATCH_QUEUE_SERIAL)
-    public let emitQueue = dispatch_queue_create("emitQueue".cStringUsingEncoding(NSUTF8StringEncoding),
-        DISPATCH_QUEUE_SERIAL)
+    public let handleAckQueue = dispatch_queue_create("handleAckQueue", DISPATCH_QUEUE_SERIAL)
+    public let handleQueue = dispatch_queue_create("handleQueue", DISPATCH_QUEUE_SERIAL)
+    public let emitQueue = dispatch_queue_create("emitQueue", DISPATCH_QUEUE_SERIAL)
     public var closed:Bool {
         return self._closed
     }
@@ -89,6 +88,26 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         
         // Set options
         if opts != nil {
+            if let cookies = opts!["cookies"] as? [NSHTTPCookie] {
+                self.cookies = cookies
+            }
+            
+            if let polling = opts!["forcePolling"] as? Bool {
+                self.forcePolling = polling
+            }
+            
+            if let ws = opts!["forceWebsockets"] as? Bool {
+                self.forceWebsockets = ws
+            }
+            
+            if var nsp = opts!["nsp"] as? String {
+                if nsp != "/" && nsp.hasPrefix("/") {
+                    nsp.removeAtIndex(nsp.startIndex)
+                }
+                
+                self.nsp = nsp
+            }
+            
             if let reconnects = opts!["reconnects"] as? Bool {
                 self.reconnects = reconnects
             }
@@ -101,26 +120,6 @@ public class SocketIOClient: NSObject, SocketEngineClient {
             
             if let reconnectWait = opts!["reconnectWait"] as? Int {
                 self.reconnectWait = abs(reconnectWait)
-            }
-            
-            if var nsp = opts!["nsp"] as? String {
-                if nsp != "/" && nsp.hasPrefix("/") {
-                    nsp.removeAtIndex(nsp.startIndex)
-                }
-                
-                self.nsp = nsp
-            }
-            
-            if let polling = opts!["forcePolling"] as? Bool {
-                self.forcePolling = polling
-            }
-            
-            if let ws = opts!["forceWebsockets"] as? Bool {
-                self.forceWebsockets = ws
-            }
-            
-            if let cookies = opts!["cookies"] as? [NSHTTPCookie] {
-                self.cookies = cookies
             }
         } else {
             self.reconnectAttempts = -1
@@ -190,6 +189,29 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         self.engine?.open(opts: params)
     }
     
+    private func createOnAck(event:String, items:[AnyObject]) -> OnAckCallback {
+        return {[weak self, ack = ++self.currentAck] timeout, callback in
+            if self == nil {
+                return
+            }
+            
+            self?.ackHandlers.addAck(ack, callback)
+            
+            dispatch_async(self!.emitQueue) {
+                self?._emit(event, items, ack: ack)
+                return
+            }
+            
+            if timeout != 0 {
+                let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeout * NSEC_PER_SEC))
+                dispatch_after(time, dispatch_get_main_queue()) {
+                    self?.ackHandlers.timeoutAck(ack)
+                    return
+                }
+            }
+        }
+    }
+    
     func didConnect() {
         self._closed = false
         self._connected = true
@@ -217,6 +239,13 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         self._connecting = false
         self._reconnecting = false
         self.handleEvent("disconnect", data: [reason], isInternalMessage: true)
+    }
+    
+    /**
+    Same as close
+    */
+    public func disconnect(#fast:Bool) {
+        self.close(fast: fast)
     }
     
     /**
@@ -251,43 +280,23 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     Sends a message to the server, requesting an ack. Use the onAck method of SocketAckHandler to add
     an ack.
     */
-    public func emitWithAck(event:String, _ items:AnyObject...) -> SocketAckHandler {
+    public func emitWithAck(event:String, _ items:AnyObject...) -> OnAckCallback {
         if !self.connected {
-            return SocketAckHandler(event: "fail", socket: self)
+            return createOnAck(event, items: items)
         }
         
-        self.currentAck++
-        let ackHandler = SocketAckHandler(event: event,
-            ackNum: self.currentAck, socket: self)
-        self.ackHandlers.append(ackHandler)
-        
-        dispatch_async(self.emitQueue) {[weak self, ack = self.currentAck] in
-            self?._emit(event, items, ack: ack)
-            return
-        }
-        
-        return ackHandler
+        return self.createOnAck(event, items: items)
     }
     
     /**
     Same as emitWithAck, but for Objective-C
     */
-    public func emitWithAckObjc(event:String, withItems items:[AnyObject]) -> SocketAckHandler {
+    public func emitWithAckObjc(event:String, withItems items:[AnyObject]) -> OnAckCallback {
         if !self.connected {
-            return SocketAckHandler(event: "fail", socket: self)
+            return self.createOnAck(event, items: items)
         }
         
-        self.currentAck++
-        let ackHandler = SocketAckHandler(event: event,
-            ackNum: self.currentAck, socket: self)
-        self.ackHandlers.append(ackHandler)
-        
-        dispatch_async(self.emitQueue) {[weak self, ack = self.currentAck] in
-            self?._emit(event, items, ack: ack)
-            return
-        }
-        
-        return ackHandler
+        return self.createOnAck(event, items: items)
     }
     
     private func _emit(event:String, _ args:[AnyObject], ack:Int? = nil) {
@@ -331,21 +340,15 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     
     // Called when the socket gets an ack for something it sent
     func handleAck(ack:Int, data:AnyObject?) {
-        self.ackHandlers = self.ackHandlers.filter {handler in
-            if handler.ackNum != ack {
-                return true
-            } else {
-                if data is NSArray {
-                    handler.executeAck(data as? NSArray)
-                } else if data != nil {
-                    handler.executeAck([data!])
-                } else {
-                    handler.executeAck(nil)
-                }
-                
-                return false
-            }
+        var ackData:[AnyObject]?
+        
+        if data is NSArray {
+            ackData = data as? NSArray
+        } else if data != nil {
+            ackData = [data!]
         }
+        
+        self.ackHandlers.executeAck(ack, items: ackData)
     }
     
     /**
@@ -426,10 +429,6 @@ public class SocketIOClient: NSObject, SocketEngineClient {
             self.handleEvent("reconnect", data: [err], isInternalMessage: true)
             self.tryReconnect()
         }
-    }
-    
-    func removeAck(ack:SocketAckHandler) {
-        self.ackHandlers = self.ackHandlers.filter {$0 === ack ? false : true}
     }
     
     // We lost connection and should attempt to reestablish

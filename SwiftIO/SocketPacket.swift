@@ -24,7 +24,7 @@
 
 import Foundation
 
-enum SocketPacketType: Int {
+enum SocketPacketType:Int {
     case CONNECT = 0
     case DISCONNECT = 1
     case EVENT = 2
