@@ -30,7 +30,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8
 [socket on: @"connect" callback: ^(NSArray* data, void (^ack)(NSArray*)) {
     NSLog(@"connected");
     [socket emitObjc:@"echo" withItems:@[@"echo test"]];
-    [socket emitWithAckObjc:@"connect" withItems:@[@1]](10, ^(NSArray* data) {
+    [socket emitWithAckObjc:@"ackack" withItems:@[@1]](10, ^(NSArray* data) {
         NSLog(@"Got ack");
     });
 }];
