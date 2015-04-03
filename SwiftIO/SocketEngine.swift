@@ -164,18 +164,21 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         self.ws = WebSocket(url: NSURL(string: self.urlWebSocket! + "&sid=\(self.sid)")!)
         self.ws?.queue = self.handleQueue
         self.ws?.delegate = self
-                
+        
         if connect {
             self.ws?.connect()
         }
     }
     
     private func doFastUpgrade() {
-        self.sendWebSocketMessage("", withType: PacketType.UPGRADE)
-        self._websocket = true
-        self._polling = false
-        self.fastUpgrade = false
-        self.flushProbeWait()
+        dispatch_async(self.emitQueue) {[weak self] in
+            self?.sendWebSocketMessage("", withType: PacketType.UPGRADE)
+            self?._websocket = true
+            self?._polling = false
+            self?.fastUpgrade = false
+            self?.probing = false
+            self?.flushProbeWait()
+        }
     }
     
     private func doPoll() {
@@ -229,7 +232,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     }
     
     private func flushProbeWait() {
-        // println("flushing probe wait")
+        // NSLog("flushing probe wait")
         dispatch_async(self.emitQueue) {[weak self] in
             if self == nil {
                 return
@@ -240,6 +243,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             }
             
             self?.probeWait.removeAll(keepCapacity: false)
+            // NSLog("waiting for post after flush probe: \(self!.postWait.count)")
         }
     }
     
@@ -269,11 +273,14 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         let postData = postStr.dataUsingEncoding(NSUTF8StringEncoding,
             allowLossyConversion: false)!
         
-        // NSLog("posting: \(postStr)")
         req.HTTPBody = postData
         req.setValue(String(postData.length), forHTTPHeaderField: "Content-Length")
         
         self.waitingForPost = true
+        
+        // NSLog("posting: \(postStr)")
+        // NSLog("Posting with WS status of: \(self.websocket)")
+        
         self.session.dataTaskWithRequest(req) {[weak self] data, res, err in
             if self == nil {
                 return
@@ -284,9 +291,13 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             
             self?.waitingForPost = false
             dispatch_async(self!.emitQueue) {
-                self?.flushWaitingForPost()
-                self?.doPoll()
-                return
+                if self!.fastUpgrade {
+                    self?.doFastUpgrade()
+                    return
+                } else {
+                    self?.flushWaitingForPost()
+                    self?.doPoll()
+                }
             }}.resume()
     }
     
@@ -517,6 +528,8 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         self.write("", withType: PacketType.PING, withData: nil)
     }
     
+    /// Send polling message.
+    /// Only call on emitQueue
     private func sendPollMessage(var msg:String, withType type:PacketType,
         datas:ContiguousArray<NSData>? = nil) {
             // println("Sending poll: \(msg) as type: \(type.rawValue)")
@@ -538,6 +551,8 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             }
     }
     
+    /// Send message on WebSockets
+    /// Only call on emitQueue
     private func sendWebSocketMessage(str:String, withType type:PacketType,
         datas:ContiguousArray<NSData>? = nil) {
             // println("Sending ws: \(str) as type: \(type.rawValue)")
@@ -569,9 +584,9 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     
     private func upgradeTransport() {
         if self.websocketConnected {
+            // NSLog("Doing fast upgrade")
             // Do a fast upgrade
             self.fastUpgrade = true
-            self.probing = false
             self.sendPollMessage("", withType: PacketType.NOOP)
         }
     }
@@ -591,7 +606,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             }
         }
     }
-
+    
     // Delagate methods
     
     public func websocketDidConnect(socket:WebSocket) {

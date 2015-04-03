@@ -1,9 +1,9 @@
 //
-//  SocketAckHandler.swift
-//  Socket.IO-Swift
+//  SocketAckMap.swift
+//  SocketIO-Swift
 //
-//  Created by Erik Little on 2/14/15.
-
+//  Created by Erik Little on 4/3/15.
+//
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
 //  in the Software without restriction, including without limitation the rights
@@ -25,45 +25,35 @@
 import Foundation
 
 public typealias AckCallback = (NSArray?) -> Void
+public typealias OnAckCallback = (timeout:UInt64, callback:AckCallback) -> Void
 
-@objc public class SocketAckHandler {
-    let ackNum:Int!
-    let event:String!
-    var acked = false
-    var callback:AckCallback?
-    weak var socket:SocketIOClient?
-
+struct SocketAckMap {
+    private var acks = [Int: AckCallback]()
+    private var waiting = [Int: Bool]()
     
-    init(event:String, ackNum:Int = 0, socket:SocketIOClient) {
-        self.ackNum = ackNum
-        self.event = event
-        self.socket = socket
+    mutating func addAck(ack:Int, callback:AckCallback) {
+        waiting[ack] = true
+        acks[ack] = callback
     }
     
-    public func onAck(timeout:UInt64, withCallback callback:AckCallback) {
-        self.callback = callback
+    mutating func executeAck(ack:Int, items:[AnyObject]?) {
+        let callback = acks[ack]
+        waiting[ack] = false
         
-        
-        if timeout != 0 {
-            let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeout * NSEC_PER_SEC))
-            dispatch_after(time, dispatch_get_main_queue()) {[weak self] in
-                if self == nil {
-                    return
-                }
-                
-                if !self!.acked {
-                    self?.executeAck(["No ACK"])
-                    self?.socket?.removeAck(self!)
-                }
-            }
-        }
-    }
-    
-    func executeAck(data:NSArray?) {
-        dispatch_async(dispatch_get_main_queue()) {[weak self, cb = self.callback] in
-            self?.acked = true
-            cb?(data)
+        dispatch_async(dispatch_get_main_queue()) {
+            callback?(items)
             return
         }
+        
+        acks.removeValueForKey(ack)
+    }
+    
+    mutating func timeoutAck(ack:Int) {
+        if waiting[ack] != nil && waiting[ack]! {
+            acks[ack]?(["NO ACK"])
+        }
+        
+        acks.removeValueForKey(ack)
+        waiting.removeValueForKey(ack)
     }
 }
