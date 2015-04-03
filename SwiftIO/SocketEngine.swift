@@ -171,14 +171,12 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     }
     
     private func doFastUpgrade() {
-        dispatch_async(self.emitQueue) {[weak self] in
-            self?.sendWebSocketMessage("", withType: PacketType.UPGRADE)
-            self?._websocket = true
-            self?._polling = false
-            self?.fastUpgrade = false
-            self?.probing = false
-            self?.flushProbeWait()
-        }
+        self.sendWebSocketMessage("", withType: PacketType.UPGRADE)
+        self._websocket = true
+        self._polling = false
+        self.fastUpgrade = false
+        self.probing = false
+        self.flushProbeWait()
     }
     
     private func doPoll() {
@@ -243,7 +241,10 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             }
             
             self?.probeWait.removeAll(keepCapacity: false)
-            // NSLog("waiting for post after flush probe: \(self!.postWait.count)")
+            
+            if self?.postWait.count != 0 {
+                self?.flushWaitingForPostToWebSocket()
+            }
         }
     }
     
