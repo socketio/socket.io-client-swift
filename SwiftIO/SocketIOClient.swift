@@ -195,7 +195,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
                 return
             }
             
-            self?.ackHandlers.addAck(ack, callback)
+            self?.ackHandlers.addAck(ack, callback: callback)
             
             dispatch_async(self!.emitQueue) {
                 self?._emit(event, items, ack: ack)
@@ -343,7 +343,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         var ackData:[AnyObject]?
         
         if data is NSArray {
-            ackData = data as? NSArray
+            ackData = (data as? [AnyObject]?)!
         } else if data != nil {
             ackData = [data!]
         }
