@@ -204,6 +204,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
             
             if timeout != 0 {
                 let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeout * NSEC_PER_SEC))
+                
                 dispatch_after(time, dispatch_get_main_queue()) {
                     self?.ackHandlers.timeoutAck(ack)
                     return
