@@ -174,7 +174,12 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     }
     
     private func doFastUpgrade() {
-        self.sendWebSocketMessage("", withType: PacketType.UPGRADE)
+        if self.waitingForPoll {
+            NSLog("Outstanding poll when switched to websockets," +
+                "we'll probably disconnect soon. You should report this.")
+        }
+        
+        self.sendWebSocketMessage("", withType: PacketType.UPGRADE, datas: nil)
         self._websocket = true
         self._polling = false
         self.fastUpgrade = false
@@ -207,6 +212,8 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             } else if err != nil {
                 if self!.polling {
                     self?.handlePollingFailed(err.localizedDescription)
+                } else {
+                    NSLog(err.localizedDescription)
                 }
                 
                 return
@@ -222,11 +229,10 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             }
             
             self?.waitingForPoll = false
-            
             if self!.fastUpgrade {
                 self?.doFastUpgrade()
                 return
-            } else if !self!.closed && !self!.websocket {
+            } else if !self!.closed && self!.polling {
                 self?.doPoll()
             }
             }.resume()
@@ -291,14 +297,14 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             } else if err != nil && self!.polling {
                 self?.handlePollingFailed(err.localizedDescription)
                 return
+            } else if err != nil {
+                NSLog(err.localizedDescription)
+                return
             }
             
             self?.waitingForPost = false
             dispatch_async(self!.emitQueue) {
-                if self!.fastUpgrade {
-                    self?.doFastUpgrade()
-                    return
-                } else {
+                if !self!.fastUpgrade {
                     self?.flushWaitingForPost()
                     self?.doPoll()
                 }
@@ -611,6 +617,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         if self.websocketConnected {
             // NSLog("Doing fast upgrade")
             // Do a fast upgrade
+            // At this point, we should not send anymore polling messages-
             self.fastUpgrade = true
             self.sendPollMessage("", withType: PacketType.NOOP)
         }
