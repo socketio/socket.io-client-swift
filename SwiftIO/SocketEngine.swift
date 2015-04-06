@@ -44,7 +44,6 @@ public enum PacketType:String {
 }
 
 public class SocketEngine: NSObject, WebSocketDelegate {
-    unowned let client:SocketEngineClient
     private let workQueue = NSOperationQueue()
     private let emitQueue = dispatch_queue_create(
         "engineEmitQueue".cStringUsingEncoding(NSUTF8StringEncoding), DISPATCH_QUEUE_SERIAL)
@@ -70,6 +69,8 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     var connected:Bool {
         return self._connected
     }
+    
+    weak var client:SocketEngineClient?
     var cookies:[NSHTTPCookie]?
     var pingInterval:Int?
     var polling:Bool {
@@ -97,16 +98,14 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         self.pingTimer?.invalidate()
         self.closed = true
         
-        if self.polling {
-            self.write("", withType: PacketType.CLOSE, withData: nil)
-            self.client.didForceClose("Disconnect")
-        } else {
-            self.ws?.disconnect()
-            
-            if fast {
-                self.client.didForceClose("Fast Disconnect")
-            }
+        self.write("", withType: PacketType.CLOSE, withData: nil)
+        self.ws?.disconnect()
+        
+        if fast || self.polling {
+            self.client?.didForceClose("Disconnect")
         }
+        
+        self.client = nil
     }
     
     private func createBinaryDataForSend(data:NSData) -> (NSData?, String?) {
@@ -126,11 +125,15 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     }
     
     private func createURLs(params:[String: AnyObject]?) -> (String, String) {
-        var url = "\(self.client.socketURL)/socket.io/?transport="
+        if self.client == nil {
+            return ("", "")
+        }
+        
+        var url = "\(self.client!.socketURL)/socket.io/?transport="
         var urlPolling:String
         var urlWebSocket:String
         
-        if self.client.secure {
+        if self.client!.secure {
             urlPolling = "https://" + url + "polling"
             urlWebSocket = "wss://" + url + "websocket"
         } else {
@@ -320,10 +323,14 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         self.waitingForPoll = false
         self.waitingForPost = false
         
-        if !self.closed && !self.client.reconnecting {
-            self.client.pollingDidFail(reason)
-        } else if !self.client.reconnecting {
-            self.client.didForceClose(reason)
+        if self.client == nil {
+            return
+        }
+        
+        if !self.closed && !self.client!.reconnecting {
+            self.client?.pollingDidFail(reason)
+        } else if !self.client!.reconnecting {
+            self.client?.didForceClose(reason)
         }
     }
     
@@ -413,8 +420,12 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     }
     
     private func parseEngineData(data:NSData) {
-        dispatch_async(self.client.handleQueue) {[weak self] in
-            self?.client.parseBinaryData(data.subdataWithRange(NSMakeRange(1, data.length - 1)))
+        if self.client == nil {
+            return
+        }
+        
+        dispatch_async(self.client!.handleQueue) {[weak self] in
+            self?.client?.parseBinaryData(data.subdataWithRange(NSMakeRange(1, data.length - 1)))
             return
         }
     }
@@ -438,8 +449,13 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                 if let data = NSData(base64EncodedString: message,
                     options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters) {
                         // println("sending \(data)")
-                        dispatch_async(self.client.handleQueue) {[weak self] in
-                            self?.client.parseBinaryData(data)
+                        
+                        if self.client == nil {
+                            return
+                        }
+                        
+                        dispatch_async(self.client!.handleQueue) {[weak self] in
+                            self?.client?.parseBinaryData(data)
                             return
                         }
                 }
@@ -491,8 +507,12 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                 
                 return
             } else if type == PacketType.CLOSE.rawValue {
+                if self.client == nil {
+                    return
+                }
+                
                 if self.polling {
-                    self.client.didForceClose("Disconnect")
+                    self.client!.didForceClose("Disconnect")
                 }
                 
                 return
@@ -504,8 +524,12 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         // Remove message type
         message.removeAtIndex(message.startIndex)
         
-        dispatch_async(self.client.handleQueue) {[weak self] in
-            self?.client.parseSocketMessage(message)
+        if self.client == nil {
+            return
+        }
+        
+        dispatch_async(self.client!.handleQueue) {[weak self] in
+            self?.client?.parseSocketMessage(message)
             return
         }
     }
@@ -633,7 +657,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             self._websocket = false
             
             let reason = error?.localizedDescription
-            self.client.webSocketDidCloseWithCode(1,
+            self.client?.webSocketDidCloseWithCode(1,
                 reason: reason == nil ? "Socket Disconnected" : reason!)
         } else {
             self.flushProbeWait()
