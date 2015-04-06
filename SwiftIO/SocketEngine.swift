@@ -104,8 +104,6 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         if fast || self.polling {
             self.client?.didForceClose("Disconnect")
         }
-        
-        self.client = nil
     }
     
     private func createBinaryDataForSend(data:NSData) -> (NSData?, String?) {
@@ -657,6 +655,11 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     public func websocketDidDisconnect(socket:WebSocket, error:NSError?) {
         self.websocketConnected = false
         self.probing = false
+        
+        if self.closed {
+            self.client?.didForceClose("Disconnect")
+            return
+        }
         
         if self.websocket {
             self.pingTimer?.invalidate()
