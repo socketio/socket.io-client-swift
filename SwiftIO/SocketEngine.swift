@@ -102,7 +102,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         self.ws?.disconnect()
         
         if fast || self.polling {
-            self.client?.didForceClose("Disconnect")
+            self.client?.engineDidForceClose("Disconnect")
         }
     }
     
@@ -334,13 +334,14 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         if !self.closed && !self.client!.reconnecting {
             self.client?.pollingDidFail(reason)
         } else if !self.client!.reconnecting {
-            self.client?.didForceClose(reason)
+            self.client?.engineDidForceClose(reason)
         }
     }
     
     public func open(opts:[String: AnyObject]? = nil) {
         if self.connected {
-            fatalError("Engine tried to open while connected")
+            self.client?.engineDidError("Engine tried to open while connected")
+            return
         }
         
         self.closed = false
@@ -492,7 +493,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                                 self.createWebsocket(andConnect: true)
                             }
                         } else {
-                            NSLog("Error handshaking")
+                            self.client?.engineDidError("Error parsing engine connect")
                             return
                         }
                         
@@ -500,7 +501,8 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                             self.pingInterval = pingInterval / 1000
                         }
                 } else {
-                    fatalError("Error parsing engine connect")
+                    self.client?.engineDidError("Error parsing engine connect")
+                    return
                 }
                 
                 self.startPingTimer()
@@ -516,7 +518,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                 }
                 
                 if self.polling {
-                    self.client!.didForceClose("Disconnect")
+                    self.client!.engineDidForceClose("Disconnect")
                 }
                 
                 return
@@ -657,7 +659,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         self.probing = false
         
         if self.closed {
-            self.client?.didForceClose("Disconnect")
+            self.client?.engineDidForceClose("Disconnect")
             return
         }
         

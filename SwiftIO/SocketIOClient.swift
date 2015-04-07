@@ -228,20 +228,6 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         self.handleEvent("connect", data: nil, isInternalMessage: false)
     }
     
-    /// Server wants us to die
-    public func didForceClose(reason:String) {
-        if self.closed {
-            return
-        }
-        
-        self._closed = true
-        self._connected = false
-        self.reconnects = false
-        self._connecting = false
-        self._reconnecting = false
-        self.handleEvent("disconnect", data: [reason], isInternalMessage: true)
-    }
-    
     /**
     Same as close
     */
@@ -337,6 +323,25 @@ public class SocketIOClient: NSObject, SocketEngineClient {
                 self?.engine?.send(str, withData: nil)
             }
         }
+    }
+    
+    /// Engine error
+    public func engineDidError(reason:String) {
+        self.handleEvent("error", data: [reason], isInternalMessage: true)
+    }
+    
+    /// Server wants us to die
+    public func engineDidForceClose(reason:String) {
+        if self.closed {
+            return
+        }
+        
+        self._closed = true
+        self._connected = false
+        self.reconnects = false
+        self._connecting = false
+        self._reconnecting = false
+        self.handleEvent("disconnect", data: [reason], isInternalMessage: true)
     }
     
     // Called when the socket gets an ack for something it sent
@@ -435,7 +440,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     // We lost connection and should attempt to reestablish
     func tryReconnect() {
         if self.reconnectAttempts != -1 && self.currentReconnectAttempt + 1 > self.reconnectAttempts {
-            self.didForceClose("Reconnect Failed")
+            self.engineDidForceClose("Reconnect Failed")
             return
         } else if self.connected {
             self._connecting = false
@@ -473,7 +478,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         self._connected = false
         self._connecting = false
         if self.closed || !self.reconnects {
-            self.didForceClose("WebSocket closed")
+            self.engineDidForceClose("WebSocket closed")
         } else if !self.reconnecting {
             self.handleEvent("reconnect", data: [reason], isInternalMessage: true)
             self.tryReconnect()
@@ -486,7 +491,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         self._connecting = false
         self.handleEvent("error", data: [error.localizedDescription], isInternalMessage: true)
         if self.closed || !self.reconnects {
-            self.didForceClose("WebSocket closed with an error \(error)")
+            self.engineDidForceClose("WebSocket closed with an error \(error)")
         } else if !self.reconnecting {
             self.handleEvent("reconnect", data: [error.localizedDescription], isInternalMessage: true)
             self.tryReconnect()
