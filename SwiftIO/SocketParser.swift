@@ -227,7 +227,7 @@ class SocketParser {
                 socket.didConnect()
             }
         } else if p.type == SocketPacketType.DISCONNECT {
-            socket.didForceClose("Got Disconnect")
+            socket.engineDidForceClose("Got Disconnect")
         }
     }
     
