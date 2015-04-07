@@ -90,68 +90,68 @@ class SocketPacket {
     }
     
     func createMessageForEvent(event:String) -> String {
-            var message:String
-            var jsonSendError:NSError?
+        var message:String
+        var jsonSendError:NSError?
+        
+        if self.binary.count == 0 {
+            self.type = SocketPacketType.EVENT
             
-            if self.binary.count == 0 {
-                self.type = SocketPacketType.EVENT
-                
-                if self.nsp == "/" {
-                    if self.id == nil {
-                        message = "2[\"\(event)\""
-                    } else {
-                        message = "2\(self.id!)[\"\(event)\""
-                    }
+            if self.nsp == "/" {
+                if self.id == nil {
+                    message = "2[\"\(event)\""
                 } else {
-                    if self.id == nil {
-                        message = "2/\(self.nsp),[\"\(event)\""
-                    } else {
-                        message = "2/\(self.nsp),\(self.id!)[\"\(event)\""
-                    }
+                    message = "2\(self.id!)[\"\(event)\""
                 }
             } else {
-                self.type = SocketPacketType.BINARY_EVENT
-                
-                if self.nsp == "/" {
-                    if self.id == nil {
-                        message = "5\(self.binary.count)-[\"\(event)\""
-                    } else {
-                        message = "5\(self.binary.count)-\(self.id!)[\"\(event)\""
-                    }
+                if self.id == nil {
+                    message = "2/\(self.nsp),[\"\(event)\""
                 } else {
-                    if self.id == nil {
-                        message = "5\(self.binary.count)-/\(self.nsp),[\"\(event)\""
-                    } else {
-                        message = "5\(self.binary.count)-/\(self.nsp),\(self.id!)[\"\(event)\""
-                    }
+                    message = "2/\(self.nsp),\(self.id!)[\"\(event)\""
                 }
             }
+        } else {
+            self.type = SocketPacketType.BINARY_EVENT
             
-            return self.completeMessage(message)
+            if self.nsp == "/" {
+                if self.id == nil {
+                    message = "5\(self.binary.count)-[\"\(event)\""
+                } else {
+                    message = "5\(self.binary.count)-\(self.id!)[\"\(event)\""
+                }
+            } else {
+                if self.id == nil {
+                    message = "5\(self.binary.count)-/\(self.nsp),[\"\(event)\""
+                } else {
+                    message = "5\(self.binary.count)-/\(self.nsp),\(self.id!)[\"\(event)\""
+                }
+            }
+        }
+        
+        return self.completeMessage(message)
     }
     
     func createAck() -> String {
-            var msg:String
+        var msg:String
+        
+        if self.binary.count == 0 {
+            self.type = SocketPacketType.ACK
             
-            if self.binary.count == 0 {
-                self.type = SocketPacketType.ACK
-                
-                if nsp == "/" {
-                    msg = "3\(self.id!)["
-                } else {
-                    msg = "3/\(self.nsp),\(self.id!)["
-                }
+            if nsp == "/" {
+                msg = "3\(self.id!)["
             } else {
-                self.type = SocketPacketType.BINARY_ACK
-
-                if nsp == "/" {
-                    msg = "6\(self.binary.count)-\(self.id!)["
-                } else {
-                    msg = "6\(self.binary.count)-/\(self.nsp),\(self.id!)["
-                }
+                msg = "3/\(self.nsp),\(self.id!)["
             }
+        } else {
+            self.type = SocketPacketType.BINARY_ACK
             
-            return self.completeMessage(msg, ack: true)
+            if nsp == "/" {
+                msg = "6\(self.binary.count)-\(self.id!)["
+            } else {
+                msg = "6\(self.binary.count)-/\(self.nsp),\(self.id!)["
+            }
+        }
+        
+        return self.completeMessage(msg, ack: true)
     }
     
     func completeMessage(var message:String, ack:Bool = false) -> String {
