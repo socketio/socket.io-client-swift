@@ -24,7 +24,7 @@
 
 import Foundation
 
-public typealias AckCallback = (NSArray?) -> Void
+public typealias AckCallback = @objc_block (NSArray?) -> Void
 public typealias OnAckCallback = (timeout:UInt64, callback:AckCallback) -> Void
 
 struct SocketAckMap {
