@@ -138,7 +138,7 @@ public class SwiftRegex: NSObject, BooleanType {
         return out
     }
 
-    func substituteMatches(substitution: (NSTextCheckingResult, UnsafeMutablePointer<ObjCBool>) -> String,
+    func substituteMatches(substitution: ((NSTextCheckingResult, UnsafeMutablePointer<ObjCBool>) -> String),
         options:NSMatchingOptions = nil) -> String {
             let out = NSMutableString()
             var pos = 0
