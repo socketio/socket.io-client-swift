@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "7CCB67501AC452F00070BA41"
-               BuildableName = "SocketIO-OSX.framework"
+               BuildableName = "SocketIO.framework"
                BlueprintName = "SocketIO-OSX"
                ReferencedContainer = "container:SocketIO.xcodeproj">
             </BuildableReference>
@@ -57,7 +57,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "7CCB67501AC452F00070BA41"
-            BuildableName = "SocketIO-OSX.framework"
+            BuildableName = "SocketIO.framework"
             BlueprintName = "SocketIO-OSX"
             ReferencedContainer = "container:SocketIO.xcodeproj">
          </BuildableReference>
@@ -76,7 +76,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "7CCB67501AC452F00070BA41"
-            BuildableName = "SocketIO-OSX.framework"
+            BuildableName = "SocketIO.framework"
             BlueprintName = "SocketIO-OSX"
             ReferencedContainer = "container:SocketIO.xcodeproj">
          </BuildableReference>
@@ -94,7 +94,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "7CCB67501AC452F00070BA41"
-            BuildableName = "SocketIO-OSX.framework"
+            BuildableName = "SocketIO.framework"
             BlueprintName = "SocketIO-OSX"
             ReferencedContainer = "container:SocketIO.xcodeproj">
          </BuildableReference>

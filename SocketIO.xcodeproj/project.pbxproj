@@ -7,8 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7C96C3D61AD6E1E300824D9F /* SocketAckMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C96C3D31AD6E1E300824D9F /* SocketAckMap.swift */; };
+		7C96C3D71AD6E1E300824D9F /* SocketAckMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C96C3D31AD6E1E300824D9F /* SocketAckMap.swift */; };
+		7C96C3D81AD6E1E300824D9F /* SocketAnyEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C96C3D41AD6E1E300824D9F /* SocketAnyEvent.swift */; };
+		7C96C3D91AD6E1E300824D9F /* SocketAnyEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C96C3D41AD6E1E300824D9F /* SocketAnyEvent.swift */; };
+		7C96C3DA1AD6E1E300824D9F /* SocketTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C96C3D51AD6E1E300824D9F /* SocketTypes.swift */; };
+		7C96C3DB1AD6E1E300824D9F /* SocketTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C96C3D51AD6E1E300824D9F /* SocketTypes.swift */; };
 		7CCB67221AC44E040070BA41 /* SocketIO.h in Headers */ = {isa = PBXBuildFile; fileRef = 7CCB67211AC44E040070BA41 /* SocketIO.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		7CCB67421AC44EA60070BA41 /* SocketAckHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCB67381AC44EA60070BA41 /* SocketAckHandler.swift */; };
 		7CCB67431AC44EA60070BA41 /* SocketEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCB67391AC44EA60070BA41 /* SocketEngine.swift */; };
 		7CCB67441AC44EA60070BA41 /* SocketEngineClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCB673A1AC44EA60070BA41 /* SocketEngineClient.swift */; };
 		7CCB67451AC44EA60070BA41 /* SocketEventHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCB673B1AC44EA60070BA41 /* SocketEventHandler.swift */; };
@@ -19,7 +24,6 @@
 		7CCB674A1AC44EA60070BA41 /* SwiftRegex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCB67401AC44EA60070BA41 /* SwiftRegex.swift */; };
 		7CCB674B1AC44EA60070BA41 /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCB67411AC44EA60070BA41 /* WebSocket.swift */; };
 		7CCB67561AC452F00070BA41 /* SocketIO-OSX.h in Headers */ = {isa = PBXBuildFile; fileRef = 7CCB67551AC452F00070BA41 /* SocketIO-OSX.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		7CCB676A1AC453190070BA41 /* SocketAckHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCB67381AC44EA60070BA41 /* SocketAckHandler.swift */; };
 		7CCB676B1AC453190070BA41 /* SocketEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCB67391AC44EA60070BA41 /* SocketEngine.swift */; };
 		7CCB676C1AC453190070BA41 /* SocketEngineClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCB673A1AC44EA60070BA41 /* SocketEngineClient.swift */; };
 		7CCB676D1AC453190070BA41 /* SocketEventHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCB673B1AC44EA60070BA41 /* SocketEventHandler.swift */; };
@@ -32,10 +36,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		7C96C3D31AD6E1E300824D9F /* SocketAckMap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketAckMap.swift; sourceTree = "<group>"; };
+		7C96C3D41AD6E1E300824D9F /* SocketAnyEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketAnyEvent.swift; sourceTree = "<group>"; };
+		7C96C3D51AD6E1E300824D9F /* SocketTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketTypes.swift; sourceTree = "<group>"; };
 		7CCB671C1AC44E040070BA41 /* SocketIO.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SocketIO.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7CCB67201AC44E040070BA41 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7CCB67211AC44E040070BA41 /* SocketIO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SocketIO.h; sourceTree = "<group>"; };
-		7CCB67381AC44EA60070BA41 /* SocketAckHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketAckHandler.swift; sourceTree = "<group>"; };
 		7CCB67391AC44EA60070BA41 /* SocketEngine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketEngine.swift; sourceTree = "<group>"; };
 		7CCB673A1AC44EA60070BA41 /* SocketEngineClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketEngineClient.swift; sourceTree = "<group>"; };
 		7CCB673B1AC44EA60070BA41 /* SocketEventHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketEventHandler.swift; sourceTree = "<group>"; };
@@ -68,6 +74,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7C96C3DC1AD6E9D800824D9F /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				7CCB67401AC44EA60070BA41 /* SwiftRegex.swift */,
+			);
+			name = Extensions;
+			sourceTree = "<group>";
+		};
 		7CCB67121AC44E040070BA41 = {
 			isa = PBXGroup;
 			children = (
@@ -90,7 +104,6 @@
 			isa = PBXGroup;
 			children = (
 				7CCB67211AC44E040070BA41 /* SocketIO.h */,
-				7CCB67381AC44EA60070BA41 /* SocketAckHandler.swift */,
 				7CCB67391AC44EA60070BA41 /* SocketEngine.swift */,
 				7CCB673A1AC44EA60070BA41 /* SocketEngineClient.swift */,
 				7CCB673B1AC44EA60070BA41 /* SocketEventHandler.swift */,
@@ -98,8 +111,11 @@
 				7CCB673D1AC44EA60070BA41 /* SocketIOClient.swift */,
 				7CCB673E1AC44EA60070BA41 /* SocketPacket.swift */,
 				7CCB673F1AC44EA60070BA41 /* SocketParser.swift */,
-				7CCB67401AC44EA60070BA41 /* SwiftRegex.swift */,
+				7C96C3D31AD6E1E300824D9F /* SocketAckMap.swift */,
+				7C96C3D41AD6E1E300824D9F /* SocketAnyEvent.swift */,
+				7C96C3D51AD6E1E300824D9F /* SocketTypes.swift */,
 				7CCB67411AC44EA60070BA41 /* WebSocket.swift */,
+				7C96C3DC1AD6E9D800824D9F /* Extensions */,
 				7CCB671F1AC44E040070BA41 /* Supporting Files */,
 			);
 			path = SocketIO;
@@ -249,11 +265,13 @@
 				7CCB67461AC44EA60070BA41 /* SocketFixUTF8.swift in Sources */,
 				7CCB674A1AC44EA60070BA41 /* SwiftRegex.swift in Sources */,
 				7CCB67431AC44EA60070BA41 /* SocketEngine.swift in Sources */,
+				7C96C3D81AD6E1E300824D9F /* SocketAnyEvent.swift in Sources */,
 				7CCB67491AC44EA60070BA41 /* SocketParser.swift in Sources */,
 				7CCB67481AC44EA60070BA41 /* SocketPacket.swift in Sources */,
 				7CCB67471AC44EA60070BA41 /* SocketIOClient.swift in Sources */,
+				7C96C3D61AD6E1E300824D9F /* SocketAckMap.swift in Sources */,
 				7CCB67441AC44EA60070BA41 /* SocketEngineClient.swift in Sources */,
-				7CCB67421AC44EA60070BA41 /* SocketAckHandler.swift in Sources */,
+				7C96C3DA1AD6E1E300824D9F /* SocketTypes.swift in Sources */,
 				7CCB674B1AC44EA60070BA41 /* WebSocket.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -262,15 +280,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7CCB676A1AC453190070BA41 /* SocketAckHandler.swift in Sources */,
 				7CCB676B1AC453190070BA41 /* SocketEngine.swift in Sources */,
 				7CCB676C1AC453190070BA41 /* SocketEngineClient.swift in Sources */,
 				7CCB676D1AC453190070BA41 /* SocketEventHandler.swift in Sources */,
 				7CCB676E1AC453190070BA41 /* SocketFixUTF8.swift in Sources */,
+				7C96C3D91AD6E1E300824D9F /* SocketAnyEvent.swift in Sources */,
 				7CCB676F1AC453190070BA41 /* SocketIOClient.swift in Sources */,
 				7CCB67701AC453190070BA41 /* SocketPacket.swift in Sources */,
 				7CCB67711AC453190070BA41 /* SocketParser.swift in Sources */,
+				7C96C3D71AD6E1E300824D9F /* SocketAckMap.swift in Sources */,
 				7CCB67721AC453190070BA41 /* SwiftRegex.swift in Sources */,
+				7C96C3DB1AD6E1E300824D9F /* SocketTypes.swift in Sources */,
 				7CCB67731AC453190070BA41 /* WebSocket.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -466,6 +486,7 @@
 				7CCB67661AC452F00070BA41 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

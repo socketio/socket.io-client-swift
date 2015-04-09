@@ -30,5 +30,5 @@ import Foundation
 // SocketAckMap#addAck
 public typealias AckCallback = @objc_block (NSArray?) -> Void
 public typealias AckEmitter = (AnyObject...) -> Void
-public typealias NormalCallback = (NSArray?, AckEmitter?) -> Void
-public typealias OnAckCallback = (timeout:UInt64, callback:AckCallback) -> Void
+public typealias SocketCallback = (NSArray?, AckEmitter?) -> Void
+public typealias OnAckCallback = (timeout: UInt64, callback: AckCallback) -> Void
