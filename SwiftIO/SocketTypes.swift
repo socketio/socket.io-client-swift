@@ -1,8 +1,8 @@
 //
-//  EventHandler.swift
-//  Socket.IO-Swift
+//  SocketTypes.swift
+//  SocketIO-Swift
 //
-//  Created by Erik Little on 1/18/15.
+//  Created by Erik Little on 4/8/15.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -24,26 +24,29 @@
 
 import Foundation
 
-private func emitAckCallback(socket:SocketIOClient, num:Int)
-    // Curried
-    (items:AnyObject...) -> Void {
-        socket.emitAck(num, withData: items)
-}
+// @objc_block is undocumented, but is used because Swift assumes that all
+// Objective-C blocks are copied, but Objective-C assumes that Swift will copy it.
+// And the way things are done here, the bridging fails to copy the block in
+// SocketAckMap#addAck
+public typealias AckCallback = @objc_block (NSArray?) -> Void
+public typealias AckEmitter = (AnyObject...) -> Void
+public typealias NormalCallback = (NSArray?, AckEmitter?) -> Void
+public typealias OnAckCallback = (timeout:UInt64, callback:AckCallback) -> Void
 
-class SocketEventHandler {
-    let event:String!
-    let callback:NormalCallback?
+enum SocketPacketType:Int {
+    case CONNECT = 0
+    case DISCONNECT = 1
+    case EVENT = 2
+    case ACK = 3
+    case ERROR = 4
+    case BINARY_EVENT = 5
+    case BINARY_ACK = 6
     
-    init(event:String, callback:NormalCallback) {
-        self.event = event
-        self.callback = callback
-    }
-    
-    func executeCallback(_ items:NSArray? = nil, withAck ack:Int? = nil, withAckType type:Int? = nil,
-        withSocket socket:SocketIOClient? = nil) {
-            dispatch_async(dispatch_get_main_queue()) {[weak self] in
-                self?.callback?(items, ack != nil ? emitAckCallback(socket!, ack!) : nil)
-                return
-            }
+    init(str:String) {
+        if let int = str.toInt() {
+            self = SocketPacketType(rawValue: int)!
+        } else {
+            self = SocketPacketType(rawValue: 4)!
+        }
     }
 }

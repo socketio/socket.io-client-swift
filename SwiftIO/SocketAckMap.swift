@@ -24,9 +24,6 @@
 
 import Foundation
 
-public typealias AckCallback = @objc_block (NSArray?) -> Void
-public typealias OnAckCallback = (timeout:UInt64, callback:AckCallback) -> Void
-
 struct SocketAckMap {
     private var acks = [Int: AckCallback]()
     private var waiting = [Int: Bool]()
