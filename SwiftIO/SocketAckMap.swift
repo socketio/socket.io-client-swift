@@ -39,7 +39,6 @@ struct SocketAckMap {
         
         dispatch_async(dispatch_get_main_queue()) {
             callback?(items)
-            return
         }
         
         acks.removeValueForKey(ack)

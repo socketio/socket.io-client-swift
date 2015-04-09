@@ -83,11 +83,11 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         case UPGRADE = 5
         case NOOP = 6
         
-        init(str:String) {
-            if let value = str.toInt() {
+        init?(str:String?) {
+            if let value = str?.toInt() {
                 self = PacketType(rawValue: value)!
             } else {
-                self = PacketType.NOOP
+                return nil
             }
         }
     }
@@ -230,7 +230,6 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             if let str = NSString(data: data, encoding: NSUTF8StringEncoding) as? String {
                 dispatch_async(self!.parseQueue) {
                     self?.parsePollingMessage(str)
-                    return
                 }
             }
             
@@ -424,7 +423,6 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                     // Be sure to capture the value of the msg
                     dispatch_async(self.handleQueue) {[weak self, msg] in
                         self?.parseEngineMessage(msg, fromPolling: true)
-                        return
                     }
                 }
                 
@@ -441,7 +439,6 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         
         dispatch_async(self.client!.handleQueue) {[weak self] in
             self?.client?.parseBinaryData(data.subdataWithRange(NSMakeRange(1, data.length - 1)))
-            return
         }
     }
     
@@ -451,7 +448,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             fixDoubleUTF8(&message)
         }
         
-        let type = PacketType(str: (message["^(\\d)"].groups()?[1])!)
+        let type = PacketType(str: (message["^(\\d)"].groups()?[1]))
         
         if type == PacketType.MESSAGE {
             // Remove message type
@@ -463,7 +460,6 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             
             dispatch_async(self.client!.handleQueue) {[weak self] in
                 self?.client?.parseSocketMessage(message)
-                return
             }
         } else if type == PacketType.NOOP {
             self.doPoll()
@@ -534,7 +530,6 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                         
                         dispatch_async(self.client!.handleQueue) {[weak self] in
                             self?.client?.parseBinaryData(data)
-                            return
                         }
                 }
             }
