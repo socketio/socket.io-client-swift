@@ -199,7 +199,6 @@ public class SocketIOClient: NSObject, SocketEngineClient {
             
             dispatch_async(self!.emitQueue) {
                 self?._emit(event, items, ack: ack)
-                return
             }
             
             if timeout != 0 {
@@ -207,7 +206,6 @@ public class SocketIOClient: NSObject, SocketEngineClient {
                 
                 dispatch_after(time, dispatch_get_main_queue()) {
                     self?.ackHandlers.timeoutAck(ack)
-                    return
                 }
             }
         }
@@ -259,7 +257,6 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         
         dispatch_async(self.emitQueue) {[weak self] in
             self?._emit(event, items)
-            return
         }
     }
     
@@ -273,7 +270,6 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         
         dispatch_async(self.emitQueue) {[weak self] in
             self?._emit(event, items)
-            return
         }
     }
     
@@ -365,7 +361,6 @@ public class SocketIOClient: NSObject, SocketEngineClient {
             if self.anyHandler != nil {
                 dispatch_async(dispatch_get_main_queue()) {[weak self] in
                     self?.anyHandler?(SocketAnyEvent(event: event, items: data))
-                    return
                 }
             }
             

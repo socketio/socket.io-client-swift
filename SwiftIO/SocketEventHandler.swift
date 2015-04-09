@@ -43,7 +43,6 @@ class SocketEventHandler {
         withSocket socket:SocketIOClient? = nil) {
             dispatch_async(dispatch_get_main_queue()) {[weak self] in
                 self?.callback?(items, ack != nil ? emitAckCallback(socket!, ack!) : nil)
-                return
             }
     }
 }
