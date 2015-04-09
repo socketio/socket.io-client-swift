@@ -49,7 +49,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8
 ##Installation
 Manually (iOS 7+)
 -----------------
-1. Copy the SwiftIO folder into your Xcode project!
+1. Copy the SocketIOClientSwift folder into your Xcode project
 
 CocoaPods 0.36.0 or later (iOS 8+)
 ------------------
