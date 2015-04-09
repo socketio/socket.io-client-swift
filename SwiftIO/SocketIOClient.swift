@@ -343,15 +343,8 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     
     // Called when the socket gets an ack for something it sent
     func handleAck(ack:Int, data:AnyObject?) {
-        var ackData:[AnyObject]?
-        
-        if data is NSArray {
-            ackData = (data as? [AnyObject]?)!
-        } else if data != nil {
-            ackData = [data!]
-        }
-        
-        self.ackHandlers.executeAck(ack, items: ackData)
+        self.ackHandlers.executeAck(ack,
+            items: data as? [AnyObject]? ?? data != nil ? [data!] : nil)
     }
     
     /**
