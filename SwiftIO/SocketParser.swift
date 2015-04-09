@@ -183,11 +183,7 @@ class SocketParser {
         }
 
         func checkNSP(nsp:String) -> Bool {
-            if nsp == "" && socket.nsp != "/" {
-                return true
-            } else {
-                return false
-            }
+            return nsp == "" && socket.nsp != "/"
         }
 
         let p = parseString(stringMessage) as SocketPacket!

@@ -83,11 +83,11 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         case UPGRADE = 5
         case NOOP = 6
         
-        init(str:String) {
-            if let value = str.toInt() {
+        init?(str:String?) {
+            if let value = str?.toInt() {
                 self = PacketType(rawValue: value)!
             } else {
-                self = PacketType.NOOP
+                return nil
             }
         }
     }
@@ -450,7 +450,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             fixDoubleUTF8(&message)
         }
         
-        let type = PacketType(str: (message["^(\\d)"].groups()?[1])!)
+        let type = PacketType(str: (message["^(\\d)"].groups()?[1]))
         
         if type == PacketType.MESSAGE {
             // Remove message type
