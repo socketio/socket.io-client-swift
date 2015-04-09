@@ -80,7 +80,7 @@ class SocketParser {
     }
 
     // Translation of socket.io-client#decodeString
-    class func parseString(str:String) -> SocketPacket? {
+    static func parseString(str:String) -> SocketPacket? {
         let arr = Array(str)
         let type = String(arr[0])
 
@@ -158,7 +158,7 @@ class SocketParser {
     }
 
     // Parses data for events
-    class func parseData(data:String) -> AnyObject? {
+    static func parseData(data:String) -> AnyObject? {
         var err:NSError?
         let stringData = data.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)
         let parsed:AnyObject? = NSJSONSerialization.JSONObjectWithData(stringData!,
@@ -172,12 +172,12 @@ class SocketParser {
         return parsed
     }
 
-    class func parseForEmit(packet:SocketPacket) {
+    static func parseForEmit(packet:SocketPacket) {
         shredder.deconstructPacket(packet)
     }
 
     // Parses messages recieved
-    class func parseSocketMessage(stringMessage:String, socket:SocketIOClient) {
+    static func parseSocketMessage(stringMessage:String, socket:SocketIOClient) {
         if stringMessage == "" {
             return
         }
@@ -228,7 +228,7 @@ class SocketParser {
     }
 
     // Handles binary data
-    class func parseBinaryData(data:NSData, socket:SocketIOClient) {
+    static func parseBinaryData(data:NSData, socket:SocketIOClient) {
         // NSLog(data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions.allZeros))
 
         if socket.waitingData.count == 0 {
