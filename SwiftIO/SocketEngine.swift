@@ -479,24 +479,21 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             let mesData = message.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!
             
             if let json = NSJSONSerialization.JSONObjectWithData(mesData,
-                options: NSJSONReadingOptions.AllowFragments, error: &err) as? NSDictionary {
-                    if let sid = json["sid"] as? String {
-                        // println(json)
-                        self.sid = sid
-                        self._connected = true
-                        if !self.forcePolling && !self.forceWebsockets {
-                            self.createWebsocket(andConnect: true)
-                        }
-                    } else {
-                        NSLog("Error handshaking")
-                        return
+                options: NSJSONReadingOptions.AllowFragments, error: &err) as? NSDictionary,
+                let sid = json["sid"] as? String {
+                    self.sid = sid
+                    self._connected = true
+                    
+                    if !self.forcePolling && !self.forceWebsockets {
+                        self.createWebsocket(andConnect: true)
                     }
                     
                     if let pingInterval = json["pingInterval"] as? Int {
                         self.pingInterval = pingInterval / 1000
                     }
             } else {
-                fatalError("Error parsing engine connect")
+                self.client?.engineDidError("Engine failed to handshake")
+                return
             }
             
             self.startPingTimer()
