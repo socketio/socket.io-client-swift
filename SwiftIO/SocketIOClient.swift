@@ -299,7 +299,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         SocketParser.parseForEmit(packet)
         str = packet.createMessageForEvent(event)
         
-        if packet.type == SocketPacketType.BINARY_EVENT {
+        if packet.type == SocketPacket.PacketType.BINARY_EVENT {
             self.engine?.send(str, withData: packet.binary)
         } else {
             self.engine?.send(str, withData: nil)
@@ -319,7 +319,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
             SocketParser.parseForEmit(packet)
             str = packet.createAck()
             
-            if packet.type == SocketPacketType.BINARY_ACK {
+            if packet.type == SocketPacket.PacketType.BINARY_ACK {
                 self?.engine?.send(str, withData: packet.binary)
             } else {
                 self?.engine?.send(str, withData: nil)

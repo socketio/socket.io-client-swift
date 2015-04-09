@@ -85,7 +85,7 @@ class SocketParser {
         let type = String(arr[0])
         
         if arr.count == 1 {
-            return SocketPacket(type: SocketPacketType(str: type))
+            return SocketPacket(type: SocketPacket.PacketType(str: type))
         }
         
         var id = nil as Int?
@@ -124,7 +124,7 @@ class SocketParser {
         }
         
         if i + 1 >= arr.count {
-            return SocketPacket(type: SocketPacketType(str: type),
+            return SocketPacket(type: SocketPacket.PacketType(str: type),
                 nsp: nsp, placeholders: placeholders, id: id)
         }
         
@@ -149,7 +149,7 @@ class SocketParser {
             let noPlaceholders = d["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] ~= "\"~~$2\""
             let data = SocketParser.parseData(noPlaceholders) as? [AnyObject] ?? [noPlaceholders]
             
-            return SocketPacket(type: SocketPacketType(str: type), data: data,
+            return SocketPacket(type: SocketPacket.PacketType(str: type), data: data,
                 nsp: nsp, placeholders: placeholders, id: id)
         }
         
@@ -187,33 +187,33 @@ class SocketParser {
         
         let p = parseString(stringMessage) as SocketPacket!
         
-        if p.type == SocketPacketType.EVENT {
+        if p.type == SocketPacket.PacketType.EVENT {
             if checkNSP(p.nsp) {
                 return
             }
             
             socket.handleEvent(p.getEvent(), data: p.data,
                 isInternalMessage: false, wantsAck: p.id)
-        } else if p.type == SocketPacketType.ACK {
+        } else if p.type == SocketPacket.PacketType.ACK {
             if checkNSP(p.nsp) {
                 return
             }
             
             socket.handleAck(p.id!, data: p.data)
-        } else if p.type == SocketPacketType.BINARY_EVENT {
+        } else if p.type == SocketPacket.PacketType.BINARY_EVENT {
             if checkNSP(p.nsp) {
                 return
             }
             
             socket.waitingData.append(p)
-        } else if p.type == SocketPacketType.BINARY_ACK {
+        } else if p.type == SocketPacket.PacketType.BINARY_ACK {
             if checkNSP(p.nsp) {
                 return
             }
             
             p.justAck = true
             socket.waitingData.append(p)
-        } else if p.type == SocketPacketType.CONNECT {
+        } else if p.type == SocketPacket.PacketType.CONNECT {
             if p.nsp == "" && socket.nsp != "/" {
                 socket.joinNamespace()
             } else if p.nsp != "" && socket.nsp == "/" {
@@ -221,9 +221,9 @@ class SocketParser {
             } else {
                 socket.didConnect()
             }
-        } else if p.type == SocketPacketType.DISCONNECT {
+        } else if p.type == SocketPacket.PacketType.DISCONNECT {
             socket.engineDidForceClose("Got Disconnect")
-        } else if p.type == SocketPacketType.ERROR {
+        } else if p.type == SocketPacket.PacketType.ERROR {
             socket.didError(p.data == nil ? "Error" : p.data!)
         }
     }

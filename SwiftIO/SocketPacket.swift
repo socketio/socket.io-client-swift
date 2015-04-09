@@ -32,9 +32,27 @@ class SocketPacket {
     var justAck = false
     var nsp = ""
     var placeholders:Int?
-    var type:SocketPacketType?
+    var type:PacketType?
+    
+    enum PacketType:Int {
+        case CONNECT = 0
+        case DISCONNECT = 1
+        case EVENT = 2
+        case ACK = 3
+        case ERROR = 4
+        case BINARY_EVENT = 5
+        case BINARY_ACK = 6
+        
+        init(str:String) {
+            if let int = str.toInt() {
+                self = PacketType(rawValue: int)!
+            } else {
+                self = PacketType(rawValue: 4)!
+            }
+        }
+    }
 
-    init(type:SocketPacketType?, data:[AnyObject]? = nil, nsp:String = "",
+    init(type:PacketType?, data:[AnyObject]? = nil, nsp:String = "",
         placeholders:Int? = nil, id:Int? = nil) {
             self.type = type
             self.data = data
@@ -76,7 +94,7 @@ class SocketPacket {
         var jsonSendError:NSError?
 
         if self.binary.count == 0 {
-            self.type = SocketPacketType.EVENT
+            self.type = PacketType.EVENT
 
             if self.nsp == "/" {
                 if self.id == nil {
@@ -92,7 +110,7 @@ class SocketPacket {
                 }
             }
         } else {
-            self.type = SocketPacketType.BINARY_EVENT
+            self.type = PacketType.BINARY_EVENT
 
             if self.nsp == "/" {
                 if self.id == nil {
@@ -116,7 +134,7 @@ class SocketPacket {
         var msg:String
 
         if self.binary.count == 0 {
-            self.type = SocketPacketType.ACK
+            self.type = PacketType.ACK
 
             if nsp == "/" {
                 msg = "3\(self.id!)["
@@ -124,7 +142,7 @@ class SocketPacket {
                 msg = "3/\(self.nsp),\(self.id!)["
             }
         } else {
-            self.type = SocketPacketType.BINARY_ACK
+            self.type = PacketType.BINARY_ACK
 
             if nsp == "/" {
                 msg = "6\(self.binary.count)-\(self.id!)["
