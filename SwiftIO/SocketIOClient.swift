@@ -226,6 +226,15 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         self.handleEvent("connect", data: nil, isInternalMessage: false)
     }
     
+    /// error
+    public func didError(reason:AnyObject) {
+        if !(reason is [AnyObject]) {
+            self.handleEvent("error", data: [reason], isInternalMessage: true)
+        } else {
+            self.handleEvent("error", data: reason as? [AnyObject], isInternalMessage: true)
+        }
+    }
+    
     /**
     Same as close
     */
@@ -319,11 +328,6 @@ public class SocketIOClient: NSObject, SocketEngineClient {
                 self?.engine?.send(str, withData: nil)
             }
         }
-    }
-    
-    /// Engine error
-    public func engineDidError(reason:String) {
-        self.handleEvent("error", data: [reason], isInternalMessage: true)
     }
     
     /// Server wants us to die

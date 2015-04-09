@@ -32,7 +32,7 @@ import Foundation
     var socketURL:String {get}
     var secure:Bool {get}
     
-    func engineDidError(reason:String)
+    func didError(reason:AnyObject)
     func engineDidForceClose(reason:String)
     func parseSocketMessage(msg:String)
     func parseBinaryData(data:NSData)

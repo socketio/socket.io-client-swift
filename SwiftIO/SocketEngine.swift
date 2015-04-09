@@ -349,7 +349,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
     
     public func open(opts:[String: AnyObject]? = nil) {
         if self.connected {
-            self.client?.engineDidError("Engine tried to open while connected")
+            self.client?.didError("Engine tried to open while connected")
             return
         }
         
@@ -478,9 +478,8 @@ public class SocketEngine: NSObject, WebSocketDelegate {
             message.removeAtIndex(message.startIndex)
             let mesData = message.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!
             
-            if let json = NSJSONSerialization.JSONObjectWithData(mesData,
-                options: NSJSONReadingOptions.AllowFragments, error: &err) as? NSDictionary,
-                let sid = json["sid"] as? String {
+            if let json = NSJSONSerialization.JSONObjectWithData(mesData, options: NSJSONReadingOptions.AllowFragments,
+                error: &err) as? NSDictionary, let sid = json["sid"] as? String {
                     self.sid = sid
                     self._connected = true
                     
@@ -492,7 +491,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                         self.pingInterval = pingInterval / 1000
                     }
             } else {
-                self.client?.engineDidError("Engine failed to handshake")
+                self.client?.didError("Engine failed to handshake")
                 return
             }
             
