@@ -35,6 +35,8 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8
     });
 }];
 
+[socket connect];
+
 ```
 
 ##Features
