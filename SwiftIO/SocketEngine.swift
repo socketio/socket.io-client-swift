@@ -30,20 +30,10 @@ extension String {
     }
 }
 
-private typealias Probe = (msg:String, type:PacketType, data:ContiguousArray<NSData>?)
-private typealias ProbeWaitQueue = [Probe]
-
-public enum PacketType:String {
-    case OPEN = "0"
-    case CLOSE = "1"
-    case PING = "2"
-    case PONG = "3"
-    case MESSAGE = "4"
-    case UPGRADE = "5"
-    case NOOP = "6"
-}
-
 public class SocketEngine: NSObject, WebSocketDelegate {
+    private typealias Probe = (msg:String, type:PacketType, data:ContiguousArray<NSData>?)
+    private typealias ProbeWaitQueue = [Probe]
+    
     private let workQueue = NSOperationQueue()
     private let emitQueue = dispatch_queue_create(
         "engineEmitQueue".cStringUsingEncoding(NSUTF8StringEncoding), DISPATCH_QUEUE_SERIAL)
@@ -83,6 +73,16 @@ public class SocketEngine: NSObject, WebSocketDelegate {
         return self._websocket
     }
     var ws:WebSocket?
+    
+    public enum PacketType:String {
+        case OPEN = "0"
+        case CLOSE = "1"
+        case PING = "2"
+        case PONG = "3"
+        case MESSAGE = "4"
+        case UPGRADE = "5"
+        case NOOP = "6"
+    }
 
     public init(client:SocketEngineClient, forcePolling:Bool,
         forceWebsockets:Bool, withCookies cookies:[NSHTTPCookie]?) {

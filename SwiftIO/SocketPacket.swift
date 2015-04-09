@@ -24,24 +24,6 @@
 
 import Foundation
 
-enum SocketPacketType:Int {
-    case CONNECT = 0
-    case DISCONNECT = 1
-    case EVENT = 2
-    case ACK = 3
-    case ERROR = 4
-    case BINARY_EVENT = 5
-    case BINARY_ACK = 6
-
-    init(str:String) {
-        if let int = str.toInt() {
-            self = SocketPacketType(rawValue: int)!
-        } else {
-            self = SocketPacketType(rawValue: 4)!
-        }
-    }
-}
-
 class SocketPacket {
     var binary = ContiguousArray<NSData>()
     var currentPlace = 0
@@ -90,7 +72,7 @@ class SocketPacket {
     }
 
     func createMessageForEvent(event:String) -> String {
-        var message:String
+        let message:String
         var jsonSendError:NSError?
 
         if self.binary.count == 0 {

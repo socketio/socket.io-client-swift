@@ -306,7 +306,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
         }
         
         let packet = SocketPacket(type: nil, data: args, nsp: self.nsp, id: ack)
-        var str:String
+        let str:String
         
         SocketParser.parseForEmit(packet)
         str = packet.createMessageForEvent(event)
@@ -326,7 +326,7 @@ public class SocketIOClient: NSObject, SocketEngineClient {
             }
             
             let packet = SocketPacket(type: nil, data: args, nsp: self!.nsp, id: ack)
-            var str:String
+            let str:String
             
             SocketParser.parseForEmit(packet)
             str = packet.createAck()
