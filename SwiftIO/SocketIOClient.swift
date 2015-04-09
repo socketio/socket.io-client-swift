@@ -228,11 +228,8 @@ public class SocketIOClient: NSObject, SocketEngineClient {
     
     /// error
     public func didError(reason:AnyObject) {
-        if !(reason is [AnyObject]) {
-            self.handleEvent("error", data: [reason], isInternalMessage: true)
-        } else {
-            self.handleEvent("error", data: reason as? [AnyObject], isInternalMessage: true)
-        }
+        self.handleEvent("error", data: reason as? [AnyObject] ?? [reason],
+            isInternalMessage: true)
     }
     
     /**
