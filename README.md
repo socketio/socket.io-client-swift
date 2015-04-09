@@ -1,14 +1,52 @@
-Socket.IO-Client-Swift
-======================
+#Socket.IO-Client-Swift
+Socket.IO-client for iOS/OS X.
 
-Socket.IO-client for Swift. Supports ws/wss/polling connections and binary. For socket.io 1.0+ and Swift 1.1.
+##Example
+```swift
+let socket = SocketIOClient(socketURL: "localhost:8080")
 
-For Swift 1.2 use the 1.2 branch.
+socket.on("connect") {data, ack in
+    println("socket connected")
+}
 
-Installation
-============
-[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
+socket.on("currentAmount") {data, ack in
+    if let cur = data?[0] as? Double {
+        socket.emitWithAck("canUpdate", cur)(timeout: 0) {data in
+            socket.emit("update", ["amount": cur + 2.50])
+        }
 
+        ack?("Got your currentAmount", "dude")
+    }
+}
+
+// Connect
+socket.connect()
+```
+
+##Objective-C Example
+```objective-c
+SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8080" options:nil];
+
+[socket on: @"connect" callback: ^(NSArray* data, void (^ack)(NSArray*)) {
+    NSLog(@"connected");
+    [socket emitObjc:@"echo" withItems:@[@"echo test"]];
+    [socket emitWithAckObjc:@"ackack" withItems:@[@1]](10, ^(NSArray* data) {
+        NSLog(@"Got ack");
+    });
+}];
+
+[socket connect];
+
+```
+
+##Features
+- Supports socket.io 1.0+
+- Supports binary
+- Supports Polling and WebSockets
+- Supports TLS/SSL
+- Can be used from Objective-C
+
+##Installation
 Manually (iOS 7+)
 -----------------
 1. Copy the SwiftIO folder into your Xcode project!
@@ -37,127 +75,45 @@ Import in your swift file:
 import Socket_IO_Client_Swift
 ```
 
-Carthage
---------------
-Add this line to your Cartfile
-```
-github "SocketIO/Socket.IO-client-swift" >= 1.4.2
-```
-
-In your project directory
-```bash
-$ carthage update
-```
-
-Add the `SocketIO.framework` from Carthage/Build/iOS or Carthage/Build/OSX to your project
-
-API
-===
+##API
 Constructors
 -----------
-`init(socketURL: String, opts:NSDictionary? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values. See example)
+`init(socketURL: String, opts:NSDictionary? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values)
 
 `convenience init(socketURL: String, options:NSDictionary?)` - Same as above, but meant for Objective-C. See Objective-C Example.
+
+Options
+-------
+- `reconnects: Bool` Default is `true`
+- `reconnectAttempts: Int` Default is `-1` (infinite tries)
+- `reconnectWait: Int` Default is `10`
+- `forcePolling: Bool` Default is `false`. `true` forces the client to use xhr-polling.
+- `forceWebsockets: Bool` Default is `false`. `true` forces the client to use WebSockets.
+- `nsp: String` Default is `"/"`
+- `cookies: [NSHTTPCookie]?` An array of NSHTTPCookies. Passed during the handshake. Default is nil.
+
 Methods
 -------
-1. `socket.on(name:String, callback:((data:NSArray?, ack:AckEmitter?) -> Void))` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
-2. `socket.onAny(callback:((event:String, items:AnyObject?)) -> Void)` - Adds a handler for all events. It will be called on any received event.
-3. `socket.emit(event:String, _ items:AnyObject...)` - Sends a message. Can send multiple items.
-4. `socket.emitObjc(event:String, withItems items:[AnyObject])` - `emit` for Objective-C
-5. `socket.emitWithAck(event:String, _ items:AnyObject...) -> SocketAckHandler` - Sends a message that requests an acknowledgement from the server. Returns a SocketAckHandler which you can use to add an onAck handler. See example.
-6. `socket.emitWithAckObjc(event:String, withItems items:[AnyObject]) -> SocketAckHandler` - `emitWithAck` for Objective-C.
-7. `socket.connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
-8. `socket.connectWithParams(params:[String: AnyObject])` - Establishes a connection to the server passing the specified params. A "connect" event is fired upon successful connection.
-9. `socket.close(#fast:Bool)` - Closes the socket. Once a socket is closed it should not be reopened. Pass true to fast if you're closing from a background task.
+1. `on(name:String, callback:((data:NSArray?, ack:AckEmitter?) -> Void))` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
+2. `onAny(callback:((event:String, items:AnyObject?)) -> Void)` - Adds a handler for all events. It will be called on any received event.
+3. `emit(event:String, _ items:AnyObject...)` - Sends a message. Can send multiple items.
+4. `emitObjc(event:String, withItems items:[AnyObject])` - `emit` for Objective-C
+5. `emitWithAck(event:String, _ items:AnyObject...) -> (timeout:UInt64, callback:(NSArray?) -> Void) -> Void` - Sends a message that requests an acknowledgement from the server. Returns a function which you can use to add a handler. See example. Note: The message is not sent until you call the returned function.
+6. `emitWithAckObjc(event:String, withItems items:[AnyObject]) -> (UInt64, (NSArray?) -> Void) -> Void` - `emitWithAck` for Objective-C. Note: The message is not sent until you call the returned function.
+7. `connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
+8. `connectWithParams(params:[String: AnyObject])` - Establishes a connection to the server passing the specified params. A "connect" event is fired upon successful connection.
+9. `close(#fast:Bool)` - Closes the socket. Once a socket is closed it should not be reopened. Pass true to fast if you're closing from a background task.
 
 Events
 ------
 1. `connect` - Emitted when on a successful connection.
 2. `disconnect` - Emitted when the connection is closed.
-3. `error` - Emitted if the websocket encounters an error.
+3. `error` - Emitted on an error.
 4. `reconnect` - Emitted when the connection is starting to reconnect.
 5. `reconnectAttempt` - Emitted when attempting to reconnect.
 
-Example
-=======
-```swift
-// opts can be omitted, will use default values
-let socket = SocketIOClient(socketURL: "https://localhost:8080", opts: [
-    "reconnects": true, // Default is true
-    "reconnectAttempts": 5, // Default is -1 (infinite tries)
-    "reconnectWait": 5, // Default is 10
-    "nsp": "swift", // connects to the specified namespace. Default is /
-    "forcePolling": true, // if true, the socket will only use XHR polling, Default is false (polling/WebSockets)
-    "cookies": nil // An array of NSHTTPCookies. Passed during handshake. Default is nil
-])
-
-// Called on every event
-socket.onAny {println("got event: \($0.event) with items \($0.items)")}
-
-// Socket Events
-socket.on("connect") {data, ack in
-    println("socket connected")
-
-    // Sending messages
-    socket.emit("testEcho")
-
-    socket.emit("testObject", [
-        "data": true
-        ])
-
-    // Sending multiple items per message
-    socket.emit("multTest", [1], 1.4, 1, "true",
-        true, ["test": "foo"], "bar")
-}
-
-// Requesting acks, and responding to acks
-socket.on("ackEvent") {data, ack in
-    if let str = data?[0] as? String {
-        println("Got ackEvent")
-    }
-
-    // data is an array
-    if let int = data?[1] as? Int {
-        println("Got int")
-    }
-
-    // You can specify a custom timeout interval. 0 means no timeout.
-    socket.emitWithAck("ackTest", "test").onAck(0) {data in
-        println(data?[0])
-    }
-
-    ack?("Got your event", "dude")
-}
-
-socket.on("jsonTest") {data, ack in
-    if let json = data?[0] as? NSDictionary {
-       println(json["test"]!) // foo bar
-    }
-}
-
-// Connecting
-socket.connect()
-```
-
-Objective-C Example
-===================
-```objective-c
-SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8080" options:nil];
-
-[socket on: @"connect" callback: ^(NSArray* data, void (^ack)(NSArray*)) {
-    NSLog(@"connected");
-    [socket emitObjc:@"echo" withItems:@[@"echo test"]];
-    [[socket emitWithAckObjc:@"ackack" withItems:@[@"test"]] onAck:0 withCallback:^(NSArray* data) {
-        NSLog(@"Got data");
-    }];
-}];
-
-```
-
-Detailed Example
-================
+##Detailed Example
 A more detailed example can be found [here](https://github.com/nuclearace/socket.io-client-swift-example)
 
-License
-=======
+##License
 MIT

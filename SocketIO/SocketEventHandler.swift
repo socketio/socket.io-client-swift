@@ -24,10 +24,6 @@
 
 import Foundation
 
-public typealias NormalCallback = (NSArray?, AckEmitter?) -> Void
-public typealias AnyHandler = (event:String, items:AnyObject?)
-public typealias AckEmitter = (AnyObject...) -> Void
-
 private func emitAckCallback(socket:SocketIOClient, num:Int)
     // Curried
     (items:AnyObject...) -> Void {
@@ -47,7 +43,6 @@ class SocketEventHandler {
         withSocket socket:SocketIOClient? = nil) {
             dispatch_async(dispatch_get_main_queue()) {[weak self] in
                 self?.callback?(items, ack != nil ? emitAckCallback(socket!, ack!) : nil)
-                return
             }
     }
 }

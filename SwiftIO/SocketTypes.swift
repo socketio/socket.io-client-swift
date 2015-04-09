@@ -1,8 +1,8 @@
 //
-//  SocketEngineClient.swift
-//  Socket.IO-Swift
+//  SocketTypes.swift
+//  SocketIO-Swift
 //
-//  Created by Erik Little on 3/19/15.
+//  Created by Erik Little on 4/8/15.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -21,22 +21,14 @@
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
-//
 
 import Foundation
 
-@objc public protocol SocketEngineClient {
-    var handleQueue:dispatch_queue_attr_t! {get}
-    var emitQueue:dispatch_queue_attr_t! {get}
-    var reconnecting:Bool {get}
-    var socketURL:String {get}
-    var secure:Bool {get}
-    
-    func didError(reason:AnyObject)
-    func engineDidForceClose(reason:String)
-    func parseSocketMessage(msg:String)
-    func parseBinaryData(data:NSData)
-    func pollingDidFail(err:String)
-    func webSocketDidCloseWithCode(code:Int, reason:String)
-    func webSocketDidFailWithError(error:NSError)
-}
+// @objc_block is undocumented, but is used because Swift assumes that all
+// Objective-C blocks are copied, but Objective-C assumes that Swift will copy it.
+// And the way things are done here, the bridging fails to copy the block in
+// SocketAckMap#addAck
+public typealias AckCallback = @objc_block (NSArray?) -> Void
+public typealias AckEmitter = (AnyObject...) -> Void
+public typealias NormalCallback = (NSArray?, AckEmitter?) -> Void
+public typealias OnAckCallback = (timeout:UInt64, callback:AckCallback) -> Void

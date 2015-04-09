@@ -1,8 +1,8 @@
 //
-//  SocketEngineClient.swift
-//  Socket.IO-Swift
+//  SocketAckMap.swift
+//  SocketIO-Swift
 //
-//  Created by Erik Little on 3/19/15.
+//  Created by Erik Little on 4/3/15.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -21,22 +21,35 @@
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
-//
 
 import Foundation
 
-@objc public protocol SocketEngineClient {
-    var handleQueue:dispatch_queue_attr_t! {get}
-    var emitQueue:dispatch_queue_attr_t! {get}
-    var reconnecting:Bool {get}
-    var socketURL:String {get}
-    var secure:Bool {get}
+struct SocketAckMap {
+    private var acks = [Int: AckCallback]()
+    private var waiting = [Int: Bool]()
     
-    func didError(reason:AnyObject)
-    func engineDidForceClose(reason:String)
-    func parseSocketMessage(msg:String)
-    func parseBinaryData(data:NSData)
-    func pollingDidFail(err:String)
-    func webSocketDidCloseWithCode(code:Int, reason:String)
-    func webSocketDidFailWithError(error:NSError)
+    mutating func addAck(ack:Int, callback:AckCallback) {
+        waiting[ack] = true
+        acks[ack] = callback
+    }
+    
+    mutating func executeAck(ack:Int, items:[AnyObject]?) {
+        let callback = acks[ack]
+        waiting[ack] = false
+        
+        dispatch_async(dispatch_get_main_queue()) {
+            callback?(items)
+        }
+        
+        acks.removeValueForKey(ack)
+    }
+    
+    mutating func timeoutAck(ack:Int) {
+        if waiting[ack] != nil && waiting[ack]! {
+            acks[ack]?(["NO ACK"])
+        }
+        
+        acks.removeValueForKey(ack)
+        waiting.removeValueForKey(ack)
+    }
 }
