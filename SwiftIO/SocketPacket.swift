@@ -43,11 +43,11 @@ class SocketPacket {
         case BINARY_EVENT = 5
         case BINARY_ACK = 6
         
-        init(str:String) {
-            if let int = str.toInt() {
-                self = PacketType(rawValue: int)!
+        init?(str:String) {
+            if let int = str.toInt(), let raw = PacketType(rawValue: int) {
+                self = raw
             } else {
-                self = PacketType(rawValue: 4)!
+                return nil
             }
         }
     }

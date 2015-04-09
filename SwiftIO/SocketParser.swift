@@ -185,7 +185,14 @@ class SocketParser {
             return nsp == "" && socket.nsp != "/"
         }
         
-        let p = parseString(stringMessage) as SocketPacket!
+        let p:SocketPacket
+        
+        if let pack = parseString(stringMessage) {
+            p = pack
+        } else {
+            socket.didError("Error parsing packet")
+            return
+        }
         
         if p.type == SocketPacket.PacketType.EVENT {
             if checkNSP(p.nsp) {
