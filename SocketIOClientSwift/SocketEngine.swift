@@ -304,7 +304,7 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                 self?.handlePollingFailed(err.localizedDescription)
                 return
             } else if err != nil {
-                NSLog(err.localizedDescription)
+                self?.client?.didError(err.localizedDescription)
                 return
             }
             
@@ -420,7 +420,6 @@ public class SocketEngine: NSObject, WebSocketDelegate {
                 }
                 
                 if msg.length != 0 {
-                    // Be sure to capture the value of the msg
                     dispatch_async(self.handleQueue) {[weak self, msg] in
                         self?.parseEngineMessage(msg, fromPolling: true)
                     }

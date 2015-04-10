@@ -88,7 +88,7 @@ class SocketParser {
             return SocketPacket(type: SocketPacket.PacketType(str: type))
         }
         
-        var id = nil as Int?
+        var id:Int?
         var nsp = ""
         var i = 0
         var placeholders = -1
@@ -111,7 +111,7 @@ class SocketParser {
             }
         }
         
-        if arr[i + 1] == "/" {
+        if arr[i &+ 1] == "/" {
             while ++i < arr.count {
                 let c = arr[i]
                 
@@ -123,12 +123,12 @@ class SocketParser {
             }
         }
         
-        if i + 1 >= arr.count {
+        if i &+ 1 >= arr.count {
             return SocketPacket(type: SocketPacket.PacketType(str: type),
                 nsp: nsp, placeholders: placeholders, id: id)
         }
         
-        let next = String(arr[i + 1])
+        let next = String(arr[i &+ 1])
         
         if next.toInt() != nil {
             var c = ""
