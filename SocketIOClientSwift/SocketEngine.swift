@@ -30,7 +30,7 @@ extension String {
     }
 }
 
-public final class SocketEngine: NSObject, WebSocketDelegate {
+public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     private typealias Probe = (msg:String, type:PacketType, data:ContiguousArray<NSData>?)
     private typealias ProbeWaitQueue = [Probe]
     
@@ -62,6 +62,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     
     weak var client:SocketEngineClient?
     var cookies:[NSHTTPCookie]?
+    var log = false
     var pingInterval:Int?
     var polling:Bool {
         return self._polling
@@ -93,11 +94,12 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     }
     
     public init(client:SocketEngineClient, forcePolling:Bool,
-        forceWebsockets:Bool, withCookies cookies:[NSHTTPCookie]?) {
+        forceWebsockets:Bool, withCookies cookies:[NSHTTPCookie]?, logging:Bool) {
             self.client = client
             self.forcePolling = forcePolling
             self.forceWebsockets = forceWebsockets
             self.cookies = cookies
+            self.log = logging
             self.session = NSURLSession(configuration: NSURLSessionConfiguration.ephemeralSessionConfiguration(),
                 delegate: nil, delegateQueue: self.workQueue)
     }
@@ -181,8 +183,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     
     private func doFastUpgrade() {
         if self.waitingForPoll {
-            NSLog("Outstanding poll when switched to websockets," +
-                "we'll probably disconnect soon. You should report this.")
+            SocketLogger.err("Engine: Outstanding poll when switched to WebSockets," +
+                "we'll probably disconnect soon. You should report this.", client: self)
         }
         
         self.sendWebSocketMessage("", withType: PacketType.UPGRADE, datas: nil)
@@ -211,7 +213,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
         
         req.cachePolicy = NSURLRequestCachePolicy.ReloadIgnoringLocalAndRemoteCacheData
         
-        // NSLog("Doing request: \(req)")
+        SocketLogger.log("Engine: Doing polling request: \(req)", client: self)
+        
         self.session.dataTaskWithRequest(req) {[weak self] data, res, err in
             if self == nil {
                 return
@@ -225,7 +228,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
                 return
             }
             
-            // NSLog("Got response: \(res)")
+            SocketLogger.log("Engine: Got polling response: \(res)", client: self!)
             
             if let str = NSString(data: data, encoding: NSUTF8StringEncoding) as? String {
                 dispatch_async(self!.parseQueue) {
@@ -245,7 +248,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     }
     
     private func flushProbeWait() {
-        // NSLog("flushing probe wait")
+        SocketLogger.log("Engine: Flushing probe wait", client: self)
+        
         dispatch_async(self.emitQueue) {[weak self] in
             if self == nil {
                 return
@@ -294,8 +298,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
         
         self.waitingForPost = true
         
-        // NSLog("posting: \(postStr)")
-        // NSLog("Posting with WS status of: \(self.websocket)")
+        SocketLogger.log("Engine: POSTing: \(postStr)", client: self)
         
         self.session.dataTaskWithRequest(req) {[weak self] data, res, err in
             if self == nil {
@@ -349,6 +352,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     
     public func open(opts:[String: AnyObject]? = nil) {
         if self.connected {
+            SocketLogger.err("Engine: Tried to open while connected", client: self)
+            
             self.client?.didError("Engine tried to open while connected")
             return
         }
@@ -405,7 +410,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
                 length += chr
             } else {
                 if length == "" || testLength(length, &n) {
-                    NSLog("parsing error: \(str)")
+                    SocketLogger.err("Engine: parsing error: \(str)", client: self)
+                    
                     self.handlePollingFailed("Error parsing XHR message")
                     return
                 }
@@ -443,7 +449,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     }
     
     private func parseEngineMessage(var message:String, fromPolling:Bool) {
-        // NSLog("Engine got message: \(message)")
+        SocketLogger.log("Engine: Got message: \(message)", client: self)
+        
         if fromPolling {
             fixDoubleUTF8(&message)
         }
@@ -555,7 +562,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     /// Only call on emitQueue
     private func sendPollMessage(var msg:String, withType type:PacketType,
         datas:ContiguousArray<NSData>? = nil) {
-            // println("Sending poll: \(msg) as type: \(type.rawValue)")
+            SocketLogger.log("Engine: Sending poll: \(msg) as type: \(type.rawValue)", client: self)
+            
             doubleEncodeUTF8(&msg)
             let strMsg = "\(type.rawValue)\(msg)"
             
@@ -578,7 +586,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     /// Only call on emitQueue
     private func sendWebSocketMessage(str:String, withType type:PacketType,
         datas:ContiguousArray<NSData>? = nil) {
-            // println("Sending ws: \(str) as type: \(type.rawValue)")
+            SocketLogger.log("Engine: Sending ws: \(str) as type: \(type.rawValue)", client: self)
+            
             self.ws?.writeString("\(type.rawValue)\(str)")
             
             if datas != nil {
@@ -607,7 +616,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     
     private func upgradeTransport() {
         if self.websocketConnected {
-            // NSLog("Doing fast upgrade")
+            SocketLogger.log("Engine: Upgrading transport to WebSockets", client: self)
+            
             // Do a fast upgrade
             // At this point, we should not send anymore polling messages-
             self.fastUpgrade = true
@@ -622,10 +632,10 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
             }
             
             if self!.websocket {
-                // NSLog("writing ws: \(msg):\(data)")
+                SocketLogger.log("Engine: Writing ws: \(msg):\(data)", client: self!)
                 self?.sendWebSocketMessage(msg, withType: type, datas: data)
             } else {
-                // NSLog("writing poll: \(msg):\(data)")
+                SocketLogger.log("Engine: Writing poll: \(msg):\(data)", client: self!)
                 self?.sendPollMessage(msg, withType: type, datas: data)
             }
         }

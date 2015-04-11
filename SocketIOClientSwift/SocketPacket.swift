@@ -24,10 +24,16 @@
 
 import Foundation
 
-final class SocketPacket {
+final class SocketPacket: Printable {
     var binary = ContiguousArray<NSData>()
     var currentPlace = 0
     var data:[AnyObject]?
+    var description:String {
+        var ret = "{SocketPacket\n\ttype: \(self.type?.rawValue)\n\tdata: \(self.data)\n\t" +
+            "id: \(self.id)\n\tplaceholders: \(self.placeholders)"
+        
+        return ret
+    }
     var id:Int?
     var justAck = false
     var nsp = ""

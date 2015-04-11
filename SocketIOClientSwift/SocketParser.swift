@@ -194,6 +194,8 @@ class SocketParser {
             return
         }
         
+        SocketLogger.log("Parser: Decoded packet as: \(p)", client: socket)
+        
         if p.type == SocketPacket.PacketType.EVENT {
             if checkNSP(p.nsp) {
                 return
