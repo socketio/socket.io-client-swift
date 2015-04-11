@@ -24,7 +24,7 @@
 
 import Foundation
 
-@objc public class SocketAnyEvent {
+@objc public final class SocketAnyEvent {
     public let event:String!
     public var items:[AnyObject]?
     

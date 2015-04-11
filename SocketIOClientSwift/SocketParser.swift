@@ -26,7 +26,7 @@ class SocketParser {
     private static let shredder = SocketParser.PacketShredder()
     
     // Translation of socket.io-parser#deconstructPacket
-    private class PacketShredder {
+    private final class PacketShredder {
         var buf = ContiguousArray<NSData>()
         
         func shred(data:AnyObject) -> AnyObject {
