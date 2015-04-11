@@ -24,7 +24,7 @@
 
 import Foundation
 
-class SocketPacket {
+final class SocketPacket {
     var binary = ContiguousArray<NSData>()
     var currentPlace = 0
     var data:[AnyObject]?
