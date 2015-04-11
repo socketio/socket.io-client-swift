@@ -30,7 +30,7 @@ extension String {
     }
 }
 
-public class SocketEngine: NSObject, WebSocketDelegate {
+public final class SocketEngine: NSObject, WebSocketDelegate {
     private typealias Probe = (msg:String, type:PacketType, data:ContiguousArray<NSData>?)
     private typealias ProbeWaitQueue = [Probe]
     
