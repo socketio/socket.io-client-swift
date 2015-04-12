@@ -29,8 +29,8 @@ final class SocketPacket: Printable {
     var currentPlace = 0
     var data:[AnyObject]?
     var description:String {
-        var ret = "{SocketPacket\n\ttype: \(self.type?.rawValue)\n\tdata: \(self.data)\n\t" +
-            "id: \(self.id)\n\tplaceholders: \(self.placeholders)"
+        let ret = "SocketPacket {type: \(self.type?.rawValue) data: \(self.data) " +
+            "id: \(self.id) placeholders: \(self.placeholders)}"
         
         return ret
     }

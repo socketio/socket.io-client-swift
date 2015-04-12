@@ -379,7 +379,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
                 return
             }
             
-            SocketLogger.log("Client: Got event: \(event) with data: \(data)", client: self)
+            SocketLogger.log("Client: Handling event: \(event) with data: \(data)", client: self)
             
             if self.anyHandler != nil {
                 dispatch_async(dispatch_get_main_queue()) {[weak self] in

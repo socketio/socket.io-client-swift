@@ -194,7 +194,9 @@ class SocketParser {
             return
         }
         
-        SocketLogger.log("Parser: Decoded packet as: \(p)", client: socket)
+        if socket.log {
+            SocketLogger.log("Parser: Decoded packet as: \(p)", client: socket)
+        }
         
         if p.type == SocketPacket.PacketType.EVENT {
             if checkNSP(p.nsp) {
@@ -242,7 +244,7 @@ class SocketParser {
         // NSLog(data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions.allZeros))
         
         if socket.waitingData.count == 0 {
-            NSLog("Got data when not remaking packet")
+            SocketLogger.err("Parser: Got data when not remaking packet", client: socket)
             return
         }
         

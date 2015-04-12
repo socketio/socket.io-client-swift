@@ -213,7 +213,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         
         req.cachePolicy = NSURLRequestCachePolicy.ReloadIgnoringLocalAndRemoteCacheData
         
-        SocketLogger.log("Engine: Doing polling request: \(req)", client: self)
+        SocketLogger.log("Engine: Doing polling request", client: self)
         
         self.session.dataTaskWithRequest(req) {[weak self] data, res, err in
             if self == nil {
@@ -228,7 +228,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                 return
             }
             
-            SocketLogger.log("Engine: Got polling response: \(res)", client: self!)
+            SocketLogger.log("Engine: Got polling response", client: self!)
             
             if let str = NSString(data: data, encoding: NSUTF8StringEncoding) as? String {
                 dispatch_async(self!.parseQueue) {
@@ -357,6 +357,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             self.client?.didError("Engine tried to open while connected")
             return
         }
+        
+        SocketLogger.log("Engine: Starting engine", client: self)
         
         self.closed = false
         let (urlPolling, urlWebSocket) = self.createURLs(opts)
