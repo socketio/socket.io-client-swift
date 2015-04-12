@@ -1,8 +1,8 @@
 //
-//  EventHandler.swift
-//  Socket.IO-Swift
+//  SocketLogger.swift
+//  SocketIO-Swift
 //
-//  Created by Erik Little on 1/18/15.
+//  Created by Erik Little on 4/11/15.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -24,25 +24,20 @@
 
 import Foundation
 
-private func emitAckCallback(socket:SocketIOClient, num:Int)
-    // Curried
-    (items:AnyObject...) -> Void {
-        socket.emitAck(num, withData: items)
+protocol SocketLogClient {
+    var log:Bool {get set}
 }
 
-final class SocketEventHandler {
-    let event:String!
-    let callback:NormalCallback?
-    
-    init(event:String, callback:NormalCallback) {
-        self.event = event
-        self.callback = callback
+final class SocketLogger {
+    static func log(message:String, client:SocketLogClient) {
+        if client.log {
+            NSLog("%@", message)
+        }
     }
     
-    func executeCallback(_ items:NSArray? = nil, withAck ack:Int? = nil, withAckType type:Int? = nil,
-        withSocket socket:SocketIOClient? = nil) {
-            dispatch_async(dispatch_get_main_queue()) {[weak self] in
-                self?.callback?(items, ack != nil ? emitAckCallback(socket!, ack!) : nil)
-            }
+    static func err(message:String, client:SocketLogClient) {
+        if client.log {
+            NSLog("ERROR %@", message)
+        }
     }
 }

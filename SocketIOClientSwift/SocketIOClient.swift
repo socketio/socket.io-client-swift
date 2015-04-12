@@ -24,7 +24,7 @@
 
 import Foundation
 
-public final class SocketIOClient: NSObject, SocketEngineClient {
+public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient {
     private lazy var params = [String: AnyObject]()
     private var anyHandler:((SocketAnyEvent) -> Void)?
     private var _closed = false
@@ -43,6 +43,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     let reconnectAttempts:Int!
     var ackHandlers = SocketAckMap()
     var currentAck = -1
+    var log = false
     var waitingData = ContiguousArray<SocketPacket>()
     
     public let socketURL:String
@@ -92,12 +93,12 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
                 self.cookies = cookies
             }
             
-            if let polling = opts!["forcePolling"] as? Bool {
-                self.forcePolling = polling
+            if let log = opts!["log"] as? Bool {
+                self.log = log
             }
             
-            if let ws = opts!["forceWebsockets"] as? Bool {
-                self.forceWebsockets = ws
+            if let polling = opts!["forcePolling"] as? Bool {
+                self.forcePolling = polling
             }
             
             if var nsp = opts!["nsp"] as? String {
@@ -121,6 +122,10 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
             if let reconnectWait = opts!["reconnectWait"] as? Int {
                 self.reconnectWait = abs(reconnectWait)
             }
+            
+            if let ws = opts!["forceWebsockets"] as? Bool {
+                self.forceWebsockets = ws
+            }
         } else {
             self.reconnectAttempts = -1
         }
@@ -133,10 +138,13 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     }
     
     private func addEngine() {
+        SocketLogger.log("Client: Adding engine", client: self)
+        
         self.engine = SocketEngine(client: self,
             forcePolling: self.forcePolling,
             forceWebsockets: self.forceWebsockets,
-            withCookies: self.cookies)
+            withCookies: self.cookies,
+            logging: self.log)
     }
     
     /**
@@ -145,6 +153,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     Pass true to fast if you're closing from a background task
     */
     public func close(#fast:Bool) {
+        SocketLogger.log("Client: Closing socket", client: self)
+        
         self.reconnects = false
         self._connecting = false
         self._connected = false
@@ -212,6 +222,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     }
     
     func didConnect() {
+        SocketLogger.log("Client: Socket connected", client: self)
+        
         self._closed = false
         self._connected = true
         self._connecting = false
@@ -228,6 +240,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     
     /// error
     public func didError(reason:AnyObject) {
+        SocketLogger.err("Client: Error", client: self)
+        
         self.handleEvent("error", data: reason as? [AnyObject] ?? [reason],
             isInternalMessage: true)
     }
@@ -299,6 +313,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         SocketParser.parseForEmit(packet)
         str = packet.createMessageForEvent(event)
         
+        SocketLogger.log("Client: Emitting: \(str)", client: self)
+        
         if packet.type == SocketPacket.PacketType.BINARY_EVENT {
             self.engine?.send(str, withData: packet.binary)
         } else {
@@ -319,6 +335,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
             SocketParser.parseForEmit(packet)
             str = packet.createAck()
             
+            SocketLogger.log("Client: Emitting: \(str)", client: self!)
+
             if packet.type == SocketPacket.PacketType.BINARY_ACK {
                 self?.engine?.send(str, withData: packet.binary)
             } else {
@@ -333,6 +351,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
             return
         }
         
+        SocketLogger.log("Client: Engine closed", client: self)
+        
         self._closed = true
         self._connected = false
         self.reconnects = false
@@ -343,6 +363,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     
     // Called when the socket gets an ack for something it sent
     func handleAck(ack:Int, data:AnyObject?) {
+        SocketLogger.log("Client: Handling ack: \(ack) with data: \(data)", client: self)
+        
         self.ackHandlers.executeAck(ack,
             items: data as? [AnyObject]? ?? data != nil ? [data!] : nil)
     }
@@ -356,6 +378,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
             if !self.connected && !isInternalMessage {
                 return
             }
+            
+            SocketLogger.log("Client: Handling event: \(event) with data: \(data)", client: self)
             
             if self.anyHandler != nil {
                 dispatch_async(dispatch_get_main_queue()) {[weak self] in
@@ -375,6 +399,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     }
     
     func joinNamespace() {
+        SocketLogger.log("Client: Joining namespace", client: self)
+        
         if self.nsp != "/" {
             self.engine?.send("0/\(self.nsp)", withData: nil)
         }
@@ -384,6 +410,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     Removes handler(s)
     */
     public func off(event:String) {
+        SocketLogger.log("Client: Removing handler for event: \(event)", client: self)
+        
         self.handlers = self.handlers.filter {$0.event == event ? false : true}
     }
     
@@ -391,6 +419,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     Adds a handler for an event.
     */
     public func on(name:String, callback:NormalCallback) {
+        SocketLogger.log("Client: Adding handler for event: \(name)", client: self)
+        
         let handler = SocketEventHandler(event: name, callback: callback)
         self.handlers.append(handler)
     }
@@ -438,6 +468,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         }
         
         if self.reconnectTimer == nil {
+            SocketLogger.log("Client: Starting reconnect", client: self)
+            
             self._reconnecting = true
             
             dispatch_async(dispatch_get_main_queue()) {[weak self] in
@@ -451,6 +483,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
             }
         }
         
+        SocketLogger.log("Client: Trying to reconnect", client: self)
         self.handleEvent("reconnectAttempt", data: [self.reconnectAttempts - self.currentReconnectAttempt],
             isInternalMessage: true)
         
