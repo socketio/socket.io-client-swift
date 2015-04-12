@@ -33,6 +33,8 @@
 		74BE0AC31AD751E700F92937 /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74BE0AB81AD751E700F92937 /* WebSocket.swift */; };
 		74BE0AC41AD751E700F92937 /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74BE0AB81AD751E700F92937 /* WebSocket.swift */; };
 		74BE0AC51AD7551C00F92937 /* SocketIO.h in Headers */ = {isa = PBXBuildFile; fileRef = 74BE0A9B1AD7519A00F92937 /* SocketIO.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		74FCC4E51ADA0695003CADB6 /* SocketLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74FCC4E41ADA0695003CADB6 /* SocketLogger.swift */; };
+		74FCC4E61ADA0695003CADB6 /* SocketLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74FCC4E41ADA0695003CADB6 /* SocketLogger.swift */; };
 		7CCB67561AC452F00070BA41 /* SocketIO-OSX.h in Headers */ = {isa = PBXBuildFile; fileRef = 7CCB67551AC452F00070BA41 /* SocketIO-OSX.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
@@ -51,6 +53,7 @@
 		74BE0AB61AD751E700F92937 /* SocketTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketTypes.swift; path = SocketIOClientSwift/SocketTypes.swift; sourceTree = SOURCE_ROOT; };
 		74BE0AB71AD751E700F92937 /* SwiftRegex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SwiftRegex.swift; path = SocketIOClientSwift/SwiftRegex.swift; sourceTree = SOURCE_ROOT; };
 		74BE0AB81AD751E700F92937 /* WebSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WebSocket.swift; path = SocketIOClientSwift/WebSocket.swift; sourceTree = SOURCE_ROOT; };
+		74FCC4E41ADA0695003CADB6 /* SocketLogger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketLogger.swift; path = SocketIOClientSwift/SocketLogger.swift; sourceTree = SOURCE_ROOT; };
 		7CCB671C1AC44E040070BA41 /* SocketIO.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SocketIO.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7CCB67511AC452F00070BA41 /* SocketIO.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SocketIO.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7CCB67541AC452F00070BA41 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -103,6 +106,7 @@
 				74BE0AA51AD751DF00F92937 /* SocketEventHandler.swift */,
 				74BE0AA61AD751DF00F92937 /* SocketFixUTF8.swift */,
 				74BE0AB31AD751E700F92937 /* SocketIOClient.swift */,
+				74FCC4E41ADA0695003CADB6 /* SocketLogger.swift */,
 				74BE0AB41AD751E700F92937 /* SocketPacket.swift */,
 				74BE0AB51AD751E700F92937 /* SocketParser.swift */,
 				74BE0AB61AD751E700F92937 /* SocketTypes.swift */,
@@ -262,6 +266,7 @@
 				74BE0ABF1AD751E700F92937 /* SocketTypes.swift in Sources */,
 				74BE0ABD1AD751E700F92937 /* SocketParser.swift in Sources */,
 				74BE0AAF1AD751DF00F92937 /* SocketEventHandler.swift in Sources */,
+				74FCC4E51ADA0695003CADB6 /* SocketLogger.swift in Sources */,
 				74BE0AC11AD751E700F92937 /* SwiftRegex.swift in Sources */,
 				74BE0AB11AD751DF00F92937 /* SocketFixUTF8.swift in Sources */,
 				74BE0AB91AD751E700F92937 /* SocketIOClient.swift in Sources */,
@@ -281,6 +286,7 @@
 				74BE0AC01AD751E700F92937 /* SocketTypes.swift in Sources */,
 				74BE0ABE1AD751E700F92937 /* SocketParser.swift in Sources */,
 				74BE0AB01AD751DF00F92937 /* SocketEventHandler.swift in Sources */,
+				74FCC4E61ADA0695003CADB6 /* SocketLogger.swift in Sources */,
 				74BE0AC21AD751E700F92937 /* SwiftRegex.swift in Sources */,
 				74BE0AB21AD751DF00F92937 /* SocketFixUTF8.swift in Sources */,
 				74BE0ABA1AD751E700F92937 /* SocketIOClient.swift in Sources */,
