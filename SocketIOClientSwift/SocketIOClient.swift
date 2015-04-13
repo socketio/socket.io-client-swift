@@ -366,7 +366,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         SocketLogger.log("Client: Handling ack: \(ack) with data: \(data)", client: self)
         
         self.ackHandlers.executeAck(ack,
-            items: data as? [AnyObject]? ?? data != nil ? [data!] : nil)
+            items: (data as? [AnyObject]?) ?? (data != nil ? [data!] : nil))
     }
     
     /**
