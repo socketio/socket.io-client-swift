@@ -26,18 +26,19 @@ import Foundation
 
 protocol SocketLogClient {
     var log:Bool {get set}
+    var logType:String {get}
 }
 
 final class SocketLogger {
-    static func log(message:String, client:SocketLogClient) {
+    static func log(message:String, client:SocketLogClient, altType:String? = nil) {
         if client.log {
-            NSLog("%@", message)
+            NSLog("%@: %@", altType ?? client.logType, message)
         }
     }
     
-    static func err(message:String, client:SocketLogClient) {
+    static func err(message:String, client:SocketLogClient, altType:String? = nil) {
         if client.log {
-            NSLog("ERROR %@", message)
+            NSLog("ERROR %@: %@", altType ?? client.logType, message)
         }
     }
 }

@@ -22,7 +22,7 @@
 
 import Foundation
 
-class SocketParser {
+class SocketParser {    
     private static let shredder = SocketParser.PacketShredder()
     
     // Translation of socket.io-parser#deconstructPacket
@@ -185,6 +185,8 @@ class SocketParser {
             return nsp == "" && socket.nsp != "/"
         }
         
+        SocketLogger.log("Parsing \(stringMessage)", client: socket, altType: "SocketParser")
+        
         let p:SocketPacket
         
         if let pack = parseString(stringMessage) {
@@ -194,8 +196,9 @@ class SocketParser {
             return
         }
         
+        // Don't call SocketPacket.description unless we need to
         if socket.log {
-            SocketLogger.log("Parser: Decoded packet as: \(p)", client: socket)
+            SocketLogger.log("Decoded packet as: \(p)", client: socket, altType: "SocketParser")
         }
         
         if p.type == SocketPacket.PacketType.EVENT {
@@ -244,7 +247,7 @@ class SocketParser {
         // NSLog(data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions.allZeros))
         
         if socket.waitingData.count == 0 {
-            SocketLogger.err("Parser: Got data when not remaking packet", client: socket)
+            SocketLogger.err("Got data when not remaking packet", client: socket, altType: "SocketParser")
             return
         }
         

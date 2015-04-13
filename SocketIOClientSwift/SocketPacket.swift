@@ -29,10 +29,15 @@ final class SocketPacket: Printable {
     var currentPlace = 0
     var data:[AnyObject]?
     var description:String {
-        let ret = "SocketPacket {type: \(self.type?.rawValue) data: \(self.data) " +
-            "id: \(self.id) placeholders: \(self.placeholders)}"
+        var better = "SocketPacket {type: ~~0; data: ~~1; " +
+        "id: ~~2; placeholders: ~~3;}"
         
-        return ret
+        better = better["~~0"] ~= (self.type != nil ? String(self.type!.rawValue) : "nil")
+        better = better["~~1"] ~= (self.data != nil ? "\(self.data!)" : "nil")
+        better = better["~~2"] ~= (self.id != nil ? String(self.id!) : "nil")
+        better = better["~~3"] ~= (self.placeholders != nil ? String(self.placeholders!) : "nil")
+        
+        return better
     }
     var id:Int?
     var justAck = false
