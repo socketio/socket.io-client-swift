@@ -185,6 +185,8 @@ class SocketParser {
             return nsp == "" && socket.nsp != "/"
         }
         
+        SocketLogger.log("Parser: Parsing \(stringMessage)", client: socket)
+        
         let p:SocketPacket
         
         if let pack = parseString(stringMessage) {
@@ -193,7 +195,6 @@ class SocketParser {
             socket.didError("Error parsing packet")
             return
         }
-        
         
         // Don't call SocketPacket.description unless we need to
         if socket.log {

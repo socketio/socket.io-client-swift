@@ -32,10 +32,10 @@ final class SocketPacket: Printable {
         var better = "SocketPacket {type: ~~0; data: ~~1; " +
         "id: ~~2; placeholders: ~~3;}"
         
-        better = self.type != nil ? better["~~0"] ~= String(self.type!.rawValue) : "nil"
-        better = self.data != nil ? better["~~1"] ~= "\(self.data!)" : "nil"
-        better = self.id != nil ? better["~~2"] ~= String(self.id!) : "nil"
-        better = self.placeholders != nil ? better["~~3"] ~= String(self.placeholders!) : "nil"
+        better = better["~~0"] ~= (self.type != nil ? String(self.type!.rawValue) : "nil")
+        better = better["~~1"] ~= (self.data != nil ? "\(self.data!)" : "nil")
+        better = better["~~2"] ~= (self.id != nil ? String(self.id!) : "nil")
+        better = better["~~3"] ~= (self.placeholders != nil ? String(self.placeholders!) : "nil")
         
         return better
     }
