@@ -84,8 +84,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         case NOOP = 6
         
         init?(str:String?) {
-            if let value = str?.toInt() {
-                self = PacketType(rawValue: value)!
+            if let value = str?.toInt(), raw = PacketType(rawValue: value) {
+                self = raw
             } else {
                 return nil
             }
