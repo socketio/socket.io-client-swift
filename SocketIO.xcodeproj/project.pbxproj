@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		74BE0A9D1AD7519A00F92937 /* SocketIO.h in Headers */ = {isa = PBXBuildFile; fileRef = 74BE0A9B1AD7519A00F92937 /* SocketIO.h */; };
 		74BE0AA71AD751DF00F92937 /* SocketAckMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74BE0AA11AD751DF00F92937 /* SocketAckMap.swift */; };
 		74BE0AA81AD751DF00F92937 /* SocketAckMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74BE0AA11AD751DF00F92937 /* SocketAckMap.swift */; };
 		74BE0AA91AD751DF00F92937 /* SocketAnyEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74BE0AA21AD751DF00F92937 /* SocketAnyEvent.swift */; };
@@ -160,7 +159,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				7CCB67561AC452F00070BA41 /* SocketIO-OSX.h in Headers */,
-				74BE0A9D1AD7519A00F92937 /* SocketIO.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
