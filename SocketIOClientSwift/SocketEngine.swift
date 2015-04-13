@@ -35,12 +35,9 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     private typealias ProbeWaitQueue = [Probe]
     
     private let workQueue = NSOperationQueue()
-    private let emitQueue = dispatch_queue_create(
-        "engineEmitQueue".cStringUsingEncoding(NSUTF8StringEncoding), DISPATCH_QUEUE_SERIAL)
-    private let parseQueue = dispatch_queue_create(
-        "engineParseQueue".cStringUsingEncoding(NSUTF8StringEncoding), DISPATCH_QUEUE_SERIAL)
-    private let handleQueue = dispatch_queue_create(
-        "engineHandleQueue".cStringUsingEncoding(NSUTF8StringEncoding), DISPATCH_QUEUE_SERIAL)
+    private let emitQueue = dispatch_queue_create("engineEmitQueue", DISPATCH_QUEUE_SERIAL)
+    private let parseQueue = dispatch_queue_create("engineParseQueue", DISPATCH_QUEUE_SERIAL)
+    private let handleQueue = dispatch_queue_create("engineHandleQueue", DISPATCH_QUEUE_SERIAL)
     private let session:NSURLSession!
     private var closed = false
     private var _connected = false
