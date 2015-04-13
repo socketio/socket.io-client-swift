@@ -335,7 +335,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             SocketParser.parseForEmit(packet)
             str = packet.createAck()
             
-            SocketLogger.log("Client: Emitting: \(str)", client: self!)
+            SocketLogger.log("Client: Emitting Ack: \(str)", client: self!)
 
             if packet.type == SocketPacket.PacketType.BINARY_ACK {
                 self?.engine?.send(str, withData: packet.binary)
