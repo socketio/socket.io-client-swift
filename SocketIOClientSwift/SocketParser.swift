@@ -194,6 +194,8 @@ class SocketParser {
             return
         }
         
+        
+        // Don't call SocketPacket.description unless we need to
         if socket.log {
             SocketLogger.log("Parser: Decoded packet as: \(p)", client: socket)
         }
