@@ -30,15 +30,21 @@ protocol SocketLogClient {
 }
 
 final class SocketLogger {
+    private static let printQueue = dispatch_queue_create("printQueue", DISPATCH_QUEUE_SERIAL)
+    
     static func log(message:String, client:SocketLogClient, altType:String? = nil) {
-        if client.log {
-            NSLog("%@: %@", altType ?? client.logType, message)
+        dispatch_async(printQueue) {
+            if client.log {
+                NSLog("%@: %@", altType ?? client.logType, message)
+            }
         }
     }
     
     static func err(message:String, client:SocketLogClient, altType:String? = nil) {
-        if client.log {
-            NSLog("ERROR %@: %@", altType ?? client.logType, message)
+        dispatch_async(printQueue) {
+            if client.log {
+                NSLog("ERROR %@: %@", altType ?? client.logType, message)
+            }
         }
     }
 }

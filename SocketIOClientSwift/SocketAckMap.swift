@@ -24,32 +24,47 @@
 
 import Foundation
 
+private struct SocketAck: Hashable, Equatable {
+    let ack:Int
+    var callback:AckCallback!
+    var hashValue:Int {
+        return ack.hashValue
+    }
+    
+    init(ack:Int) {
+        self.ack = ack
+    }
+    
+    init(ack:Int, callback:AckCallback?) {
+        self.ack = ack
+        self.callback = callback
+    }
+}
+
+private func <(lhs:SocketAck, rhs:SocketAck) -> Bool {
+    return lhs.ack < rhs.ack
+}
+
+private func ==(lhs:SocketAck, rhs:SocketAck) -> Bool {
+    return lhs.ack == rhs.ack
+}
+
 struct SocketAckMap {
-    private var acks = [Int: AckCallback]()
-    private var waiting = [Int: Bool]()
+    private var acks = Set<SocketAck>(minimumCapacity: 1)
     
     mutating func addAck(ack:Int, callback:AckCallback) {
-        waiting[ack] = true
-        acks[ack] = callback
+        self.acks.insert(SocketAck(ack: ack, callback: callback))
     }
     
     mutating func executeAck(ack:Int, items:[AnyObject]?) {
-        let callback = acks[ack]
-        waiting[ack] = false
-        
+        let callback = self.acks.remove(SocketAck(ack: ack))
+
         dispatch_async(dispatch_get_main_queue()) {
-            callback?(items)
+            callback?.callback(items)
         }
-        
-        acks.removeValueForKey(ack)
     }
     
     mutating func timeoutAck(ack:Int) {
-        if waiting[ack] != nil && waiting[ack]! {
-            acks[ack]?(["NO ACK"])
-        }
-        
-        acks.removeValueForKey(ack)
-        waiting.removeValueForKey(ack)
+        self.acks.remove(SocketAck(ack: ack))?.callback(["NO ACK"])
     }
 }
