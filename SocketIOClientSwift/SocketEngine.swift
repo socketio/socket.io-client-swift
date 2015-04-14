@@ -358,6 +358,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         }
         
         SocketLogger.log("Starting engine", client: self)
+        SocketLogger.log("Handshaking", client: self)
         
         self.closed = false
         let (urlPolling, urlWebSocket) = self.createURLs(opts)

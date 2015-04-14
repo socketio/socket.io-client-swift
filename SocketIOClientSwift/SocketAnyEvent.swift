@@ -26,9 +26,9 @@ import Foundation
 
 @objc public final class SocketAnyEvent {
     public let event:String!
-    public var items:[AnyObject]?
+    public let items:NSArray?
     
-    init(event:String, items:[AnyObject]?) {
+    init(event:String, items:NSArray?) {
         self.event = event
         self.items = items
     }
