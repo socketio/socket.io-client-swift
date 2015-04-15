@@ -35,7 +35,7 @@ private struct SocketAck: Hashable, Equatable {
         self.ack = ack
     }
     
-    init(ack:Int, callback:AckCallback?) {
+    init(ack:Int, callback:AckCallback) {
         self.ack = ack
         self.callback = callback
     }
@@ -65,6 +65,10 @@ struct SocketAckMap {
     }
     
     mutating func timeoutAck(ack:Int) {
-        self.acks.remove(SocketAck(ack: ack))?.callback(["NO ACK"])
+        let callback = self.acks.remove(SocketAck(ack: ack))
+        
+        dispatch_async(dispatch_get_main_queue()) {
+            callback?.callback(["NO ACK"])
+        }
     }
 }

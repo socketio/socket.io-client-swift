@@ -77,22 +77,14 @@ final class SocketPacket: Printable {
     }
 
     func addData(data:NSData) -> Bool {
-        func checkDoEvent() -> Bool {
-            if self.placeholders == self.currentPlace {
-                return true
-            } else {
-                return false
-            }
-        }
-
-        if checkDoEvent() {
+        if self.placeholders == self.currentPlace {
             return true
         }
 
         self.binary.append(data)
         self.currentPlace++
 
-        if checkDoEvent() {
+        if self.placeholders == self.currentPlace {
             self.currentPlace = 0
             return true
         } else {
