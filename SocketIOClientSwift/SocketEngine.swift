@@ -201,7 +201,12 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         
         self.waitingForPoll = true
         let req = NSMutableURLRequest(URL: NSURL(string: self.urlPolling! + "&sid=\(self.sid)&b64=1")!)
-        
+      
+        if self.cookies != nil {
+            let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(self.cookies!)
+            req.allHTTPHeaderFields = headers
+        }
+      
         self.doRequest(req)
     }
     
@@ -285,7 +290,12 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         self.postWait.removeAll(keepCapacity: false)
         
         let req = NSMutableURLRequest(URL: NSURL(string: self.urlPolling! + "&sid=\(self.sid)")!)
-        
+      
+        if self.cookies != nil {
+            let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(self.cookies!)
+            req.allHTTPHeaderFields = headers
+        }
+      
         req.HTTPMethod = "POST"
         req.setValue("text/plain; charset=UTF-8", forHTTPHeaderField: "Content-Type")
         
