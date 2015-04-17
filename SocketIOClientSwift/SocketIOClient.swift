@@ -24,7 +24,7 @@
 
 import Foundation
 
-public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient {
+public final class SocketIOClient: NSObject, NSURLSessionDelegate, SocketEngineClient, SocketLogClient {
     private lazy var params = [String: AnyObject]()
     private var anyHandler:((SocketAnyEvent) -> Void)?
     private var _closed = false
@@ -40,12 +40,15 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     private var _reconnecting = false
     private var reconnectTimer:NSTimer?
     
+    
     let reconnectAttempts:Int!
     let logType = "SocketClient"
     var ackHandlers = SocketAckMap()
     var currentAck = -1
     var log = false
     var waitingData = ContiguousArray<SocketPacket>()
+    
+    var sessionDelegate : NSURLSessionDelegate?
     
     public let socketURL:String
     public let handleAckQueue = dispatch_queue_create("handleAckQueue", DISPATCH_QUEUE_SERIAL)
@@ -90,6 +93,10 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         
         // Set options
         if opts != nil {
+            if let sessionDelegate = opts!["sessionDelegate"] as? NSURLSessionDelegate {
+                self.sessionDelegate = sessionDelegate
+            }
+            
             if let cookies = opts!["cookies"] as? [NSHTTPCookie] {
                 self.cookies = cookies
             }
@@ -145,7 +152,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             forcePolling: self.forcePolling,
             forceWebsockets: self.forceWebsockets,
             withCookies: self.cookies,
-            logging: self.log)
+            logging: self.log,
+            withSessionDelegate : self.sessionDelegate)
     }
     
     /**
