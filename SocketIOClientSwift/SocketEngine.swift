@@ -23,12 +23,11 @@
 //  THE SOFTWARE.
 
 import Foundation
-
-//extension String {
-//    private var length:Int {
-//        return count(self)
-//    }
-//}
+extension String {
+    private var length:Int {
+        return count(self)
+    }
+}
 
 public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     private typealias Probe = (msg:String, type:PacketType, data:ContiguousArray<NSData>?)
