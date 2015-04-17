@@ -47,6 +47,9 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8
 - Can be used from Objective-C
 
 ##Installation
+Requires Swift 1.2/Xcode 6.3
+
+If you need Swift 1.1/Xcode 6.2 use v1.5.2. (Pre-Swift 1.2 support is no longer maintained)
 Manually (iOS 7+)
 -----------------
 1. Copy the SocketIOClientSwift folder into your Xcode project
