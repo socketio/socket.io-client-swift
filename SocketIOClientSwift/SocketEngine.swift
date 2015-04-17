@@ -23,7 +23,6 @@
 //  THE SOFTWARE.
 
 import Foundation
-
 extension String {
     private var length:Int {
         return count(self)
@@ -93,14 +92,14 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     }
     
     public init(client:SocketEngineClient, forcePolling:Bool,
-        forceWebsockets:Bool, withCookies cookies:[NSHTTPCookie]?, logging:Bool) {
+        forceWebsockets:Bool, withCookies cookies:[NSHTTPCookie]?, logging:Bool, withSessionDelegate sessionDelegate : NSURLSessionDelegate?) {
             self.client = client
             self.forcePolling = forcePolling
             self.forceWebsockets = forceWebsockets
             self.cookies = cookies
             self.log = logging
             self.session = NSURLSession(configuration: NSURLSessionConfiguration.ephemeralSessionConfiguration(),
-                delegate: nil, delegateQueue: self.workQueue)
+                delegate: sessionDelegate, delegateQueue: self.workQueue)
     }
     
     public func close(#fast:Bool) {
