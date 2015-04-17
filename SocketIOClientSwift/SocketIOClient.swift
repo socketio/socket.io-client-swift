@@ -43,12 +43,11 @@ public final class SocketIOClient: NSObject, NSURLSessionDelegate, SocketEngineC
     
     let reconnectAttempts:Int!
     let logType = "SocketClient"
-    var ackHandlers = SocketAckMap()
+    var ackHandlers = SocketAckManager()
     var currentAck = -1
     var log = false
     var waitingData = ContiguousArray<SocketPacket>()
-    
-    var sessionDelegate : NSURLSessionDelegate?
+    var sessionDelegate:NSURLSessionDelegate?
     
     public let socketURL:String
     public let handleAckQueue = dispatch_queue_create("handleAckQueue", DISPATCH_QUEUE_SERIAL)
@@ -153,7 +152,7 @@ public final class SocketIOClient: NSObject, NSURLSessionDelegate, SocketEngineC
             forceWebsockets: self.forceWebsockets,
             withCookies: self.cookies,
             logging: self.log,
-            withSessionDelegate : self.sessionDelegate)
+            withSessionDelegate: self.sessionDelegate)
     }
     
     /**

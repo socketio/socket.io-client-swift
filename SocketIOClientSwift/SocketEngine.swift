@@ -23,6 +23,7 @@
 //  THE SOFTWARE.
 
 import Foundation
+
 extension String {
     private var length:Int {
         return count(self)
@@ -92,7 +93,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     }
     
     public init(client:SocketEngineClient, forcePolling:Bool,
-        forceWebsockets:Bool, withCookies cookies:[NSHTTPCookie]?, logging:Bool, withSessionDelegate sessionDelegate : NSURLSessionDelegate?) {
+        forceWebsockets:Bool, withCookies cookies:[NSHTTPCookie]?, logging:Bool,
+        withSessionDelegate sessionDelegate:NSURLSessionDelegate?) {
             self.client = client
             self.forcePolling = forcePolling
             self.forceWebsockets = forceWebsockets

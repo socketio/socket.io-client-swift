@@ -1,5 +1,5 @@
 //
-//  SocketAckMap.swift
+//  SocketAckManager.swift
 //  SocketIO-Swift
 //
 //  Created by Erik Little on 4/3/15.
@@ -49,7 +49,7 @@ private func ==(lhs:SocketAck, rhs:SocketAck) -> Bool {
     return lhs.ack == rhs.ack
 }
 
-struct SocketAckMap {
+struct SocketAckManager {
     private var acks = Set<SocketAck>(minimumCapacity: 1)
     
     mutating func addAck(ack:Int, callback:AckCallback) {
