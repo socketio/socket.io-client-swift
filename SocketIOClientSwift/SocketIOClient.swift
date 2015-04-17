@@ -40,7 +40,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     private var _reconnecting = false
     private var reconnectTimer:NSTimer?
     
-    
     let reconnectAttempts:Int!
     let logType = "SocketClient"
     var ackHandlers = SocketAckManager()
