@@ -409,11 +409,10 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         func testLength(length:String, inout n:Int) -> Bool {
             if let num = length.toInt() {
                 n = num
+                return false
             } else {
                 return true
             }
-            
-            return false
         }
         
         for var i = 0, l = str.length; i < l; i = i &+ 1 {

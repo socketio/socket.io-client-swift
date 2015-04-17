@@ -24,7 +24,7 @@
 
 import Foundation
 
-public final class SocketIOClient: NSObject, NSURLSessionDelegate, SocketEngineClient, SocketLogClient {
+public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient {
     private lazy var params = [String: AnyObject]()
     private var anyHandler:((SocketAnyEvent) -> Void)?
     private var _closed = false

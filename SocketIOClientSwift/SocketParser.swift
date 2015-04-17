@@ -242,10 +242,7 @@ class SocketParser {
         }
     }
     
-    // Handles binary data
     static func parseBinaryData(data:NSData, socket:SocketIOClient) {
-        // NSLog(data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions.allZeros))
-        
         if socket.waitingData.count == 0 {
             SocketLogger.err("Got data when not remaking packet", client: socket, altType: "SocketParser")
             return
