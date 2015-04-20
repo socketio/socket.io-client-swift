@@ -37,8 +37,8 @@ final class SocketLogger {
             return
         }
         
-        dispatch_async(printQueue) {
-            NSLog("%@: %@", altType ?? client.logType, message)
+        dispatch_async(printQueue) {[type = client.logType] in
+            NSLog("%@: %@", altType ?? type, message)
         }
     }
     
@@ -47,7 +47,7 @@ final class SocketLogger {
             return
         }
         
-        dispatch_async(printQueue) {
+        dispatch_async(printQueue) {[type = client.logType] in
             NSLog("ERROR %@: %@", altType ?? client.logType, message)
         }
     }

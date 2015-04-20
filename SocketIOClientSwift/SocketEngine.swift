@@ -104,6 +104,10 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                 delegate: sessionDelegate, delegateQueue: self.workQueue)
     }
     
+    deinit {
+        SocketLogger.log("Engine is being deinit", client: self)
+    }
+    
     public func close(#fast:Bool) {
         self.pingTimer?.invalidate()
         self.closed = true
