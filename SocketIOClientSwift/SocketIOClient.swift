@@ -62,7 +62,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         return self._connecting
     }
     public var cookies:[NSHTTPCookie]?
-    public var engine:SocketEngine!
+    public var engine:SocketEngine?
     public var nsp = "/"
     public var reconnects = true
     public var reconnecting:Bool {
@@ -170,7 +170,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         self._connecting = false
         self._connected = false
         self._reconnecting = false
-        self.engine.close(fast: fast)
+        self.engine?.close(fast: fast)
     }
     
     /**
@@ -187,7 +187,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         }
         
         self.addEngine()
-        self.engine.open()
+        self.engine?.open()
     }
     
     /**
@@ -207,7 +207,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         self.paramConnect = true
         
         self.addEngine()
-        self.engine.open(opts: params)
+        self.engine?.open(opts: params)
     }
     
     private func createOnAck(event:String, items:[AnyObject]) -> OnAckCallback {
@@ -242,7 +242,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         self.currentReconnectAttempt = 0
         self.reconnectTimer?.invalidate()
         self.reconnectTimer = nil
-        self._sid = self.engine.sid
+        self._sid = self.engine?.sid
         
         // Don't handle as internal because something crazy could happen where
         // we disconnect before it's handled
@@ -327,9 +327,9 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         SocketLogger.log("Emitting: \(str)", client: self)
         
         if packet.type == SocketPacket.PacketType.BINARY_EVENT {
-            self.engine.send(str, withData: packet.binary)
+            self.engine?.send(str, withData: packet.binary)
         } else {
-            self.engine.send(str, withData: nil)
+            self.engine?.send(str, withData: nil)
         }
     }
     
@@ -349,9 +349,9 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             SocketLogger.log("Emitting Ack: \(str)", client: self!)
             
             if packet.type == SocketPacket.PacketType.BINARY_ACK {
-                self?.engine.send(str, withData: packet.binary)
+                self?.engine?.send(str, withData: packet.binary)
             } else {
-                self?.engine.send(str, withData: nil)
+                self?.engine?.send(str, withData: nil)
             }
         }
     }
@@ -413,7 +413,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         SocketLogger.log("Joining namespace", client: self)
         
         if self.nsp != "/" {
-            self.engine.send("0/\(self.nsp)", withData: nil)
+            self.engine?.send("0/\(self.nsp)", withData: nil)
         }
     }
     
