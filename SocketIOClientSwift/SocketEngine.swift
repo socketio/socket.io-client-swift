@@ -125,7 +125,9 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             var byteArray = [UInt8](count: 1, repeatedValue: 0x0)
             byteArray[0] = 4
             var mutData = NSMutableData(bytes: &byteArray, length: 1)
+            
             mutData.appendData(data)
+            
             return (mutData, nil)
         } else {
             var str = "b4"
@@ -501,7 +503,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             message.removeAtIndex(message.startIndex)
             let mesData = message.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!
             
-            if let json = NSJSONSerialization.JSONObjectWithData(mesData, options: NSJSONReadingOptions.AllowFragments,
+            if let json = NSJSONSerialization.JSONObjectWithData(mesData,
+                options: NSJSONReadingOptions.AllowFragments,
                 error: &err) as? NSDictionary, let sid = json["sid"] as? String {
                     self.sid = sid
                     self._connected = true
