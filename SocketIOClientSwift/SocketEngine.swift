@@ -154,15 +154,17 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         }
         
         if params != nil {
+            let allowedCharacterSet = NSCharacterSet(charactersInString: "!*'();:@&=+$,/?%#[]\" ").invertedSet
+          
             for (key, value) in params! {
                 let keyEsc = key.stringByAddingPercentEncodingWithAllowedCharacters(
-                    NSCharacterSet.URLHostAllowedCharacterSet())!
+                    allowedCharacterSet)!
                 urlPolling += "&\(keyEsc)="
                 urlWebSocket += "&\(keyEsc)="
                 
                 if value is String {
                     let valueEsc = (value as! String).stringByAddingPercentEncodingWithAllowedCharacters(
-                        NSCharacterSet.URLHostAllowedCharacterSet())!
+                        allowedCharacterSet)!
                     urlPolling += "\(valueEsc)"
                     urlWebSocket += "\(valueEsc)"
                 } else {
