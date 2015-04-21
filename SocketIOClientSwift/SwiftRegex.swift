@@ -152,7 +152,7 @@ public class SwiftRegex: NSObject, BooleanType {
                 pos = matchRange.location + matchRange.length
             }
 
-            out.appendString(substring( NSRange(location:pos, length:targetRange.length-pos))!)
+            out.appendString(substring(NSRange(location:pos, length:targetRange.length-pos))!)
 
             return out as String
     }

@@ -42,10 +42,11 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     
     let reconnectAttempts:Int!
     let logType = "SocketClient"
-    var ackHandlers = SocketAckMap()
+    var ackHandlers = SocketAckManager()
     var currentAck = -1
     var log = false
     var waitingData = ContiguousArray<SocketPacket>()
+    var sessionDelegate:NSURLSessionDelegate?
     
     public let socketURL:String
     public let handleAckQueue = dispatch_queue_create("handleAckQueue", DISPATCH_QUEUE_SERIAL)
@@ -90,6 +91,10 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         
         // Set options
         if opts != nil {
+            if let sessionDelegate = opts!["sessionDelegate"] as? NSURLSessionDelegate {
+                self.sessionDelegate = sessionDelegate
+            }
+            
             if let cookies = opts!["cookies"] as? [NSHTTPCookie] {
                 self.cookies = cookies
             }
@@ -138,6 +143,10 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         self.init(socketURL: socketURL, opts: options)
     }
     
+    deinit {
+        SocketLogger.log("Client is being deinit", client: self)
+    }
+    
     private func addEngine() {
         SocketLogger.log("Adding engine", client: self)
         
@@ -145,7 +154,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             forcePolling: self.forcePolling,
             forceWebsockets: self.forceWebsockets,
             withCookies: self.cookies,
-            logging: self.log)
+            logging: self.log,
+            withSessionDelegate: self.sessionDelegate)
     }
     
     /**
@@ -337,7 +347,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             str = packet.createAck()
             
             SocketLogger.log("Emitting Ack: \(str)", client: self!)
-
+            
             if packet.type == SocketPacket.PacketType.BINARY_ACK {
                 self?.engine?.send(str, withData: packet.binary)
             } else {

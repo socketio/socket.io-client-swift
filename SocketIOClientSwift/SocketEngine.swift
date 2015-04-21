@@ -93,14 +93,19 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     }
     
     public init(client:SocketEngineClient, forcePolling:Bool,
-        forceWebsockets:Bool, withCookies cookies:[NSHTTPCookie]?, logging:Bool) {
+        forceWebsockets:Bool, withCookies cookies:[NSHTTPCookie]?, logging:Bool,
+        withSessionDelegate sessionDelegate:NSURLSessionDelegate?) {
             self.client = client
             self.forcePolling = forcePolling
             self.forceWebsockets = forceWebsockets
             self.cookies = cookies
             self.log = logging
             self.session = NSURLSession(configuration: NSURLSessionConfiguration.ephemeralSessionConfiguration(),
-                delegate: nil, delegateQueue: self.workQueue)
+                delegate: sessionDelegate, delegateQueue: self.workQueue)
+    }
+    
+    deinit {
+        SocketLogger.log("Engine is being deinit", client: self)
     }
     
     public func close(#fast:Bool) {
@@ -120,7 +125,9 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             var byteArray = [UInt8](count: 1, repeatedValue: 0x0)
             byteArray[0] = 4
             var mutData = NSMutableData(bytes: &byteArray, length: 1)
+            
             mutData.appendData(data)
+            
             return (mutData, nil)
         } else {
             var str = "b4"
@@ -149,15 +156,17 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         }
         
         if params != nil {
+            let allowedCharacterSet = NSCharacterSet(charactersInString: "!*'();:@&=+$,/?%#[]\" ").invertedSet
+          
             for (key, value) in params! {
                 let keyEsc = key.stringByAddingPercentEncodingWithAllowedCharacters(
-                    NSCharacterSet.URLHostAllowedCharacterSet())!
+                    allowedCharacterSet)!
                 urlPolling += "&\(keyEsc)="
                 urlWebSocket += "&\(keyEsc)="
                 
                 if value is String {
                     let valueEsc = (value as! String).stringByAddingPercentEncodingWithAllowedCharacters(
-                        NSCharacterSet.URLHostAllowedCharacterSet())!
+                        allowedCharacterSet)!
                     urlPolling += "\(valueEsc)"
                     urlWebSocket += "\(valueEsc)"
                 } else {
@@ -201,7 +210,12 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         
         self.waitingForPoll = true
         let req = NSMutableURLRequest(URL: NSURL(string: self.urlPolling! + "&sid=\(self.sid)&b64=1")!)
-        
+      
+        if self.cookies != nil {
+            let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(self.cookies!)
+            req.allHTTPHeaderFields = headers
+        }
+      
         self.doRequest(req)
     }
     
@@ -285,7 +299,12 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         self.postWait.removeAll(keepCapacity: false)
         
         let req = NSMutableURLRequest(URL: NSURL(string: self.urlPolling! + "&sid=\(self.sid)")!)
-        
+      
+        if self.cookies != nil {
+            let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(self.cookies!)
+            req.allHTTPHeaderFields = headers
+        }
+      
         req.HTTPMethod = "POST"
         req.setValue("text/plain; charset=UTF-8", forHTTPHeaderField: "Content-Type")
         
@@ -358,6 +377,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         }
         
         SocketLogger.log("Starting engine", client: self)
+        SocketLogger.log("Handshaking", client: self)
         
         self.closed = false
         let (urlPolling, urlWebSocket) = self.createURLs(opts)
@@ -397,11 +417,10 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         func testLength(length:String, inout n:Int) -> Bool {
             if let num = length.toInt() {
                 n = num
+                return false
             } else {
                 return true
             }
-            
-            return false
         }
         
         for var i = 0, l = str.length; i < l; i = i &+ 1 {
@@ -485,7 +504,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             message.removeAtIndex(message.startIndex)
             let mesData = message.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!
             
-            if let json = NSJSONSerialization.JSONObjectWithData(mesData, options: NSJSONReadingOptions.AllowFragments,
+            if let json = NSJSONSerialization.JSONObjectWithData(mesData,
+                options: NSJSONReadingOptions.AllowFragments,
                 error: &err) as? NSDictionary, let sid = json["sid"] as? String {
                     self.sid = sid
                     self._connected = true

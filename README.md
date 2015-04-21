@@ -47,9 +47,13 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8
 - Can be used from Objective-C
 
 ##Installation
+Requires Swift 1.2/Xcode 6.3
+
+If you need Swift 1.1/Xcode 6.2 use v1.5.2. (Pre-Swift 1.2 support is no longer maintained)
 Manually (iOS 7+)
 -----------------
-1. Copy the SocketIOClientSwift folder into your Xcode project
+1. Copy the SocketIOClientSwift folder into your Xcode project. (Make sure you add the files to your target(s))
+2. If you plan on using this from Objective-C, read [this](https://developer.apple.com/library/ios/documentation/Swift/Conceptual/BuildingCocoaApps/MixandMatch.html) on exposing Swift code to Objective-C.
 
 CocoaPods 0.36.0 or later (iOS 8+)
 ------------------
@@ -92,6 +96,7 @@ Options
 - `nsp: String` Default is `"/"`
 - `cookies: [NSHTTPCookie]?` An array of NSHTTPCookies. Passed during the handshake. Default is nil.
 - `log: Bool` If `true` socket will log debug messages. Default is false.
+- `sessionDelegate: NSURLSessionDelegate` Sets an NSURLSessionDelegate for the underlying engine. Useful if you need to handle self-signed certs. Default is nil.
 
 Methods
 -------
