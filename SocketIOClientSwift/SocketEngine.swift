@@ -646,6 +646,9 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         }
     }
     
+    /**
+    Write a message, independent of transport.
+    */
     public func write(msg:String, withType type:PacketType, withData data:ContiguousArray<NSData>?) {
         dispatch_async(self.emitQueue) {[weak self] in
             if self == nil || !self!.connected {
@@ -659,6 +662,23 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                 SocketLogger.log("Writing poll: \(msg):\(data)", client: self!)
                 self?.sendPollMessage(msg, withType: type, datas: data)
             }
+        }
+    }
+    
+    /**
+    Write a message, independent of transport. For Objective-C. withData should be an NSArray of NSData
+    */
+    public func writeObjc(msg:String, withType type:Int, withData data:NSArray?) {
+        if let pType = PacketType(rawValue: type) {
+            var arr = ContiguousArray<NSData>()
+            
+            if data != nil {
+                for d in data! {
+                    arr.append(d as! NSData)
+                }
+            }
+            
+            self.write(msg, withType: pType, withData: arr)
         }
     }
     
