@@ -280,7 +280,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     /**
     Same as emit, but meant for Objective-C
     */
-    public func emitObjc(event:String, withItems items:[AnyObject]) {
+    public func emit(event:String, withItems items:[AnyObject]) {
         if !self.connected {
             return
         }
@@ -305,7 +305,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     /**
     Same as emitWithAck, but for Objective-C
     */
-    public func emitWithAckObjc(event:String, withItems items:[AnyObject]) -> OnAckCallback {
+    public func emitWithAck(event:String, withItems items:[AnyObject]) -> OnAckCallback {
         if !self.connected {
             return self.createOnAck(event, items: items)
         }
