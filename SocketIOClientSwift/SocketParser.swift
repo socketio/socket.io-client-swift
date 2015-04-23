@@ -103,11 +103,11 @@ class SocketParser {
                 }
             }
             
-            if buf.toInt() == nil || arr[i] != "-" {
+            if let holders = buf.toInt() where arr[i] == "-" {
+                placeholders = holders
+            } else {
                 NSLog("Error parsing \(str)")
                 return nil
-            } else {
-                placeholders = buf.toInt()!
             }
         }
         
