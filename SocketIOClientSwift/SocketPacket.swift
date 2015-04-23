@@ -172,22 +172,14 @@ final class SocketPacket: Printable {
                     options: NSJSONWritingOptions(0), error: &err)
                 let jsonString = NSString(data: jsonSend!, encoding: NSUTF8StringEncoding)
                 
-                message += jsonString! as String
-                message += ","
-                continue
+                message += jsonString! as String + ","
+            } else if arg is String {
+                message += "\"\(arg)\","
             } else if arg is NSNull {
                 message += "null,"
-                continue
+            } else {
+                message += "\(arg),"
             }
-            
-            if arg is String {
-                message += "\"\(arg)\""
-                message += ","
-                continue
-            }
-            
-            message += "\(arg)"
-            message += ","
         }
         
         if message != "" {

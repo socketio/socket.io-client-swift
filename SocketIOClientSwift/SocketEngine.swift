@@ -257,8 +257,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                 return
             } else if !self!.closed && self!.polling {
                 self?.doPoll()
-            }
-            }.resume()
+            }}.resume()
     }
     
     private func flushProbeWait() {
