@@ -490,7 +490,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
                 
                 self?.reconnectTimer = NSTimer.scheduledTimerWithTimeInterval(Double(self!.reconnectWait),
                     target: self!, selector: "tryReconnect", userInfo: nil, repeats: true)
-                return
             }
         }
         
