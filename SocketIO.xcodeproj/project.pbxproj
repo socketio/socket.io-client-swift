@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		74BE0AA71AD751DF00F92937 /* SocketAckMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74BE0AA11AD751DF00F92937 /* SocketAckMap.swift */; };
-		74BE0AA81AD751DF00F92937 /* SocketAckMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74BE0AA11AD751DF00F92937 /* SocketAckMap.swift */; };
+		7419AF5A1AE90B2200FC327E /* SocketAckManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7419AF591AE90B2200FC327E /* SocketAckManager.swift */; };
+		7419AF5B1AE90B2200FC327E /* SocketAckManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7419AF591AE90B2200FC327E /* SocketAckManager.swift */; };
 		74BE0AA91AD751DF00F92937 /* SocketAnyEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74BE0AA21AD751DF00F92937 /* SocketAnyEvent.swift */; };
 		74BE0AAA1AD751DF00F92937 /* SocketAnyEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74BE0AA21AD751DF00F92937 /* SocketAnyEvent.swift */; };
 		74BE0AAB1AD751DF00F92937 /* SocketEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74BE0AA31AD751DF00F92937 /* SocketEngine.swift */; };
@@ -38,9 +38,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		7419AF591AE90B2200FC327E /* SocketAckManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketAckManager.swift; path = SocketIOClientSwift/SocketAckManager.swift; sourceTree = SOURCE_ROOT; };
 		74BE0A9B1AD7519A00F92937 /* SocketIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SocketIO.h; path = SocketIOClientSwift/SocketIO.h; sourceTree = SOURCE_ROOT; };
 		74BE0A9E1AD751A400F92937 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = SocketIOClientSwift/Info.plist; sourceTree = SOURCE_ROOT; };
-		74BE0AA11AD751DF00F92937 /* SocketAckMap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketAckMap.swift; path = SocketIOClientSwift/SocketAckMap.swift; sourceTree = SOURCE_ROOT; };
 		74BE0AA21AD751DF00F92937 /* SocketAnyEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketAnyEvent.swift; path = SocketIOClientSwift/SocketAnyEvent.swift; sourceTree = SOURCE_ROOT; };
 		74BE0AA31AD751DF00F92937 /* SocketEngine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketEngine.swift; path = SocketIOClientSwift/SocketEngine.swift; sourceTree = SOURCE_ROOT; };
 		74BE0AA41AD751DF00F92937 /* SocketEngineClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketEngineClient.swift; path = SocketIOClientSwift/SocketEngineClient.swift; sourceTree = SOURCE_ROOT; };
@@ -98,8 +98,8 @@
 		7CCB671E1AC44E040070BA41 /* SocketIOClientSwift */ = {
 			isa = PBXGroup;
 			children = (
-				74BE0AA11AD751DF00F92937 /* SocketAckMap.swift */,
 				74BE0AA21AD751DF00F92937 /* SocketAnyEvent.swift */,
+				7419AF591AE90B2200FC327E /* SocketAckManager.swift */,
 				74BE0AA31AD751DF00F92937 /* SocketEngine.swift */,
 				74BE0AA41AD751DF00F92937 /* SocketEngineClient.swift */,
 				74BE0AA51AD751DF00F92937 /* SocketEventHandler.swift */,
@@ -259,6 +259,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				74BE0AAB1AD751DF00F92937 /* SocketEngine.swift in Sources */,
+				7419AF5A1AE90B2200FC327E /* SocketAckManager.swift in Sources */,
 				74BE0AC31AD751E700F92937 /* WebSocket.swift in Sources */,
 				74BE0AAD1AD751DF00F92937 /* SocketEngineClient.swift in Sources */,
 				74BE0ABF1AD751E700F92937 /* SocketTypes.swift in Sources */,
@@ -270,7 +271,6 @@
 				74BE0AB91AD751E700F92937 /* SocketIOClient.swift in Sources */,
 				74BE0AA91AD751DF00F92937 /* SocketAnyEvent.swift in Sources */,
 				74BE0ABB1AD751E700F92937 /* SocketPacket.swift in Sources */,
-				74BE0AA71AD751DF00F92937 /* SocketAckMap.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -279,6 +279,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				74BE0AAC1AD751DF00F92937 /* SocketEngine.swift in Sources */,
+				7419AF5B1AE90B2200FC327E /* SocketAckManager.swift in Sources */,
 				74BE0AC41AD751E700F92937 /* WebSocket.swift in Sources */,
 				74BE0AAE1AD751DF00F92937 /* SocketEngineClient.swift in Sources */,
 				74BE0AC01AD751E700F92937 /* SocketTypes.swift in Sources */,
@@ -290,7 +291,6 @@
 				74BE0ABA1AD751E700F92937 /* SocketIOClient.swift in Sources */,
 				74BE0AAA1AD751DF00F92937 /* SocketAnyEvent.swift in Sources */,
 				74BE0ABC1AD751E700F92937 /* SocketPacket.swift in Sources */,
-				74BE0AA81AD751DF00F92937 /* SocketAckMap.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
