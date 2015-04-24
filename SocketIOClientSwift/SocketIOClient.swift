@@ -249,9 +249,28 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         self.handleEvent("connect", data: nil, isInternalMessage: false)
     }
     
+    func didDisconnect(reason:String) {
+        if self.closed {
+            return
+        }
+        
+        SocketLogger.log("Disconnected: \(reason)", client: self)
+        
+        self._closed = true
+        self._connected = false
+        self.reconnects = false
+        self._connecting = false
+        self._reconnecting = false
+        
+        // Make sure the engine is actually dead.
+        self.engine?.close(fast: true)
+        
+        self.handleEvent("disconnect", data: [reason], isInternalMessage: true)
+    }
+    
     /// error
     public func didError(reason:AnyObject) {
-        SocketLogger.err("Error", client: self)
+        SocketLogger.err("Error: \(reason)", client: self)
         
         self.handleEvent("error", data: reason as? [AnyObject] ?? [reason],
             isInternalMessage: true)
@@ -356,20 +375,16 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         }
     }
     
-    /// Server wants us to die
-    public func engineDidForceClose(reason:String) {
-        if self.closed {
-            return
-        }
-        
-        SocketLogger.log("Engine closed", client: self)
-        
-        self._closed = true
+    public func engineDidClose(reason:String) {
         self._connected = false
-        self.reconnects = false
         self._connecting = false
-        self._reconnecting = false
-        self.handleEvent("disconnect", data: [reason], isInternalMessage: true)
+        
+        if self.closed || !self.reconnects {
+            self.didDisconnect("Engine closed")
+        } else if !self.reconnecting {
+            self.handleEvent("reconnect", data: [reason], isInternalMessage: true)
+            self.tryReconnect()
+        }
     }
     
     // Called when the socket gets an ack for something it sent
@@ -458,19 +473,10 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         SocketParser.parseBinaryData(data, socket: self)
     }
     
-    // Something happened while polling
-    public func pollingDidFail(err:String) {
-        if !self.reconnecting {
-            self._connected = false
-            self.handleEvent("reconnect", data: [err], isInternalMessage: true)
-            self.tryReconnect()
-        }
-    }
-    
     // We lost connection and should attempt to reestablish
     func tryReconnect() {
         if self.reconnectAttempts != -1 && self.currentReconnectAttempt + 1 > self.reconnectAttempts {
-            self.engineDidForceClose("Reconnect Failed")
+            self.didDisconnect("Reconnect Failed")
             return
         } else if self.connected {
             self._connecting = false
@@ -502,31 +508,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             self.connectWithParams(self.params)
         } else {
             self.connect()
-        }
-    }
-    
-    // Called when the socket is closed
-    public func webSocketDidCloseWithCode(code:Int, reason:String) {
-        self._connected = false
-        self._connecting = false
-        if self.closed || !self.reconnects {
-            self.engineDidForceClose("WebSocket closed")
-        } else if !self.reconnecting {
-            self.handleEvent("reconnect", data: [reason], isInternalMessage: true)
-            self.tryReconnect()
-        }
-    }
-    
-    // Called when an error occurs.
-    public func webSocketDidFailWithError(error:NSError) {
-        self._connected = false
-        self._connecting = false
-        self.handleEvent("error", data: [error.localizedDescription], isInternalMessage: true)
-        if self.closed || !self.reconnects {
-            self.engineDidForceClose("WebSocket closed with an error \(error)")
-        } else if !self.reconnecting {
-            self.handleEvent("reconnect", data: [error.localizedDescription], isInternalMessage: true)
-            self.tryReconnect()
         }
     }
 }

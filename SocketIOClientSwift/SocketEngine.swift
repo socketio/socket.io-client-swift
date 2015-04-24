@@ -110,6 +110,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     }
     
     public func close(#fast:Bool) {
+        SocketLogger.log("Engine is being closed. Fast: \(fast)", client: self)
+
         self.pingTimer?.invalidate()
         self.closed = true
         
@@ -117,7 +119,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         self.ws?.disconnect()
         
         if fast || self.polling {
-            self.client?.engineDidForceClose("Disconnect")
+            self.client?.engineDidClose("Disconnect")
         }
     }
     
@@ -349,7 +351,6 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     }
     
     // A poll failed, tell the client about it
-    
     private func handlePollingFailed(reason:String) {
         self._connected = false
         self.ws?.disconnect()
@@ -361,10 +362,9 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             return
         }
         
-        if !self.closed && !self.client!.reconnecting {
-            self.client?.pollingDidFail(reason)
-        } else if !self.client!.reconnecting {
-            self.client?.engineDidForceClose(reason)
+        if !self.closed {
+            self.client?.didError(reason)
+            self.client?.engineDidClose(reason)
         }
     }
     
@@ -536,7 +536,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             }
             
             if self.polling {
-                self.client!.engineDidForceClose("Disconnect")
+                self.client!.engineDidClose("Disconnect")
             }
             
             return
@@ -699,7 +699,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         self.probing = false
         
         if self.closed {
-            self.client?.engineDidForceClose("Disconnect")
+            self.client?.engineDidClose("Disconnect")
             return
         }
         
@@ -708,9 +708,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             self._connected = false
             self._websocket = false
             
-            let reason = error?.localizedDescription
-            self.client?.webSocketDidCloseWithCode(1,
-                reason: reason == nil ? "Socket Disconnected" : reason!)
+            self.client?.didError(error?.localizedDescription ?? "Socket Disconnected")
+            self.client?.engineDidClose(error?.localizedDescription ?? "Socket Disconnected")
         } else {
             self.flushProbeWait()
         }
