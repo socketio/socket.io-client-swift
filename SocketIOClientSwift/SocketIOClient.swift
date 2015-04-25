@@ -264,7 +264,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         
         // Make sure the engine is actually dead.
         self.engine?.close(fast: true)
-        
         self.handleEvent("disconnect", data: [reason], isInternalMessage: true)
     }
     
