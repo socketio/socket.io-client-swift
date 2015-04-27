@@ -153,6 +153,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         self._connected = false
         self._reconnecting = false
         self.engine?.close(fast: fast)
+        self.engine = nil
     }
     
     /**
@@ -454,8 +455,20 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         SocketParser.parseBinaryData(data, socket: self)
     }
     
+    /**
+    Trieds to reconnect to the server.
+    */
+    public func reconnect() {
+        self._connected = false
+        self._connecting = false
+        self._reconnecting = false
+        
+        self.engine?.stopPolling()
+        self.tryReconnect()
+    }
+    
     // We lost connection and should attempt to reestablish
-    func tryReconnect() {
+    @objc private func tryReconnect() {
         if self.reconnectAttempts != -1 && self.currentReconnectAttempt + 1 > self.reconnectAttempts {
             self.didDisconnect("Reconnect Failed")
             return

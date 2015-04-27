@@ -121,7 +121,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         
         self.write("", withType: PacketType.CLOSE, withData: nil)
         self.ws?.disconnect()
-        
+        self.stopPolling()
+
         if fast || self.polling {
             self.client?.engineDidClose("Disconnect")
         }
@@ -252,7 +253,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             SocketLogger.log("Got polling response", client: self!)
             
             if let str = NSString(data: data, encoding: NSUTF8StringEncoding) as? String {
-                dispatch_async(self!.parseQueue) {
+                dispatch_async(self!.parseQueue) {[weak self] in
                     self?.parsePollingMessage(str)
                 }
             }
@@ -337,7 +338,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             }
             
             self?.waitingForPost = false
-            dispatch_async(self!.emitQueue) {
+            dispatch_async(self!.emitQueue) {[weak self] in
                 if !self!.fastUpgrade {
                     self?.flushWaitingForPost()
                     self?.doPoll()
@@ -363,7 +364,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         self.waitingForPoll = false
         self.waitingForPost = false
         
-        if self.client == nil {
+        // If cancelled we were already closing
+        if self.client == nil || reason == "cancelled" {
             return
         }
         
@@ -445,7 +447,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                 
                 if let lengthInt = length.toInt() {
                     if lengthInt != msg.length {
-                        NSLog("parsing error: \(str)")
+                        SocketLogger.err("parsing error: \(str)", client: self)
                         return
                     }
                 }
@@ -630,11 +632,19 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         }
         
         self.pingTimer?.invalidate()
-        dispatch_async(dispatch_get_main_queue()) {
-            self.pingTimer = NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(self.pingInterval!),
-                target: self,
+        dispatch_async(dispatch_get_main_queue()) {[weak self] in
+            if self == nil {
+                return
+            }
+            
+            self?.pingTimer = NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(self!.pingInterval!),
+                target: self!,
                 selector: Selector("sendPing"), userInfo: nil, repeats: true)
         }
+    }
+    
+    func stopPolling() {
+        self.session.invalidateAndCancel()
     }
     
     private func upgradeTransport() {
