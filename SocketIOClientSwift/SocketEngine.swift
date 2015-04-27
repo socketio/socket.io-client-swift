@@ -185,7 +185,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     }
     
     private func createWebsocket(andConnect connect:Bool) {
-        self.ws = WebSocket(url: NSURL(string: self.urlWebSocket! + "&sid=\(self.sid)")!)
+        self.ws = WebSocket(url: NSURL(string: self.urlWebSocket! + "&sid=\(self.sid)")!,
+            cookies: self.cookies)
         self.ws?.queue = self.handleQueue
         self.ws?.delegate = self
         

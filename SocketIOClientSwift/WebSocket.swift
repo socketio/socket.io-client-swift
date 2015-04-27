@@ -78,6 +78,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
         var buffer: NSMutableData?
     }
     
+    private var cookies:[NSHTTPCookie]?
     public weak var delegate: WebSocketDelegate?
     private var url: NSURL
     private var inputStream: NSInputStream?
@@ -102,6 +103,11 @@ public class WebSocket : NSObject, NSStreamDelegate {
     //init the websocket with a url
     public init(url: NSURL) {
         self.url = url
+    }
+    public convenience init(url: NSURL, cookies:[NSHTTPCookie]?) {
+        self.init(url: url)
+        self.cookies = cookies
+        
     }
     //used for setting protocols.
     public convenience init(url: NSURL, protocols: Array<String>) {
@@ -175,6 +181,14 @@ public class WebSocket : NSObject, NSStreamDelegate {
                 port = 80
             }
         }
+        
+        if self.cookies != nil {
+            let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(self.cookies!)
+            for (key, value) in headers {
+                self.addHeader(urlRequest, key: key as! String, val: value as! String)
+            }
+        }
+        
         self.addHeader(urlRequest, key: headerWSUpgradeName, val: headerWSUpgradeValue)
         self.addHeader(urlRequest, key: headerWSConnectionName, val: headerWSConnectionValue)
         if let protocols = optionalProtocols {
