@@ -236,7 +236,7 @@ class SocketParser {
                 socket.didConnect()
             }
         } else if p.type == SocketPacket.PacketType.DISCONNECT {
-            socket.engineDidForceClose("Got Disconnect")
+            socket.didDisconnect("Got Disconnect")
         } else if p.type == SocketPacket.PacketType.ERROR {
             socket.didError(p.data == nil ? "Error" : p.data!)
         }

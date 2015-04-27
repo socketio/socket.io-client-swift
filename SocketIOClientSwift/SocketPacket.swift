@@ -55,7 +55,7 @@ final class SocketPacket: Printable {
         case BINARY_ACK = 6
         
         init?(str:String) {
-            if let int = str.toInt(), let raw = PacketType(rawValue: int) {
+            if let int = str.toInt(), raw = PacketType(rawValue: int) {
                 self = raw
             } else {
                 return nil

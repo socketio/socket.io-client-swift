@@ -28,15 +28,11 @@ import Foundation
 @objc public protocol SocketEngineClient {
     var handleQueue:dispatch_queue_attr_t! {get}
     var emitQueue:dispatch_queue_attr_t! {get}
-    var reconnecting:Bool {get}
     var socketURL:String {get}
     var secure:Bool {get}
     
     func didError(reason:AnyObject)
-    func engineDidForceClose(reason:String)
+    func engineDidClose(reason:String)
     func parseSocketMessage(msg:String)
     func parseBinaryData(data:NSData)
-    func pollingDidFail(err:String)
-    func webSocketDidCloseWithCode(code:Int, reason:String)
-    func webSocketDidFailWithError(error:NSError)
 }

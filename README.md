@@ -97,6 +97,7 @@ Options
 - `cookies: [NSHTTPCookie]?` An array of NSHTTPCookies. Passed during the handshake. Default is nil.
 - `log: Bool` If `true` socket will log debug messages. Default is false.
 - `sessionDelegate: NSURLSessionDelegate` Sets an NSURLSessionDelegate for the underlying engine. Useful if you need to handle self-signed certs. Default is nil.
+- `path: String` - If the server uses a custom path. ex: `"/swift"`. Default is `""`
 
 Methods
 -------

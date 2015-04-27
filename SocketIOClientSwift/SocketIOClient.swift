@@ -31,8 +31,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     private var _connected = false
     private var _connecting = false
     private var currentReconnectAttempt = 0
-    private var forcePolling = false
-    private var forceWebsockets = false
     private var handlers = ContiguousArray<SocketEventHandler>()
     private var paramConnect = false
     private var _secure = false
@@ -61,9 +59,9 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     public var connecting:Bool {
         return self._connecting
     }
-    public var cookies:[NSHTTPCookie]?
     public var engine:SocketEngine?
     public var nsp = "/"
+    public var opts:[String: AnyObject]?
     public var reconnects = true
     public var reconnecting:Bool {
         return self._reconnecting
@@ -79,7 +77,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     /**
     Create a new SocketIOClient. opts can be omitted
     */
-    public init(var socketURL:String, opts:NSDictionary? = nil) {
+    public init(var socketURL:String, opts:[String: AnyObject]? = nil) {
         if socketURL["https://"].matches().count != 0 {
             self._secure = true
         }
@@ -88,6 +86,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         socketURL = socketURL["https://"] ~= ""
         
         self.socketURL = socketURL
+        self.opts = opts
         
         // Set options
         if opts != nil {
@@ -95,16 +94,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
                 self.sessionDelegate = sessionDelegate
             }
             
-            if let cookies = opts!["cookies"] as? [NSHTTPCookie] {
-                self.cookies = cookies
-            }
-            
             if let log = opts!["log"] as? Bool {
                 self.log = log
-            }
-            
-            if let polling = opts!["forcePolling"] as? Bool {
-                self.forcePolling = polling
             }
             
             if var nsp = opts!["nsp"] as? String {
@@ -128,10 +119,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             if let reconnectWait = opts!["reconnectWait"] as? Int {
                 self.reconnectWait = abs(reconnectWait)
             }
-            
-            if let ws = opts!["forceWebsockets"] as? Bool {
-                self.forceWebsockets = ws
-            }
         } else {
             self.reconnectAttempts = -1
         }
@@ -139,7 +126,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         super.init()
     }
     
-    public convenience init(socketURL:String, options:NSDictionary?) {
+    public convenience init(socketURL:String, options:[String: AnyObject]?) {
         self.init(socketURL: socketURL, opts: options)
     }
     
@@ -150,12 +137,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     private func addEngine() {
         SocketLogger.log("Adding engine", client: self)
         
-        self.engine = SocketEngine(client: self,
-            forcePolling: self.forcePolling,
-            forceWebsockets: self.forceWebsockets,
-            withCookies: self.cookies,
-            logging: self.log,
-            withSessionDelegate: self.sessionDelegate)
+        self.engine = SocketEngine(client: self, opts: self.opts)
     }
     
     /**
@@ -171,6 +153,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         self._connected = false
         self._reconnecting = false
         self.engine?.close(fast: fast)
+        self.engine = nil
     }
     
     /**
@@ -249,9 +232,27 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         self.handleEvent("connect", data: nil, isInternalMessage: false)
     }
     
+    func didDisconnect(reason:String) {
+        if self.closed {
+            return
+        }
+        
+        SocketLogger.log("Disconnected: \(reason)", client: self)
+        
+        self._closed = true
+        self._connected = false
+        self.reconnects = false
+        self._connecting = false
+        self._reconnecting = false
+        
+        // Make sure the engine is actually dead.
+        self.engine?.close(fast: true)
+        self.handleEvent("disconnect", data: [reason], isInternalMessage: true)
+    }
+    
     /// error
     public func didError(reason:AnyObject) {
-        SocketLogger.err("Error", client: self)
+        SocketLogger.err("Error: \(reason)", client: self)
         
         self.handleEvent("error", data: reason as? [AnyObject] ?? [reason],
             isInternalMessage: true)
@@ -356,20 +357,16 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         }
     }
     
-    /// Server wants us to die
-    public func engineDidForceClose(reason:String) {
-        if self.closed {
-            return
-        }
-        
-        SocketLogger.log("Engine closed", client: self)
-        
-        self._closed = true
+    public func engineDidClose(reason:String) {
         self._connected = false
-        self.reconnects = false
         self._connecting = false
-        self._reconnecting = false
-        self.handleEvent("disconnect", data: [reason], isInternalMessage: true)
+        
+        if self.closed || !self.reconnects {
+            self.didDisconnect("Engine closed")
+        } else if !self.reconnecting {
+            self.handleEvent("reconnect", data: [reason], isInternalMessage: true)
+            self.tryReconnect()
+        }
     }
     
     // Called when the socket gets an ack for something it sent
@@ -458,19 +455,22 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         SocketParser.parseBinaryData(data, socket: self)
     }
     
-    // Something happened while polling
-    public func pollingDidFail(err:String) {
-        if !self.reconnecting {
-            self._connected = false
-            self.handleEvent("reconnect", data: [err], isInternalMessage: true)
-            self.tryReconnect()
-        }
+    /**
+    Trieds to reconnect to the server.
+    */
+    public func reconnect() {
+        self._connected = false
+        self._connecting = false
+        self._reconnecting = false
+        
+        self.engine?.stopPolling()
+        self.tryReconnect()
     }
     
     // We lost connection and should attempt to reestablish
-    func tryReconnect() {
+    @objc private func tryReconnect() {
         if self.reconnectAttempts != -1 && self.currentReconnectAttempt + 1 > self.reconnectAttempts {
-            self.engineDidForceClose("Reconnect Failed")
+            self.didDisconnect("Reconnect Failed")
             return
         } else if self.connected {
             self._connecting = false
@@ -502,31 +502,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             self.connectWithParams(self.params)
         } else {
             self.connect()
-        }
-    }
-    
-    // Called when the socket is closed
-    public func webSocketDidCloseWithCode(code:Int, reason:String) {
-        self._connected = false
-        self._connecting = false
-        if self.closed || !self.reconnects {
-            self.engineDidForceClose("WebSocket closed")
-        } else if !self.reconnecting {
-            self.handleEvent("reconnect", data: [reason], isInternalMessage: true)
-            self.tryReconnect()
-        }
-    }
-    
-    // Called when an error occurs.
-    public func webSocketDidFailWithError(error:NSError) {
-        self._connected = false
-        self._connecting = false
-        self.handleEvent("error", data: [error.localizedDescription], isInternalMessage: true)
-        if self.closed || !self.reconnects {
-            self.engineDidForceClose("WebSocket closed with an error \(error)")
-        } else if !self.reconnecting {
-            self.handleEvent("reconnect", data: [error.localizedDescription], isInternalMessage: true)
-            self.tryReconnect()
         }
     }
 }
