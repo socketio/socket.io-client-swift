@@ -112,7 +112,7 @@ Methods
 9. `close(#fast:Bool)` - Closes the socket. Once a socket is closed it should not be reopened. Pass true to fast if you're closing from a background task.
 10. `reconnect()` - Causes the client to reconnect to the server.
 
-Events
+Client Events
 ------
 1. `connect` - Emitted when on a successful connection.
 2. `disconnect` - Emitted when the connection is closed.
