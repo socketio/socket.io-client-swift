@@ -75,6 +75,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     public var sid:String? {
         return self._sid
     }
+    public var socketPath = ""
+
     
     /**
     Create a new SocketIOClient. opts can be omitted
@@ -101,6 +103,10 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             
             if let log = opts!["log"] as? Bool {
                 self.log = log
+            }
+            
+            if let path = opts!["path"] as? String {
+                self.socketPath = path
             }
             
             if let polling = opts!["forcePolling"] as? Bool {
@@ -153,9 +159,11 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         self.engine = SocketEngine(client: self,
             forcePolling: self.forcePolling,
             forceWebsockets: self.forceWebsockets,
-            withCookies: self.cookies,
+            cookies: self.cookies,
             logging: self.log,
-            withSessionDelegate: self.sessionDelegate)
+            sessionDelegate: self.sessionDelegate,
+            path: self.socketPath
+        )
     }
     
     /**

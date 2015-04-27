@@ -68,6 +68,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         return self._polling
     }
     var sid = ""
+    var socketPath = ""
     var urlPolling:String?
     var urlWebSocket:String?
     var websocket:Bool {
@@ -94,13 +95,14 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     }
     
     public init(client:SocketEngineClient, forcePolling:Bool,
-        forceWebsockets:Bool, withCookies cookies:[NSHTTPCookie]?, logging:Bool,
-        withSessionDelegate sessionDelegate:NSURLSessionDelegate?) {
+        forceWebsockets:Bool, cookies:[NSHTTPCookie]?, logging:Bool,
+        sessionDelegate:NSURLSessionDelegate?, path:String) {
             self.client = client
             self.forcePolling = forcePolling
             self.forceWebsockets = forceWebsockets
             self.cookies = cookies
             self.log = logging
+            self.socketPath = path
             self.session = NSURLSession(configuration: NSURLSessionConfiguration.ephemeralSessionConfiguration(),
                 delegate: sessionDelegate, delegateQueue: self.workQueue)
     }
@@ -146,7 +148,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             return ("", "")
         }
         
-        var url = "\(self.client!.socketURL)/socket.io/?transport="
+        var url = "\(self.client!.socketURL)\(self.socketPath)/socket.io/?transport="
         var urlPolling:String
         var urlWebSocket:String
         
