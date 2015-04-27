@@ -110,6 +110,7 @@ Methods
 7. `connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
 8. `connectWithParams(params:[String: AnyObject])` - Establishes a connection to the server passing the specified params. A "connect" event is fired upon successful connection.
 9. `close(#fast:Bool)` - Closes the socket. Once a socket is closed it should not be reopened. Pass true to fast if you're closing from a background task.
+10. `reconnect()` - Causes the client to reconnect to the server.
 
 Events
 ------
