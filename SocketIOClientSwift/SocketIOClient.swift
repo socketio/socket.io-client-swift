@@ -31,8 +31,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     private var _connected = false
     private var _connecting = false
     private var currentReconnectAttempt = 0
-    private var forcePolling = false
-    private var forceWebsockets = false
     private var handlers = ContiguousArray<SocketEventHandler>()
     private var paramConnect = false
     private var _secure = false
@@ -61,9 +59,9 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     public var connecting:Bool {
         return self._connecting
     }
-    public var cookies:[NSHTTPCookie]?
     public var engine:SocketEngine?
     public var nsp = "/"
+    public var opts:[String: AnyObject]?
     public var reconnects = true
     public var reconnecting:Bool {
         return self._reconnecting
@@ -75,13 +73,11 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     public var sid:String? {
         return self._sid
     }
-    public var socketPath = ""
-
     
     /**
     Create a new SocketIOClient. opts can be omitted
     */
-    public init(var socketURL:String, opts:NSDictionary? = nil) {
+    public init(var socketURL:String, opts:[String: AnyObject]? = nil) {
         if socketURL["https://"].matches().count != 0 {
             self._secure = true
         }
@@ -90,6 +86,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         socketURL = socketURL["https://"] ~= ""
         
         self.socketURL = socketURL
+        self.opts = opts
         
         // Set options
         if opts != nil {
@@ -97,20 +94,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
                 self.sessionDelegate = sessionDelegate
             }
             
-            if let cookies = opts!["cookies"] as? [NSHTTPCookie] {
-                self.cookies = cookies
-            }
-            
             if let log = opts!["log"] as? Bool {
                 self.log = log
-            }
-            
-            if let path = opts!["path"] as? String {
-                self.socketPath = path
-            }
-            
-            if let polling = opts!["forcePolling"] as? Bool {
-                self.forcePolling = polling
             }
             
             if var nsp = opts!["nsp"] as? String {
@@ -134,10 +119,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             if let reconnectWait = opts!["reconnectWait"] as? Int {
                 self.reconnectWait = abs(reconnectWait)
             }
-            
-            if let ws = opts!["forceWebsockets"] as? Bool {
-                self.forceWebsockets = ws
-            }
         } else {
             self.reconnectAttempts = -1
         }
@@ -145,7 +126,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         super.init()
     }
     
-    public convenience init(socketURL:String, options:NSDictionary?) {
+    public convenience init(socketURL:String, options:[String: AnyObject]?) {
         self.init(socketURL: socketURL, opts: options)
     }
     
@@ -156,14 +137,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     private func addEngine() {
         SocketLogger.log("Adding engine", client: self)
         
-        self.engine = SocketEngine(client: self,
-            forcePolling: self.forcePolling,
-            forceWebsockets: self.forceWebsockets,
-            cookies: self.cookies,
-            logging: self.log,
-            sessionDelegate: self.sessionDelegate,
-            path: self.socketPath
-        )
+        self.engine = SocketEngine(client: self, opts: self.opts)
     }
     
     /**

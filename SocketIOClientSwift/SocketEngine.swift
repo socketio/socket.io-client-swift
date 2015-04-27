@@ -94,17 +94,19 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         }
     }
     
-    public init(client:SocketEngineClient, forcePolling:Bool,
-        forceWebsockets:Bool, cookies:[NSHTTPCookie]?, logging:Bool,
-        sessionDelegate:NSURLSessionDelegate?, path:String) {
+    public init(client:SocketEngineClient, sessionDelegate:NSURLSessionDelegate?) {
             self.client = client
-            self.forcePolling = forcePolling
-            self.forceWebsockets = forceWebsockets
-            self.cookies = cookies
-            self.log = logging
-            self.socketPath = path
             self.session = NSURLSession(configuration: NSURLSessionConfiguration.ephemeralSessionConfiguration(),
                 delegate: sessionDelegate, delegateQueue: self.workQueue)
+    }
+    
+    public convenience init(client:SocketEngineClient, opts:NSDictionary?) {
+        self.init(client: client, sessionDelegate: opts?["sessionDelegate"] as? NSURLSessionDelegate)
+        self.forceWebsockets = opts?["forceWebsockets"] as? Bool ?? false
+        self.forcePolling = opts?["forcePolling"] as? Bool ?? false
+        self.cookies = opts?["cookies"] as? [NSHTTPCookie]
+        self.log = opts?["log"] as? Bool ?? false
+        self.socketPath = opts?["path"] as? String ?? ""
     }
     
     deinit {
