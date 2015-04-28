@@ -151,7 +151,9 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             return ("", "")
         }
         
-        var url = "\(self.client!.socketURL)\(self.socketPath)/socket.io/?transport="
+        let path = self.socketPath == "" ? "/socket.io" : self.socketPath
+        
+        var url = "\(self.client!.socketURL)\(path)/?transport="
         var urlPolling:String
         var urlWebSocket:String
         
