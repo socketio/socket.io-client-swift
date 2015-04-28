@@ -161,7 +161,7 @@ class SocketParser {
         var err:NSError?
         let stringData = data.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)
         let parsed:AnyObject? = NSJSONSerialization.JSONObjectWithData(stringData!,
-            options: NSJSONReadingOptions.AllowFragments, error: &err)
+            options: NSJSONReadingOptions.MutableContainers, error: &err)
         
         if err != nil {
             // println(err)
