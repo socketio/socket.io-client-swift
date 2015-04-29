@@ -95,9 +95,9 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     }
     
     public init(client:SocketEngineClient, sessionDelegate:NSURLSessionDelegate?) {
-            self.client = client
-            self.session = NSURLSession(configuration: NSURLSessionConfiguration.ephemeralSessionConfiguration(),
-                delegate: sessionDelegate, delegateQueue: self.workQueue)
+        self.client = client
+        self.session = NSURLSession(configuration: NSURLSessionConfiguration.ephemeralSessionConfiguration(),
+            delegate: sessionDelegate, delegateQueue: self.workQueue)
     }
     
     public convenience init(client:SocketEngineClient, opts:NSDictionary?) {
@@ -122,7 +122,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         self.write("", withType: PacketType.CLOSE, withData: nil)
         self.ws?.disconnect()
         self.stopPolling()
-
+        
         if fast || self.polling {
             self.client?.engineDidClose("Disconnect")
         }
@@ -240,33 +240,32 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         SocketLogger.log("Doing polling request", client: self)
         
         self.session.dataTaskWithRequest(req) {[weak self] data, res, err in
-            if self == nil {
-                return
-            } else if err != nil {
-                if self!.polling {
-                    self?.handlePollingFailed(err.localizedDescription)
-                } else {
-                    NSLog(err.localizedDescription)
+            if let this = self {
+                if err != nil {
+                    if this.polling {
+                        this.handlePollingFailed(err.localizedDescription)
+                    } else {
+                        NSLog(err.localizedDescription)
+                    }
+                    return
                 }
                 
-                return
-            }
-            
-            SocketLogger.log("Got polling response", client: self!)
-            
-            if let str = NSString(data: data, encoding: NSUTF8StringEncoding) as? String {
-                dispatch_async(self!.parseQueue) {[weak self] in
-                    self?.parsePollingMessage(str)
+                SocketLogger.log("Got polling response", client: this)
+                
+                if let str = NSString(data: data, encoding: NSUTF8StringEncoding) as? String {
+                    dispatch_async(this.parseQueue) {[weak this] in
+                        this?.parsePollingMessage(str)
+                    }
                 }
-            }
-            
-            self?.waitingForPoll = false
-            
-            if self!.fastUpgrade {
-                self?.doFastUpgrade()
-                return
-            } else if !self!.closed && self!.polling {
-                self?.doPoll()
+                
+                this.waitingForPoll = false
+                
+                if this.fastUpgrade {
+                    this.doFastUpgrade()
+                    return
+                } else if !this.closed && this.polling {
+                    this.doPoll()
+                }
             }}.resume()
     }
     
@@ -274,18 +273,16 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         SocketLogger.log("Flushing probe wait", client: self)
         
         dispatch_async(self.emitQueue) {[weak self] in
-            if self == nil {
-                return
-            }
-            
-            for waiter in self!.probeWait {
-                self?.write(waiter.msg, withType: waiter.type, withData: waiter.data)
-            }
-            
-            self?.probeWait.removeAll(keepCapacity: false)
-            
-            if self?.postWait.count != 0 {
-                self?.flushWaitingForPostToWebSocket()
+            if let this = self {
+                for waiter in this.probeWait {
+                    this.write(waiter.msg, withType: waiter.type, withData: waiter.data)
+                }
+                
+                this.probeWait.removeAll(keepCapacity: false)
+                
+                if this.postWait.count != 0 {
+                    this.flushWaitingForPostToWebSocket()
+                }
             }
         }
     }
@@ -329,21 +326,22 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         SocketLogger.log("POSTing: \(postStr)", client: self)
         
         self.session.dataTaskWithRequest(req) {[weak self] data, res, err in
-            if self == nil {
-                return
-            } else if err != nil && self!.polling {
-                self?.handlePollingFailed(err.localizedDescription)
-                return
-            } else if err != nil {
-                NSLog(err.localizedDescription)
-                return
-            }
-            
-            self?.waitingForPost = false
-            dispatch_async(self!.emitQueue) {[weak self] in
-                if !self!.fastUpgrade {
-                    self?.flushWaitingForPost()
-                    self?.doPoll()
+            if let this = self {
+                if err != nil && this.polling {
+                    this.handlePollingFailed(err.localizedDescription)
+                    return
+                } else if err != nil {
+                    NSLog(err.localizedDescription)
+                    return
+                }
+                
+                this.waitingForPost = false
+                
+                dispatch_async(this.emitQueue) {[weak this] in
+                    if !(this?.fastUpgrade ?? true) {
+                        this?.flushWaitingForPost()
+                        this?.doPoll()
+                    }
                 }
             }}.resume()
     }
@@ -468,12 +466,10 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     }
     
     private func parseEngineData(data:NSData) {
-        if self.client == nil {
-            return
-        }
-        
-        dispatch_async(self.client!.handleQueue) {[weak self] in
-            self?.client?.parseBinaryData(data.subdataWithRange(NSMakeRange(1, data.length - 1)))
+        if let client = self.client {
+            dispatch_async(client.handleQueue) {[weak self] in
+                self?.client?.parseBinaryData(data.subdataWithRange(NSMakeRange(1, data.length - 1)))
+            }
         }
     }
     
@@ -490,12 +486,10 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             // Remove message type
             message.removeAtIndex(message.startIndex)
             
-            if self.client == nil {
-                return
-            }
-            
-            dispatch_async(self.client!.handleQueue) {[weak self] in
-                self?.client?.parseSocketMessage(message)
+            if let client = self.client {
+                dispatch_async(client.handleQueue) {[weak self] in
+                    self?.client?.parseSocketMessage(message)
+                }
             }
         } else if type == PacketType.NOOP {
             self.doPoll()
@@ -555,11 +549,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                 end: advance(message.startIndex, 2)))
             
             if let data = NSData(base64EncodedString: message,
-                options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters)
-                where self.client != nil {
-                    // println("sending \(data)")
-                    
-                    dispatch_async(self.client!.handleQueue) {[weak self] in
+                options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters), client = self.client {
+                    dispatch_async(client.handleQueue) {[weak self] in
                         self?.client?.parseBinaryData(data)
                     }
             }
@@ -635,13 +626,11 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         
         self.pingTimer?.invalidate()
         dispatch_async(dispatch_get_main_queue()) {[weak self] in
-            if self == nil {
-                return
+            if let this = self {
+                this.pingTimer = NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(this.pingInterval!),
+                    target: this,
+                    selector: Selector("sendPing"), userInfo: nil, repeats: true)
             }
-            
-            self?.pingTimer = NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(self!.pingInterval!),
-                target: self!,
-                selector: Selector("sendPing"), userInfo: nil, repeats: true)
         }
     }
     
@@ -665,16 +654,14 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     */
     public func write(msg:String, withType type:PacketType, withData data:ContiguousArray<NSData>?) {
         dispatch_async(self.emitQueue) {[weak self] in
-            if self == nil || !self!.connected {
-                return
-            }
-            
-            if self!.websocket {
-                SocketLogger.log("Writing ws: \(msg):\(data)", client: self!)
-                self?.sendWebSocketMessage(msg, withType: type, datas: data)
-            } else {
-                SocketLogger.log("Writing poll: \(msg):\(data)", client: self!)
-                self?.sendPollMessage(msg, withType: type, datas: data)
+            if let this = self where this.connected {
+                if this.websocket {
+                    SocketLogger.log("Writing ws: \(msg):\(data)", client: this)
+                    this.sendWebSocketMessage(msg, withType: type, datas: data)
+                } else {
+                    SocketLogger.log("Writing poll: \(msg):\(data)", client: this)
+                    this.sendPollMessage(msg, withType: type, datas: data)
+                }
             }
         }
     }
