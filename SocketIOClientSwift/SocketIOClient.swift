@@ -195,21 +195,19 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     
     private func createOnAck(event:String, items:[AnyObject]) -> OnAckCallback {
         return {[weak self, ack = ++self.currentAck] timeout, callback in
-            if self == nil {
-                return
-            }
-            
-            self?.ackHandlers.addAck(ack, callback: callback)
-            
-            dispatch_async(self!.emitQueue) {
-                self?._emit(event, items, ack: ack)
-            }
-            
-            if timeout != 0 {
-                let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeout * NSEC_PER_SEC))
+            if let this = self {
+                this.ackHandlers.addAck(ack, callback: callback)
                 
-                dispatch_after(time, dispatch_get_main_queue()) {
-                    self?.ackHandlers.timeoutAck(ack)
+                dispatch_async(this.emitQueue) {[weak this] in
+                    this?._emit(event, items, ack: ack)
+                }
+                
+                if timeout != 0 {
+                    let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeout * NSEC_PER_SEC))
+                    
+                    dispatch_after(time, dispatch_get_main_queue()) {[weak this] in
+                        this?.ackHandlers.timeoutAck(ack)
+                    }
                 }
             }
         }
@@ -337,22 +335,21 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     // If the server wants to know that the client received data
     func emitAck(ack:Int, withData args:[AnyObject]) {
         dispatch_async(self.emitQueue) {[weak self] in
-            if self == nil || !self!.connected {
-                return
-            }
-            
-            let packet = SocketPacket(type: nil, data: args, nsp: self!.nsp, id: ack)
-            let str:String
-            
-            SocketParser.parseForEmit(packet)
-            str = packet.createAck()
-            
-            SocketLogger.log("Emitting Ack: \(str)", client: self!)
-            
-            if packet.type == SocketPacket.PacketType.BINARY_ACK {
-                self?.engine?.send(str, withData: packet.binary)
-            } else {
-                self?.engine?.send(str, withData: nil)
+            if let this = self where this.connected {
+                let packet = SocketPacket(type: nil, data: args, nsp: this.nsp, id: ack)
+                let str:String
+                
+                SocketParser.parseForEmit(packet)
+                str = packet.createAck()
+                
+                SocketLogger.log("Emitting Ack: \(str)", client: this)
+                
+                if packet.type == SocketPacket.PacketType.BINARY_ACK {
+                    this.engine?.send(str, withData: packet.binary)
+                } else {
+                    this.engine?.send(str, withData: nil)
+                }
+                
             }
         }
     }
@@ -484,12 +481,10 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             self._reconnecting = true
             
             dispatch_async(dispatch_get_main_queue()) {[weak self] in
-                if self == nil {
-                    return
+                if let this = self {
+                    this.reconnectTimer = NSTimer.scheduledTimerWithTimeInterval(Double(this.reconnectWait),
+                        target: this, selector: "tryReconnect", userInfo: nil, repeats: true)
                 }
-                
-                self?.reconnectTimer = NSTimer.scheduledTimerWithTimeInterval(Double(self!.reconnectWait),
-                    target: self!, selector: "tryReconnect", userInfo: nil, repeats: true)
             }
         }
         
