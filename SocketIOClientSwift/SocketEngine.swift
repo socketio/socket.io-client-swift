@@ -166,7 +166,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         }
         
         if params != nil {
-            let allowedCharacterSet = NSCharacterSet(charactersInString: "!*'();:@&=+$,/?%#[]\" ").invertedSet
+            let allowedCharacterSet = NSCharacterSet(charactersInString: "!*'();:@&=+$,/?%#[]\" {}").invertedSet
             
             for (key, value) in params! {
                 let keyEsc = key.stringByAddingPercentEncodingWithAllowedCharacters(
