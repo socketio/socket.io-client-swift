@@ -89,38 +89,34 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         self.opts = opts
         
         // Set options
-        if opts != nil {
-            if let sessionDelegate = opts!["sessionDelegate"] as? NSURLSessionDelegate {
-                self.sessionDelegate = sessionDelegate
+        if let sessionDelegate = opts?["sessionDelegate"] as? NSURLSessionDelegate {
+            self.sessionDelegate = sessionDelegate
+        }
+        
+        if let log = opts?["log"] as? Bool {
+            self.log = log
+        }
+        
+        if var nsp = opts?["nsp"] as? String {
+            if nsp != "/" && nsp.hasPrefix("/") {
+                nsp.removeAtIndex(nsp.startIndex)
             }
             
-            if let log = opts!["log"] as? Bool {
-                self.log = log
-            }
-            
-            if var nsp = opts!["nsp"] as? String {
-                if nsp != "/" && nsp.hasPrefix("/") {
-                    nsp.removeAtIndex(nsp.startIndex)
-                }
-                
-                self.nsp = nsp
-            }
-            
-            if let reconnects = opts!["reconnects"] as? Bool {
-                self.reconnects = reconnects
-            }
-            
-            if let reconnectAttempts = opts!["reconnectAttempts"] as? Int {
-                self.reconnectAttempts = reconnectAttempts
-            } else {
-                self.reconnectAttempts = -1
-            }
-            
-            if let reconnectWait = opts!["reconnectWait"] as? Int {
-                self.reconnectWait = abs(reconnectWait)
-            }
+            self.nsp = nsp
+        }
+        
+        if let reconnects = opts?["reconnects"] as? Bool {
+            self.reconnects = reconnects
+        }
+        
+        if let reconnectAttempts = opts?["reconnectAttempts"] as? Int {
+            self.reconnectAttempts = reconnectAttempts
         } else {
             self.reconnectAttempts = -1
+        }
+        
+        if let reconnectWait = opts?["reconnectWait"] as? Int {
+            self.reconnectWait = abs(reconnectWait)
         }
         
         super.init()

@@ -493,15 +493,11 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             }
         } else if type == PacketType.NOOP {
             self.doPoll()
-            return
         } else if type == PacketType.PONG {
             // We should upgrade
             if message == "3probe" {
                 self.upgradeTransport()
-                return
             }
-            
-            return
         } else if type == PacketType.OPEN {
             var err:NSError?
             
@@ -531,8 +527,6 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             if !self.forceWebsockets {
                 self.doPoll()
             }
-            
-            return
         } else if type == PacketType.CLOSE {
             if self.client == nil {
                 return
@@ -541,8 +535,6 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             if self.polling {
                 self.client!.engineDidClose("Disconnect")
             }
-            
-            return
         } else if message.hasPrefix("b4") {
             // binary in base64 string
             message.removeRange(Range<String.Index>(start: message.startIndex,

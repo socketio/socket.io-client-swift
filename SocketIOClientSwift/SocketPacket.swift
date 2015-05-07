@@ -94,7 +94,6 @@ final class SocketPacket: Printable {
     
     func createMessageForEvent(event:String) -> String {
         let message:String
-        var jsonSendError:NSError?
         
         if self.binary.count == 0 {
             self.type = PacketType.EVENT
@@ -157,7 +156,7 @@ final class SocketPacket: Printable {
         return self.completeMessage(msg, ack: true)
     }
     
-    func completeMessage(var message:String, ack:Bool = false) -> String {
+    private func completeMessage(var message:String, ack:Bool = false) -> String {
         var err:NSError?
         
         if self.data == nil || self.data!.count == 0 {
