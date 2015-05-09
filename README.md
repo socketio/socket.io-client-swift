@@ -88,6 +88,7 @@ Constructors
 
 Options
 -------
+- `connectParams: [String: AnyObject]?` - Dictionary whose contents will be passed with the connection.
 - `reconnects: Bool` Default is `true`
 - `reconnectAttempts: Int` Default is `-1` (infinite tries)
 - `reconnectWait: Int` Default is `10`
@@ -108,9 +109,8 @@ Methods
 5. `emitWithAck(event:String, _ items:AnyObject...) -> (timeout:UInt64, callback:(NSArray?) -> Void) -> Void` - Sends a message that requests an acknowledgement from the server. Returns a function which you can use to add a handler. See example. Note: The message is not sent until you call the returned function.
 6. `emitWithAck(event:String, withItems items:[AnyObject]) -> (UInt64, (NSArray?) -> Void) -> Void` - `emitWithAck` for Objective-C. Note: The message is not sent until you call the returned function.
 7. `connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
-8. `connectWithParams(params:[String: AnyObject])` - Establishes a connection to the server passing the specified params. A "connect" event is fired upon successful connection.
-9. `close(#fast:Bool)` - Closes the socket. Once a socket is closed it should not be reopened. Pass true to fast if you're closing from a background task.
-10. `reconnect()` - Causes the client to reconnect to the server.
+8. `close(#fast:Bool)` - Closes the socket. Once a socket is closed it should not be reopened. Pass true to fast if you're closing from a background task.
+9. `reconnect()` - Causes the client to reconnect to the server.
 
 Client Events
 ------
