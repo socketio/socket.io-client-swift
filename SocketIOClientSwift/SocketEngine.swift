@@ -119,13 +119,14 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         self.pingTimer?.invalidate()
         self.closed = true
         
-        self.write("", withType: PacketType.CLOSE, withData: nil)
         self.ws?.disconnect()
-        self.stopPolling()
         
         if fast || self.polling {
+            self.write("", withType: PacketType.CLOSE, withData: nil)
             self.client?.engineDidClose("Disconnect")
         }
+        
+        self.stopPolling()
     }
     
     private func createBinaryDataForSend(data:NSData) -> (NSData?, String?) {
