@@ -93,7 +93,7 @@ Options
 - `reconnectWait: Int` Default is `10`
 - `forcePolling: Bool` Default is `false`. `true` forces the client to use xhr-polling.
 - `forceWebsockets: Bool` Default is `false`. `true` forces the client to use WebSockets.
-- `nsp: String` Default is `"/"`
+- `nsp: String` Default is `"/"`. Connects to a namespace.
 - `cookies: [NSHTTPCookie]?` An array of NSHTTPCookies. Passed during the handshake. Default is nil.
 - `log: Bool` If `true` socket will log debug messages. Default is false.
 - `sessionDelegate: NSURLSessionDelegate` Sets an NSURLSessionDelegate for the underlying engine. Useful if you need to handle self-signed certs. Default is nil.
