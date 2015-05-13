@@ -27,12 +27,18 @@ socket.connect()
 ```objective-c
 SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8080" options:nil];
 
-[socket on: @"connect" callback: ^(NSArray* data, void (^ack)(NSArray*)) {
-    NSLog(@"connected");
-    [socket emit:@"echo" withItems:@[@"echo test"]];
-    [socket emitWithAck:@"ackack" withItems:@[@1]](10, ^(NSArray* data) {
-        NSLog(@"Got ack");
+[socket on:@"connect" callback:^(NSArray* data, void (^ack)(NSArray*)) {
+    NSLog(@"socket connected");
+}];
+
+[socket on:@"currentAmount" callback:^(NSArray* data, void (^ack)(NSArray*)) {
+    double cur = [[data objectAtIndex:0] floatValue];
+
+    [socket emitWithAck:@"canUpdate" withItems:@[@(cur)]](0, ^(NSArray* data) {
+        [socket emit:@"update" withItems:@[@(cur + 2.50)]];
     });
+
+    ack(@[@"Got your ack, ", @"dude"]);
 }];
 
 [socket connect];
