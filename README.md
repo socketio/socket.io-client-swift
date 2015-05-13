@@ -35,7 +35,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8
     double cur = [[data objectAtIndex:0] floatValue];
 
     [socket emitWithAck:@"canUpdate" withItems:@[@(cur)]](0, ^(NSArray* data) {
-        [socket emit:@"update" withItems:@[@(cur + 2.50)]];
+        [socket emit:@"update" withItems:@[@{@"amount": @(cur + 2.50)}]];
     });
 
     ack(@[@"Got your currentAmount, ", @"dude"]);
