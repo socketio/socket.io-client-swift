@@ -404,7 +404,20 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             }
     }
     
-    func joinNamespace() {
+    /**
+    Leaves nsp and goes back to /
+    */
+    public func leaveNamespace() {
+        if self.nsp != "/" {
+            self.engine?.send("1/\(self.nsp)", withData: nil)
+            self.nsp = "/"
+        }
+    }
+    
+    /**
+    Joins nsp if it is not /
+    */
+    public func joinNamespace() {
         SocketLogger.log("Joining namespace", client: self)
         
         if self.nsp != "/" {

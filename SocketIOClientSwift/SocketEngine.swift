@@ -34,6 +34,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     private typealias Probe = (msg:String, type:PacketType, data:ContiguousArray<NSData>?)
     private typealias ProbeWaitQueue = [Probe]
     
+    private let allowedCharacterSet = NSCharacterSet(charactersInString: "!*'();:@&=+$,/?%#[]\" {}").invertedSet
     private let workQueue = NSOperationQueue()
     private let emitQueue = dispatch_queue_create("engineEmitQueue", DISPATCH_QUEUE_SERIAL)
     private let parseQueue = dispatch_queue_create("engineParseQueue", DISPATCH_QUEUE_SERIAL)
@@ -167,17 +168,16 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         }
         
         if params != nil {
-            let allowedCharacterSet = NSCharacterSet(charactersInString: "!*'();:@&=+$,/?%#[]\" {}").invertedSet
             
             for (key, value) in params! {
                 let keyEsc = key.stringByAddingPercentEncodingWithAllowedCharacters(
-                    allowedCharacterSet)!
+                    self.allowedCharacterSet)!
                 urlPolling += "&\(keyEsc)="
                 urlWebSocket += "&\(keyEsc)="
                 
                 if value is String {
                     let valueEsc = (value as! String).stringByAddingPercentEncodingWithAllowedCharacters(
-                        allowedCharacterSet)!
+                        self.allowedCharacterSet)!
                     urlPolling += "\(valueEsc)"
                     urlWebSocket += "\(valueEsc)"
                 } else {
@@ -219,7 +219,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         if self.websocket || self.waitingForPoll || !self.connected {
             return
         }
-        
+
         self.waitingForPoll = true
         let req = NSMutableURLRequest(URL: NSURL(string: self.urlPolling! + "&sid=\(self.sid)&b64=1")!)
         
@@ -246,7 +246,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                     if this.polling {
                         this.handlePollingFailed(err.localizedDescription)
                     } else {
-                        NSLog(err.localizedDescription)
+                        SocketLogger.err(err.localizedDescription, client: this)
                     }
                     return
                 }
@@ -263,7 +263,6 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                 
                 if this.fastUpgrade {
                     this.doFastUpgrade()
-                    return
                 } else if !this.closed && this.polling {
                     this.doPoll()
                 }
