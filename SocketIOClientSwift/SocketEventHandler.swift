@@ -25,7 +25,6 @@
 import Foundation
 
 private func emitAckCallback(socket:SocketIOClient, num:Int)
-    // Curried
     (items:AnyObject...) -> Void {
         socket.emitAck(num, withData: items)
 }

@@ -145,7 +145,7 @@ class SocketParser {
         }
         
         if ++i < arr.count {
-            let d = String(arr[i...arr.count-1])
+            let d = str[advance(str.startIndex, i)...advance(str.startIndex, count(str)-1)]
             let noPlaceholders = d["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] ~= "\"~~$2\""
             let data = SocketParser.parseData(noPlaceholders) as? [AnyObject] ?? [noPlaceholders]
             

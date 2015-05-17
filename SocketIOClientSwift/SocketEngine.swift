@@ -430,7 +430,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             }
         }
         
-        for var i = 0, l = str.length; i < l; i = i &+ 1 {
+        for var i = 0, l = str.length; i < l; i++ {
             let chr = String(strArray[i])
             
             if chr != ":" {
@@ -443,7 +443,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                     return
                 }
                 
-                msg = String(strArray[i&+1...i&+n])
+                msg = String(strArray[i+1...i+n])
                 
                 if let lengthInt = length.toInt() {
                     if lengthInt != msg.length {
