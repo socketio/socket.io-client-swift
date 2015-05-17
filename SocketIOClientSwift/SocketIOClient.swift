@@ -25,14 +25,13 @@
 import Foundation
 
 public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient {
-    private lazy var params = [String: AnyObject]()
     private var anyHandler:((SocketAnyEvent) -> Void)?
     private var _closed = false
     private var _connected = false
     private var _connecting = false
     private var currentReconnectAttempt = 0
     private var handlers = ContiguousArray<SocketEventHandler>()
-    private var paramConnect = false
+    private var params:[String: AnyObject]?
     private var _secure = false
     private var _sid:String?
     private var _reconnecting = false
@@ -88,39 +87,40 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         self.socketURL = socketURL
         self.opts = opts
         
+
         // Set options
-        if opts != nil {
-            if let sessionDelegate = opts!["sessionDelegate"] as? NSURLSessionDelegate {
-                self.sessionDelegate = sessionDelegate
+        if let sessionDelegate = opts?["sessionDelegate"] as? NSURLSessionDelegate {
+            self.sessionDelegate = sessionDelegate
+        }
+        
+        if let connectParams = opts?["connectParams"] as? [String: AnyObject] {
+            self.params = connectParams
+        }
+        
+        if let log = opts?["log"] as? Bool {
+            self.log = log
+        }
+        
+        if var nsp = opts?["nsp"] as? String {
+            if nsp != "/" && nsp.hasPrefix("/") {
+                nsp.removeAtIndex(nsp.startIndex)
             }
             
-            if let log = opts!["log"] as? Bool {
-                self.log = log
-            }
-            
-            if var nsp = opts!["nsp"] as? String {
-                if nsp != "/" && nsp.hasPrefix("/") {
-                    nsp.removeAtIndex(nsp.startIndex)
-                }
-                
-                self.nsp = nsp
-            }
-            
-            if let reconnects = opts!["reconnects"] as? Bool {
-                self.reconnects = reconnects
-            }
-            
-            if let reconnectAttempts = opts!["reconnectAttempts"] as? Int {
-                self.reconnectAttempts = reconnectAttempts
-            } else {
-                self.reconnectAttempts = -1
-            }
-            
-            if let reconnectWait = opts!["reconnectWait"] as? Int {
-                self.reconnectWait = abs(reconnectWait)
-            }
+            self.nsp = nsp
+        }
+        
+        if let reconnects = opts?["reconnects"] as? Bool {
+            self.reconnects = reconnects
+        }
+        
+        if let reconnectAttempts = opts?["reconnectAttempts"] as? Int {
+            self.reconnectAttempts = reconnectAttempts
         } else {
             self.reconnectAttempts = -1
+        }
+        
+        if let reconnectWait = opts?["reconnectWait"] as? Int {
+            self.reconnectWait = abs(reconnectWait)
         }
         
         super.init()
@@ -160,37 +160,38 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     Connect to the server.
     */
     public func connect() {
-        if self.closed {
-            println("Warning! This socket was previously closed. This might be dangerous!")
-            self._closed = false
-        }
-        
-        if self.connected {
-            return
-        }
-        
-        self.addEngine()
-        self.engine?.open()
+        self.connect(timeoutAfter: 0, withTimeoutHandler: nil)
     }
     
     /**
-    Connect to the server with params that will be passed on connection.
+    Connect to the server. If we aren't connected after timeoutAfter, call handler
     */
-    public func connectWithParams(params:[String: AnyObject]) {
+    public func connect(#timeoutAfter:Int, withTimeoutHandler handler:(() -> Void)?) {
         if self.closed {
-            println("Warning! This socket was previously closed. This might be dangerous!")
+            SocketLogger.log("Warning! This socket was previously closed. This might be dangerous!", client: self)
             self._closed = false
-        }
-        
-        if self.connected {
+        } else if self.connected {
             return
         }
         
-        self.params = params
-        self.paramConnect = true
-        
         self.addEngine()
-        self.engine?.open(opts: params)
+        self.engine?.open(opts: self.params)
+        
+        if timeoutAfter == 0 {
+            return
+        }
+        
+        let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeoutAfter) * Int64(NSEC_PER_SEC))
+        
+        dispatch_after(time, dispatch_get_main_queue()) {[weak self] in
+            if let this = self where !this.connected {
+                this._closed = true
+                this._connecting = false
+                this.engine?.close(fast: true)
+                
+                handler?()
+            }
+        }
     }
     
     private func createOnAck(event:String, items:[AnyObject]) -> OnAckCallback {
@@ -403,7 +404,20 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             }
     }
     
-    func joinNamespace() {
+    /**
+    Leaves nsp and goes back to /
+    */
+    public func leaveNamespace() {
+        if self.nsp != "/" {
+            self.engine?.send("1/\(self.nsp)", withData: nil)
+            self.nsp = "/"
+        }
+    }
+    
+    /**
+    Joins nsp if it is not /
+    */
+    public func joinNamespace() {
         SocketLogger.log("Joining namespace", client: self)
         
         if self.nsp != "/" {
@@ -493,10 +507,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             isInternalMessage: true)
         
         self.currentReconnectAttempt++
-        if self.paramConnect {
-            self.connectWithParams(self.params)
-        } else {
-            self.connect()
-        }
+        self.connect()
     }
 }

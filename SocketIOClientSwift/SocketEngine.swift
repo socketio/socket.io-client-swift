@@ -33,7 +33,7 @@ extension String {
 public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     private typealias Probe = (msg:String, type:PacketType, data:ContiguousArray<NSData>?)
     private typealias ProbeWaitQueue = [Probe]
-
+    private let allowedCharacterSet = NSCharacterSet(charactersInString: "!*'();:@&=+$,/?%#[]\" {}").invertedSet
     private let workQueue = NSOperationQueue()
     private let emitQueue = dispatch_queue_create("engineEmitQueue", DISPATCH_QUEUE_SERIAL)
     private let parseQueue = dispatch_queue_create("engineParseQueue", DISPATCH_QUEUE_SERIAL)
@@ -118,14 +118,14 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
 
         self.pingTimer?.invalidate()
         self.closed = true
-
-        self.write("", withType: PacketType.CLOSE, withData: nil)
         self.ws?.disconnect()
-        self.stopPolling()
 
         if fast || self.polling {
+            self.write("", withType: PacketType.CLOSE, withData: nil)
             self.client?.engineDidClose("Disconnect")
         }
+
+        self.stopPolling()
     }
 
     private func createBinaryDataForSend(data:NSData) -> (NSData?, String?) {
@@ -166,17 +166,15 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         }
 
         if params != nil {
-            let allowedCharacterSet = NSCharacterSet(charactersInString: "!*'();:@&=+$,/?%#[]\" ").invertedSet
-
             for (key, value) in params! {
                 let keyEsc = key.stringByAddingPercentEncodingWithAllowedCharacters(
-                    allowedCharacterSet)!
+                    self.allowedCharacterSet)!
                 urlPolling += "&\(keyEsc)="
                 urlWebSocket += "&\(keyEsc)="
 
                 if value is String {
                     let valueEsc = (value as! String).stringByAddingPercentEncodingWithAllowedCharacters(
-                        allowedCharacterSet)!
+                        self.allowedCharacterSet)!
                     urlPolling += "\(valueEsc)"
                     urlWebSocket += "\(valueEsc)"
                 } else {
@@ -245,7 +243,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                     if this.polling {
                         this.handlePollingFailed(err.localizedDescription)
                     } else {
-                        NSLog(err.localizedDescription)
+                        SocketLogger.err(err.localizedDescription, client: this)
                     }
                     return
                 }
@@ -262,7 +260,6 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
 
                 if this.fastUpgrade {
                     this.doFastUpgrade()
-                    return
                 } else if !this.closed && this.polling {
                     this.doPoll()
                 }
@@ -430,7 +427,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             }
         }
 
-        for var i = 0, l = str.length; i < l; i = i &+ 1 {
+        for var i = 0, l = str.length; i < l; i++ {
             let chr = String(strArray[i])
 
             if chr != ":" {
@@ -443,7 +440,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                     return
                 }
 
-                msg = String(strArray[i&+1...i&+n])
+                msg = String(strArray[i+1...i+n])
 
                 if let lengthInt = length.toInt() {
                     if lengthInt != msg.length {
@@ -492,15 +489,11 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             }
         } else if type == PacketType.NOOP {
             self.doPoll()
-            return
         } else if type == PacketType.PONG {
             // We should upgrade
             if message == "3probe" {
                 self.upgradeTransport()
-                return
             }
-
-            return
         } else if type == PacketType.OPEN {
             var err:NSError?
 
@@ -530,8 +523,6 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             if !self.forceWebsockets {
                 self.doPoll()
             }
-
-            return
         } else if type == PacketType.CLOSE {
             if self.client == nil {
                 return
@@ -540,8 +531,6 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             if self.polling {
                 self.client!.engineDidClose("Disconnect")
             }
-
-            return
         } else if message.hasPrefix("b4") {
             // binary in base64 string
             message.removeRange(Range<String.Index>(start: message.startIndex,
