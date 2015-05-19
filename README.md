@@ -19,7 +19,6 @@ socket.on("currentAmount") {data, ack in
     }
 }
 
-// Connect
 socket.connect()
 ```
 
