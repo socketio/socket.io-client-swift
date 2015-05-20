@@ -32,10 +32,10 @@ final class SocketPacket: Printable {
         var better = "SocketPacket {type: ~~0; data: ~~1; " +
         "id: ~~2; placeholders: ~~3;}"
         
-        better = better["~~0"] ~= (self.type != nil ? String(self.type!.rawValue) : "nil")
-        better = better["~~1"] ~= (self.data != nil ? "\(self.data!)" : "nil")
-        better = better["~~2"] ~= (self.id != nil ? String(self.id!) : "nil")
-        better = better["~~3"] ~= (self.placeholders != nil ? String(self.placeholders!) : "nil")
+        better = better["~~0"] ~= (type != nil ? String(type!.rawValue) : "nil")
+        better = better["~~1"] ~= (data != nil ? "\(data!)" : "nil")
+        better = better["~~2"] ~= (id != nil ? String(id!) : "nil")
+        better = better["~~3"] ~= (placeholders != nil ? String(placeholders!) : "nil")
         
         return better
     }
@@ -77,15 +77,15 @@ final class SocketPacket: Printable {
     }
     
     func addData(data:NSData) -> Bool {
-        if self.placeholders == self.currentPlace {
+        if placeholders == currentPlace {
             return true
         }
         
-        self.binary.append(data)
-        self.currentPlace++
+        binary.append(data)
+        currentPlace++
         
-        if self.placeholders == self.currentPlace {
-            self.currentPlace = 0
+        if placeholders == currentPlace {
+            currentPlace = 0
             return true
         } else {
             return false
@@ -95,77 +95,77 @@ final class SocketPacket: Printable {
     func createMessageForEvent(event:String) -> String {
         let message:String
         
-        if self.binary.count == 0 {
-            self.type = PacketType.EVENT
+        if binary.count == 0 {
+            type = PacketType.EVENT
             
-            if self.nsp == "/" {
-                if self.id == nil {
+            if nsp == "/" {
+                if id == nil {
                     message = "2[\"\(event)\""
                 } else {
-                    message = "2\(self.id!)[\"\(event)\""
+                    message = "2\(id!)[\"\(event)\""
                 }
             } else {
-                if self.id == nil {
-                    message = "2/\(self.nsp),[\"\(event)\""
+                if id == nil {
+                    message = "2/\(nsp),[\"\(event)\""
                 } else {
-                    message = "2/\(self.nsp),\(self.id!)[\"\(event)\""
+                    message = "2/\(nsp),\(id!)[\"\(event)\""
                 }
             }
         } else {
-            self.type = PacketType.BINARY_EVENT
+            type = PacketType.BINARY_EVENT
             
-            if self.nsp == "/" {
-                if self.id == nil {
-                    message = "5\(self.binary.count)-[\"\(event)\""
+            if nsp == "/" {
+                if id == nil {
+                    message = "5\(binary.count)-[\"\(event)\""
                 } else {
-                    message = "5\(self.binary.count)-\(self.id!)[\"\(event)\""
+                    message = "5\(binary.count)-\(id!)[\"\(event)\""
                 }
             } else {
-                if self.id == nil {
-                    message = "5\(self.binary.count)-/\(self.nsp),[\"\(event)\""
+                if id == nil {
+                    message = "5\(binary.count)-/\(nsp),[\"\(event)\""
                 } else {
-                    message = "5\(self.binary.count)-/\(self.nsp),\(self.id!)[\"\(event)\""
+                    message = "5\(binary.count)-/\(nsp),\(id!)[\"\(event)\""
                 }
             }
         }
         
-        return self.completeMessage(message)
+        return completeMessage(message)
     }
     
     func createAck() -> String {
         var msg:String
         
-        if self.binary.count == 0 {
-            self.type = PacketType.ACK
+        if binary.count == 0 {
+            type = PacketType.ACK
             
             if nsp == "/" {
-                msg = "3\(self.id!)["
+                msg = "3\(id!)["
             } else {
-                msg = "3/\(self.nsp),\(self.id!)["
+                msg = "3/\(nsp),\(id!)["
             }
         } else {
-            self.type = PacketType.BINARY_ACK
+            type = PacketType.BINARY_ACK
             
             if nsp == "/" {
-                msg = "6\(self.binary.count)-\(self.id!)["
+                msg = "6\(binary.count)-\(id!)["
             } else {
-                msg = "6\(self.binary.count)-/\(self.nsp),\(self.id!)["
+                msg = "6\(binary.count)-/\(nsp),\(id!)["
             }
         }
         
-        return self.completeMessage(msg, ack: true)
+        return completeMessage(msg, ack: true)
     }
     
     private func completeMessage(var message:String, ack:Bool = false) -> String {
         var err:NSError?
         
-        if self.data == nil || self.data!.count == 0 {
+        if data == nil || data!.count == 0 {
             return message + "]"
         } else if !ack {
             message += ","
         }
         
-        for arg in self.data! {
+        for arg in data! {
             if arg is NSDictionary || arg is [AnyObject] {
                 let jsonSend = NSJSONSerialization.dataWithJSONObject(arg,
                     options: NSJSONWritingOptions(0), error: &err)
@@ -189,23 +189,23 @@ final class SocketPacket: Printable {
     }
     
     func fillInPlaceholders() {
-        var newArr = NSMutableArray(array: self.data!)
+        var newArr = NSMutableArray(array: data!)
         
-        for i in 0..<self.data!.count {
-            if let str = self.data?[i] as? String, num = str["~~(\\d)"].groups() {
-                newArr[i] = self.binary[num[1].toInt()!]
-            } else if self.data?[i] is NSDictionary || self.data?[i] is NSArray {
-                newArr[i] = self._fillInPlaceholders(self.data![i])
+        for i in 0..<data!.count {
+            if let str = data?[i] as? String, num = str["~~(\\d)"].groups() {
+                newArr[i] = binary[num[1].toInt()!]
+            } else if data?[i] is NSDictionary || data?[i] is NSArray {
+                newArr[i] = _fillInPlaceholders(data![i])
             }
         }
         
-        self.data = newArr as [AnyObject]
+        data = newArr as [AnyObject]
     }
     
     private func _fillInPlaceholders(data:AnyObject) -> AnyObject {
         if let str = data as? String {
             if let num = str["~~(\\d)"].groups() {
-                return self.binary[num[1].toInt()!]
+                return binary[num[1].toInt()!]
             } else {
                 return str
             }
