@@ -356,6 +356,35 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         postWait.removeAll(keepCapacity: true)
     }
     
+    private func handleOpen(openData:String) {
+        var err:NSError?
+        let mesData = openData.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!
+        
+        if let json = NSJSONSerialization.JSONObjectWithData(mesData,
+            options: NSJSONReadingOptions.AllowFragments,
+            error: &err) as? NSDictionary, let sid = json["sid"] as? String {
+                self.sid = sid
+                _connected = true
+                
+                if !forcePolling && !forceWebsockets {
+                    createWebsocket(andConnect: true)
+                }
+                
+                if let pingInterval = json["pingInterval"] as? Int {
+                    self.pingInterval = pingInterval / 1000
+                }
+        } else {
+            client?.didError("Engine failed to handshake")
+            return
+        }
+        
+        startPingTimer()
+        
+        if !forceWebsockets {
+            doPoll()
+        }
+    }
+    
     // A poll failed, tell the client about it
     private func handlePollingFailed(reason:String) {
         _connected = false
@@ -498,34 +527,9 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                 upgradeTransport()
             }
         } else if type == PacketType.OPEN {
-            var err:NSError?
-            
             message.removeAtIndex(message.startIndex)
-            let mesData = message.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!
             
-            if let json = NSJSONSerialization.JSONObjectWithData(mesData,
-                options: NSJSONReadingOptions.AllowFragments,
-                error: &err) as? NSDictionary, let sid = json["sid"] as? String {
-                    self.sid = sid
-                    _connected = true
-                    
-                    if !forcePolling && !forceWebsockets {
-                        createWebsocket(andConnect: true)
-                    }
-                    
-                    if let pingInterval = json["pingInterval"] as? Int {
-                        self.pingInterval = pingInterval / 1000
-                    }
-            } else {
-                client?.didError("Engine failed to handshake")
-                return
-            }
-            
-            startPingTimer()
-            
-            if !forceWebsockets {
-                doPoll()
-            }
+            handleOpen(message)
         } else if type == PacketType.CLOSE {
             if polling {
                 client?.engineDidClose("Disconnect")
