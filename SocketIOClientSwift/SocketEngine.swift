@@ -24,12 +24,6 @@
 
 import Foundation
 
-extension String {
-    private var length:Int {
-        return count(self)
-    }
-}
-
 public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     private typealias Probe = (msg:String, type:PacketType, data:ContiguousArray<NSData>?)
     private typealias ProbeWaitQueue = [Probe]
@@ -438,7 +432,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     
     // Translatation of engine.io-parser#decodePayload
     private func parsePollingMessage(str:String) {
-        if str.length == 1 {
+        if count(str) == 1 {
             return
         }
         
@@ -458,7 +452,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             }
         }
         
-        for var i = 0, l = str.length; i < l; i++ {
+        for var i = 0, l = count(str); i < l; i++ {
             let chr = String(strArray[i])
             
             if chr != ":" {
@@ -474,13 +468,13 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                 msg = String(strArray[i+1...i+n])
                 
                 if let lengthInt = length.toInt() {
-                    if lengthInt != msg.length {
+                    if lengthInt != count(msg) {
                         SocketLogger.err("parsing error: \(str)", client: self)
                         return
                     }
                 }
                 
-                if msg.length != 0 {
+                if count(msg) != 0 {
                     // Be sure to capture the value of the msg
                     dispatch_async(handleQueue) {[weak self, msg] in
                         self?.parseEngineMessage(msg, fromPolling: true)
@@ -515,8 +509,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             message.removeAtIndex(message.startIndex)
             
             if let client = client {
-                dispatch_async(client.handleQueue) {[weak self] in
-                    self?.client?.parseSocketMessage(message)
+                dispatch_async(client.handleQueue) {[weak client] in
+                    client?.parseSocketMessage(message)
                 }
             }
         } else if type == PacketType.NOOP {
