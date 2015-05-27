@@ -359,7 +359,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         _connecting = false
         
         if closed || !reconnects {
-            didDisconnect("Engine closed")
+            didDisconnect(reason)
         } else if !reconnecting {
             handleEvent("reconnect", data: [reason], isInternalMessage: true)
             tryReconnect()

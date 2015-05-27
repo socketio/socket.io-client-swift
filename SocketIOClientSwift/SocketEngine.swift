@@ -40,6 +40,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     private var fastUpgrade = false
     private var forcePolling = false
     private var forceWebsockets = false
+    private var gotPong = true
     private var pingTimer:NSTimer?
     private var postWait = [String]()
     private var _polling = true
@@ -516,6 +517,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         } else if type == PacketType.NOOP {
             doPoll()
         } else if type == PacketType.PONG {
+            gotPong = true
+            
             // We should upgrade
             if message == "3probe" {
                 upgradeTransport()
@@ -558,6 +561,14 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     }
     
     func sendPing() {
+        //Server is not responding
+        if !gotPong {
+            pingTimer?.invalidate()
+            client?.engineDidClose("Ping timeout")
+            return
+        }
+        
+        gotPong = false
         write("", withType: PacketType.PING, withData: nil)
     }
     
