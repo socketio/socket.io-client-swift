@@ -40,8 +40,13 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     private var fastUpgrade = false
     private var forcePolling = false
     private var forceWebsockets = false
-    private var gotPong = true
+    private var pingInterval:Int?
     private var pingTimer:NSTimer?
+    private var pingTimeout = 0
+    private var pongsMissed = 0
+    private var pongsMissedMax:Int {
+        return pingTimeout / (pingInterval ?? 25)
+    }
     private var postWait = [String]()
     private var _polling = true
     private var probing = false
@@ -59,7 +64,6 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     weak var client:SocketEngineClient?
     var cookies:[NSHTTPCookie]?
     var log = false
-    var pingInterval:Int?
     var polling:Bool {
         return _polling
     }
@@ -357,7 +361,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         
         if let json = NSJSONSerialization.JSONObjectWithData(mesData,
             options: NSJSONReadingOptions.AllowFragments,
-            error: &err) as? NSDictionary, let sid = json["sid"] as? String {
+            error: &err) as? NSDictionary, sid = json["sid"] as? String {
                 self.sid = sid
                 _connected = true
                 
@@ -365,8 +369,9 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                     createWebsocket(andConnect: true)
                 }
                 
-                if let pingInterval = json["pingInterval"] as? Int {
+                if let pingInterval = json["pingInterval"] as? Int, pingTimeout = json["pingTimeout"] as? Int {
                     self.pingInterval = pingInterval / 1000
+                    self.pingTimeout = pingTimeout / 1000
                 }
         } else {
             client?.didError("Engine failed to handshake")
@@ -517,7 +522,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         } else if type == PacketType.NOOP {
             doPoll()
         } else if type == PacketType.PONG {
-            gotPong = true
+            pongsMissed = 0
             
             // We should upgrade
             if message == "3probe" {
@@ -560,15 +565,15 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         }
     }
     
-    func sendPing() {
+    @objc private func sendPing() {
         //Server is not responding
-        if !gotPong {
+        if pongsMissed > pongsMissedMax {
             pingTimer?.invalidate()
             client?.engineDidClose("Ping timeout")
             return
         }
         
-        gotPong = false
+        ++pongsMissed
         write("", withType: PacketType.PING, withData: nil)
     }
     
