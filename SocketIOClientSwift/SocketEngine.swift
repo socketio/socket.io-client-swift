@@ -42,11 +42,13 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     private var forceWebsockets = false
     private var pingInterval:Int?
     private var pingTimer:NSTimer?
-    private var pingTimeout = 0
-    private var pongsMissed = 0
-    private var pongsMissedMax:Int {
-        return pingTimeout / (pingInterval ?? 25)
+    private var pingTimeout:Int = 0 {
+        didSet {
+            pongsMissedMax = pingTimeout / (pingInterval ?? 25)
+        }
     }
+    private var pongsMissed = 0
+    private var pongsMissedMax = 0
     private var postWait = [String]()
     private var _polling = true
     private var probing = false
