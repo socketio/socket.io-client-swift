@@ -42,7 +42,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     private var forceWebsockets = false
     private var pingInterval:Int?
     private var pingTimer:NSTimer?
-    private var pingTimeout:Int = 0 {
+    private var pingTimeout = 0 {
         didSet {
             pongsMissedMax = pingTimeout / (pingInterval ?? 25)
         }
