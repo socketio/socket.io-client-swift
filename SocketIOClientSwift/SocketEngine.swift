@@ -379,7 +379,6 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     }
     
     private func handleMessage(message:String) {
-        // Remove message type
         if let client = client {
             dispatch_async(client.handleQueue) {[weak client] in
                 client?.parseSocketMessage(message)
