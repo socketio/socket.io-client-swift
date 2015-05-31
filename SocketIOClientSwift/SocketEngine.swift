@@ -220,7 +220,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         if websocket || waitingForPoll || !connected {
             return
         }
-
+        
         waitingForPoll = true
         let req = NSMutableURLRequest(URL: NSURL(string: urlPolling! + "&sid=\(sid)&b64=1")!)
         
@@ -357,6 +357,40 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         postWait.removeAll(keepCapacity: true)
     }
     
+    private func handleClose() {
+        if polling {
+            client?.engineDidClose("Disconnect")
+        }
+    }
+    
+    private func checkIfMessageIsBase64Binary(var message:String) {
+        if message.hasPrefix("b4") {
+            // binary in base64 string
+            message.removeRange(Range<String.Index>(start: message.startIndex,
+                end: advance(message.startIndex, 2)))
+            
+            if let data = NSData(base64EncodedString: message,
+                options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters), client = client {
+                    dispatch_async(client.handleQueue) {[weak self] in
+                        self?.client?.parseBinaryData(data)
+                    }
+            }
+        }
+    }
+    
+    private func handleMessage(message:String) {
+        // Remove message type
+        if let client = client {
+            dispatch_async(client.handleQueue) {[weak client] in
+                client?.parseSocketMessage(message)
+            }
+        }
+    }
+    
+    private func handleNOOP() {
+        doPoll()
+    }
+    
     private func handleOpen(openData:String) {
         var err:NSError?
         let mesData = openData.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!
@@ -384,6 +418,15 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         
         if !forceWebsockets {
             doPoll()
+        }
+    }
+    
+    private func handlePong(pongMessage:String) {
+        pongsMissed = 0
+        
+        // We should upgrade
+        if pongMessage == "3probe" {
+            upgradeTransport()
         }
     }
     
@@ -468,18 +511,15 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             } else {
                 if length == "" || testLength(length, &n) {
                     SocketLogger.err("Parsing error: \(str)", client: self)
-                    
                     handlePollingFailed("Error parsing XHR message")
                     return
                 }
                 
                 msg = String(strArray[i+1...i+n])
                 
-                if let lengthInt = length.toInt() {
-                    if lengthInt != count(msg) {
-                        SocketLogger.err("parsing error: \(str)", client: self)
-                        return
-                    }
+                if let lengthInt = length.toInt() where lengthInt != count(msg) {
+                    SocketLogger.err("parsing error: \(str)", client: self)
+                    return
                 }
                 
                 if count(msg) != 0 {
@@ -510,45 +550,23 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             fixDoubleUTF8(&message)
         }
         
-        let type = PacketType(str: (message["^(\\d)"].groups()?[1]))
+        let type = PacketType(str: (message["^(\\d)"].groups()?[1])) ?? PacketType.NOOP
         
-        if type == PacketType.MESSAGE {
-            // Remove message type
+        switch type {
+        case PacketType.MESSAGE:
             message.removeAtIndex(message.startIndex)
-            
-            if let client = client {
-                dispatch_async(client.handleQueue) {[weak client] in
-                    client?.parseSocketMessage(message)
-                }
-            }
-        } else if type == PacketType.NOOP {
-            doPoll()
-        } else if type == PacketType.PONG {
-            pongsMissed = 0
-            
-            // We should upgrade
-            if message == "3probe" {
-                upgradeTransport()
-            }
-        } else if type == PacketType.OPEN {
+            handleMessage(message)
+        case PacketType.NOOP:
+            handleNOOP()
+        case PacketType.PONG:
+            handlePong(message)
+        case PacketType.OPEN:
             message.removeAtIndex(message.startIndex)
-            
             handleOpen(message)
-        } else if type == PacketType.CLOSE {
-            if polling {
-                client?.engineDidClose("Disconnect")
-            }
-        } else if message.hasPrefix("b4") {
-            // binary in base64 string
-            message.removeRange(Range<String.Index>(start: message.startIndex,
-                end: advance(message.startIndex, 2)))
-            
-            if let data = NSData(base64EncodedString: message,
-                options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters), client = client {
-                    dispatch_async(client.handleQueue) {[weak self] in
-                        self?.client?.parseBinaryData(data)
-                    }
-            }
+        case PacketType.CLOSE:
+            handleClose()
+        default:
+            checkIfMessageIsBase64Binary(message)
         }
     }
     
