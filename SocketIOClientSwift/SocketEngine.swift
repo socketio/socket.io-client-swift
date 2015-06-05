@@ -549,7 +549,10 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             fixDoubleUTF8(&message)
         }
         
-        let type = PacketType(str: (message["^(\\d)"].groups()?[1])) ?? PacketType.NOOP
+        let type = PacketType(str: (message["^(\\d)"].groups()?[1])) ?? {
+            self.checkIfMessageIsBase64Binary(message)
+            return PacketType.NOOP
+        }()
         
         switch type {
         case PacketType.MESSAGE:
@@ -565,7 +568,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         case PacketType.CLOSE:
             handleClose()
         default:
-            checkIfMessageIsBase64Binary(message)
+            SocketLogger.log("Got unknown packet type", client: self)
         }
     }
     
