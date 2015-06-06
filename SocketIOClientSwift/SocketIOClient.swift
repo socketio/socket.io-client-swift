@@ -235,7 +235,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             return
         }
         
-        SocketLogger.log("Disconnected: \(reason)", client: self)
+        SocketLogger.log("Disconnected: %@", client: self, args: reason)
         
         _closed = true
         _connected = false
@@ -250,7 +250,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     
     /// error
     public func didError(reason:AnyObject) {
-        SocketLogger.err("Error: \(reason)", client: self)
+        SocketLogger.err("%@", client: self, args: reason)
         
         handleEvent("error", data: reason as? [AnyObject] ?? [reason],
             isInternalMessage: true)
@@ -323,7 +323,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         SocketParser.parseForEmit(packet)
         str = packet.createMessageForEvent(event)
         
-        SocketLogger.log("Emitting: \(str)", client: self)
+        SocketLogger.log("Emitting: %@", client: self, args: str)
         
         if packet.type == SocketPacket.PacketType.BINARY_EVENT {
             engine?.send(str, withData: packet.binary)
@@ -342,7 +342,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
                 SocketParser.parseForEmit(packet)
                 str = packet.createAck()
                 
-                SocketLogger.log("Emitting Ack: \(str)", client: this)
+                SocketLogger.log("Emitting Ack: %@", client: this, args: str)
                 
                 if packet.type == SocketPacket.PacketType.BINARY_ACK {
                     this.engine?.send(str, withData: packet.binary)
@@ -368,7 +368,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     
     // Called when the socket gets an ack for something it sent
     func handleAck(ack:Int, data:AnyObject?) {
-        SocketLogger.log("Handling ack: \(ack) with data: \(data)", client: self)
+        SocketLogger.log("Handling ack: %@ with data: %@", client: self,
+            args: ack, data ?? "")
         
         ackHandlers.executeAck(ack,
             items: (data as? [AnyObject]?) ?? (data != nil ? [data!] : nil))
@@ -384,7 +385,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
                 return
             }
             
-            SocketLogger.log("Handling event: \(event) with data: \(data)", client: self)
+            SocketLogger.log("Handling event: %@ with data: %@", client: self,
+                args: event, data ?? "")
             
             if anyHandler != nil {
                 dispatch_async(dispatch_get_main_queue()) {[weak self] in
@@ -428,7 +430,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     Removes handler(s)
     */
     public func off(event:String) {
-        SocketLogger.log("Removing handler for event: \(event)", client: self)
+        SocketLogger.log("Removing handler for event: %@", client: self, args: event)
         
         handlers = handlers.filter {$0.event == event ? false : true}
     }
@@ -436,10 +438,10 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     /**
     Adds a handler for an event.
     */
-    public func on(name:String, callback:NormalCallback) {
-        SocketLogger.log("Adding handler for event: \(name)", client: self)
+    public func on(event:String, callback:NormalCallback) {
+        SocketLogger.log("Adding handler for event: %@", client: self, args: event)
         
-        let handler = SocketEventHandler(event: name, callback: callback)
+        let handler = SocketEventHandler(event: event, callback: callback)
         handlers.append(handler)
     }
     

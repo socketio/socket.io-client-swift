@@ -116,7 +116,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     }
     
     public func close(#fast:Bool) {
-        SocketLogger.log("Engine is being closed. Fast: \(fast)", client: self)
+        SocketLogger.log("Engine is being closed. Fast: %@", client: self, args: fast)
         
         pingTimer?.invalidate()
         closed = true
@@ -324,7 +324,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         
         waitingForPost = true
         
-        SocketLogger.log("POSTing: \(postStr)", client: self)
+        SocketLogger.log("POSTing: %@", client: self, args: postStr)
         
         session.dataTaskWithRequest(req) {[weak self] data, res, err in
             if let this = self {
@@ -509,7 +509,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                 length += chr
             } else {
                 if length == "" || testLength(length, &n) {
-                    SocketLogger.err("Parsing error: \(str)", client: self)
+                    SocketLogger.err("Parsing error: %@", client: self, args: str)
                     handlePollingFailed("Error parsing XHR message")
                     return
                 }
@@ -517,7 +517,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                 msg = String(strArray[i+1...i+n])
                 
                 if let lengthInt = length.toInt() where lengthInt != count(msg) {
-                    SocketLogger.err("parsing error: \(str)", client: self)
+                    SocketLogger.err("Parsing error: %@", client: self, args: str)
                     return
                 }
                 
@@ -543,7 +543,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     }
     
     private func parseEngineMessage(var message:String, fromPolling:Bool) {
-        SocketLogger.log("Got message: \(message)", client: self)
+        SocketLogger.log("Got message: %@", client: self, args: message)
         
         if fromPolling {
             fixDoubleUTF8(&message)
@@ -603,7 +603,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     /// Only call on emitQueue
     private func sendPollMessage(var msg:String, withType type:PacketType,
         datas:ContiguousArray<NSData>? = nil) {
-            SocketLogger.log("Sending poll: \(msg) as type: \(type.rawValue)", client: self)
+            SocketLogger.log("Sending poll: %@ as type: %@", client: self, args: msg, type.rawValue)
             
             doubleEncodeUTF8(&msg)
             let strMsg = "\(type.rawValue)\(msg)"
@@ -627,7 +627,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     /// Only call on emitQueue
     private func sendWebSocketMessage(str:String, withType type:PacketType,
         datas:ContiguousArray<NSData>? = nil) {
-            SocketLogger.log("Sending ws: \(str) as type: \(type.rawValue)", client: self)
+            SocketLogger.log("Sending ws: %@ as type: %@", client: self, args: str, type.rawValue)
             
             ws?.writeString("\(type.rawValue)\(str)")
             
@@ -678,10 +678,12 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         dispatch_async(emitQueue) {[weak self] in
             if let this = self where this.connected {
                 if this.websocket {
-                    SocketLogger.log("Writing ws: \(msg):\(data)", client: this)
+                    SocketLogger.log("Writing ws: %@ has data: %@", client: this,
+                        args: msg, data == nil ? false : true)
                     this.sendWebSocketMessage(msg, withType: type, datas: data)
                 } else {
-                    SocketLogger.log("Writing poll: \(msg):\(data)", client: this)
+                    SocketLogger.log("Writing poll: %@ has data: %@", client: this,
+                        args: msg, data == nil ? false : true)
                     this.sendPollMessage(msg, withType: type, datas: data)
                 }
             }

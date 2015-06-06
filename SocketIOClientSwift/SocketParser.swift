@@ -185,7 +185,7 @@ class SocketParser {
             return nsp == "" && socket.nsp != "/"
         }
         
-        SocketLogger.log("Parsing \(stringMessage)", client: socket, altType: "SocketParser")
+        SocketLogger.log("Parsing %@", client: socket, altType: "SocketParser", args: stringMessage)
         
         let p:SocketPacket
         
@@ -196,10 +196,7 @@ class SocketParser {
             return
         }
         
-        // Don't call SocketPacket.description unless we need to
-        if socket.log {
-            SocketLogger.log("Decoded packet as: \(p)", client: socket, altType: "SocketParser")
-        }
+        SocketLogger.log("Decoded packet as: %@", client: socket, altType: "SocketParser", args: p)
         
         if p.type == SocketPacket.PacketType.EVENT {
             if checkNSP(p.nsp) {
