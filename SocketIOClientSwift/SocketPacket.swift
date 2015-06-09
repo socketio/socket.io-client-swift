@@ -157,8 +157,6 @@ final class SocketPacket: CustomStringConvertible {
     }
     
     private func completeMessage(var message:String, ack:Bool = false) -> String {
-        var err:NSError?
-        
         if data == nil || data!.count == 0 {
             return message + "]"
         } else if !ack {
@@ -171,8 +169,7 @@ final class SocketPacket: CustomStringConvertible {
                 do {
                     jsonSend = try NSJSONSerialization.dataWithJSONObject(arg,
                                         options: NSJSONWritingOptions(rawValue: 0))
-                } catch var error as NSError {
-                    err = error
+                } catch {
                     jsonSend = nil
                 }
                 let jsonString = NSString(data: jsonSend!, encoding: NSUTF8StringEncoding)

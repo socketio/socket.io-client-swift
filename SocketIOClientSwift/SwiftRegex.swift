@@ -24,15 +24,13 @@ public class SwiftRegex: NSObject, BooleanType {
         if let regex = swiftRegexCache[pattern] {
             self.regex = regex
         } else {
-            var error: NSError?
             do {
                 let regex = try NSRegularExpression(pattern: pattern, options:
                     NSRegularExpressionOptions.DotMatchesLineSeparators)
                 swiftRegexCache[pattern] = regex
                 self.regex = regex
             } catch let error1 as NSError {
-                error = error1
-                SwiftRegex.failure("Error in pattern: \(pattern) - \(error)")
+                SwiftRegex.failure("Error in pattern: \(pattern) - \(error1)")
                 self.regex = NSRegularExpression()
             }
         }
