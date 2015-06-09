@@ -145,7 +145,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     Will turn off automatic reconnects.
     Pass true to fast if you're closing from a background task
     */
-    public func close(#fast:Bool) {
+    public func close(fast fast:Bool) {
         SocketLogger.log("Closing socket", client: self)
         
         reconnects = false
@@ -166,7 +166,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     /**
     Connect to the server. If we aren't connected after timeoutAfter, call handler
     */
-    public func connect(#timeoutAfter:Int, withTimeoutHandler handler:(() -> Void)?) {
+    public func connect(timeoutAfter timeoutAfter:Int, withTimeoutHandler handler:(() -> Void)?) {
         if closed {
             SocketLogger.log("Warning! This socket was previously closed. This might be dangerous!", client: self)
             _closed = false
@@ -175,7 +175,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         }
         
         addEngine()
-        engine?.open(opts: connectParams)
+        engine?.open(connectParams)
         
         if timeoutAfter == 0 {
             return
@@ -260,7 +260,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     /**
     Same as close
     */
-    public func disconnect(#fast:Bool) {
+    public func disconnect(fast fast:Bool) {
         close(fast: fast)
     }
     
@@ -433,7 +433,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     public func off(event:String) {
         SocketLogger.log("Removing handler for event: %@", client: self, args: event)
         
-        handlers = handlers.filter {$0.event == event ? false : true}
+        handlers = ContiguousArray(handlers.filter {$0.event == event ? false : true})
     }
     
     /**

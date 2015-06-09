@@ -24,7 +24,7 @@
 
 import Foundation
 
-final class SocketPacket: Printable {
+final class SocketPacket: CustomStringConvertible {
     var binary = ContiguousArray<NSData>()
     var currentPlace = 0
     var data:[AnyObject]?
@@ -55,7 +55,7 @@ final class SocketPacket: Printable {
         case BINARY_ACK = 6
         
         init?(str:String) {
-            if let int = str.toInt(), raw = PacketType(rawValue: int) {
+            if let int = Int(str), raw = PacketType(rawValue: int) {
                 self = raw
             } else {
                 return nil
@@ -167,8 +167,14 @@ final class SocketPacket: Printable {
         
         for arg in data! {
             if arg is NSDictionary || arg is [AnyObject] {
-                let jsonSend = NSJSONSerialization.dataWithJSONObject(arg,
-                    options: NSJSONWritingOptions(0), error: &err)
+                let jsonSend: NSData?
+                do {
+                    jsonSend = try NSJSONSerialization.dataWithJSONObject(arg,
+                                        options: NSJSONWritingOptions(rawValue: 0))
+                } catch var error as NSError {
+                    err = error
+                    jsonSend = nil
+                }
                 let jsonString = NSString(data: jsonSend!, encoding: NSUTF8StringEncoding)
                 
                 message += jsonString! as String + ","
@@ -192,11 +198,11 @@ final class SocketPacket: Printable {
     }
     
     func fillInPlaceholders() {
-        var newArr = NSMutableArray(array: data!)
+        let newArr = NSMutableArray(array: data!)
         
         for i in 0..<data!.count {
             if let str = data?[i] as? String, num = str["~~(\\d)"].groups() {
-                newArr[i] = binary[num[1].toInt()!]
+                newArr[i] = binary[Int(num[1])!]
             } else if data?[i] is NSDictionary || data?[i] is NSArray {
                 newArr[i] = _fillInPlaceholders(data![i])
             }
@@ -208,12 +214,12 @@ final class SocketPacket: Printable {
     private func _fillInPlaceholders(data:AnyObject) -> AnyObject {
         if let str = data as? String {
             if let num = str["~~(\\d)"].groups() {
-                return binary[num[1].toInt()!]
+                return binary[Int(num[1])!]
             } else {
                 return str
             }
         } else if let dict = data as? NSDictionary {
-            var newDict = NSMutableDictionary(dictionary: dict)
+            let newDict = NSMutableDictionary(dictionary: dict)
             
             for (key, value) in dict {
                 newDict[key as! NSCopying] = _fillInPlaceholders(value)
@@ -221,7 +227,7 @@ final class SocketPacket: Printable {
             
             return newDict
         } else if let arr = data as? NSArray {
-            var newArr = NSMutableArray(array: arr)
+            let newArr = NSMutableArray(array: arr)
             
             for i in 0..<arr.count {
                 newArr[i] = _fillInPlaceholders(arr[i])

@@ -37,7 +37,7 @@ class SocketParser {
                 
                 return placeholder
             } else if let arr = data as? NSArray {
-                var newArr = NSMutableArray(array: arr)
+                let newArr = NSMutableArray(array: arr)
                 
                 for i in 0..<arr.count {
                     newArr[i] = shred(arr[i])
@@ -45,7 +45,7 @@ class SocketParser {
                 
                 return newArr
             } else if let dict = data as? NSDictionary {
-                var newDict = NSMutableDictionary(dictionary: dict)
+                let newDict = NSMutableDictionary(dictionary: dict)
                 
                 for (key, value) in newDict {
                     newDict[key as! NSCopying] = shred(value)
@@ -81,7 +81,7 @@ class SocketParser {
     
     // Translation of socket.io-client#decodeString
     static func parseString(str:String) -> SocketPacket? {
-        let arr = Array(str)
+        let arr = Array(str.characters)
         let type = String(arr[0])
         
         if arr.count == 1 {
@@ -103,7 +103,7 @@ class SocketParser {
                 }
             }
             
-            if let holders = buf.toInt() where arr[i] == "-" {
+            if let holders = Int(buf) where arr[i] == "-" {
                 placeholders = holders
             } else {
                 NSLog("Error parsing \(str)")
@@ -130,10 +130,10 @@ class SocketParser {
         
         let next = String(arr[i + 1])
         
-        if next.toInt() != nil {
+        if Int(next) != nil {
             var c = ""
             while ++i < arr.count {
-                if let int = String(arr[i]).toInt() {
+                if let int = Int(String(arr[i])) {
                     c += String(arr[i])
                 } else {
                     --i
@@ -141,11 +141,11 @@ class SocketParser {
                 }
             }
             
-            id = c.toInt()
+            id = Int(c)
         }
         
         if ++i < arr.count {
-            let d = str[advance(str.startIndex, i)...advance(str.startIndex, count(str)-1)]
+            let d = str[advance(str.startIndex, i)...advance(str.startIndex, str.characters.count-1)]
             let noPlaceholders = d["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] ~= "\"~~$2\""
             let data = SocketParser.parseData(noPlaceholders) as? [AnyObject] ?? [noPlaceholders]
             
@@ -160,8 +160,14 @@ class SocketParser {
     static func parseData(data:String) -> AnyObject? {
         var err:NSError?
         let stringData = data.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)
-        let parsed:AnyObject? = NSJSONSerialization.JSONObjectWithData(stringData!,
-            options: NSJSONReadingOptions.MutableContainers, error: &err)
+        let parsed:AnyObject?
+        do {
+            parsed = try NSJSONSerialization.JSONObjectWithData(stringData!,
+                        options: NSJSONReadingOptions.MutableContainers)
+        } catch var error as NSError {
+            err = error
+            parsed = nil
+        }
         
         if err != nil {
             // println(err)

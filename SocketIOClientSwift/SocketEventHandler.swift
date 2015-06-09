@@ -24,24 +24,24 @@
 
 import Foundation
 
-private func emitAckCallback(socket:SocketIOClient, num:Int)
-    (items:AnyObject...) -> Void {
-        socket.emitAck(num, withData: items)
+private func emitAckCallback(socket:SocketIOClient?, num:Int?)
+    (items:[AnyObject]) -> Void {
+        socket?.emitAck(num ?? -1, withData: items)
 }
 
 final class SocketEventHandler {
     let event:String!
-    let callback:NormalCallback?
+    let callback:NormalCallback
     
     init(event:String, callback:NormalCallback) {
         self.event = event
         self.callback = callback
     }
     
-    func executeCallback(_ items:NSArray? = nil, withAck ack:Int? = nil, withAckType type:Int? = nil,
+    func executeCallback(items:NSArray? = nil, withAck ack:Int? = nil, withAckType type:Int? = nil,
         withSocket socket:SocketIOClient? = nil) {
             dispatch_async(dispatch_get_main_queue()) {[weak self] in
-                self?.callback?(items, ack != nil ? emitAckCallback(socket!, ack!) : nil)
+                self?.callback(items, emitAckCallback(socket, num: ack))
             }
     }
 }

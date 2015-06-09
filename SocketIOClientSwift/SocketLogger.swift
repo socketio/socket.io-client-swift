@@ -24,8 +24,6 @@
 
 import Foundation
 
-private let MESSAGE_LENGTH_MAX = 10000
-
 protocol SocketLogClient {
     var log:Bool {get set}
     var logType:String {get}
@@ -34,16 +32,8 @@ protocol SocketLogClient {
 final class SocketLogger {
     private static let printQueue = dispatch_queue_create("printQueue", DISPATCH_QUEUE_SERIAL)
     
-    private static func shorten(item:AnyObject) -> CVarArgType {
-        var str = toString(item)
-        
-        if count(str) > MESSAGE_LENGTH_MAX {
-            let endIndex = advance(str.startIndex, MESSAGE_LENGTH_MAX)
-            
-            str = str.substringToIndex(endIndex)
-        }
-        
-        return str
+    private static func toCVArgType(item:AnyObject) -> CVarArgType {
+        return String(item)
     }
     
     static func log(message:String, client:SocketLogClient, altType:String? = nil, args:AnyObject...) {
@@ -52,7 +42,7 @@ final class SocketLogger {
         }
         
         dispatch_async(printQueue) {[type = client.logType] in
-            let newArgs = args.map(SocketLogger.shorten)
+            let newArgs = args.map(SocketLogger.toCVArgType)
             let replaced = String(format: message, arguments: newArgs)
             
             NSLog("%@: %@", altType ?? type, replaced)
@@ -65,7 +55,7 @@ final class SocketLogger {
         }
         
         dispatch_async(printQueue) {[type = client.logType] in
-            let newArgs = args.map(SocketLogger.shorten)
+            let newArgs = args.map(SocketLogger.toCVArgType)
             let replaced = String(format: message, arguments: newArgs)
             
             NSLog("ERROR %@: %@", altType ?? type, replaced)
