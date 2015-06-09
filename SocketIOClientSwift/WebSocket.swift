@@ -169,7 +169,6 @@ public class WebSocket : NSObject, NSStreamDelegate {
     //private method that starts the connection
     private func createHTTPRequest() {
         
-        let str: NSString = url.absoluteString
         let urlRequest = CFHTTPMessageCreateRequest(kCFAllocatorDefault, "GET",
             url, kCFHTTPVersion1_1)
         

@@ -134,7 +134,7 @@ class SocketParser {
             var c = ""
             while ++i < arr.count {
                 if let int = Int(String(arr[i])) {
-                    c += String(arr[i])
+                    c += String(int)
                 } else {
                     --i
                     break
@@ -164,7 +164,7 @@ class SocketParser {
         do {
             parsed = try NSJSONSerialization.JSONObjectWithData(stringData!,
                         options: NSJSONReadingOptions.MutableContainers)
-        } catch var error as NSError {
+        } catch let error as NSError {
             err = error
             parsed = nil
         }
