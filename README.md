@@ -15,7 +15,7 @@ socket.on("currentAmount") {data, ack in
             socket.emit("update", ["amount": cur + 2.50])
         }
 
-        ack?("Got your currentAmount", "dude")
+        ack?(["Got your currentAmount", "dude"])
     }
 }
 
