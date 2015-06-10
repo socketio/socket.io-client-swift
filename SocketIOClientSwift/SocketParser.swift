@@ -79,6 +79,54 @@ class SocketParser {
         }
     }
     
+    private static func checkNSP(nsp:String) -> Bool {
+        return nsp == "" && socket.nsp != "/"
+    }
+    
+    private static func handleAck(p:SocketPacket, socket:SocketIOClient) {
+        if checkNSP(p.nsp) {
+            return
+        }
+        
+        socket.handleAck(p.id!, data: p.data)
+    }
+    
+    private static func handleBinaryAck(p:SocketPacket, socket:SocketIOClient) {
+        if checkNSP(p.nsp) {
+            return
+        }
+        
+        p.justAck = true
+        socket.waitingData.append(p)
+    }
+    
+    private static func handleBinaryEvent(p:SocketPacket, socket:SocketIOClient) {
+        if checkNSP(p.nsp) {
+            return
+        }
+        
+        socket.waitingData.append(p)
+    }
+    
+    private static func handleConnect(p:SocketPacket, socket:SocketIOClient) {
+        if p.nsp == "" && socket.nsp != "/" {
+            socket.joinNamespace()
+        } else if p.nsp != "" && socket.nsp == "/" {
+            socket.didConnect()
+        } else {
+            socket.didConnect()
+        }
+    }
+    
+    private static func handleEvent(p:SocketPacket, socket:SocketIOClient) {
+        if checkNSP(p.nsp) {
+            return
+        }
+        
+        socket.handleEvent(p.getEvent(), data: p.data,
+            isInternalMessage: false, wantsAck: p.id)
+    }
+    
     // Translation of socket.io-client#decodeString
     static func parseString(str:String) -> SocketPacket? {
         let arr = Array(str.characters)
@@ -187,10 +235,6 @@ class SocketParser {
             return
         }
         
-        func checkNSP(nsp:String) -> Bool {
-            return nsp == "" && socket.nsp != "/"
-        }
-        
         SocketLogger.log("Parsing %@", client: socket, altType: "SocketParser", args: stringMessage)
         
         let p:SocketPacket
@@ -204,44 +248,23 @@ class SocketParser {
         
         SocketLogger.log("Decoded packet as: %@", client: socket, altType: "SocketParser", args: p)
         
-        if p.type == SocketPacket.PacketType.EVENT {
-            if checkNSP(p.nsp) {
-                return
-            }
-            
-            socket.handleEvent(p.getEvent(), data: p.data,
-                isInternalMessage: false, wantsAck: p.id)
-        } else if p.type == SocketPacket.PacketType.ACK {
-            if checkNSP(p.nsp) {
-                return
-            }
-            
-            socket.handleAck(p.id!, data: p.data)
-        } else if p.type == SocketPacket.PacketType.BINARY_EVENT {
-            if checkNSP(p.nsp) {
-                return
-            }
-            
-            socket.waitingData.append(p)
-        } else if p.type == SocketPacket.PacketType.BINARY_ACK {
-            if checkNSP(p.nsp) {
-                return
-            }
-            
-            p.justAck = true
-            socket.waitingData.append(p)
-        } else if p.type == SocketPacket.PacketType.CONNECT {
-            if p.nsp == "" && socket.nsp != "/" {
-                socket.joinNamespace()
-            } else if p.nsp != "" && socket.nsp == "/" {
-                socket.didConnect()
-            } else {
-                socket.didConnect()
-            }
-        } else if p.type == SocketPacket.PacketType.DISCONNECT {
+        switch p.type {
+        case SocketPacket.PacketType.EVENT?:
+            handleEvent(p, socket: socket)
+        case SocketPacket.PacketType.ACK?:
+            handleAck(p, socket: socket)
+        case SocketPacket.PacketType.BINARY_EVENT?:
+            handleBinaryEvent(p, socket: socket)
+        case SocketPacket.PacketType.BINARY_ACK?:
+            handleBinaryAck(p, socket: socket)
+        case SocketPacket.PacketType.CONNECT?:
+            handleConnect(p, socket: socket)
+        case SocketPacket.PacketType.DISCONNECT?:
             socket.didDisconnect("Got Disconnect")
-        } else if p.type == SocketPacket.PacketType.ERROR {
+        case SocketPacket.PacketType.ERROR?:
             socket.didError(p.data == nil ? "Error" : p.data!)
+        case nil:
+            SocketLogger.err("Got packet with invalid packet type", client: socket)
         }
     }
     

@@ -395,13 +395,11 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
                 }
             }
             
-            for handler in handlers {
-                if handler.event == event {
-                    if ack != nil {
-                        handler.executeCallback(data, withAck: ack!, withSocket: self)
-                    } else {
-                        handler.executeCallback(data)
-                    }
+            for handler in handlers where handler.event == event {
+                if ack != nil {
+                    handler.executeCallback(data, withAck: ack!, withSocket: self)
+                } else {
+                    handler.executeCallback(data)
                 }
             }
     }
