@@ -29,8 +29,8 @@ private func emitAckCallback(socket:SocketIOClient?, num:Int?)
         socket?.emitAck(num ?? -1, withData: items)
 }
 
-final class SocketEventHandler {
-    let event:String!
+struct SocketEventHandler {
+    let event:String
     let callback:NormalCallback
     
     init(event:String, callback:NormalCallback) {
@@ -40,8 +40,8 @@ final class SocketEventHandler {
     
     func executeCallback(items:NSArray? = nil, withAck ack:Int? = nil, withAckType type:Int? = nil,
         withSocket socket:SocketIOClient? = nil) {
-            dispatch_async(dispatch_get_main_queue()) {[weak self] in
-                self?.callback(items, emitAckCallback(socket, num: ack))
+            dispatch_async(dispatch_get_main_queue()) {
+                self.callback(items, emitAckCallback(socket, num: ack))
             }
     }
 }
