@@ -24,10 +24,6 @@
 
 import Foundation
 
-// @objc_block is undocumented, but is used because Swift assumes that all
-// Objective-C blocks are copied, but Objective-C assumes that Swift will copy it.
-// And the way things are done here, the bridging fails to copy the block in
-// SocketAckMap#addAck
 public typealias AckCallback = @convention(block) (NSArray?) -> Void
 public typealias AckEmitter = ([AnyObject]) -> Void
 public typealias NormalCallback = (NSArray?, AckEmitter?) -> Void
