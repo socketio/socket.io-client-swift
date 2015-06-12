@@ -79,12 +79,12 @@ class SocketParser {
         }
     }
     
-    private static func checkNSP(nsp:String) -> Bool {
+    private static func checkNSP(nsp:String, _ socket:SocketIOClient) -> Bool {
         return nsp == "" && socket.nsp != "/"
     }
     
     private static func handleAck(p:SocketPacket, socket:SocketIOClient) {
-        if checkNSP(p.nsp) {
+        if checkNSP(p.nsp, socket) {
             return
         }
         
@@ -92,7 +92,7 @@ class SocketParser {
     }
     
     private static func handleBinaryAck(p:SocketPacket, socket:SocketIOClient) {
-        if checkNSP(p.nsp) {
+        if checkNSP(p.nsp, socket) {
             return
         }
         
@@ -101,7 +101,7 @@ class SocketParser {
     }
     
     private static func handleBinaryEvent(p:SocketPacket, socket:SocketIOClient) {
-        if checkNSP(p.nsp) {
+        if checkNSP(p.nsp, socket) {
             return
         }
         
@@ -119,7 +119,7 @@ class SocketParser {
     }
     
     private static func handleEvent(p:SocketPacket, socket:SocketIOClient) {
-        if checkNSP(p.nsp) {
+        if checkNSP(p.nsp, socket) {
             return
         }
         
