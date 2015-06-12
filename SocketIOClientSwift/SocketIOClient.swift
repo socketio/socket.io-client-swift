@@ -76,7 +76,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     /**
     Create a new SocketIOClient. opts can be omitted
     */
-    public init(var socketURL:String, opts:[String: AnyObject]? = nil) {
+    public init(var socketURL:String, opts:[String: AnyObject]?) {
         if socketURL["https://"].matches().count != 0 {
             self._secure = true
         }
@@ -123,10 +123,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         }
         
         super.init()
-    }
-    
-    public convenience init(socketURL:String, options:[String: AnyObject]?) {
-        self.init(socketURL: socketURL, opts: options)
     }
     
     deinit {
