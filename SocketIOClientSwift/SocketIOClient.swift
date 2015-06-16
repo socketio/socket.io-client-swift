@@ -33,7 +33,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     private var handlers = ContiguousArray<SocketEventHandler>()
     private var connectParams:[String: AnyObject]?
     private var _secure = false
-    private var _sid:String?
     private var _reconnecting = false
     private var reconnectTimer:NSTimer?
     
@@ -70,7 +69,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         return _secure
     }
     public var sid:String? {
-        return _sid
+        return engine?.sid
     }
     
     /**
@@ -220,7 +219,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         currentReconnectAttempt = 0
         reconnectTimer?.invalidate()
         reconnectTimer = nil
-        _sid = engine?.sid
         
         // Don't handle as internal because something crazy could happen where
         // we disconnect before it's handled
