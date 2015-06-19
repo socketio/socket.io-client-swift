@@ -328,7 +328,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     func emitAck(ack:Int, withData args:[AnyObject]) {
         dispatch_async(emitQueue) {[weak self] in
             if let this = self where this.connected {
-                let packet = SocketPacket.packetFromEmitWithData(args, id: ack ?? -1, nsp: this.nsp)
+                let packet = SocketPacket.packetFromEmitAckWithData(args, id: ack ?? -1, nsp: this.nsp)
                 let str = packet.createAck()
                 
                 SocketLogger.log("Emitting Ack: %@", client: this, args: str)
