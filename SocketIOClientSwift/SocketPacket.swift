@@ -48,7 +48,6 @@ struct SocketPacket {
     var data:[AnyObject]
     var id:Int = -1
     var nsp = ""
-    var justAck = false
     var placeholders:Int
     var type:PacketType
     var description:String {
@@ -253,7 +252,7 @@ struct SocketPacket {
         case _ where ack:
             return PacketType.BINARY_ACK
         default:
-            return PacketType.BINARY_ACK
+            return PacketType.EVENT
         }
     }
     
