@@ -22,63 +22,7 @@
 
 import Foundation
 
-class SocketParser {    
-    private static let shredder = SocketParser.PacketShredder()
-    
-    // Translation of socket.io-parser#deconstructPacket
-    private final class PacketShredder {
-        var buf = ContiguousArray<NSData>()
-        
-        func shred(data:AnyObject) -> AnyObject {
-            if let bin = data as? NSData {
-                let placeholder = ["_placeholder" :true, "num": buf.count]
-                
-                buf.append(bin)
-                
-                return placeholder
-            } else if let arr = data as? NSArray {
-                let newArr = NSMutableArray(array: arr)
-                
-                for i in 0..<arr.count {
-                    newArr[i] = shred(arr[i])
-                }
-                
-                return newArr
-            } else if let dict = data as? NSDictionary {
-                let newDict = NSMutableDictionary(dictionary: dict)
-                
-                for (key, value) in newDict {
-                    newDict[key as! NSCopying] = shred(value)
-                }
-                
-                return newDict
-            } else {
-                return data
-            }
-        }
-        
-        func deconstructPacket(packet:SocketPacket) {
-            if packet.data == nil {
-                return
-            }
-            
-            var data = packet.data!
-            
-            for i in 0..<data.count {
-                if data[i] is NSArray || data[i] is NSDictionary {
-                    data[i] = shred(data[i])
-                } else if let bin = data[i] as? NSData {
-                    data[i] = ["_placeholder" :true, "num": buf.count]
-                    buf.append(bin)
-                }
-            }
-            
-            packet.data = data
-            packet.binary = buf
-            buf.removeAll(keepCapacity: true)
-        }
-    }
-    
+class SocketParser {
     private static func checkNSP(nsp:String, _ socket:SocketIOClient) -> Bool {
         return nsp == "" && socket.nsp != "/"
     }
@@ -88,7 +32,7 @@ class SocketParser {
             return
         }
         
-        socket.handleAck(p.id!, data: p.data)
+        socket.handleAck(p.id, data: p.data)
     }
     
     private static func handleBinaryAck(p:SocketPacket, socket:SocketIOClient) {
@@ -96,7 +40,6 @@ class SocketParser {
             return
         }
         
-        p.justAck = true
         socket.waitingData.append(p)
     }
     
@@ -123,7 +66,7 @@ class SocketParser {
             return
         }
         
-        socket.handleEvent(p.getEvent(), data: p.data,
+        socket.handleEvent(p.getEvent(), data: p.getArgs(),
             isInternalMessage: false, wantsAck: p.id)
     }
     
@@ -133,7 +76,7 @@ class SocketParser {
         let type = String(arr[0])
         
         if arr.count == 1 {
-            return SocketPacket(type: SocketPacket.PacketType(str: type))
+            return SocketPacket(type: SocketPacket.PacketType(str: type)!, nsp: "/")
         }
         
         var id = nil as Int?
@@ -172,8 +115,8 @@ class SocketParser {
         }
         
         if i + 1 >= arr.count {
-            return SocketPacket(type: SocketPacket.PacketType(str: type),
-                nsp: nsp, placeholders: placeholders, id: id)
+            return SocketPacket(type: SocketPacket.PacketType(str: type)!, id: id ?? -1,
+                nsp: nsp, placeholders: placeholders)
         }
         
         let next = String(arr[i + 1])
@@ -197,8 +140,8 @@ class SocketParser {
             let noPlaceholders = d["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] ~= "\"~~$2\""
             let data = SocketParser.parseData(noPlaceholders) as? [AnyObject] ?? [noPlaceholders]
             
-            return SocketPacket(type: SocketPacket.PacketType(str: type), data: data,
-                nsp: nsp, placeholders: placeholders, id: id)
+            return SocketPacket(type: SocketPacket.PacketType(str: type)!, data: data, id: id ?? -1,
+                nsp: nsp, placeholders: placeholders)
         }
         
         return nil
@@ -225,10 +168,6 @@ class SocketParser {
         return parsed
     }
     
-    static func parseForEmit(packet:SocketPacket) {
-        shredder.deconstructPacket(packet)
-    }
-    
     // Parses messages recieved
     static func parseSocketMessage(stringMessage:String, socket:SocketIOClient) {
         if stringMessage == "" {
@@ -246,25 +185,23 @@ class SocketParser {
             return
         }
         
-        SocketLogger.log("Decoded packet as: %@", client: socket, altType: "SocketParser", args: p)
+        SocketLogger.log("Decoded packet as: %@", client: socket, altType: "SocketParser", args: p.description)
         
         switch p.type {
-        case SocketPacket.PacketType.EVENT?:
+        case SocketPacket.PacketType.EVENT:
             handleEvent(p, socket: socket)
-        case SocketPacket.PacketType.ACK?:
+        case SocketPacket.PacketType.ACK:
             handleAck(p, socket: socket)
-        case SocketPacket.PacketType.BINARY_EVENT?:
+        case SocketPacket.PacketType.BINARY_EVENT:
             handleBinaryEvent(p, socket: socket)
-        case SocketPacket.PacketType.BINARY_ACK?:
+        case SocketPacket.PacketType.BINARY_ACK:
             handleBinaryAck(p, socket: socket)
-        case SocketPacket.PacketType.CONNECT?:
+        case SocketPacket.PacketType.CONNECT:
             handleConnect(p, socket: socket)
-        case SocketPacket.PacketType.DISCONNECT?:
+        case SocketPacket.PacketType.DISCONNECT:
             socket.didDisconnect("Got Disconnect")
-        case SocketPacket.PacketType.ERROR?:
-            socket.didError(p.data == nil ? "Error" : p.data!)
-        case nil:
-            SocketLogger.err("Got packet with invalid packet type", client: socket)
+        case SocketPacket.PacketType.ERROR:
+            socket.didError("Error: \(p.data)")
         }
     }
     
@@ -280,14 +217,14 @@ class SocketParser {
             return
         }
         
-        let packet = socket.waitingData.removeAtIndex(0)
+        var packet = socket.waitingData.removeAtIndex(0)
         packet.fillInPlaceholders()
         
         if !packet.justAck {
-            socket.handleEvent(packet.getEvent(), data: packet.data,
+            socket.handleEvent(packet.getEvent(), data: packet.getArgs(),
                 wantsAck: packet.id)
         } else {
-            socket.handleAck(packet.id!, data: packet.data)
+            socket.handleAck(packet.id, data: packet.getArgs())
         }
     }
 }

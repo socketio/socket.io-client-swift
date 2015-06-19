@@ -25,7 +25,7 @@
 import Foundation
 
 public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
-    private typealias Probe = (msg:String, type:PacketType, data:ContiguousArray<NSData>?)
+    private typealias Probe = (msg:String, type:PacketType, data:[NSData]?)
     private typealias ProbeWaitQueue = [Probe]
     
     private let allowedCharacterSet = NSCharacterSet(charactersInString: "!*'();:@&=+$,/?%#[]\" {}").invertedSet
@@ -579,7 +579,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     }
     
     /// Send an engine message (4)
-    public func send(msg:String, withData datas:ContiguousArray<NSData>?) {
+    public func send(msg:String, withData datas:[NSData]?) {
         if probing {
             probeWait.append((msg, PacketType.MESSAGE, datas))
         } else {
@@ -602,7 +602,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     /// Send polling message.
     /// Only call on emitQueue
     private func sendPollMessage(var msg:String, withType type:PacketType,
-        datas:ContiguousArray<NSData>? = nil) {
+        datas:[NSData]? = nil) {
             SocketLogger.log("Sending poll: %@ as type: %@", client: self, args: msg, type.rawValue)
             
             doubleEncodeUTF8(&msg)
@@ -626,7 +626,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     /// Send message on WebSockets
     /// Only call on emitQueue
     private func sendWebSocketMessage(str:String, withType type:PacketType,
-        datas:ContiguousArray<NSData>? = nil) {
+        datas:[NSData]? = nil) {
             SocketLogger.log("Sending ws: %@ as type: %@", client: self, args: str, type.rawValue)
             
             ws?.writeString("\(type.rawValue)\(str)")
@@ -674,7 +674,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     /**
     Write a message, independent of transport.
     */
-    public func write(msg:String, withType type:PacketType, withData data:ContiguousArray<NSData>?) {
+    public func write(msg:String, withType type:PacketType, withData data:[NSData]?) {
         dispatch_async(emitQueue) {[weak self] in
             if let this = self where this.connected {
                 if this.websocket {
@@ -695,7 +695,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     */
     public func writeObjc(msg:String, withType type:Int, withData data:NSArray?) {
         if let pType = PacketType(rawValue: type) {
-            var arr = ContiguousArray<NSData>()
+            var arr = [NSData]()
             
             if data != nil {
                 for d in data! {

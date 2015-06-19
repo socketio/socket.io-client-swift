@@ -312,11 +312,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             return
         }
         
-        let packet = SocketPacket(type: nil, data: args, nsp: nsp, id: ack)
-        let str:String
-        
-        SocketParser.parseForEmit(packet)
-        str = packet.createMessageForEvent(event)
+        let packet = SocketPacket.packetFromEmitWithData(args, id: ack ?? -1, nsp: nsp)
+        let str = packet.createMessageForEvent(event)
         
         SocketLogger.log("Emitting: %@", client: self, args: str)
         
@@ -331,11 +328,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     func emitAck(ack:Int, withData args:[AnyObject]) {
         dispatch_async(emitQueue) {[weak self] in
             if let this = self where this.connected {
-                let packet = SocketPacket(type: nil, data: args, nsp: this.nsp, id: ack)
-                let str:String
-                
-                SocketParser.parseForEmit(packet)
-                str = packet.createAck()
+                let packet = SocketPacket.packetFromEmitWithData(args, id: ack ?? -1, nsp: this.nsp)
+                let str = packet.createAck()
                 
                 SocketLogger.log("Emitting Ack: %@", client: this, args: str)
                 
