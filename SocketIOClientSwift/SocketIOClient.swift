@@ -173,6 +173,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             return
         }
         
+        _connecting = true
         addEngine()
         engine?.open(opts: connectParams)
         
