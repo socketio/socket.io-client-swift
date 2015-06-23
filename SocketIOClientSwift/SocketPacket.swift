@@ -252,7 +252,7 @@ struct SocketPacket {
         case _ where ack:
             return PacketType.BINARY_ACK
         default:
-            return PacketType.EVENT
+            return PacketType.ERROR
         }
     }
     

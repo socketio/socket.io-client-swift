@@ -220,7 +220,7 @@ class SocketParser {
         var packet = socket.waitingData.removeAtIndex(0)
         packet.fillInPlaceholders()
         
-        if packet.type == SocketPacket.PacketType.BINARY_ACK {
+        if packet.type != SocketPacket.PacketType.BINARY_ACK {
             socket.handleEvent(packet.getEvent(), data: packet.getArgs(),
                 wantsAck: packet.id)
         } else {
