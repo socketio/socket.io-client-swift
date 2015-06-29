@@ -80,10 +80,12 @@ $ pod install
 
 Import the module:
 
+Swift:
 ```swift
 import Socket_IO_Client_Swift
 ```
 
+Objective-C:
 ```Objective-C
 #import <Socket_IO_Client_Swift/Socket_IO_Client_Swift-Swift.h>
 ```
