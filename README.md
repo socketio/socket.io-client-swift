@@ -78,7 +78,7 @@ Install pods:
 $ pod install
 ```
 
-Import in your swift file:
+Import the module:
 
 ```swift
 import Socket_IO_Client_Swift
