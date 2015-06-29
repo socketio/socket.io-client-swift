@@ -84,6 +84,10 @@ Import in your swift file:
 import Socket_IO_Client_Swift
 ```
 
+```Objective-C
+#import <Socket_IO_Client_Swift/Socket_IO_Client_Swift-Swift.h>
+```
+
 ##API
 Constructors
 -----------
