@@ -420,7 +420,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     public func off(event:String) {
         SocketLogger.log("Removing handler for event: %@", client: self, args: event)
         
-        handlers = ContiguousArray(handlers.filter {$0.event == event ? false : true})
+        handlers = ContiguousArray(handlers.filter {!($0.event == event)})
     }
     
     /**
