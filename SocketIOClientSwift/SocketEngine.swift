@@ -37,6 +37,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
 
     private var closed = false
     private var _connected = false
+    private var extraHeaders:[String: String]?
     private var fastUpgrade = false
     private var forcePolling = false
     private var forceWebsockets = false
@@ -109,6 +110,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         cookies = opts?["cookies"] as? [NSHTTPCookie]
         log = opts?["log"] as? Bool ?? false
         socketPath = opts?["path"] as? String ?? ""
+        extraHeaders = opts?["extraHeaders"] as? [String: String]
     }
 
     deinit {
@@ -194,6 +196,13 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     private func createWebsocket(andConnect connect:Bool) {
         ws = WebSocket(url: NSURL(string: urlWebSocket! + "&sid=\(sid)")!,
             cookies: cookies)
+        
+        if extraHeaders != nil {
+            for (headerName, value) in extraHeaders! {
+                ws?.headers[headerName] = value
+            }
+        }
+        
         ws?.queue = handleQueue
         ws?.delegate = self
 
@@ -228,7 +237,13 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies!)
             req.allHTTPHeaderFields = headers
         }
-
+        
+        if extraHeaders != nil {
+            for (headerName, value) in extraHeaders! {
+                req.setValue(value, forHTTPHeaderField: headerName)
+            }
+        }
+        
         doRequest(req)
     }
 
@@ -476,7 +491,13 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies!)
             reqPolling.allHTTPHeaderFields = headers
         }
-
+ 
+        if extraHeaders != nil {
+            for (headerName, value) in extraHeaders! {
+                reqPolling.setValue(value, forHTTPHeaderField: headerName)
+            }
+        }
+        
         doRequest(reqPolling)
     }
 

@@ -78,10 +78,16 @@ Install pods:
 $ pod install
 ```
 
-Import in your swift file:
+Import the module:
 
+Swift:
 ```swift
 import Socket_IO_Client_Swift
+```
+
+Objective-C:
+```Objective-C
+#import <Socket_IO_Client_Swift/Socket_IO_Client_Swift-Swift.h>
 ```
 
 ##API
@@ -104,6 +110,7 @@ Options
 - `log: Bool` If `true` socket will log debug messages. Default is false.
 - `sessionDelegate: NSURLSessionDelegate` Sets an NSURLSessionDelegate for the underlying engine. Useful if you need to handle self-signed certs. Default is nil.
 - `path: String` - If the server uses a custom path. ex: `"/swift"`. Default is `""`
+- `extraHeaders: [String: String]?` - Adds custom headers to the initial request. Default is nil.
 
 Methods
 -------
