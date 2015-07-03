@@ -466,8 +466,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     public func open(opts:[String: AnyObject]? = nil) {
         if connected {
             SocketLogger.err("Tried to open while connected", client: self)
-
             client?.didError("Tried to open while connected")
+            
             return
         }
 
