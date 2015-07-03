@@ -481,7 +481,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     
     // We lost connection and should attempt to reestablish
     @objc private func tryReconnect() {
-        if reconnectAttempts != -1 && currentReconnectAttempt + 1 > reconnectAttempts {
+        if reconnectAttempts != -1 && currentReconnectAttempt + 1 > reconnectAttempts || !reconnects {
             didDisconnect("Reconnect Failed")
             return
         } else if connected {
