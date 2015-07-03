@@ -135,6 +135,11 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         engine = SocketEngine(client: self, opts: opts)
     }
     
+    private func clearReconnectTimer() {
+        reconnectTimer?.invalidate()
+        reconnectTimer = nil
+    }
+    
     /**
     Closes the socket. Only reopen the same socket if you know what you're doing.
     Will turn off automatic reconnects.
@@ -218,8 +223,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         _connecting = false
         _reconnecting = false
         currentReconnectAttempt = 0
-        reconnectTimer?.invalidate()
-        reconnectTimer = nil
+        clearReconnectTimer()
         
         // Don't handle as internal because something crazy could happen where
         // we disconnect before it's handled
@@ -469,8 +473,10 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     
     // We lost connection and should attempt to reestablish
     @objc private func tryReconnect() {
-        if reconnectAttempts != -1 && currentReconnectAttempt + 1 > reconnectAttempts {
+        if reconnectAttempts != -1 && currentReconnectAttempt + 1 > reconnectAttempts || !reconnects {
+            clearReconnectTimer()
             didDisconnect("Reconnect Failed")
+            
             return
         } else if connected {
             _connecting = false
