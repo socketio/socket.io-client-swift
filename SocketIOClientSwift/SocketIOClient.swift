@@ -41,7 +41,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     var ackHandlers = SocketAckManager()
     var currentAck = -1
     var log = false
-    var waitingData = ContiguousArray<SocketPacket>()
+    var waitingData = [SocketPacket]()
     var sessionDelegate:NSURLSessionDelegate?
     
     public let socketURL:String
