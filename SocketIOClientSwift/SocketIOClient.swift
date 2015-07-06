@@ -292,6 +292,18 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             self?._emit(event, items)
         }
     }
+    /**
+    Same as emit, but meant for Objective-C To Become NSDictionary instead NSArray
+    */
+    public func emit(event:String, withItem item:[NSDictionary]) {
+        if !connected {
+            return
+        }
+        
+        dispatch_async(emitQueue) {[weak self] in
+            self?._emit(event, items)
+        }
+    }
     
     /**
     Sends a message to the server, requesting an ack. Use the onAck method of SocketAckHandler to add
