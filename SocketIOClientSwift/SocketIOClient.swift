@@ -99,11 +99,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             self.log = log
         }
         
-        if var nsp = opts?["nsp"] as? String {
-            if nsp != "/" && nsp.hasPrefix("/") {
-                nsp.removeAtIndex(nsp.startIndex)
-            }
-            
+        if let nsp = opts?["nsp"] as? String {
             self.nsp = nsp
         }
         
@@ -402,7 +398,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     */
     public func leaveNamespace() {
         if nsp != "/" {
-            engine?.send("1/\(nsp)", withData: nil)
+            engine?.send("1\(nsp)", withData: nil)
             nsp = "/"
         }
     }
@@ -414,7 +410,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         SocketLogger.log("Joining namespace", client: self)
         
         if nsp != "/" {
-            engine?.send("0/\(nsp)", withData: nil)
+            engine?.send("0\(nsp)", withData: nil)
         }
     }
     

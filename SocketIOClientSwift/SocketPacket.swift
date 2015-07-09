@@ -25,6 +25,9 @@
 import Foundation
 
 struct SocketPacket {
+    let nsp:String
+    let id:Int
+    
     enum PacketType:Int {
         case CONNECT = 0
         case DISCONNECT = 1
@@ -46,8 +49,6 @@ struct SocketPacket {
     var currentPlace = 0
     var binary:[NSData]
     var data:[AnyObject]
-    var id:Int = -1
-    var nsp = ""
     var placeholders:Int
     var type:PacketType
     var description:String {
@@ -149,7 +150,7 @@ struct SocketPacket {
             if nsp == "/" {
                 msg = "3\(id)["
             } else {
-                msg = "3/\(nsp),\(id)["
+                msg = "3\(nsp),\(id)["
             }
         } else {
             if nsp == "/" {
@@ -175,9 +176,9 @@ struct SocketPacket {
                 }
             } else {
                 if id == -1 {
-                    message = "2/\(nsp),[\"\(event)\""
+                    message = "2\(nsp),[\"\(event)\""
                 } else {
-                    message = "2/\(nsp),\(id)[\"\(event)\""
+                    message = "2\(nsp),\(id)[\"\(event)\""
                 }
             }
         } else {
@@ -189,9 +190,9 @@ struct SocketPacket {
                 }
             } else {
                 if id == -1 {
-                    message = "5\(binary.count)-/\(nsp),[\"\(event)\""
+                    message = "5\(binary.count)-\(nsp),[\"\(event)\""
                 } else {
-                    message = "5\(binary.count)-/\(nsp),\(id)[\"\(event)\""
+                    message = "5\(binary.count)-\(nsp),\(id)[\"\(event)\""
                 }
             }
         }

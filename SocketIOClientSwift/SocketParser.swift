@@ -23,12 +23,12 @@
 import Foundation
 
 class SocketParser {
-    private static func checkNSP(nsp:String, _ socket:SocketIOClient) -> Bool {
-        return nsp == "" && socket.nsp != "/"
+    private static func isCorrectNamespace(nsp:String, _ socket:SocketIOClient) -> Bool {
+        return nsp == socket.nsp
     }
     
     private static func handleAck(p:SocketPacket, socket:SocketIOClient) {
-        if checkNSP(p.nsp, socket) {
+        if !isCorrectNamespace(p.nsp, socket) {
             return
         }
         
@@ -36,7 +36,7 @@ class SocketParser {
     }
     
     private static func handleBinaryAck(p:SocketPacket, socket:SocketIOClient) {
-        if checkNSP(p.nsp, socket) {
+        if !isCorrectNamespace(p.nsp, socket) {
             return
         }
         
@@ -44,7 +44,7 @@ class SocketParser {
     }
     
     private static func handleBinaryEvent(p:SocketPacket, socket:SocketIOClient) {
-        if checkNSP(p.nsp, socket) {
+        if !isCorrectNamespace(p.nsp, socket) {
             return
         }
         
@@ -62,7 +62,7 @@ class SocketParser {
     }
     
     private static func handleEvent(p:SocketPacket, socket:SocketIOClient) {
-        if checkNSP(p.nsp, socket) {
+        if !isCorrectNamespace(p.nsp, socket) {
             return
         }
         
@@ -80,7 +80,7 @@ class SocketParser {
         }
         
         var id = nil as Int?
-        var nsp = ""
+        var nsp:String?
         var i = 0
         var placeholders = -1
         
@@ -103,6 +103,8 @@ class SocketParser {
         }
         
         if arr[i + 1] == "/" {
+            nsp = ""
+            
             while ++i < arr.count {
                 let c = arr[i]
                 
@@ -110,13 +112,13 @@ class SocketParser {
                     break
                 }
                 
-                nsp += String(c)
+                nsp! += String(c)
             }
         }
         
         if i + 1 >= arr.count {
             return SocketPacket(type: SocketPacket.PacketType(str: type)!, id: id ?? -1,
-                nsp: nsp, placeholders: placeholders)
+                nsp: nsp ?? "/", placeholders: placeholders)
         }
         
         let next = String(arr[i + 1])
@@ -141,7 +143,7 @@ class SocketParser {
             let data = SocketParser.parseData(noPlaceholders) as? [AnyObject] ?? [noPlaceholders]
             
             return SocketPacket(type: SocketPacket.PacketType(str: type)!, data: data, id: id ?? -1,
-                nsp: nsp, placeholders: placeholders)
+                nsp: nsp ?? "/", placeholders: placeholders)
         }
         
         return nil
