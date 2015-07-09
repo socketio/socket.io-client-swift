@@ -52,9 +52,9 @@ class SocketParser {
     }
     
     private static func handleConnect(p:SocketPacket, socket:SocketIOClient) {
-        if p.nsp == "" && socket.nsp != "/" {
+        if p.nsp == "/" && socket.nsp != "/" {
             socket.joinNamespace()
-        } else if p.nsp != "" && socket.nsp == "/" {
+        } else if p.nsp != "/" && socket.nsp == "/" {
             socket.didConnect()
         } else {
             socket.didConnect()
