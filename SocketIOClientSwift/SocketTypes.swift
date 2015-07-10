@@ -24,7 +24,7 @@
 
 import Foundation
 
-public typealias AckCallback = @convention(block) (NSArray?) -> Void
+public typealias AckCallback = (NSArray?) -> Void
 public typealias AckEmitter = ([AnyObject]) -> Void
 public typealias NormalCallback = (NSArray?, AckEmitter?) -> Void
 public typealias OnAckCallback = (timeout:UInt64, callback:AckCallback) -> Void
