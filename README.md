@@ -55,6 +55,17 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8
 Requires Swift 2/Xcode 7
 
 If you need Swift 1.2/Xcode 6.3/4 use v2 (Pre-Swift 2 support is no longer maintained)
+If you need Swift 1.1/Xcode 6.2 use v1.5.2. (Pre-Swift 1.2 support is no longer maintained)
+
+Carthage
+-----------------
+Add this line to your `Cartfile`:
+```
+github "socketio/socket.io-client-swift" ~> 2.3.7 # Or latest version
+```
+
+Run `carthage update`.
+
 Manually (iOS 7+)
 -----------------
 1. Copy the SocketIOClientSwift folder into your Xcode project. (Make sure you add the files to your target(s))
@@ -69,7 +80,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 platform :ios, '8.0'
 use_frameworks!
 
-pod 'Socket.IO-Client-Swift', '~> 1.3.2' # Or latest version
+pod 'Socket.IO-Client-Swift', '~> 2.3.7' # Or latest version
 ```
 
 Install pods:
