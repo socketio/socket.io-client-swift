@@ -194,7 +194,9 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     }
     
     private func createWebsocket(andConnect connect:Bool) {
-        ws = WebSocket(url: NSURL(string: urlWebSocket! + "&sid=\(sid)")!,
+        let wsUrl = urlWebSocket! + (sid == "" ? "" : "&sid=\(sid)")
+        
+        ws = WebSocket(url: NSURL(string: wsUrl)!,
             cookies: cookies)
         
         if extraHeaders != nil {
