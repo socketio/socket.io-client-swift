@@ -448,6 +448,14 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         let handler = SocketEventHandler(event: event, callback: callback)
         handlers.append(handler)
     }
+
+	/**
+	Removes all handlers.
+	Can be used after disconnecting to break any potential remaining retain cycles.
+	*/
+	public func removeAllHandlers() {
+		handlers.removeAll(keepCapacity: false)
+	}
     
     /**
     Adds a handler that will be called on every event.
