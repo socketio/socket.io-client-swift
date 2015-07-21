@@ -284,7 +284,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                 } else if !this.closed && this.polling {
                     this.doPoll()
                 }
-            }}?.resume()
+            }}.resume()
     }
 
     private func flushProbeWait() {
@@ -361,7 +361,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                         this?.doPoll()
                     }
                 }
-            }}?.resume()
+            }}.resume()
     }
 
     // We had packets waiting for send when we upgraded

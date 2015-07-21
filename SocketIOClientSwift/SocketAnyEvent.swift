@@ -24,7 +24,7 @@
 
 import Foundation
 
-@objc public final class SocketAnyEvent {
+public final class SocketAnyEvent: NSObject {
     public let event:String!
     public let items:NSArray?
     

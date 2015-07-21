@@ -25,7 +25,7 @@
 import Foundation
 
 private func emitAckCallback(socket:SocketIOClient?, num:Int?)
-    (items:[AnyObject]) -> Void {
+    (items:AnyObject...) -> Void {
         socket?.emitAck(num ?? -1, withData: items)
 }
 
