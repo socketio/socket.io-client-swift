@@ -250,8 +250,8 @@ public class WebSocket : NSObject, NSStreamDelegate {
         }
         if self.selfSignedSSL {
             let settings: Dictionary<NSObject, NSObject> = [kCFStreamSSLValidatesCertificateChain: NSNumber(bool:false), kCFStreamSSLPeerName: kCFNull]
-            inputStream!.setProperty(settings, forKey: kCFStreamPropertySSLSettings as! String)
-            outputStream!.setProperty(settings, forKey: kCFStreamPropertySSLSettings as! String)
+            inputStream!.setProperty(settings, forKey: kCFStreamPropertySSLSettings as String)
+            outputStream!.setProperty(settings, forKey: kCFStreamPropertySSLSettings as String)
         }
         isRunLoop = true
         inputStream!.scheduleInRunLoop(NSRunLoop.currentRunLoop(), forMode: NSDefaultRunLoopMode)
@@ -268,9 +268,9 @@ public class WebSocket : NSObject, NSStreamDelegate {
     public func stream(aStream: NSStream, handleEvent eventCode: NSStreamEvent) {
         
         if let sec = security where !certValidated && (eventCode == .HasBytesAvailable || eventCode == .HasSpaceAvailable) {
-            var possibleTrust: AnyObject? = aStream.propertyForKey(kCFStreamPropertySSLPeerTrust as! String)
+            let possibleTrust: AnyObject? = aStream.propertyForKey(kCFStreamPropertySSLPeerTrust as String)
             if let trust: AnyObject = possibleTrust {
-                var domain: AnyObject? = aStream.propertyForKey(kCFStreamSSLPeerName as! String)
+                let domain: AnyObject? = aStream.propertyForKey(kCFStreamSSLPeerName as String)
                 if sec.isValid(trust as! SecTrustRef, domain: domain as! String?) {
                     certValidated = true
                 } else {
