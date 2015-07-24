@@ -27,6 +27,7 @@ class SocketIO_iOSTests: XCTestCase {
         XCTAssertFalse(socketClient.connecting)
         XCTAssertFalse(socketClient.reconnecting)
         XCTAssertFalse(socketClient.closed)
+        XCTAssertFalse(socketClient.secure)
     }
     
     func testeventWithAcknowledgements() {
@@ -37,7 +38,7 @@ class SocketIO_iOSTests: XCTestCase {
             XCTAssertEqual(sendedValue + 20, resultValue)
             expection.fulfill()
         }
-        socketClient.emitWithAck("AcknowledgementTestIncomming", sendedValue)(timeout: 0, callback: didGetEmit)
+        socketClient.emitWithAck("AcknowledgementTestIncomming", sendedValue)(timeoutAfter: 0, callback: didGetEmit)
         waitForExpectationsWithTimeout(10, handler: nil)
     }
     
