@@ -39,6 +39,19 @@
 		5764DFA01B51F254004FF46E /* SwiftRegex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF871B51F254004FF46E /* SwiftRegex.swift */; };
 		5764DFA11B51F254004FF46E /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF881B51F254004FF46E /* WebSocket.swift */; };
 		5764DFA21B51F254004FF46E /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF881B51F254004FF46E /* WebSocket.swift */; };
+		945B65351B5FCEEA0081E995 /* SocketAckManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF7C1B51F254004FF46E /* SocketAckManager.swift */; };
+		945B65361B5FCEEA0081E995 /* SocketAnyEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF7D1B51F254004FF46E /* SocketAnyEvent.swift */; };
+		945B65371B5FCEEA0081E995 /* SocketEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF7E1B51F254004FF46E /* SocketEngine.swift */; };
+		945B65381B5FCEEA0081E995 /* SocketEngineClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF7F1B51F254004FF46E /* SocketEngineClient.swift */; };
+		945B65391B5FCEEA0081E995 /* SocketEventHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF801B51F254004FF46E /* SocketEventHandler.swift */; };
+		945B653A1B5FCEEA0081E995 /* SocketFixUTF8.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF811B51F254004FF46E /* SocketFixUTF8.swift */; };
+		945B653B1B5FCEEA0081E995 /* SocketIOClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF821B51F254004FF46E /* SocketIOClient.swift */; };
+		945B653C1B5FCEEA0081E995 /* SocketLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF831B51F254004FF46E /* SocketLogger.swift */; };
+		945B653D1B5FCEEA0081E995 /* SocketPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF841B51F254004FF46E /* SocketPacket.swift */; };
+		945B653E1B5FCEEA0081E995 /* SocketParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF851B51F254004FF46E /* SocketParser.swift */; };
+		945B653F1B5FCEEA0081E995 /* SocketTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF861B51F254004FF46E /* SocketTypes.swift */; };
+		945B65401B5FCEEA0081E995 /* SwiftRegex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF871B51F254004FF46E /* SwiftRegex.swift */; };
+		945B65411B5FCEEA0081E995 /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF881B51F254004FF46E /* WebSocket.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -424,7 +437,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				945B653E1B5FCEEA0081E995 /* SocketParser.swift in Sources */,
+				945B653D1B5FCEEA0081E995 /* SocketPacket.swift in Sources */,
+				945B653A1B5FCEEA0081E995 /* SocketFixUTF8.swift in Sources */,
+				945B65391B5FCEEA0081E995 /* SocketEventHandler.swift in Sources */,
+				945B65371B5FCEEA0081E995 /* SocketEngine.swift in Sources */,
+				945B65351B5FCEEA0081E995 /* SocketAckManager.swift in Sources */,
+				945B65401B5FCEEA0081E995 /* SwiftRegex.swift in Sources */,
 				572EF22C1B51F16C00EEBB58 /* SocketIO_iOSTests.swift in Sources */,
+				945B653C1B5FCEEA0081E995 /* SocketLogger.swift in Sources */,
+				945B65381B5FCEEA0081E995 /* SocketEngineClient.swift in Sources */,
+				945B65361B5FCEEA0081E995 /* SocketAnyEvent.swift in Sources */,
+				945B653F1B5FCEEA0081E995 /* SocketTypes.swift in Sources */,
+				945B653B1B5FCEEA0081E995 /* SocketIOClient.swift in Sources */,
+				945B65411B5FCEEA0081E995 /* WebSocket.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
