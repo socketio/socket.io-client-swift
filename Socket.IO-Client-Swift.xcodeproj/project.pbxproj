@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		572EF21F1B51F16C00EEBB58 /* SocketIO-iOS.h in Headers */ = {isa = PBXBuildFile; fileRef = 572EF21E1B51F16C00EEBB58 /* SocketIO-iOS.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		572EF2251B51F16C00EEBB58 /* SocketIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 572EF2191B51F16C00EEBB58 /* SocketIO.framework */; };
-		572EF22C1B51F16C00EEBB58 /* SocketIO_iOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 572EF22B1B51F16C00EEBB58 /* SocketIO_iOSTests.swift */; };
 		572EF23D1B51F18A00EEBB58 /* SocketIO-Mac.h in Headers */ = {isa = PBXBuildFile; fileRef = 572EF23C1B51F18A00EEBB58 /* SocketIO-Mac.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		572EF2431B51F18A00EEBB58 /* SocketIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 572EF2381B51F18A00EEBB58 /* SocketIO.framework */; };
 		572EF24A1B51F18A00EEBB58 /* SocketIO_MacTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 572EF2491B51F18A00EEBB58 /* SocketIO_MacTests.swift */; };
@@ -78,7 +77,6 @@
 		572EF21E1B51F16C00EEBB58 /* SocketIO-iOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SocketIO-iOS.h"; sourceTree = "<group>"; };
 		572EF2241B51F16C00EEBB58 /* SocketIO-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SocketIO-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		572EF22A1B51F16C00EEBB58 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		572EF22B1B51F16C00EEBB58 /* SocketIO_iOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketIO_iOSTests.swift; sourceTree = "<group>"; };
 		572EF2381B51F18A00EEBB58 /* SocketIO.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SocketIO.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		572EF23B1B51F18A00EEBB58 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		572EF23C1B51F18A00EEBB58 /* SocketIO-Mac.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SocketIO-Mac.h"; sourceTree = "<group>"; };
@@ -179,7 +177,6 @@
 			isa = PBXGroup;
 			children = (
 				945B65421B63D9DB0081E995 /* ConvertedSocketTest.swift */,
-				572EF22B1B51F16C00EEBB58 /* SocketIO_iOSTests.swift */,
 				572EF2291B51F16C00EEBB58 /* Supporting Files */,
 			);
 			path = "SocketIO-iOSTests";
@@ -448,7 +445,6 @@
 				945B65351B5FCEEA0081E995 /* SocketAckManager.swift in Sources */,
 				945B65431B63D9DB0081E995 /* ConvertedSocketTest.swift in Sources */,
 				945B65401B5FCEEA0081E995 /* SwiftRegex.swift in Sources */,
-				572EF22C1B51F16C00EEBB58 /* SocketIO_iOSTests.swift in Sources */,
 				945B653C1B5FCEEA0081E995 /* SocketLogger.swift in Sources */,
 				945B65381B5FCEEA0081E995 /* SocketEngineClient.swift in Sources */,
 				945B65361B5FCEEA0081E995 /* SocketAnyEvent.swift in Sources */,
