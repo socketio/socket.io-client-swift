@@ -52,6 +52,7 @@
 		945B65401B5FCEEA0081E995 /* SwiftRegex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF871B51F254004FF46E /* SwiftRegex.swift */; };
 		945B65411B5FCEEA0081E995 /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF881B51F254004FF46E /* WebSocket.swift */; };
 		945B65431B63D9DB0081E995 /* SocketEmitTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 945B65421B63D9DB0081E995 /* SocketEmitTest.swift */; };
+		94ADAC491B652D3300FD79AE /* SocketNamespaceEmitTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94ADAC481B652D3300FD79AE /* SocketNamespaceEmitTest.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -97,6 +98,7 @@
 		5764DF871B51F254004FF46E /* SwiftRegex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SwiftRegex.swift; path = SocketIOClientSwift/SwiftRegex.swift; sourceTree = "<group>"; };
 		5764DF881B51F254004FF46E /* WebSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WebSocket.swift; path = SocketIOClientSwift/WebSocket.swift; sourceTree = "<group>"; };
 		945B65421B63D9DB0081E995 /* SocketEmitTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketEmitTest.swift; sourceTree = "<group>"; };
+		94ADAC481B652D3300FD79AE /* SocketNamespaceEmitTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketNamespaceEmitTest.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -178,6 +180,7 @@
 			children = (
 				945B65421B63D9DB0081E995 /* SocketEmitTest.swift */,
 				572EF2291B51F16C00EEBB58 /* Supporting Files */,
+				94ADAC481B652D3300FD79AE /* SocketNamespaceEmitTest.swift */,
 			);
 			path = "SocketIO-iOSTests";
 			sourceTree = "<group>";
@@ -450,6 +453,7 @@
 				945B65361B5FCEEA0081E995 /* SocketAnyEvent.swift in Sources */,
 				945B653F1B5FCEEA0081E995 /* SocketTypes.swift in Sources */,
 				945B653B1B5FCEEA0081E995 /* SocketIOClient.swift in Sources */,
+				94ADAC491B652D3300FD79AE /* SocketNamespaceEmitTest.swift in Sources */,
 				945B65411B5FCEEA0081E995 /* WebSocket.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

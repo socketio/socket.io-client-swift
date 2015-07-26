@@ -39,7 +39,7 @@ class SocketEmitTest: XCTestCase {
     }
     
     override func tearDown() {
-
+        socket.close(fast: false)
         super.tearDown()
     }
     
