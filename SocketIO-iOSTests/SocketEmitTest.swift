@@ -9,8 +9,8 @@
 import XCTest
 import Foundation
 
-class ConvertedSocketTest: XCTestCase {
-    
+class SocketEmitTest: XCTestCase {
+    private static let TEST_TIMEOUT = 20.0
     var socket:SocketIOClient!
     
     
@@ -32,15 +32,8 @@ class ConvertedSocketTest: XCTestCase {
                 "reconnectWait": 5, // default 10
                 "forcePolling": false,
                 "forceWebsockets": false,// default false
-                "nsp": "/swift",
                 "path": "",
-                "extraHeaders": headers,
-                //        "connectParams": [
-                //            "test": 2.1,
-                //            "d": "{}"
-                //        ],
-                //"cookies": cookieArray
-                ])
+                "extraHeaders": headers])
         }
         openConnection()
     }
@@ -158,10 +151,85 @@ class ConvertedSocketTest: XCTestCase {
             if let double = result?.firstObject as? NSNumber {
                 XCTAssertEqual(double.floatValue, 1.2)
             }else {
-                XCTFail("Should have String as result")
+                XCTFail("Should have Double as result")
             }
         }
         abstractSocketEmitTest(testName, emitData: 1.1, callback: didGetEmit)
+    }
+    
+    func testJSONEmit() {
+        let testName = "testJSONEmit"
+        func didGetEmit(result:NSArray?, ack:AckEmitter?) {
+            if let json = result?.firstObject as? NSDictionary {
+                XCTAssertEqual(json.valueForKey("testString")! as! String, "test")
+                XCTAssertEqual(json.valueForKey("testNumber")! as! Int, 15)
+                XCTAssertEqual((json.valueForKey("testArray")! as! Array<AnyObject>).count, 2)
+                XCTAssertEqual((json.valueForKey("testArray")! as! Array<AnyObject>).last! as! Int, 1)
+                let string = NSString(data: (json.valueForKey("testArray")! as! Array<AnyObject>).first! as! NSData, encoding: NSUTF8StringEncoding)!
+                XCTAssertEqual(string, "gakgakgak2")
+            }else {
+                XCTFail("Should have NSDictionary as result")
+            }
+        }
+        let json = ["name": "test", "testArray": ["hallo"], "nestedTest": ["test": "test"], "number": 15]
+        
+        abstractSocketEmitTest(testName, emitData: json, callback: didGetEmit)
+    }
+    
+    func testUnicodeEmit() {
+        let testName = "testUnicodeEmit"
+        func didGetEmit(result:NSArray?, ack:AckEmitter?) {
+            if let unicode = result?.firstObject as? String {
+                XCTAssertEqual(unicode, "🚄")
+            }else {
+                XCTFail("Should have String as result")
+            }
+        }
+        abstractSocketEmitTest(testName, emitData: "🚀", callback: didGetEmit)
+    }
+    
+    func testMultipleItemsEmit() {
+        let testName = "testMultipleItemsEmit"
+        let expection = self.expectationWithDescription(testName)
+        func didGetEmit(result:NSArray?, ack:AckEmitter?) {
+            XCTAssertEqual(result!.count, 5)
+            if let array = result?.firstObject as? Array<AnyObject> {
+                XCTAssertEqual(array.last! as! Int, 2)
+                let string = NSString(data: array.first! as! NSData, encoding: NSUTF8StringEncoding)!
+                XCTAssertEqual(string, "gakgakgak2")
+            }else {
+                XCTFail("Should have Array as result")
+            }
+            if let dict = result?[1] as? NSDictionary {
+                XCTAssertEqual(dict.valueForKey("test") as! String, "bob")
+                
+            }else {
+                XCTFail("Should have NSDictionary as result")
+            }
+            if let number = result?[2] as? Int {
+                XCTAssertEqual(number, 25)
+                
+            }else {
+                XCTFail("Should have Integer as result")
+            }
+            if let string = result?[3] as? String {
+                XCTAssertEqual(string, "polo")
+                
+            }else {
+                XCTFail("Should have Integer as result")
+            }
+            if let data = result?[4] as? NSData {
+                let string = NSString(data: data, encoding: NSUTF8StringEncoding)!
+                XCTAssertEqual(string, "gakgakgak2")
+            }else {
+                XCTFail("Should have NSData as result")
+            }
+            expection.fulfill()
+        }
+        let data = NSString(string: "gakgakgak2").dataUsingEncoding(NSUTF8StringEncoding)!
+        socket.emit(testName, withItems: [["test1", "test2"], ["test": "test"], 15, "marco", data])
+        socket.on(testName + "Return", callback: didGetEmit)
+        waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
     }
 
     
@@ -179,12 +247,7 @@ class ConvertedSocketTest: XCTestCase {
             socket.emit(testName)
         }
         
-        waitForExpectationsWithTimeout(5, handler: nil)
-    }
-    
-    func testCloseConnection() {
-//        socket.close(fast: false)
-//        XCTAssertTrue(socket.closed)
+        waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
     }
     
 }
