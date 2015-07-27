@@ -15,26 +15,17 @@ class SocketEmitTest: XCTestCase {
     
     
     let headers = ["testing": "blah", "testing2": "b/:lah"]
-    let testCytube = false
     
     override func setUp() {
         super.setUp()
-        if testCytube {
-            socket = SocketIOClient(socketURL: "https://cytu.be:10443", opts: [
-                "forcePolling": false,
-                "forceWebsockets": false,
-                "log": true
-                ])
-        } else {
-            socket = SocketIOClient(socketURL: "127.0.0.1:8080", opts: [
-                "reconnects": true, // default true
-                "reconnectAttempts": -1, // default -1
-                "reconnectWait": 5, // default 10
-                "forcePolling": false,
-                "forceWebsockets": false,// default false
-                "path": "",
-                "extraHeaders": headers])
-        }
+        socket = SocketIOClient(socketURL: "127.0.0.1:8080", opts: [
+            "reconnects": true, // default true
+            "reconnectAttempts": -1, // default -1
+            "reconnectWait": 5, // default 10
+            "forcePolling": false,
+            "forceWebsockets": false,// default false
+            "path": "",
+            "extraHeaders": headers])
         openConnection()
     }
     

@@ -179,8 +179,8 @@
 			isa = PBXGroup;
 			children = (
 				945B65421B63D9DB0081E995 /* SocketEmitTest.swift */,
-				572EF2291B51F16C00EEBB58 /* Supporting Files */,
 				94ADAC481B652D3300FD79AE /* SocketNamespaceEmitTest.swift */,
+				572EF2291B51F16C00EEBB58 /* Supporting Files */,
 			);
 			path = "SocketIO-iOSTests";
 			sourceTree = "<group>";
