@@ -99,7 +99,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     
     public init(client:SocketEngineClient, sessionDelegate:NSURLSessionDelegate?) {
         self.client = client
-        self.session = NSURLSession(configuration: NSURLSessionConfiguration.ephemeralSessionConfiguration(),
+        self.session = NSURLSession(configuration: NSURLSessionConfiguration.defaultSessionConfiguration(),
             delegate: sessionDelegate, delegateQueue: workQueue)
     }
     
