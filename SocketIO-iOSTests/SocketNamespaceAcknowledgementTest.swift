@@ -8,7 +8,7 @@
 
 import XCTest
 
-class SocketNamespaceAcknowledgementTest: SocketEmitTest {
+class SocketNamespaceAcknowledgementTest: SocketAcknowledgementTest {
 
     override func setUp() {
         super.setUp()
@@ -72,24 +72,4 @@ class SocketNamespaceAcknowledgementTest: SocketEmitTest {
     override func testMultipleItemsEmit() {
         super.testMultipleItemsEmit()
     }
-    
-    override func abstractSocketEmit(testName:String, emitData:AnyObject?, callback:NormalCallback){
-        let finalTestname = testName + testKind.rawValue
-        let expection = self.expectationWithDescription(finalTestname)
-        func didGetEmit(result:NSArray?) {
-            callback(result, nil)
-            expection.fulfill()
-        }
-        var ack:OnAckCallback!
-        if let emitData = emitData {
-            ack = socket.emitWithAck(finalTestname, emitData)
-        } else {
-            ack = socket.emitWithAck(finalTestname)
-        }
-        ack(timeoutAfter: 20, callback: didGetEmit)
-        
-        waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
-    }
-
-
 }

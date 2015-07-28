@@ -71,6 +71,19 @@ class SocketAcknowledgementTest: SocketEmitTest {
         super.testMultipleItemsEmit()
     }
     
+    override func abstractSocketMultipleEmit(testName:String, emitData:Array<AnyObject>, callback:NormalCallback){
+        let finalTestname = generateTestName(testName)
+        let expection = self.expectationWithDescription(finalTestname)
+        func didGetEmit(result:NSArray?) {
+            callback(result, nil)
+            expection.fulfill()
+        }
+        
+        socket.emitWithAck(finalTestname, withItems: emitData)(timeoutAfter: 5, callback: didGetEmit)
+        waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
+        
+    }
+    
     override func abstractSocketEmit(testName:String, emitData:AnyObject?, callback:NormalCallback){
         let finalTestname = testName + testKind.rawValue
         let expection = self.expectationWithDescription(finalTestname)

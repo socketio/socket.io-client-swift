@@ -10,7 +10,7 @@ import XCTest
 import Foundation
 
 class SocketEmitTest: XCTestCase {
-    static let TEST_TIMEOUT = 5.0
+    static let TEST_TIMEOUT = 15.0
     var socket:SocketIOClient!
     let headers = ["testing": "blah", "testing2": "b/:lah"]
     var testKind = TestKind.Emit
@@ -185,8 +185,7 @@ class SocketEmitTest: XCTestCase {
             XCTAssertEqual(result!.count, 5)
             if let array = result?.firstObject as? Array<AnyObject> {
                 XCTAssertEqual(array.last! as! Int, 2)
-                let string = NSString(data: array.first! as! NSData, encoding: NSUTF8StringEncoding)!
-                XCTAssertEqual(string, "gakgakgak2")
+                XCTAssertEqual(array.first! as! Int, 1)
             }else {
                 XCTFail("Should have Array as result")
             }
