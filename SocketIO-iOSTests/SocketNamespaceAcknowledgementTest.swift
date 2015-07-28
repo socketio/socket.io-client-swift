@@ -1,14 +1,15 @@
 //
-//  SocketAcknowledgementTest.swift
+//  SocketNamespaceAcknowledgementTest.swift
 //  Socket.IO-Client-Swift
 //
-//  Created by Lukas Schmidt on 27.07.15.
+//  Created by Lukas Schmidt on 28.07.15.
 //
 //
 
 import XCTest
 
-class SocketAcknowledgementTest: SocketEmitTest {
+class SocketNamespaceAcknowledgementTest: SocketEmitTest {
+
     override func setUp() {
         super.setUp()
         testKind = TestKind.Acknowledgement
@@ -19,6 +20,7 @@ class SocketAcknowledgementTest: SocketEmitTest {
             "forcePolling": false,
             "forceWebsockets": false,// default false
             "path": "",
+            "nsp": "/swift",
             "extraHeaders": headers])
         openConnection()
     }
@@ -88,5 +90,6 @@ class SocketAcknowledgementTest: SocketEmitTest {
         
         waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
     }
-    
+
+
 }

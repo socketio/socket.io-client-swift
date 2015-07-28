@@ -56,7 +56,7 @@ class SocketEmitTest: XCTestCase {
         func didGetEmit(result:NSArray?, ack:AckEmitter?) {
             
         }
-        abstractSocketEmitTest(testName, emitData: nil, callback: didGetEmit)
+        abstractSocketEmit(testName, emitData: nil, callback: didGetEmit)
     }
     
     func testEmitNull() {
@@ -69,7 +69,7 @@ class SocketEmitTest: XCTestCase {
                XCTFail("Should have NSNull as result")
             }
         }
-        abstractSocketEmitTest(testName, emitData: NSNull(), callback: didGetEmit)
+        abstractSocketEmit(testName, emitData: NSNull(), callback: didGetEmit)
     }
     
     func testEmitBinary() {
@@ -83,7 +83,7 @@ class SocketEmitTest: XCTestCase {
             }
         }
         let data = NSString(string: "gakgakgak2").dataUsingEncoding(NSUTF8StringEncoding)!
-        abstractSocketEmitTest(testName, emitData: data, callback: didGetEmit)
+        abstractSocketEmit(testName, emitData: data, callback: didGetEmit)
     }
     
     func testArrayEmit() {
@@ -97,7 +97,7 @@ class SocketEmitTest: XCTestCase {
                 XCTFail("Should have NSArray as result")
             }
         }
-        abstractSocketEmitTest(testName, emitData: ["test1", "test2"], callback: didGetEmit)
+        abstractSocketEmit(testName, emitData: ["test1", "test2"], callback: didGetEmit)
     }
     
     func testStringEmit() {
@@ -109,7 +109,7 @@ class SocketEmitTest: XCTestCase {
                 XCTFail("Should have String as result")
             }
         }
-        abstractSocketEmitTest(testName, emitData: "marco", callback: didGetEmit)
+        abstractSocketEmit(testName, emitData: "marco", callback: didGetEmit)
     }
     
     func testBoolEmit() {
@@ -121,7 +121,7 @@ class SocketEmitTest: XCTestCase {
                 XCTFail("Should have Boolean as result")
             }
         }
-        abstractSocketEmitTest(testName, emitData: false, callback: didGetEmit)
+        abstractSocketEmit(testName, emitData: false, callback: didGetEmit)
     }
     
     func testIntegerEmit() {
@@ -133,7 +133,7 @@ class SocketEmitTest: XCTestCase {
                 XCTFail("Should have Integer as result")
             }
         }
-        abstractSocketEmitTest(testName, emitData: 10, callback: didGetEmit)
+        abstractSocketEmit(testName, emitData: 10, callback: didGetEmit)
     }
     
     func testDoubleEmit() {
@@ -145,7 +145,7 @@ class SocketEmitTest: XCTestCase {
                 XCTFail("Should have Double as result")
             }
         }
-        abstractSocketEmitTest(testName, emitData: 1.1, callback: didGetEmit)
+        abstractSocketEmit(testName, emitData: 1.1, callback: didGetEmit)
     }
     
     func testJSONEmit() {
@@ -164,7 +164,7 @@ class SocketEmitTest: XCTestCase {
         }
         let json = ["name": "test", "testArray": ["hallo"], "nestedTest": ["test": "test"], "number": 15]
         
-        abstractSocketEmitTest(testName, emitData: json, callback: didGetEmit)
+        abstractSocketEmit(testName, emitData: json, callback: didGetEmit)
     }
     
     func testUnicodeEmit() {
@@ -176,12 +176,11 @@ class SocketEmitTest: XCTestCase {
                 XCTFail("Should have String as result")
             }
         }
-        abstractSocketEmitTest(testName, emitData: "🚀", callback: didGetEmit)
+        abstractSocketEmit(testName, emitData: "🚀", callback: didGetEmit)
     }
     
     func testMultipleItemsEmit() {
         let testName = "testMultipleItems"
-        let expection = self.expectationWithDescription(testName)
         func didGetEmit(result:NSArray?, ack:AckEmitter?) {
             XCTAssertEqual(result!.count, 5)
             if let array = result?.firstObject as? Array<AnyObject> {
@@ -215,17 +214,33 @@ class SocketEmitTest: XCTestCase {
             }else {
                 XCTFail("Should have NSData as result")
             }
-            expection.fulfill()
         }
         let data = NSString(string: "gakgakgak2").dataUsingEncoding(NSUTF8StringEncoding)!
-        socket.emit(testName, withItems: [["test1", "test2"], ["test": "test"], 15, "marco", data])
-        socket.on(testName + "Return", callback: didGetEmit)
+        let emitArray = [["test1", "test2"], ["test": "test"], 15, "marco", data]
+        abstractSocketMultipleEmit(testName, emitData: emitArray, callback: didGetEmit)
+    }
+    
+    func generateTestName(rawTestName:String) ->String {
+        return rawTestName + testKind.rawValue
+    }
+    
+    func abstractSocketMultipleEmit(testName:String, emitData:Array<AnyObject>, callback:NormalCallback){
+        let finalTestname = generateTestName(testName)
+        let expection = self.expectationWithDescription(finalTestname)
+        func didGetEmit(result:NSArray?, ack:AckEmitter?) {
+            callback(result, ack)
+            expection.fulfill()
+        }
+       
+        socket.emit(finalTestname, withItems: emitData)
+        socket.on(finalTestname + "Return", callback: didGetEmit)
         waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
+
     }
 
     
-    func abstractSocketEmitTest(testName:String, emitData:AnyObject?, callback:NormalCallback){
-        let finalTestname = testName + testKind.rawValue
+    func abstractSocketEmit(testName:String, emitData:AnyObject?, callback:NormalCallback){
+        let finalTestname = generateTestName(testName)
         let expection = self.expectationWithDescription(finalTestname)
         func didGetEmit(result:NSArray?, ack:AckEmitter?) {
             callback(result, ack)
