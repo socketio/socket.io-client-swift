@@ -12,13 +12,6 @@ class SocketNamespaceEmitTest: SocketEmitTest {
     
     override func setUp() {
         super.setUp()
-        if testCytube {
-            socket = SocketIOClient(socketURL: "https://cytu.be:10443", opts: [
-                "forcePolling": false,
-                "forceWebsockets": false,
-                "log": true
-                ])
-        } else {
             socket = SocketIOClient(socketURL: "127.0.0.1:8080", opts: [
                 "reconnects": true, // default true
                 "reconnectAttempts": -1, // default -1
@@ -28,9 +21,7 @@ class SocketNamespaceEmitTest: SocketEmitTest {
                 "path": "",
                 "nsp": "/swift",
                 "extraHeaders": headers])
-        }
         openConnection()
-        
     }
     
     override func tearDown() {

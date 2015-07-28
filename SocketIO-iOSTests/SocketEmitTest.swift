@@ -10,11 +10,10 @@ import XCTest
 import Foundation
 
 class SocketEmitTest: XCTestCase {
-    private static let TEST_TIMEOUT = 20.0
+    static let TEST_TIMEOUT = 5.0
     var socket:SocketIOClient!
-    
-    
     let headers = ["testing": "blah", "testing2": "b/:lah"]
+    var testKind = TestKind.Emit
     
     override func setUp() {
         super.setUp()
@@ -53,7 +52,7 @@ class SocketEmitTest: XCTestCase {
     }
     
     func testEmit() {
-        let testName = "testEmit"
+        let testName = "basicTest"
         func didGetEmit(result:NSArray?, ack:AckEmitter?) {
             
         }
@@ -61,7 +60,7 @@ class SocketEmitTest: XCTestCase {
     }
     
     func testEmitNull() {
-        let testName = "testEmitNull"
+        let testName = "testNull"
         func didGetEmit(result:NSArray?, ack:AckEmitter?) {
             if let _ = result?.firstObject as? NSNull {
                 
@@ -74,7 +73,7 @@ class SocketEmitTest: XCTestCase {
     }
     
     func testEmitBinary() {
-        let testName = "testEmitBinary"
+        let testName = "testBinary"
         func didGetEmit(result:NSArray?, ack:AckEmitter?) {
             if let data = result?.firstObject as? NSData {
                 let string = NSString(data: data, encoding: NSUTF8StringEncoding)!
@@ -88,11 +87,12 @@ class SocketEmitTest: XCTestCase {
     }
     
     func testArrayEmit() {
-        let testName = "testEmitArray"
+        let testName = "testArray"
         func didGetEmit(result:NSArray?, ack:AckEmitter?) {
             if let array = result?.firstObject as? NSArray {
                 XCTAssertEqual(array.count, 2)
                 XCTAssertEqual(array.firstObject! as! String, "test3")
+                XCTAssertEqual(array.lastObject! as! String, "test4")
             }else {
                 XCTFail("Should have NSArray as result")
             }
@@ -101,7 +101,7 @@ class SocketEmitTest: XCTestCase {
     }
     
     func testStringEmit() {
-        let testName = "testStringEmit"
+        let testName = "testString"
         func didGetEmit(result:NSArray?, ack:AckEmitter?) {
             if let string = result?.firstObject as? String {
                 XCTAssertEqual(string, "polo")
@@ -113,7 +113,7 @@ class SocketEmitTest: XCTestCase {
     }
     
     func testBoolEmit() {
-        let testName = "testBoolEmit"
+        let testName = "testBool"
         func didGetEmit(result:NSArray?, ack:AckEmitter?) {
             if let bool = result?.firstObject as? NSNumber {
                 XCTAssertTrue(bool.boolValue)
@@ -125,7 +125,7 @@ class SocketEmitTest: XCTestCase {
     }
     
     func testIntegerEmit() {
-        let testName = "testIntegerEmit"
+        let testName = "testInteger"
         func didGetEmit(result:NSArray?, ack:AckEmitter?) {
             if let integer = result?.firstObject as? Int {
                 XCTAssertEqual(integer, 20)
@@ -137,7 +137,7 @@ class SocketEmitTest: XCTestCase {
     }
     
     func testDoubleEmit() {
-        let testName = "testDoubleEmit"
+        let testName = "testDouble"
         func didGetEmit(result:NSArray?, ack:AckEmitter?) {
             if let double = result?.firstObject as? NSNumber {
                 XCTAssertEqual(double.floatValue, 1.2)
@@ -149,7 +149,7 @@ class SocketEmitTest: XCTestCase {
     }
     
     func testJSONEmit() {
-        let testName = "testJSONEmit"
+        let testName = "testJSON"
         func didGetEmit(result:NSArray?, ack:AckEmitter?) {
             if let json = result?.firstObject as? NSDictionary {
                 XCTAssertEqual(json.valueForKey("testString")! as! String, "test")
@@ -168,7 +168,7 @@ class SocketEmitTest: XCTestCase {
     }
     
     func testUnicodeEmit() {
-        let testName = "testUnicodeEmit"
+        let testName = "testUnicode"
         func didGetEmit(result:NSArray?, ack:AckEmitter?) {
             if let unicode = result?.firstObject as? String {
                 XCTAssertEqual(unicode, "🚄")
@@ -180,7 +180,7 @@ class SocketEmitTest: XCTestCase {
     }
     
     func testMultipleItemsEmit() {
-        let testName = "testMultipleItemsEmit"
+        let testName = "testMultipleItems"
         let expection = self.expectationWithDescription(testName)
         func didGetEmit(result:NSArray?, ack:AckEmitter?) {
             XCTAssertEqual(result!.count, 5)
@@ -225,17 +225,18 @@ class SocketEmitTest: XCTestCase {
 
     
     func abstractSocketEmitTest(testName:String, emitData:AnyObject?, callback:NormalCallback){
-        let expection = self.expectationWithDescription(testName)
+        let finalTestname = testName + testKind.rawValue
+        let expection = self.expectationWithDescription(finalTestname)
         func didGetEmit(result:NSArray?, ack:AckEmitter?) {
             callback(result, ack)
             expection.fulfill()
         }
         
-        socket.on(testName + "Return", callback: didGetEmit)
+        socket.on(finalTestname + "Return", callback: didGetEmit)
         if let emitData = emitData {
-            socket.emit(testName, emitData)
+            socket.emit(finalTestname, emitData)
         } else {
-            socket.emit(testName)
+            socket.emit(finalTestname)
         }
         
         waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
