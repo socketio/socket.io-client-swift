@@ -27,6 +27,8 @@ import Foundation
 struct SocketPacket {
     let nsp:String
     let id:Int
+    let placeholders:Int
+    let type:PacketType
     
     enum PacketType:Int {
         case CONNECT = 0
@@ -49,8 +51,6 @@ struct SocketPacket {
     var currentPlace = 0
     var binary:[NSData]
     var data:[AnyObject]
-    var placeholders:Int
-    var type:PacketType
     var description:String {
         var better = "SocketPacket {type: ~~0; data: ~~1; " +
         "id: ~~2; placeholders: ~~3;}"
