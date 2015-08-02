@@ -11,7 +11,7 @@ socket.on("connect") {data, ack in
 
 socket.on("currentAmount") {data, ack in
     if let cur = data?[0] as? Double {
-        socket.emitWithAck("canUpdate", cur)(timeout: 0) {data in
+        socket.emitWithAck("canUpdate", cur)(timeoutAfter: 0) {data in
             socket.emit("update", ["amount": cur + 2.50])
         }
 
@@ -61,7 +61,7 @@ Carthage
 -----------------
 Add this line to your `Cartfile`:
 ```
-github "socketio/socket.io-client-swift" ~> 2.3.10 # Or latest version
+github "socketio/socket.io-client-swift" ~> 2.4.0 # Or latest version
 ```
 
 Run `carthage update`.
@@ -80,7 +80,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 platform :ios, '8.0'
 use_frameworks!
 
-pod 'Socket.IO-Client-Swift', '~> 2.3.10' # Or latest version
+pod 'Socket.IO-Client-Swift', '~> 2.4.0' # Or latest version
 ```
 
 Install pods:
@@ -129,7 +129,7 @@ Methods
 2. `onAny(callback:((event:String, items:AnyObject?)) -> Void)` - Adds a handler for all events. It will be called on any received event.
 3. `emit(event:String, _ items:AnyObject...)` - Sends a message. Can send multiple items.
 4. `emit(event:String, withItems items:[AnyObject])` - `emit` for Objective-C
-5. `emitWithAck(event:String, _ items:AnyObject...) -> (timeout:UInt64, callback:(NSArray?) -> Void) -> Void` - Sends a message that requests an acknowledgement from the server. Returns a function which you can use to add a handler. See example. Note: The message is not sent until you call the returned function.
+5. `emitWithAck(event:String, _ items:AnyObject...) -> (timeoutAfter:UInt64, callback:(NSArray?) -> Void) -> Void` - Sends a message that requests an acknowledgement from the server. Returns a function which you can use to add a handler. See example. Note: The message is not sent until you call the returned function.
 6. `emitWithAck(event:String, withItems items:[AnyObject]) -> (UInt64, (NSArray?) -> Void) -> Void` - `emitWithAck` for Objective-C. Note: The message is not sent until you call the returned function.
 7. `connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
 8. `connect(#timeoutAfter:Int, withTimeoutHandler handler:(() -> Void)?)` - Connect to the server. If it isn't connected after timeoutAfter seconds, the handler is called.
