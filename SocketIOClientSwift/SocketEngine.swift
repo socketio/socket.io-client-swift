@@ -325,8 +325,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
 
         let req = NSMutableURLRequest(URL: NSURL(string: urlPolling! + "&sid=\(sid)")!)
 
-        if cookies != nil {
-            let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies!)
+        if let cookies = cookies {
+            let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies)
             req.allHTTPHeaderFields = headers
         }
 
@@ -375,8 +375,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     }
 
     private func handleClose() {
-        if polling {
-            client?.engineDidClose("Disconnect")
+        if let client = client where polling == true {
+            client.engineDidClose("Disconnect")
         }
     }
 
@@ -494,8 +494,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             reqPolling.allHTTPHeaderFields = headers
         }
  
-        if extraHeaders != nil {
-            for (headerName, value) in extraHeaders! {
+        if let extraHeaders = extraHeaders {
+            for (headerName, value) in extraHeaders {
                 reqPolling.setValue(value, forHTTPHeaderField: headerName)
             }
         }
@@ -505,10 +505,9 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
 
     // Translatation of engine.io-parser#decodePayload
     private func parsePollingMessage(str:String) {
-        if str.characters.count == 1 {
+        guard str.characters.count == 1 else {
             return
         }
-
         // println(str)
 
         let strArray = Array(str.characters)
@@ -633,8 +632,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
 
             postWait.append(strMsg)
 
-            if datas != nil {
-                for data in datas! {
+            if let datas = datas {
+                for data in datas {
                     let (_, b64Data) = createBinaryDataForSend(data)
 
                     postWait.append(b64Data!)
@@ -654,8 +653,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
 
             ws?.writeString("\(type.rawValue)\(str)")
 
-            if datas != nil {
-                for data in datas! {
+            if let datas = datas {
+                for data in datas {
                     let (data, _) = createBinaryDataForSend(data)
                     if data != nil {
                         ws?.writeData(data!)
@@ -666,7 +665,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
 
     // Starts the ping timer
     private func startPingTimer() {
-        if pingInterval == nil {
+        guard pingInterval != nil else {
             return
         }
 
@@ -719,8 +718,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         if let pType = PacketType(rawValue: type) {
             var arr = [NSData]()
 
-            if data != nil {
-                for d in data! {
+            if let data = data {
+                for d in data {
                     arr.append(d as! NSData)
                 }
             }
