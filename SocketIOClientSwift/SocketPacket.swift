@@ -231,12 +231,16 @@ struct SocketPacket {
     
     func getArgs() -> [AnyObject]? {
         var arr = data
-        
+
         if data.count == 0 {
             return nil
         } else {
-            arr.removeAtIndex(0)
-            return arr
+            if type == PacketType.EVENT || type == PacketType.BINARY_EVENT {
+                arr.removeAtIndex(0)
+                return arr
+            } else {
+                return arr
+            }
         }
     }
 }
