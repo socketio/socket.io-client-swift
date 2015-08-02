@@ -98,16 +98,15 @@ struct SocketPacket {
         
         for arg in data {
             if arg is NSDictionary || arg is [AnyObject] {
-                let jsonSend: NSData?
                 do {
-                    jsonSend = try NSJSONSerialization.dataWithJSONObject(arg,
+                    let jsonSend = try NSJSONSerialization.dataWithJSONObject(arg,
                         options: NSJSONWritingOptions(rawValue: 0))
+                    let jsonString = NSString(data: jsonSend, encoding: NSUTF8StringEncoding)
+                    
+                    message += jsonString! as String + ","
                 } catch {
-                    jsonSend = nil
+                    print("Error creating JSON object in SocketPacket.completeMessage")
                 }
-                let jsonString = NSString(data: jsonSend!, encoding: NSUTF8StringEncoding)
-                
-                message += jsonString! as String + ","
             } else if var str = arg as? String {
                 str = str["\n"] ~= "\\\\n"
                 str = str["\r"] ~= "\\\\r"
@@ -232,12 +231,16 @@ struct SocketPacket {
     
     func getArgs() -> [AnyObject]? {
         var arr = data
-        
+
         if data.count == 0 {
             return nil
         } else {
-            arr.removeAtIndex(0)
-            return arr
+            if type == PacketType.EVENT || type == PacketType.BINARY_EVENT {
+                arr.removeAtIndex(0)
+                return arr
+            } else {
+                return arr
+            }
         }
     }
 }
