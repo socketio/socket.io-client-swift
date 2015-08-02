@@ -51,7 +51,7 @@ module.exports = {
 		},
 		returnData: [1.2]
 	},
-	testJSONWithoutBuffer: {
+	testJSON: {
 		assert: function(inputData) {
 			assert.equal(inputData.name, "test")
 		    assert.equal(inputData.nestedTest.test, "test")
@@ -59,7 +59,7 @@ module.exports = {
 		},
 		returnData: [{testString: "test", testNumber: 15, nestedTest: {test: "test"}, testArray: [1, 1]}]
 	},	
-	testJSON: {
+	testJSONWithBuffer: {
 		assert: function(inputData) {
 			assert.equal(inputData.name, "test")
 		    assert.equal(inputData.nestedTest.test, "test")
@@ -72,6 +72,16 @@ module.exports = {
 		},
 		returnData: ["🚄"]
 	},testMultipleItems: {
+		assert: function(array, object, number, string, bool) {
+			assert.equal(array.length, 2)
+			assert.equal(array[0], "test1")
+			assert.equal(array[1], "test2")
+			assert.equal(number, 15)
+			assert.equal(string, "marco")
+			assert.equal(bool, false)	
+		},
+		returnData: [[1, 2], {test: "bob"}, 25, "polo", false]
+	},testMultipleItemsWithBuffer: {
 		assert: function(array, object, number, string, binary) {
 			assert.equal(array.length, 2)
 			assert.equal(array[0], "test1")
@@ -79,8 +89,7 @@ module.exports = {
 			assert.equal(number, 15)
 			assert.equal(string, "marco")
 			assert.equal(binary.toString(), "gakgakgak2")
-			
 		},
 		returnData: [[1, 2], {test: "bob"}, 25, "polo", new Buffer("gakgakgak2")]
-	},
+	}
 }
