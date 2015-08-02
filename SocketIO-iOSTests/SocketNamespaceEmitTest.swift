@@ -8,73 +8,76 @@
 
 import XCTest
 
-class SocketNamespaceEmitTest: SocketEmitTest {
+class SocketNamespaceEmitTest: AbstractSocketTest {
     
     override func setUp() {
         super.setUp()
-            socket = SocketIOClient(socketURL: "127.0.0.1:8080", opts: [
-                "reconnects": true, // default true
-                "reconnectAttempts": -1, // default -1
-                "reconnectWait": 5, // default 10
-                "forcePolling": false,
-                "forceWebsockets": false,// default false
-                "path": "",
-                "nsp": "/swift",
-                "extraHeaders": headers])
+        testKind = TestKind.Emit
+        socket = SocketIOClient(socketURL: "127.0.0.1:8080", opts: [
+            "reconnects": true, // default true
+            "reconnectAttempts": -1, // default -1
+            "reconnectWait": 5, // default 10
+            "forcePolling": false,
+            "forceWebsockets": false,// default false
+            "path": "",
+            "nsp": "/swift"])
         openConnection()
     }
     
-    override func tearDown() {
-        socket.close(fast: false)
-        super.tearDown()
+    func testConnectionStatus() {
+        super.checkConnectionStatus()
     }
     
-    override func testConnectionStatus() {
-       super.testConnectionStatus()
+    func testBasic() {
+        SocketTestCases.testBasic(socketEmit)
     }
     
-    override func testEmit() {
-        super.testEmit()
+    func testNull() {
+        SocketTestCases.testNull(socketEmit)
     }
     
-    override func testEmitNull() {
-        super.testEmitNull()
+    func testBinary() {
+        SocketTestCases.testBinary(socketEmit)
     }
     
-    override func testEmitBinary() {
-       super.testEmitBinary()
+    func testArray() {
+        SocketTestCases.testArray(socketEmit)
     }
     
-    override func testArrayEmit() {
-       super.testArrayEmit()
+    func testString() {
+        SocketTestCases.testString(socketEmit)
     }
     
-    override func testStringEmit() {
-       super.testStringEmit()
+    func testBool() {
+        SocketTestCases.testBool(socketEmit)
     }
     
-    override func testBoolEmit() {
-        super.testBoolEmit()
+    func testInteger() {
+        SocketTestCases.testInteger(socketEmit)
     }
     
-    override func testIntegerEmit() {
-        super.testIntegerEmit()
+    func testDouble() {
+        SocketTestCases.testDouble(socketEmit)
     }
     
-    override func testDoubleEmit() {
-        super.testDoubleEmit()
+    func testJSON() {
+        SocketTestCases.testJSON(socketEmit)
     }
     
-    override func testJSONEmit() {
-        super.testJSONEmit()
+    func testJSONWithBuffer() {
+        SocketTestCases.testJSONWithBuffer(socketEmit)
     }
     
-    override func testUnicodeEmit() {
-       super.testUnicodeEmit()
+    func testUnicode() {
+        SocketTestCases.testUnicode(socketEmit)
     }
     
-    override func testMultipleItemsEmit() {
-       super.testMultipleItemsEmit()
+    func testMultipleItems() {
+        SocketTestCases.testMultipleItems(socketMultipleEmit)
+    }
+    
+    func testMultipleWithBuffer() {
+        SocketTestCases.testMultipleItemsWithBuffer(socketMultipleEmit)
     }
     
 }

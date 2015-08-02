@@ -8,7 +8,7 @@
 
 import XCTest
 
-class SocketNamespaceAcknowledgementTest: SocketAcknowledgementTest {
+class SocketNamespaceAcknowledgementTest: AbstractSocketTest {
 
     override func setUp() {
         super.setUp()
@@ -20,56 +20,63 @@ class SocketNamespaceAcknowledgementTest: SocketAcknowledgementTest {
             "forcePolling": false,
             "forceWebsockets": false,// default false
             "path": "",
-            "nsp": "/swift",
-            "extraHeaders": headers])
+            "nsp": "/swift"])
         openConnection()
     }
     
-    override func testConnectionStatus() {
-        super.testConnectionStatus()
+    func testConnectionStatus() {
+        super.checkConnectionStatus()
     }
     
-    override func testEmit() {
-        super.testEmit()
+    func testBasic() {
+        SocketTestCases.testBasic(socketAcknwoledge)
     }
     
-    override func testEmitNull() {
-        super.testEmitNull()
+    func testNull() {
+        SocketTestCases.testNull(socketAcknwoledge)
     }
     
-    override func testEmitBinary() {
-        super.testEmitBinary()
+    func testBinary() {
+        SocketTestCases.testBinary(socketAcknwoledge)
     }
     
-    override func testArrayEmit() {
-        super.testArrayEmit()
+    func testArray() {
+        SocketTestCases.testArray(socketAcknwoledge)
     }
     
-    override func testStringEmit() {
-        super.testStringEmit()
+    func testString() {
+        SocketTestCases.testString(socketAcknwoledge)
     }
     
-    override func testBoolEmit() {
-        super.testBoolEmit()
+    func testBool() {
+        SocketTestCases.testBool(socketAcknwoledge)
     }
     
-    override func testIntegerEmit() {
-        super.testIntegerEmit()
+    func testInteger() {
+        SocketTestCases.testInteger(socketAcknwoledge)
     }
     
-    override func testDoubleEmit() {
-        super.testDoubleEmit()
+    func testDouble() {
+        SocketTestCases.testDouble(socketAcknwoledge)
     }
     
-    override func testJSONEmit() {
-        super.testJSONEmit()
+    func testJSON() {
+        SocketTestCases.testJSON(socketAcknwoledge)
     }
     
-    override func testUnicodeEmit() {
-        super.testUnicodeEmit()
+    func testJSONWithBuffer() {
+        SocketTestCases.testJSONWithBuffer(socketAcknwoledge)
     }
     
-    override func testMultipleItemsEmit() {
-        super.testMultipleItemsEmit()
+    func testUnicode() {
+        SocketTestCases.testUnicode(socketAcknwoledge)
+    }
+    
+    func testMultipleItems() {
+        SocketTestCases.testMultipleItems(socketAcknwoledgeMultiple)
+    }
+    
+    func testMultipleWithBuffer() {
+        SocketTestCases.testMultipleItemsWithBuffer(socketAcknwoledgeMultiple)
     }
 }

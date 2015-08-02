@@ -12,7 +12,7 @@ import Foundation
 class SocketTestCases: NSObject {
     typealias SocketSendFunction = (testName:String, emitData:AnyObject?, callback:NormalCallback)->()
     
-    static func testBasic(abstractSocketSend:SocketSendFunction, testKind:TestKind) {
+    static func testBasic(abstractSocketSend:SocketSendFunction) {
         let testName = "basicTest"
         func didGetResult(result:NSArray?, ack:AckEmitter?) {
             
@@ -20,7 +20,7 @@ class SocketTestCases: NSObject {
         abstractSocketSend(testName: testName, emitData: nil, callback: didGetResult)
     }
     
-    static func testNull(abstractSocketSend:SocketSendFunction, testKind:TestKind) {
+    static func testNull(abstractSocketSend:SocketSendFunction) {
         let testName = "testNull"
         func didGetResult(result:NSArray?, ack:AckEmitter?) {
             if let _ = result?.firstObject as? NSNull {
@@ -33,7 +33,7 @@ class SocketTestCases: NSObject {
         abstractSocketSend(testName: testName, emitData: NSNull(), callback: didGetResult)
     }
     
-    static func testBinary(abstractSocketSend:SocketSendFunction, testKind:TestKind) {
+    static func testBinary(abstractSocketSend:SocketSendFunction) {
         let testName = "testBinary"
         func didGetResult(result:NSArray?, ack:AckEmitter?) {
             if let data = result?.firstObject as? NSData {
@@ -47,7 +47,7 @@ class SocketTestCases: NSObject {
         abstractSocketSend(testName: testName, emitData: data, callback: didGetResult)
     }
     
-    static func testArray(abstractSocketSend:SocketSendFunction, testKind:TestKind) {
+    static func testArray(abstractSocketSend:SocketSendFunction) {
         let testName = "testArray"
         func didGetResult(result:NSArray?, ack:AckEmitter?) {
             if let array = result?.firstObject as? NSArray {
@@ -61,7 +61,7 @@ class SocketTestCases: NSObject {
         abstractSocketSend(testName: testName, emitData: ["test1", "test2"], callback: didGetResult)
     }
     
-    static func testString(abstractSocketSend:SocketSendFunction, testKind:TestKind) {
+    static func testString(abstractSocketSend:SocketSendFunction) {
         let testName = "testString"
         func didGetResult(result:NSArray?, ack:AckEmitter?) {
             if let string = result?.firstObject as? String {
@@ -73,7 +73,7 @@ class SocketTestCases: NSObject {
         abstractSocketSend(testName: testName, emitData: "marco", callback: didGetResult)
     }
     
-    static func testBool(abstractSocketSend:SocketSendFunction, testKind:TestKind) {
+    static func testBool(abstractSocketSend:SocketSendFunction) {
         let testName = "testBool"
         func didGetResult(result:NSArray?, ack:AckEmitter?) {
             if let bool = result?.firstObject as? NSNumber {
@@ -85,7 +85,7 @@ class SocketTestCases: NSObject {
         abstractSocketSend(testName: testName, emitData: false, callback: didGetResult)
     }
     
-    static func testInteger(abstractSocketSend:SocketSendFunction, testKind:TestKind) {
+    static func testInteger(abstractSocketSend:SocketSendFunction) {
         let testName = "testInteger"
         func didGetResult(result:NSArray?, ack:AckEmitter?) {
             if let integer = result?.firstObject as? Int {
@@ -97,7 +97,7 @@ class SocketTestCases: NSObject {
         abstractSocketSend(testName: testName, emitData: 10, callback: didGetResult)
     }
     
-    static func testDouble(abstractSocketSend:SocketSendFunction, testKind:TestKind) {
+    static func testDouble(abstractSocketSend:SocketSendFunction) {
         let testName = "testDouble"
         func didGetResult(result:NSArray?, ack:AckEmitter?) {
             if let double = result?.firstObject as? NSNumber {
@@ -109,8 +109,8 @@ class SocketTestCases: NSObject {
         abstractSocketSend(testName: testName, emitData: 1.1, callback: didGetResult)
     }
     
-    static func testJSON(abstractSocketSend:SocketSendFunction, testKind:TestKind) {
-        let testName = "testJSON"
+    static func testJSONWithBuffer(abstractSocketSend:SocketSendFunction) {
+        let testName = "testJSONWithBuffer"
         func didGetResult(result:NSArray?, ack:AckEmitter?) {
             if let json = result?.firstObject as? NSDictionary {
                 XCTAssertEqual(json.valueForKey("testString")! as! String, "test")
@@ -128,8 +128,8 @@ class SocketTestCases: NSObject {
         abstractSocketSend(testName: testName, emitData: json, callback: didGetResult)
     }
     
-    static func testJSONWithoutBuffer(abstractSocketSend:SocketSendFunction, testKind:TestKind) {
-        let testName = "testJSONWithoutBuffer"
+    static func testJSON(abstractSocketSend:SocketSendFunction) {
+        let testName = "testJSON"
         func didGetResult(result:NSArray?, ack:AckEmitter?) {
             if let json = result?.firstObject as? NSDictionary {
                 XCTAssertEqual(json.valueForKey("testString")! as! String, "test")
@@ -147,7 +147,7 @@ class SocketTestCases: NSObject {
         abstractSocketSend(testName: testName, emitData: json, callback: didGetResult)
     }
     
-    static func testUnicode(abstractSocketSend:SocketSendFunction, testKind:TestKind) {
+    static func testUnicode(abstractSocketSend:SocketSendFunction) {
         let testName = "testUnicode"
         func didGetResult(result:NSArray?, ack:AckEmitter?) {
             if let unicode = result?.firstObject as? String {
@@ -159,10 +159,14 @@ class SocketTestCases: NSObject {
         abstractSocketSend(testName: testName, emitData: "🚀", callback: didGetResult)
     }
     
-    static func testMultipleItems(abstractSocketMultipleSend:(testName:String, emitData:Array<AnyObject>, callback:NormalCallback)->(), testKind:TestKind) {
-        let testName = "testMultipleItems"
+    static func testMultipleItemsWithBuffer(abstractSocketMultipleSend:(testName:String, emitData:Array<AnyObject>, callback:NormalCallback)->()) {
+        let testName = "testMultipleItemsWithBuffer"
         func didGetResult(result:NSArray?, ack:AckEmitter?) {
             XCTAssertEqual(result!.count, 5)
+            if result!.count != 5 {
+                XCTFail("Fatal Fail. Lost some Data")
+                return
+            }
             if let array = result?.firstObject as? Array<AnyObject> {
                 XCTAssertEqual(array.last! as! Int, 2)
                 XCTAssertEqual(array.first! as! Int, 1)
@@ -196,6 +200,47 @@ class SocketTestCases: NSObject {
         }
         let data = NSString(string: "gakgakgak2").dataUsingEncoding(NSUTF8StringEncoding)!
         let emitArray = [["test1", "test2"], ["test": "test"], 15, "marco", data]
+        abstractSocketMultipleSend(testName: testName, emitData: emitArray, callback: didGetResult)
+    }
+    
+    static func testMultipleItems(abstractSocketMultipleSend:(testName:String, emitData:Array<AnyObject>, callback:NormalCallback)->()) {
+        let testName = "testMultipleItems"
+        func didGetResult(result:NSArray?, ack:AckEmitter?) {
+            XCTAssertEqual(result!.count, 5)
+            if result!.count != 5 {
+                XCTFail("Fatal Fail. Lost some Data")
+                return
+            }
+            if let array = result?.firstObject as? Array<AnyObject> {
+                XCTAssertEqual(array.last! as! Int, 2)
+                XCTAssertEqual(array.first! as! Int, 1)
+            }else {
+                XCTFail("Should have Array as result")
+            }
+            if let dict = result?[1] as? NSDictionary {
+                XCTAssertEqual(dict.valueForKey("test") as! String, "bob")
+                
+            }else {
+                XCTFail("Should have NSDictionary as result")
+            }
+            if let number = result?[2] as? Int {
+                XCTAssertEqual(number, 25)
+                
+            }else {
+                XCTFail("Should have Integer as result")
+            }
+            if let string = result?[3] as? String {
+                XCTAssertEqual(string, "polo")
+            }else {
+                XCTFail("Should have Integer as result")
+            }
+            if let bool = result?[4] as? NSNumber {
+                XCTAssertFalse(bool.boolValue)
+            }else {
+                XCTFail("Should have NSNumber as result")
+            }
+        }
+        let emitArray = [["test1", "test2"], ["test": "test"], 15, "marco", false]
         abstractSocketMultipleSend(testName: testName, emitData: emitArray, callback: didGetResult)
     }
 }

@@ -8,7 +8,8 @@
 
 import XCTest
 
-class SocketAcknowledgementTest: SocketEmitTest {
+class SocketAcknowledgementTest: AbstractSocketTest {
+    
     override func setUp() {
         super.setUp()
         testKind = TestKind.Acknowledgement
@@ -18,92 +19,64 @@ class SocketAcknowledgementTest: SocketEmitTest {
             "reconnectWait": 5, // default 10
             "forcePolling": false,
             "forceWebsockets": false,// default false
-            "path": "",
-            "extraHeaders": headers])
+            "path": ""])
         openConnection()
     }
     
-    override func testConnectionStatus() {
-        super.testConnectionStatus()
+    func testConnectionStatus() {
+        super.checkConnectionStatus()
     }
     
-    override func testEmit() {
-        super.testEmit()
+    func testBasic() {
+       SocketTestCases.testBasic(socketAcknwoledge)
     }
     
-    override func testEmitNull() {
-        super.testEmitNull()
+    func testNull() {
+        SocketTestCases.testNull(socketAcknwoledge)
     }
     
-    override func testEmitBinary() {
-        super.testEmitBinary()
+    func testBinary() {
+        SocketTestCases.testBinary(socketAcknwoledge)
     }
     
-    override func testArrayEmit() {
-        super.testArrayEmit()
+    func testArray() {
+        SocketTestCases.testArray(socketAcknwoledge)
     }
     
-    override func testStringEmit() {
-        super.testStringEmit()
+    func testString() {
+        SocketTestCases.testString(socketAcknwoledge)
     }
     
-    override func testBoolEmit() {
-        super.testBoolEmit()
+    func testBool() {
+        SocketTestCases.testBool(socketAcknwoledge)
     }
     
-    override func testIntegerEmit() {
-        super.testIntegerEmit()
+    func testInteger() {
+        SocketTestCases.testInteger(socketAcknwoledge)
     }
     
-    override func testDoubleEmit() {
-        super.testDoubleEmit()
+    func testDouble() {
+        SocketTestCases.testDouble(socketAcknwoledge)
     }
     
-    override func testJSONEmit() {
-        super.testJSONEmit()
+    func testJSON() {
+        SocketTestCases.testJSON(socketAcknwoledge)
     }
     
-    func testJSONWithoutBuffer() {
-        SocketTestCases.testJSONEmit(abstractSocketEmit, testKind: self.testKind)
+    func testJSONWithBuffer() {
+        SocketTestCases.testJSONWithBuffer(socketAcknwoledge)
     }
     
-    override func testUnicodeEmit() {
-        super.testUnicodeEmit()
+    func testUnicode() {
+        SocketTestCases.testUnicode(socketAcknwoledge)
     }
     
-    override func testMultipleItemsEmit() {
-        super.testMultipleItemsEmit()
+    func testMultipleItems() {
+        SocketTestCases.testMultipleItems(socketAcknwoledgeMultiple)
     }
     
-    override func abstractSocketMultipleEmit(testName:String, emitData:Array<AnyObject>, callback:NormalCallback){
-        let finalTestname = generateTestName(testName)
-        let expection = self.expectationWithDescription(finalTestname)
-        func didGetEmit(result:NSArray?) {
-            callback(result, nil)
-            expection.fulfill()
-        }
-        
-        socket.emitWithAck(finalTestname, withItems: emitData)(timeoutAfter: 5, callback: didGetEmit)
-        waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
-        
-    }
-    
-    override func abstractSocketEmit(testName:String, emitData:AnyObject?, callback:NormalCallback){
-        let finalTestname = testName + testKind.rawValue
-        let expection = self.expectationWithDescription(finalTestname)
-        func didGetEmit(result:NSArray?) {
-            callback(result, nil)
-            expection.fulfill()
-        }
-        var ack:OnAckCallback!
-        if let emitData = emitData {
-            ack = socket.emitWithAck(finalTestname, emitData)
-        } else {
-            ack = socket.emitWithAck(finalTestname)
-        }
-        ack(timeoutAfter: 20, callback: didGetEmit)
-        
-        waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
+    func testMultipleWithBuffer() {
+        SocketTestCases.testMultipleItemsWithBuffer(socketAcknwoledgeMultiple)
     }
     
 }
