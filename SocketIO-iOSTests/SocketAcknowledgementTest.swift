@@ -63,6 +63,10 @@ class SocketAcknowledgementTest: SocketEmitTest {
         super.testJSONEmit()
     }
     
+    func testJSONWithoutBuffer() {
+        SocketTestCases.testJSONEmit(abstractSocketEmit, testKind: self.testKind)
+    }
+    
     override func testUnicodeEmit() {
         super.testUnicodeEmit()
     }

@@ -51,6 +51,14 @@ module.exports = {
 		},
 		returnData: [1.2]
 	},
+	testJSONWithoutBuffer: {
+		assert: function(inputData) {
+			assert.equal(inputData.name, "test")
+		    assert.equal(inputData.nestedTest.test, "test")
+		    assert.equal(inputData.testArray.length, 1)
+		},
+		returnData: [{testString: "test", testNumber: 15, nestedTest: {test: "test"}, testArray: [1, 1]}]
+	},	
 	testJSON: {
 		assert: function(inputData) {
 			assert.equal(inputData.name, "test")
