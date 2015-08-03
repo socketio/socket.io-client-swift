@@ -25,12 +25,12 @@
 import Foundation
 
 struct SocketPacket {
-    let nsp:String
-    let id:Int
-    let placeholders:Int
-    let type:PacketType
+    let nsp: String
+    let id: Int
+    let placeholders: Int
+    let type: PacketType
     
-    enum PacketType:Int {
+    enum PacketType: Int {
         case CONNECT = 0
         case DISCONNECT = 1
         case EVENT = 2
@@ -39,7 +39,7 @@ struct SocketPacket {
         case BINARY_EVENT = 5
         case BINARY_ACK = 6
         
-        init?(str:String) {
+        init?(str: String) {
             if let int = Int(str), raw = PacketType(rawValue: int) {
                 self = raw
             } else {
@@ -49,9 +49,9 @@ struct SocketPacket {
     }
     
     var currentPlace = 0
-    var binary:[NSData]
-    var data:[AnyObject]
-    var description:String {
+    var binary: [NSData]
+    var data: [AnyObject]
+    var description: String {
         var better = "SocketPacket {type: ~~0; data: ~~1; " +
         "id: ~~2; placeholders: ~~3;}"
         
@@ -63,8 +63,8 @@ struct SocketPacket {
         return better
     }
     
-    init(type:SocketPacket.PacketType, data:[AnyObject] = [AnyObject](), id:Int = -1,
-        nsp:String, placeholders:Int = 0, binary:[NSData] = [NSData]()) {
+    init(type: SocketPacket.PacketType, data: [AnyObject] = [AnyObject](), id: Int = -1,
+        nsp: String, placeholders: Int = 0, binary: [NSData] = [NSData]()) {
         self.data = data
         self.id = id
         self.nsp = nsp
@@ -73,7 +73,7 @@ struct SocketPacket {
         self.binary = binary
     }
     
-    mutating func addData(data:NSData) -> Bool {
+    mutating func addData(data: NSData) -> Bool {
         if placeholders == currentPlace {
             return true
         }
@@ -89,7 +89,7 @@ struct SocketPacket {
         }
     }
     
-    private func completeMessage(var message:String, ack:Bool = false) -> String {
+    private func completeMessage(var message: String, ack: Bool) -> String {
         if data.count == 0 {
             return message + "]"
         } else if !ack {
@@ -127,7 +127,7 @@ struct SocketPacket {
     }
     
     func createAck() -> String {
-        let msg:String
+        let msg: String
         
         if type == PacketType.ACK {
             if nsp == "/" {
@@ -147,8 +147,8 @@ struct SocketPacket {
     }
 
     
-    func createMessageForEvent(event:String) -> String {
-        let message:String
+    func createMessageForEvent(event: String) -> String {
+        let message: String
         
         if type == PacketType.EVENT {
             if nsp == "/" {
@@ -180,7 +180,7 @@ struct SocketPacket {
             }
         }
         
-        return completeMessage(message)
+        return completeMessage(message, ack: false)
     }
     
     mutating func fillInPlaceholders() {
@@ -197,7 +197,7 @@ struct SocketPacket {
         data = newArr as [AnyObject]
     }
     
-    private mutating func _fillInPlaceholders(data:AnyObject) -> AnyObject {
+    private mutating func _fillInPlaceholders(data: AnyObject) -> AnyObject {
         if let str = data as? String {
             if let num = str["~~(\\d)"].groups() {
                 return binary[Int(num[1])!]
@@ -246,7 +246,7 @@ struct SocketPacket {
 }
 
 extension SocketPacket {
-    private static func findType(binCount:Int, ack:Bool) -> PacketType {
+    private static func findType(binCount: Int, ack: Bool) -> PacketType {
         switch binCount {
         case 0 where !ack:
             return PacketType.EVENT
@@ -261,7 +261,7 @@ extension SocketPacket {
         }
     }
     
-    static func packetFromEmitWithData(data:[AnyObject], id:Int, nsp:String) -> SocketPacket {
+    static func packetFromEmitWithData(data: [AnyObject], id: Int, nsp: String) -> SocketPacket {
         let (parsedData, binary) = deconstructData(data)
         let packet = SocketPacket(type: findType(binary.count, ack: false), data: parsedData,
             id: id, nsp: nsp, placeholders: -1, binary: binary)
@@ -269,7 +269,7 @@ extension SocketPacket {
         return packet
     }
     
-    static func packetFromEmitAckWithData(data:[AnyObject], id:Int, nsp:String) -> SocketPacket {
+    static func packetFromEmitAckWithData(data: [AnyObject], id: Int, nsp: String) -> SocketPacket {
         let (parsedData, binary) = deconstructData(data)
         let packet = SocketPacket(type: findType(binary.count, ack: true), data: parsedData,
             id: id, nsp: nsp, placeholders: -1, binary: binary)
@@ -279,7 +279,7 @@ extension SocketPacket {
 }
 
 extension SocketPacket {
-    private static func shred(data:AnyObject, inout binary:[NSData]) -> AnyObject {
+    private static func shred(data: AnyObject, inout binary: [NSData]) -> AnyObject {
         if let bin = data as? NSData {
             let placeholder = ["_placeholder" :true, "num": binary.count]
             
@@ -307,7 +307,7 @@ extension SocketPacket {
         }
     }
     
-    private static func deconstructData(var data:[AnyObject]) -> ([AnyObject], [NSData]) {
+    private static func deconstructData(var data: [AnyObject]) -> ([AnyObject], [NSData]) {
         var binary = [NSData]()
         
         for i in 0..<data.count {

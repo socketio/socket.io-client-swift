@@ -25,18 +25,18 @@
 import Foundation
 
 protocol SocketLogClient {
-    var log:Bool {get set}
-    var logType:String {get}
+    var log: Bool {get set}
+    var logType: String {get}
 }
 
 final class SocketLogger {
     private static let printQueue = dispatch_queue_create("printQueue", DISPATCH_QUEUE_SERIAL)
     
-    private static func toCVArgType(item:AnyObject) -> CVarArgType {
+    private static func toCVArgType(item: AnyObject) -> CVarArgType {
         return String(item)
     }
     
-    static func log(message:String, client:SocketLogClient, altType:String? = nil, args:AnyObject...) {
+    static func log(message: String, client: SocketLogClient, altType: String? = nil, args: AnyObject...) {
         if !client.log {
             return
         }
@@ -49,7 +49,7 @@ final class SocketLogger {
         }
     }
     
-    static func err(message:String, client:SocketLogClient, altType:String? = nil, args:AnyObject...) {
+    static func err(message: String, client: SocketLogClient, altType: String? = nil, args: AnyObject...) {
         if !client.log {
             return
         }

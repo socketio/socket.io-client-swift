@@ -23,11 +23,11 @@
 import Foundation
 
 class SocketParser {
-    private static func isCorrectNamespace(nsp:String, _ socket:SocketIOClient) -> Bool {
+    private static func isCorrectNamespace(nsp: String, _ socket: SocketIOClient) -> Bool {
         return nsp == socket.nsp
     }
     
-    private static func handleAck(p:SocketPacket, socket:SocketIOClient) {
+    private static func handleAck(p: SocketPacket, socket: SocketIOClient) {
         if !isCorrectNamespace(p.nsp, socket) {
             return
         }
@@ -35,7 +35,7 @@ class SocketParser {
         socket.handleAck(p.id, data: p.data)
     }
     
-    private static func handleBinaryAck(p:SocketPacket, socket:SocketIOClient) {
+    private static func handleBinaryAck(p: SocketPacket, socket: SocketIOClient) {
         if !isCorrectNamespace(p.nsp, socket) {
             return
         }
@@ -43,7 +43,7 @@ class SocketParser {
         socket.waitingData.append(p)
     }
     
-    private static func handleBinaryEvent(p:SocketPacket, socket:SocketIOClient) {
+    private static func handleBinaryEvent(p: SocketPacket, socket: SocketIOClient) {
         if !isCorrectNamespace(p.nsp, socket) {
             return
         }
@@ -51,7 +51,7 @@ class SocketParser {
         socket.waitingData.append(p)
     }
     
-    private static func handleConnect(p:SocketPacket, socket:SocketIOClient) {
+    private static func handleConnect(p: SocketPacket, socket: SocketIOClient) {
         if p.nsp == "/" && socket.nsp != "/" {
             socket.joinNamespace()
         } else if p.nsp != "/" && socket.nsp == "/" {
@@ -61,7 +61,7 @@ class SocketParser {
         }
     }
     
-    private static func handleEvent(p:SocketPacket, socket:SocketIOClient) {
+    private static func handleEvent(p: SocketPacket, socket: SocketIOClient) {
         if !isCorrectNamespace(p.nsp, socket) {
             return
         }
@@ -71,7 +71,7 @@ class SocketParser {
     }
     
     // Translation of socket.io-client#decodeString
-    static func parseString(str:String) -> SocketPacket? {
+    static func parseString(str: String) -> SocketPacket? {
         let arr = Array(str.characters)
         let type = String(arr[0])
         
@@ -79,7 +79,7 @@ class SocketParser {
             return SocketPacket(type: SocketPacket.PacketType(str: type)!, nsp: "/")
         }
         
-        var id = nil as Int?
+        var id: Int?
         var nsp:String?
         var i = 0
         var placeholders = -1
@@ -150,10 +150,11 @@ class SocketParser {
     }
     
     // Parses data for events
-    static func parseData(data:String) -> AnyObject? {
-        var err:NSError?
+    static func parseData(data: String) -> AnyObject? {
+        var err: NSError?
         let stringData = data.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)
-        let parsed:AnyObject?
+        let parsed: AnyObject?
+        
         do {
             parsed = try NSJSONSerialization.JSONObjectWithData(stringData!,
                         options: NSJSONReadingOptions.MutableContainers)
@@ -171,14 +172,14 @@ class SocketParser {
     }
     
     // Parses messages recieved
-    static func parseSocketMessage(stringMessage:String, socket:SocketIOClient) {
+    static func parseSocketMessage(stringMessage: String, socket: SocketIOClient) {
         if stringMessage == "" {
             return
         }
         
         SocketLogger.log("Parsing %@", client: socket, altType: "SocketParser", args: stringMessage)
         
-        let p:SocketPacket
+        let p: SocketPacket
         
         if let pack = parseString(stringMessage) {
             p = pack
@@ -207,7 +208,7 @@ class SocketParser {
         }
     }
     
-    static func parseBinaryData(data:NSData, socket:SocketIOClient) {
+    static func parseBinaryData(data: NSData, socket: SocketIOClient) {
         if socket.waitingData.count == 0 {
             SocketLogger.err("Got data when not remaking packet", client: socket, altType: "SocketParser")
             return
