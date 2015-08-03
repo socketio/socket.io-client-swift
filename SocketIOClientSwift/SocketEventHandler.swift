@@ -29,19 +29,34 @@ private func emitAckCallback(socket: SocketIOClient?, num: Int?)
         socket?.emitAck(num ?? -1, withData: items)
 }
 
+private func emitAckCallbackObjectiveC(socket: SocketIOClient?, num: Int?)
+    (items: NSArray) -> Void {
+        socket?.emitAck(num ?? -1, withData: items as [AnyObject])
+}
+
 struct SocketEventHandler {
     let event: String
-    let callback: NormalCallback
+    let callback: NormalCallback?
+    let callBackObjectiveC: NormalCallbackObjectiveC?
     
     init(event: String, callback: NormalCallback) {
         self.event = event
         self.callback = callback
+        self.callBackObjectiveC = nil
     }
     
-    func executeCallback(items: NSArray? = nil, withAck ack: Int? = nil, withAckType type: Int? = nil,
+    init(event: String, callback: NormalCallbackObjectiveC) {
+        self.event = event
+        self.callback = nil
+        self.callBackObjectiveC = callback
+    }
+    
+    func executeCallback(items: [AnyObject]? = nil, withAck ack: Int? = nil, withAckType type: Int? = nil,
         withSocket socket: SocketIOClient? = nil) {
             dispatch_async(dispatch_get_main_queue()) {
-                self.callback(items, emitAckCallback(socket, num: ack))
+                self.callback != nil ?
+                    self.callback?(items, emitAckCallback(socket, num: ack))
+                    : self.callBackObjectiveC?(items, emitAckCallbackObjectiveC(socket, num: ack))
             }
     }
 }
