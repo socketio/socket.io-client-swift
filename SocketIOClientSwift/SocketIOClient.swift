@@ -45,7 +45,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     
     public let socketURL: String
     public let handleAckQueue = dispatch_queue_create("handleAckQueue", DISPATCH_QUEUE_SERIAL)
-    public let handleQueue = dispatch_queue_create("handleQueue", DISPATCH_QUEUE_SERIAL)
+    public let handleQueue: dispatch_queue_t!
     public let emitQueue = dispatch_queue_create("emitQueue", DISPATCH_QUEUE_SERIAL)
     public var closed: Bool {
         return _closed
@@ -109,6 +109,12 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         
         if let reconnectWait = opts?["reconnectWait"] as? Int {
             self.reconnectWait = abs(reconnectWait)
+        }
+        
+        if let handleQueue = opts?["handleQueue"] as? dispatch_queue_t {
+            self.handleQueue = handleQueue
+        } else {
+            self.handleQueue = dispatch_get_main_queue()
         }
         
         super.init()
@@ -373,16 +379,20 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
                 args: event, data ?? "")
             
             if anyHandler != nil {
-                dispatch_async(dispatch_get_main_queue()) {[weak self] in
+                dispatch_async(handleQueue) {[weak self] in
                     self?.anyHandler?(SocketAnyEvent(event: event, items: data))
                 }
             }
             
             for handler in handlers where handler.event == event {
                 if ack != nil {
-                    handler.executeCallback(data, withAck: ack!, withSocket: self)
+                    dispatch_async(handleQueue) {[weak self] in
+                        handler.executeCallback(data, withAck: ack!, withSocket: self)
+                    }
                 } else {
-                    handler.executeCallback(data)
+                    dispatch_async(handleQueue) {
+                        handler.executeCallback(data)
+                    }
                 }
             }
     }
@@ -436,14 +446,14 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         let handler = SocketEventHandler(event: event, callback: callback)
         handlers.append(handler)
     }
-
-	/**
-	Removes all handlers.
-	Can be used after disconnecting to break any potential remaining retain cycles.
-	*/
-	public func removeAllHandlers() {
-		handlers.removeAll(keepCapacity: false)
-	}
+    
+    /**
+    Removes all handlers.
+    Can be used after disconnecting to break any potential remaining retain cycles.
+    */
+    public func removeAllHandlers() {
+        handlers.removeAll(keepCapacity: false)
+    }
     
     /**
     Adds a handler that will be called on every event.

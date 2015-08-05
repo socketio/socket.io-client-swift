@@ -51,12 +51,10 @@ struct SocketEventHandler {
         self.callBackObjectiveC = callback
     }
     
-    func executeCallback(items: [AnyObject]? = nil, withAck ack: Int? = nil, withAckType type: Int? = nil,
-        withSocket socket: SocketIOClient? = nil) {
-            dispatch_async(dispatch_get_main_queue()) {
-                self.callback != nil ?
-                    self.callback?(items, emitAckCallback(socket, num: ack))
-                    : self.callBackObjectiveC?(items, emitAckCallbackObjectiveC(socket, num: ack))
-            }
+    func executeCallback(items:NSArray? = nil, withAck ack:Int? = nil, withAckType type:Int? = nil,
+        withSocket socket:SocketIOClient? = nil) {
+            self.callback != nil ?
+                self.callback?(items, emitAckCallback(socket, num: ack))
+                : self.callBackObjectiveC?(items, emitAckCallbackObjectiveC(socket, num: ack))
     }
 }
