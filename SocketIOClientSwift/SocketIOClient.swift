@@ -30,7 +30,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     private var currentReconnectAttempt = 0
     private var handlers = ContiguousArray<SocketEventHandler>()
     private var connectParams:[String: AnyObject]?
-    private var _secure = false
+    public private(set) var secure = false
     private var reconnectTimer:NSTimer?
     
     let reconnectAttempts:Int!
@@ -51,9 +51,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     public var reconnects = true
    
     public var reconnectWait = 10
-    public var secure:Bool {
-        return _secure
-    }
     public var sid:String? {
         return engine?.sid
     }
@@ -63,7 +60,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     */
     public init(var socketURL:String, opts:[String: AnyObject]? = nil) {
         if socketURL["https://"].matches().count != 0 {
-            self._secure = true
+            self.secure = true
         }
         
         socketURL = socketURL["http://"] ~= ""
@@ -158,7 +155,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         addEngine()
         engine?.open(connectParams)
         
-        if timeoutAfter == 0 {
+        guard  timeoutAfter == 0 else {
             return
         }
         
@@ -377,6 +374,14 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         if nsp != "/" {
             engine?.send("0\(nsp)", withData: nil)
         }
+    }
+    
+    /**
+    Joins namespace /
+    */
+    public func joinNamespace(namespace:String) {
+       self.nsp = namespace
+        joinNamespace()
     }
     
     /**
