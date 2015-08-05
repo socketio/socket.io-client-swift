@@ -25,10 +25,10 @@
 import Foundation
 
 public final class SocketAnyEvent: NSObject {
-    public let event:String!
-    public let items:NSArray?
+    public let event: String!
+    public let items: NSArray?
     
-    init(event:String, items:NSArray?) {
+    init(event: String, items: NSArray?) {
         self.event = event
         self.items = items
     }

@@ -42,3 +42,5 @@ DerivedData
 *.hmap
 *.ipa
 *.xcuserstate
+
+Socket.IO-Test-Server/node_modules/*
