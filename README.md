@@ -122,6 +122,7 @@ Options
 - `sessionDelegate: NSURLSessionDelegate` Sets an NSURLSessionDelegate for the underlying engine. Useful if you need to handle self-signed certs. Default is nil.
 - `path: String` - If the server uses a custom path. ex: `"/swift"`. Default is `""`
 - `extraHeaders: [String: String]?` - Adds custom headers to the initial request. Default is nil.
+- `handleQueue: dispatch_queue_t` - The dispatch queue that handlers are run on. Default is the main queue.
 
 Methods
 -------
