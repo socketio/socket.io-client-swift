@@ -163,7 +163,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         _connected = false
         _reconnecting = false
         engine?.close(fast: fast)
-        engine = nil
     }
     
     /**
