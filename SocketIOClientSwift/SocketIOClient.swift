@@ -31,8 +31,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     private var handlers = ContiguousArray<SocketEventHandler>()
     public private(set) var secure = false
     private var connectParams: [String: AnyObject]?
-    private var _secure = false
-    private var _reconnecting = false
     private var reconnectTimer: NSTimer?
     
     let reconnectAttempts: Int!
