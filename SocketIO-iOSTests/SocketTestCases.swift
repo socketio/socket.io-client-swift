@@ -52,8 +52,8 @@ class SocketTestCases: NSObject {
         func didGetResult(result:NSArray?, ack:AckEmitter?) {
             if let array = result?.firstObject as? NSArray {
                 XCTAssertEqual(array.count, 2)
-                XCTAssertEqual(array.firstObject! as! String, "test3")
-                XCTAssertEqual(array.lastObject! as! String, "test4")
+                XCTAssertEqual((array.firstObject! as! String), "test3")
+                XCTAssertEqual((array.lastObject! as! String), "test4")
             }else {
                 XCTFail("Should have NSArray as result")
             }
