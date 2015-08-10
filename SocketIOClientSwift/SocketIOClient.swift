@@ -130,7 +130,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         reconnects = false
         status = SocketIOClientStatus.Closed
         engine?.close(fast: fast)
-        engine = nil
     }
     
     /**
