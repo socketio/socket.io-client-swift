@@ -20,11 +20,12 @@ class AbstractSocketTest: XCTestCase {
     
     func openConnection() {
         let expection = self.expectationWithDescription("connect")
+        XCTAssertTrue(socket.status == SocketIOClientStatus.NotConnected)
         socket.on("connect") {data, ack in
             expection.fulfill()
         }
         socket.connect()
-        XCTAssertTrue(socket.connecting)
+        XCTAssertEqual(socket.status, SocketIOClientStatus.Connecting)
         waitForExpectationsWithTimeout(AbstractSocketTest.TEST_TIMEOUT, handler: nil)
     }
     
@@ -33,10 +34,7 @@ class AbstractSocketTest: XCTestCase {
     }
     
     func checkConnectionStatus() {
-        XCTAssertTrue(socket.connected)
-        XCTAssertFalse(socket.connecting)
-        XCTAssertFalse(socket.reconnecting)
-        XCTAssertFalse(socket.closed)
+        XCTAssertEqual(socket.status, SocketIOClientStatus.Connected)
         XCTAssertFalse(socket.secure)
     }
     

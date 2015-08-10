@@ -26,14 +26,11 @@ import Foundation
 
 public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient {
     private var anyHandler:((SocketAnyEvent) -> Void)?
-    private var _closed = false
-    private var _connected = false
-    private var _connecting = false
+    public private(set) var status = SocketIOClientStatus.NotConnected
     private var currentReconnectAttempt = 0
     private var handlers = ContiguousArray<SocketEventHandler>()
+    public private(set) var secure = false
     private var connectParams: [String: AnyObject]?
-    private var _secure = false
-    private var _reconnecting = false
     private var reconnectTimer: NSTimer?
     
     let reconnectAttempts: Int!
@@ -47,27 +44,13 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     public let handleAckQueue = dispatch_queue_create("handleAckQueue", DISPATCH_QUEUE_SERIAL)
     public let handleQueue: dispatch_queue_t!
     public let emitQueue = dispatch_queue_create("emitQueue", DISPATCH_QUEUE_SERIAL)
-    public var closed: Bool {
-        return _closed
-    }
-    public var connected: Bool {
-        return _connected
-    }
-    public var connecting: Bool {
-        return _connecting
-    }
+    
     public var engine:SocketEngine?
     public var nsp = "/"
     public var opts: [String: AnyObject]?
     public var reconnects = true
-    public var reconnecting: Bool {
-        return _reconnecting
-    }
     public var reconnectWait = 10
-    public var secure: Bool {
-        return _secure
-    }
-    public var sid: String? {
+    public var sid:String? {
         return engine?.sid
     }
     
@@ -76,7 +59,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     */
     public init(var socketURL: String, opts: [String: AnyObject]? = nil) {
         if socketURL["https://"].matches().count != 0 {
-            self._secure = true
+            self.secure = true
         }
         
         socketURL = socketURL["http://"] ~= ""
@@ -145,9 +128,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         SocketLogger.log("Closing socket", client: self)
         
         reconnects = false
-        _connecting = false
-        _connected = false
-        _reconnecting = false
+        status = SocketIOClientStatus.Closed
         engine?.close(fast: fast)
         engine = nil
     }
@@ -162,28 +143,28 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     /**
     Connect to the server. If we aren't connected after timeoutAfter, call handler
     */
-    public func connect(timeoutAfter timeoutAfter: Int, withTimeoutHandler handler: (() -> Void)?) {
-        if closed {
-            SocketLogger.log("Warning! This socket was previously closed. This might be dangerous!", client: self)
-            _closed = false
-        } else if connected {
+    public func connect(timeoutAfter timeoutAfter:Int,
+        withTimeoutHandler handler:(() -> Void)?) {
+        guard status != SocketIOClientStatus.Connected else {
             return
         }
+        if status == SocketIOClientStatus.Closed {
+            SocketLogger.log("Warning! This socket was previously closed. This might be dangerous!", client: self)
+        }
         
-        _connecting = true
+        status = SocketIOClientStatus.Connecting
         addEngine()
         engine?.open(connectParams)
         
-        if timeoutAfter == 0 {
+        guard timeoutAfter != 0 else {
             return
         }
         
         let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeoutAfter) * Int64(NSEC_PER_SEC))
         
         dispatch_after(time, dispatch_get_main_queue()) {[weak self] in
-            if let this = self where !this.connected {
-                this._closed = true
-                this._connecting = false
+            if let this = self where this.status != SocketIOClientStatus.Connected {
+                this.status = SocketIOClientStatus.Closed
                 this.engine?.close(fast: true)
                 
                 handler?()
@@ -213,11 +194,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     
     func didConnect() {
         SocketLogger.log("Socket connected", client: self)
-        
-        _closed = false
-        _connected = true
-        _connecting = false
-        _reconnecting = false
+        status = SocketIOClientStatus.Connected
         currentReconnectAttempt = 0
         clearReconnectTimer()
         
@@ -226,18 +203,16 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         handleEvent("connect", data: nil, isInternalMessage: false)
     }
     
-    func didDisconnect(reason: String) {
-        if closed {
+    func didDisconnect(reason:String) {
+        guard status != SocketIOClientStatus.Closed else {
             return
         }
         
         SocketLogger.log("Disconnected: %@", client: self, args: reason)
         
-        _closed = true
-        _connected = false
+        status = SocketIOClientStatus.Closed
+        
         reconnects = false
-        _connecting = false
-        _reconnecting = false
         
         // Make sure the engine is actually dead.
         engine?.close(fast: true)
@@ -262,21 +237,15 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     /**
     Send a message to the server
     */
-    public func emit(event:String, _ items: AnyObject...) {
-        if !connected {
-            return
-        }
-        
-        dispatch_async(emitQueue) {[weak self] in
-            self?._emit(event, items)
-        }
+    public func emit(event:String, _ items:AnyObject...) {
+        emit(event, withItems: items)
     }
     
     /**
     Same as emit, but meant for Objective-C
     */
-    public func emit(event: String, withItems items: [AnyObject]) {
-        if !connected {
+    public func emit(event:String, withItems items:[AnyObject]) {
+        guard status == SocketIOClientStatus.Connected else {
             return
         }
         
@@ -289,27 +258,19 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     Sends a message to the server, requesting an ack. Use the onAck method of SocketAckHandler to add
     an ack.
     */
-    public func emitWithAck(event: String, _ items: AnyObject...) -> OnAckCallback {
-        if !connected {
-            return createOnAck(event, items: items)
-        }
-        
+    public func emitWithAck(event:String, _ items:AnyObject...) -> OnAckCallback {
         return createOnAck(event, items: items)
     }
     
     /**
     Same as emitWithAck, but for Objective-C
     */
-    public func emitWithAck(event: String, withItems items: [AnyObject]) -> OnAckCallback {
-        if !connected {
-            return createOnAck(event, items: items)
-        }
-        
+    public func emitWithAck(event:String, withItems items:[AnyObject]) -> OnAckCallback {
         return createOnAck(event, items: items)
     }
     
-    private func _emit(event: String, _ args: [AnyObject], ack: Int? = nil) {
-        if !connected {
+    private func _emit(event:String, _ args:[AnyObject], ack:Int? = nil) {
+        guard status == SocketIOClientStatus.Connected else {
             return
         }
         
@@ -328,7 +289,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     // If the server wants to know that the client received data
     func emitAck(ack: Int, withData args: [AnyObject]) {
         dispatch_async(emitQueue) {[weak self] in
-            if let this = self where this.connected {
+            if let this = self where this.status == SocketIOClientStatus.Connected {
                 let packet = SocketPacket.packetFromEmitAckWithData(args, id: ack ?? -1, nsp: this.nsp)
                 let str = packet.createAck()
                 
@@ -344,13 +305,10 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         }
     }
     
-    public func engineDidClose(reason: String) {
-        _connected = false
-        _connecting = false
-        
-        if closed || !reconnects {
+    public func engineDidClose(reason:String) {
+        if status == SocketIOClientStatus.Closed || !reconnects {
             didDisconnect(reason)
-        } else if !reconnecting {
+        } else if status != SocketIOClientStatus.Reconnecting {
             handleEvent("reconnect", data: [reason], isInternalMessage: true)
             tryReconnect()
         }
@@ -368,12 +326,12 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     /**
     Causes an event to be handled. Only use if you know what you're doing.
     */
-    public func handleEvent(event: String, data: [AnyObject]?, isInternalMessage: Bool = false,
-        wantsAck ack: Int? = nil) {
-            // println("Should do event: \(event) with data: \(data)")
-            if !connected && !isInternalMessage {
+    public func handleEvent(event:String, data:[AnyObject]?, isInternalMessage:Bool = false,
+        wantsAck ack:Int? = nil) {
+            guard status == SocketIOClientStatus.Connected && !isInternalMessage else {
                 return
             }
+            // println("Should do event: \(event) with data: \(data)")
             
             SocketLogger.log("Handling event: %@ with data: %@", client: self,
                 args: event, data ?? "")
@@ -385,9 +343,9 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             }
             
             for handler in handlers where handler.event == event {
-                if ack != nil {
+                if let ack = ack {
                     dispatch_async(handleQueue) {[weak self] in
-                        handler.executeCallback(data, withAck: ack!, withSocket: self)
+                        handler.executeCallback(data, withAck: ack, withSocket: self)
                     }
                 } else {
                     dispatch_async(handleQueue) {
@@ -416,6 +374,14 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         if nsp != "/" {
             engine?.send("0\(nsp)", withData: nil)
         }
+    }
+    
+    /**
+    Joins namespace /
+    */
+    public func joinNamespace(namespace:String) {
+       self.nsp = namespace
+        joinNamespace()
     }
     
     /**
@@ -481,30 +447,26 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     Trieds to reconnect to the server.
     */
     public func reconnect() {
-        _connected = false
-        _connecting = false
-        _reconnecting = false
-        
+        status = SocketIOClientStatus.Reconnecting
         engine?.stopPolling()
         tryReconnect()
     }
     
     @objc private func tryReconnect() {
+        guard status != SocketIOClientStatus.Connected else {
+            return
+        }
         if reconnectAttempts != -1 && currentReconnectAttempt + 1 > reconnectAttempts || !reconnects {
             clearReconnectTimer()
             didDisconnect("Reconnect Failed")
             
-            return
-        } else if connected {
-            _connecting = false
-            _reconnecting = false
             return
         }
         
         if reconnectTimer == nil {
             SocketLogger.log("Starting reconnect", client: self)
             
-            _reconnecting = true
+            status = SocketIOClientStatus.Reconnecting
             
             dispatch_async(dispatch_get_main_queue()) {[weak self] in
                 if let this = self {
