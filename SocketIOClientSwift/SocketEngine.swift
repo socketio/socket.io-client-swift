@@ -505,7 +505,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
 
     // Translatation of engine.io-parser#decodePayload
     private func parsePollingMessage(str:String) {
-        guard str.characters.count == 1 else {
+        guard str.characters.count != 1 else {
             return
         }
         // println(str)
