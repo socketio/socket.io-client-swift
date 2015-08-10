@@ -113,10 +113,10 @@ class SocketTestCases: NSObject {
         let testName = "testJSONWithBuffer"
         func didGetResult(result:NSArray?, ack:AckEmitter?) {
             if let json = result?.firstObject as? NSDictionary {
-                XCTAssertEqual(json.valueForKey("testString")! as! String, "test")
-                XCTAssertEqual(json.valueForKey("testNumber")! as! Int, 15)
+                XCTAssertEqual((json.valueForKey("testString")! as! String), "test")
+                XCTAssertEqual((json.valueForKey("testNumber")! as! Int), 15)
                 XCTAssertEqual((json.valueForKey("testArray")! as! Array<AnyObject>).count, 2)
-                XCTAssertEqual((json.valueForKey("testArray")! as! Array<AnyObject>).last! as! Int, 1)
+                XCTAssertEqual(((json.valueForKey("testArray")! as! Array<AnyObject>).last! as! Int), 1)
                 let string = NSString(data: (json.valueForKey("testArray")! as! Array<AnyObject>).first! as! NSData, encoding: NSUTF8StringEncoding)!
                 XCTAssertEqual(string, "gakgakgak2")
             }else {
@@ -132,11 +132,11 @@ class SocketTestCases: NSObject {
         let testName = "testJSON"
         func didGetResult(result:NSArray?, ack:AckEmitter?) {
             if let json = result?.firstObject as? NSDictionary {
-                XCTAssertEqual(json.valueForKey("testString")! as! String, "test")
-                XCTAssertEqual(json.valueForKey("testNumber")! as! Int, 15)
+                XCTAssertEqual((json.valueForKey("testString")! as! String), "test")
+                XCTAssertEqual(json.valueForKey("testNumber")! as? Int, 15)
                 XCTAssertEqual((json.valueForKey("testArray")! as! Array<AnyObject>).count, 2)
-                XCTAssertEqual((json.valueForKey("testArray")! as! Array<AnyObject>).first! as! Int, 1)
-                XCTAssertEqual((json.valueForKey("testArray")! as! Array<AnyObject>).last! as! Int, 1)
+                XCTAssertEqual((json.valueForKey("testArray")! as! Array<AnyObject>).first! as? Int, 1)
+                XCTAssertEqual((json.valueForKey("testArray")! as! Array<AnyObject>).last! as? Int, 1)
                 
             }else {
                 XCTFail("Should have NSDictionary as result")
@@ -168,13 +168,13 @@ class SocketTestCases: NSObject {
                 return
             }
             if let array = result?.firstObject as? Array<AnyObject> {
-                XCTAssertEqual(array.last! as! Int, 2)
-                XCTAssertEqual(array.first! as! Int, 1)
+                XCTAssertEqual((array.last! as! Int), 2)
+                XCTAssertEqual((array.first! as! Int), 1)
             }else {
                 XCTFail("Should have Array as result")
             }
             if let dict = result?[1] as? NSDictionary {
-                XCTAssertEqual(dict.valueForKey("test") as! String, "bob")
+                XCTAssertEqual((dict.valueForKey("test") as! String), "bob")
                 
             }else {
                 XCTFail("Should have NSDictionary as result")
@@ -212,13 +212,13 @@ class SocketTestCases: NSObject {
                 return
             }
             if let array = result?.firstObject as? Array<AnyObject> {
-                XCTAssertEqual(array.last! as! Int, 2)
-                XCTAssertEqual(array.first! as! Int, 1)
+                XCTAssertEqual((array.last! as! Int), 2)
+                XCTAssertEqual((array.first! as! Int), 1)
             }else {
                 XCTFail("Should have Array as result")
             }
             if let dict = result?[1] as? NSDictionary {
-                XCTAssertEqual(dict.valueForKey("test") as! String, "bob")
+                XCTAssertEqual((dict.valueForKey("test") as! String), "bob")
                 
             }else {
                 XCTFail("Should have NSDictionary as result")
