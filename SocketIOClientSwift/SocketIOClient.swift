@@ -158,7 +158,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         addEngine()
         engine?.open(connectParams)
         
-        guard timeoutAfter == 0 else {
+        guard timeoutAfter != 0 else {
             return
         }
         
@@ -330,7 +330,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     */
     public func handleEvent(event:String, data:[AnyObject]?, isInternalMessage:Bool = false,
         wantsAck ack:Int? = nil) {
-            guard status == SocketIOClientStatus.Connected && isInternalMessage else {
+            guard status == SocketIOClientStatus.Connected && !isInternalMessage else {
                 return
             }
             // println("Should do event: \(event) with data: \(data)")
