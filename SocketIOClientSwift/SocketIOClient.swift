@@ -352,7 +352,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             for handler in handlers where handler.event == event {
                 if let ack = ack {
                     dispatch_async(handleQueue) {[weak self] in
-                        handler.executeCallback(data, withAck: ack!, withSocket: self)
+                        handler.executeCallback(data, withAck: ack, withSocket: self)
                     }
                 } else {
                     dispatch_async(handleQueue) {
