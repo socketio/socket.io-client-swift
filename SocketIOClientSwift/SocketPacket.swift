@@ -31,13 +31,7 @@ struct SocketPacket {
     let type: PacketType
     
     enum PacketType: Int {
-        case Connect = 0
-        case Disconnect = 1
-        case Event = 2
-        case Ack = 3
-        case Error = 4
-        case BinaryEvent = 5
-        case BinaryAck = 6
+        case Connect, Disconnect, Event, Ack, Error, BinaryEvent, BinaryAck
         
         init?(str: String) {
             if let int = Int(str), raw = PacketType(rawValue: int) {
