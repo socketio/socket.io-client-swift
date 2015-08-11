@@ -436,7 +436,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     }
     
     public func parseSocketMessage(msg: String) {
-        SocketPargser.parseSocketMessage(msg, socket: self)
+        SocketParser.parseSocketMessage(msg, socket: self)
     }
     
     public func parseBinaryData(data: NSData) {
