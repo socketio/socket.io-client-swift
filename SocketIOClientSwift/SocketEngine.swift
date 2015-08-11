@@ -80,13 +80,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     var ws:WebSocket?
 
     public enum PacketType: Int {
-        case OPEN = 0
-        case CLOSE = 1
-        case PING = 2
-        case PONG = 3
-        case MESSAGE = 4
-        case UPGRADE = 5
-        case NOOP = 6
+        case Open, Close, Ping, Pong, Message, Upgrade, Noop
 
         init?(str: String?) {
             if let value = Int(str ?? ""), raw = PacketType(rawValue: value) {
@@ -126,7 +120,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         ws?.disconnect()
 
         if fast || polling {
-            write("", withType: PacketType.CLOSE, withData: nil)
+            write("", withType: PacketType.Close, withData: nil)
             client?.engineDidClose("Disconnect")
         }
 
@@ -219,7 +213,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                 "we'll probably disconnect soon. You should report this.", client: self)
         }
 
-        sendWebSocketMessage("", withType: PacketType.UPGRADE, datas: nil)
+        sendWebSocketMessage("", withType: PacketType.Upgrade, datas: nil)
         _websocket = true
         _polling = false
         fastUpgrade = false
@@ -573,21 +567,21 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
 
         let type = PacketType(str: (message["^(\\d)"].groups()?[1])) ?? {
             self.checkIfMessageIsBase64Binary(message)
-            return PacketType.NOOP
+            return PacketType.Noop
             }()
 
         switch type {
-        case PacketType.MESSAGE:
+        case PacketType.Message:
             message.removeAtIndex(message.startIndex)
             handleMessage(message)
-        case PacketType.NOOP:
+        case PacketType.Noop:
             handleNOOP()
-        case PacketType.PONG:
+        case PacketType.Pong:
             handlePong(message)
-        case PacketType.OPEN:
+        case PacketType.Open:
             message.removeAtIndex(message.startIndex)
             handleOpen(message)
-        case PacketType.CLOSE:
+        case PacketType.Close:
             handleClose()
         default:
             SocketLogger.log("Got unknown packet type", client: self)
@@ -596,16 +590,16 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
 
     private func probeWebSocket() {
         if websocketConnected {
-            sendWebSocketMessage("probe", withType: PacketType.PING)
+            sendWebSocketMessage("probe", withType: PacketType.Ping)
         }
     }
 
     /// Send an engine message (4)
     public func send(msg: String, withData datas: [NSData]?) {
         if probing {
-            probeWait.append((msg, PacketType.MESSAGE, datas))
+            probeWait.append((msg, PacketType.Message, datas))
         } else {
-            write(msg, withType: PacketType.MESSAGE, withData: datas)
+            write(msg, withType: PacketType.Message, withData: datas)
         }
     }
 
@@ -618,7 +612,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         }
 
         ++pongsMissed
-        write("", withType: PacketType.PING, withData: nil)
+        write("", withType: PacketType.Ping, withData: nil)
     }
 
     /// Send polling message.
@@ -687,7 +681,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             SocketLogger.log("Upgrading transport to WebSockets", client: self)
 
             fastUpgrade = true
-            sendPollMessage("", withType: PacketType.NOOP)
+            sendPollMessage("", withType: PacketType.Noop)
             // After this point, we should not send anymore polling messages
         }
     }

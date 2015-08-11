@@ -31,13 +31,13 @@ struct SocketPacket {
     let type: PacketType
     
     enum PacketType: Int {
-        case CONNECT = 0
-        case DISCONNECT = 1
-        case EVENT = 2
-        case ACK = 3
-        case ERROR = 4
-        case BINARY_EVENT = 5
-        case BINARY_ACK = 6
+        case Connect = 0
+        case Disconnect = 1
+        case Event = 2
+        case Ack = 3
+        case Error = 4
+        case BinaryEvent = 5
+        case BinaryAck = 6
         
         init?(str: String) {
             if let int = Int(str), raw = PacketType(rawValue: int) {
@@ -129,7 +129,7 @@ struct SocketPacket {
     func createAck() -> String {
         let msg: String
         
-        if type == PacketType.ACK {
+        if type == PacketType.Ack {
             if nsp == "/" {
                 msg = "3\(id)["
             } else {
@@ -150,7 +150,7 @@ struct SocketPacket {
     func createMessageForEvent(event: String) -> String {
         let message: String
         
-        if type == PacketType.EVENT {
+        if type == PacketType.Event {
             if nsp == "/" {
                 if id == -1 {
                     message = "2[\"\(event)\""
@@ -235,7 +235,7 @@ struct SocketPacket {
         if data.count == 0 {
             return nil
         } else {
-            if type == PacketType.EVENT || type == PacketType.BINARY_EVENT {
+            if type == PacketType.Event || type == PacketType.BinaryEvent {
                 arr.removeAtIndex(0)
                 return arr
             } else {
@@ -249,15 +249,15 @@ extension SocketPacket {
     private static func findType(binCount: Int, ack: Bool) -> PacketType {
         switch binCount {
         case 0 where !ack:
-            return PacketType.EVENT
+            return PacketType.Event
         case 0 where ack:
-            return PacketType.ACK
+            return PacketType.Ack
         case _ where !ack:
-            return PacketType.BINARY_EVENT
+            return PacketType.BinaryEvent
         case _ where ack:
-            return PacketType.BINARY_ACK
+            return PacketType.BinaryAck
         default:
-            return PacketType.ERROR
+            return PacketType.Error
         }
     }
     

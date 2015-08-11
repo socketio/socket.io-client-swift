@@ -191,19 +191,19 @@ class SocketParser {
         SocketLogger.log("Decoded packet as: %@", client: socket, altType: "SocketParser", args: p.description)
         
         switch p.type {
-        case SocketPacket.PacketType.EVENT:
+        case SocketPacket.PacketType.Event:
             handleEvent(p, socket: socket)
-        case SocketPacket.PacketType.ACK:
+        case SocketPacket.PacketType.Ack:
             handleAck(p, socket: socket)
-        case SocketPacket.PacketType.BINARY_EVENT:
+        case SocketPacket.PacketType.BinaryEvent:
             handleBinaryEvent(p, socket: socket)
-        case SocketPacket.PacketType.BINARY_ACK:
+        case SocketPacket.PacketType.BinaryAck:
             handleBinaryAck(p, socket: socket)
-        case SocketPacket.PacketType.CONNECT:
+        case SocketPacket.PacketType.Connect:
             handleConnect(p, socket: socket)
-        case SocketPacket.PacketType.DISCONNECT:
+        case SocketPacket.PacketType.Disconnect:
             socket.didDisconnect("Got Disconnect")
-        case SocketPacket.PacketType.ERROR:
+        case SocketPacket.PacketType.Error:
             socket.didError("Error: \(p.data)")
         }
     }
@@ -223,7 +223,7 @@ class SocketParser {
         var packet = socket.waitingData.removeAtIndex(0)
         packet.fillInPlaceholders()
         
-        if packet.type != SocketPacket.PacketType.BINARY_ACK {
+        if packet.type != SocketPacket.PacketType.BinaryAck {
             socket.handleEvent(packet.getEvent(), data: packet.getArgs(),
                 wantsAck: packet.id)
         } else {

@@ -278,7 +278,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         
         SocketLogger.log("Emitting: %@", client: self, args: str)
         
-        if packet.type == SocketPacket.PacketType.BINARY_EVENT {
+        if packet.type == SocketPacket.PacketType.BinaryEvent {
             engine?.send(str, withData: packet.binary)
         } else {
             engine?.send(str, withData: nil)
@@ -294,7 +294,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
                 
                 SocketLogger.log("Emitting Ack: %@", client: this, args: str)
                 
-                if packet.type == SocketPacket.PacketType.BINARY_ACK {
+                if packet.type == SocketPacket.PacketType.BinaryAck {
                     this.engine?.send(str, withData: packet.binary)
                 } else {
                     this.engine?.send(str, withData: nil)
