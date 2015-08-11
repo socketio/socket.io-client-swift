@@ -145,31 +145,31 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     */
     public func connect(timeoutAfter timeoutAfter:Int,
         withTimeoutHandler handler:(() -> Void)?) {
-        guard status != SocketIOClientStatus.Connected else {
-            return
-        }
-        if status == SocketIOClientStatus.Closed {
-            SocketLogger.log("Warning! This socket was previously closed. This might be dangerous!", client: self)
-        }
-        
-        status = SocketIOClientStatus.Connecting
-        addEngine()
-        engine?.open(connectParams)
-        
-        guard timeoutAfter != 0 else {
-            return
-        }
-        
-        let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeoutAfter) * Int64(NSEC_PER_SEC))
-        
-        dispatch_after(time, dispatch_get_main_queue()) {[weak self] in
-            if let this = self where this.status != SocketIOClientStatus.Connected {
-                this.status = SocketIOClientStatus.Closed
-                this.engine?.close(fast: true)
-                
-                handler?()
+            guard status != SocketIOClientStatus.Connected else {
+                return
             }
-        }
+            if status == SocketIOClientStatus.Closed {
+                SocketLogger.log("Warning! This socket was previously closed. This might be dangerous!", client: self)
+            }
+            
+            status = SocketIOClientStatus.Connecting
+            addEngine()
+            engine?.open(connectParams)
+            
+            guard timeoutAfter != 0 else {
+                return
+            }
+            
+            let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeoutAfter) * Int64(NSEC_PER_SEC))
+            
+            dispatch_after(time, dispatch_get_main_queue()) {[weak self] in
+                if let this = self where this.status != SocketIOClientStatus.Connected {
+                    this.status = SocketIOClientStatus.Closed
+                    this.engine?.close(fast: true)
+                    
+                    handler?()
+                }
+            }
     }
     
     private func createOnAck(event: String, items: [AnyObject]) -> OnAckCallback {
@@ -379,8 +379,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     /**
     Joins namespace /
     */
-    public func joinNamespace(namespace:String) {
-       self.nsp = namespace
+    public func joinNamespace(namespace: String) {
+        self.nsp = namespace
         joinNamespace()
     }
     
@@ -452,10 +452,11 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         tryReconnect()
     }
     
-    @objc private func tryReconnect() {
+    @objc prgivate func tryReconnect() {
         guard status != SocketIOClientStatus.Connected else {
             return
         }
+        
         if reconnectAttempts != -1 && currentReconnectAttempt + 1 > reconnectAttempts || !reconnects {
             clearReconnectTimer()
             didDisconnect("Reconnect Failed")
