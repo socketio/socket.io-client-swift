@@ -436,7 +436,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     }
     
     public func parseSocketMessage(msg: String) {
-        SocketParser.parseSocketMessage(msg, socket: self)
+        SocketPargser.parseSocketMessage(msg, socket: self)
     }
     
     public func parseBinaryData(data: NSData) {
@@ -452,7 +452,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         tryReconnect()
     }
     
-    @objc prgivate func tryReconnect() {
+    @objc private func tryReconnect() {
         guard status != SocketIOClientStatus.Connected else {
             return
         }
