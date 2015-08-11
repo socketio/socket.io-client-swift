@@ -26,10 +26,8 @@ import Foundation
 
 public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient {
     private var anyHandler:((SocketAnyEvent) -> Void)?
-    public private(set) var status = SocketIOClientStatus.NotConnected
     private var currentReconnectAttempt = 0
     private var handlers = ContiguousArray<SocketEventHandler>()
-    public private(set) var secure = false
     private var connectParams: [String: AnyObject]?
     private var reconnectTimer: NSTimer?
     
@@ -44,6 +42,9 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     public let handleAckQueue = dispatch_queue_create("handleAckQueue", DISPATCH_QUEUE_SERIAL)
     public let handleQueue: dispatch_queue_t!
     public let emitQueue = dispatch_queue_create("emitQueue", DISPATCH_QUEUE_SERIAL)
+    
+    public private(set) var secure = false
+    public private(set) var status = SocketIOClientStatus.NotConnected
     
     public var engine:SocketEngine?
     public var nsp = "/"

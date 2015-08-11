@@ -272,8 +272,8 @@ extension SocketPacket {
     }
 }
 
-extension SocketPacket {
-    private static func shred(data: AnyObject, inout binary: [NSData]) -> AnyObject {
+private extension SocketPacket {
+    static func shred(data: AnyObject, inout binary: [NSData]) -> AnyObject {
         if let bin = data as? NSData {
             let placeholder = ["_placeholder" :true, "num": binary.count]
             
@@ -301,7 +301,7 @@ extension SocketPacket {
         }
     }
     
-    private static func deconstructData(var data: [AnyObject]) -> ([AnyObject], [NSData]) {
+    static func deconstructData(var data: [AnyObject]) -> ([AnyObject], [NSData]) {
         var binary = [NSData]()
         
         for i in 0..<data.count {

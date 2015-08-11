@@ -36,7 +36,6 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     private let session:NSURLSession!
 
     private var closed = false
-    private var _connected = false
     private var extraHeaders: [String: String]?
     private var fastUpgrade = false
     private var forcePolling = false
@@ -51,32 +50,25 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     private var pongsMissed = 0
     private var pongsMissedMax = 0
     private var postWait = [String]()
-    private var _polling = true
     private var probing = false
     private var probeWait = ProbeWaitQueue()
     private var waitingForPoll = false
     private var waitingForPost = false
-    private var _websocket = false
     private var websocketConnected = false
 
     let logType = "SocketEngine"
 
-    var connected: Bool {
-        return _connected
-    }
+    private(set) var connected = false
+    private(set) var polling = true
+    private(set) var websocket = false
+
     weak var client: SocketEngineClient?
     var cookies: [NSHTTPCookie]?
     var log = false
-    var polling: Bool {
-        return _polling
-    }
     var sid = ""
     var socketPath = ""
     var urlPolling: String?
     var urlWebSocket: String?
-    var websocket: Bool {
-        return _websocket
-    }
     var ws:WebSocket?
 
     public enum PacketType: Int {
@@ -214,8 +206,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         }
 
         sendWebSocketMessage("", withType: PacketType.Upgrade, datas: nil)
-        _websocket = true
-        _polling = false
+        websocket = true
+        polling = false
         fastUpgrade = false
         probing = false
         flushProbeWait()
@@ -409,7 +401,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                 options: NSJSONReadingOptions.AllowFragments) as? NSDictionary
             if let sid = json?["sid"] as? String {
                 self.sid = sid
-                _connected = true
+                connected = true
 
                 if !forcePolling && !forceWebsockets {
                     createWebsocket(andConnect: true)
@@ -442,7 +434,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
 
     // A poll failed, tell the client about it
     private func handlePollingFailed(reason: String) {
-        _connected = false
+        connected = false
         ws?.disconnect()
         pingTimer?.invalidate()
         waitingForPoll = false
@@ -475,8 +467,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         (urlPolling, urlWebSocket) = createURLs(opts)
 
         if forceWebsockets {
-            _polling = false
-            _websocket = true
+            polling = false
+            websocket = true
             createWebsocket(andConnect: true)
             return
         }
@@ -731,9 +723,9 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             probing = true
             probeWebSocket()
         } else {
-            _connected = true
+            connected = true
             probing = false
-            _polling = false
+            polling = false
         }
     }
 
@@ -748,8 +740,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
 
         if websocket {
             pingTimer?.invalidate()
-            _connected = false
-            _websocket = false
+            connected = false
+            websocket = false
 
             let reason = error?.localizedDescription ?? "Socket Disconnected"
 
