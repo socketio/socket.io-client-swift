@@ -33,7 +33,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     private let emitQueue = dispatch_queue_create("engineEmitQueue", DISPATCH_QUEUE_SERIAL)
     private let parseQueue = dispatch_queue_create("engineParseQueue", DISPATCH_QUEUE_SERIAL)
     private let handleQueue = dispatch_queue_create("engineHandleQueue", DISPATCH_QUEUE_SERIAL)
-    private let session:NSURLSession!
+    private let session: NSURLSession!
 
     private var closed = false
     private var extraHeaders: [String: String]?
@@ -748,7 +748,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
             if error != nil {
                 client?.didError(reason)
             }
-
+            
             client?.engineDidClose(reason)
         } else {
             flushProbeWait()

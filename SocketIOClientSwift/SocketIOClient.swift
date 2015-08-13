@@ -309,6 +309,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         if status == SocketIOClientStatus.Closed || !reconnects {
             didDisconnect(reason)
         } else if status != SocketIOClientStatus.Reconnecting {
+            status = SocketIOClientStatus.Reconnecting
             handleEvent("reconnect", data: [reason], isInternalMessage: true)
             tryReconnect()
         }
@@ -326,9 +327,9 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     /**
     Causes an event to be handled. Only use if you know what you're doing.
     */
-    public func handleEvent(event:String, data:[AnyObject]?, isInternalMessage:Bool = false,
+    public func handleEvent(event:String, data:[AnyObject]?, isInternalMessage: Bool,
         wantsAck ack:Int? = nil) {
-            guard status == SocketIOClientStatus.Connected && !isInternalMessage else {
+            guard status == SocketIOClientStatus.Connected || isInternalMessage else {
                 return
             }
             // println("Should do event: \(event) with data: \(data)")
@@ -444,26 +445,14 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     }
     
     /**
-    Trieds to reconnect to the server.
+    Tries to reconnect to the server.
     */
     public func reconnect() {
-        status = SocketIOClientStatus.Reconnecting
         engine?.stopPolling()
         tryReconnect()
     }
     
-    @objc private func tryReconnect() {
-        guard status != SocketIOClientStatus.Connected else {
-            return
-        }
-        
-        if reconnectAttempts != -1 && currentReconnectAttempt + 1 > reconnectAttempts || !reconnects {
-            clearReconnectTimer()
-            didDisconnect("Reconnect Failed")
-            
-            return
-        }
-        
+    private func tryReconnect() {
         if reconnectTimer == nil {
             SocketLogger.log("Starting reconnect", client: self)
             
@@ -472,9 +461,25 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             dispatch_async(dispatch_get_main_queue()) {[weak self] in
                 if let this = self {
                     this.reconnectTimer = NSTimer.scheduledTimerWithTimeInterval(Double(this.reconnectWait),
-                        target: this, selector: "tryReconnect", userInfo: nil, repeats: true)
+                        target: this, selector: "_tryReconnect", userInfo: nil, repeats: true)
                 }
             }
+        }
+    }
+    
+    @objc private func _tryReconnect() {
+        if status == SocketIOClientStatus.Connected {
+            clearReconnectTimer()
+            
+            return
+        }
+        
+        
+        if reconnectAttempts != -1 && currentReconnectAttempt + 1 > reconnectAttempts || !reconnects {
+            clearReconnectTimer()
+            didDisconnect("Reconnect Failed")
+            
+            return
         }
         
         SocketLogger.log("Trying to reconnect", client: self)

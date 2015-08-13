@@ -225,7 +225,7 @@ class SocketParser {
         
         if packet.type != SocketPacket.PacketType.BinaryAck {
             socket.handleEvent(packet.getEvent(), data: packet.getArgs(),
-                wantsAck: packet.id)
+                isInternalMessage: false, wantsAck: packet.id)
         } else {
             socket.handleAck(packet.id, data: packet.getArgs())
         }

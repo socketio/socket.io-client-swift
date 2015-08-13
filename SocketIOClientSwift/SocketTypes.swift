@@ -32,7 +32,11 @@ public typealias NormalCallbackObjectiveC = (NSArray?, AckEmitterObjectiveC?) ->
 public typealias OnAckCallback = (timeoutAfter:UInt64, callback:AckCallback) -> Void
 
 
-@objc public enum SocketIOClientStatus: Int {
+@objc public enum SocketIOClientStatus: Int, CustomStringConvertible {
+    public var description: String {
+        return String(self.rawValue)
+    }
+    
     case NotConnected, Closed, Connecting, Connected, Reconnecting
     
 }

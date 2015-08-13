@@ -24,9 +24,12 @@
 
 import Foundation
 
-public final class SocketAnyEvent: NSObject {
+@objc public final class SocketAnyEvent: NSObject {
     public let event: String!
     public let items: NSArray?
+    override public var description: String {
+        return "SocketAnyEvent: Event: \(event) items: \(items ?? nil)"
+    }
     
     init(event: String, items: NSArray?) {
         self.event = event

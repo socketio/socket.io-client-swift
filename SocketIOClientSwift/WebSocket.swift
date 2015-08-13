@@ -93,7 +93,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
     public var headers = Dictionary<String,String>()
     public var voipEnabled = false
     public var selfSignedSSL = false
-    public var security: Security?
+    private var security: Security?
     public var isConnected :Bool {
         return connected
     }
@@ -771,8 +771,8 @@ public class SSLCert {
     }
 }
 
-public class Security {
-    public var validatedDN = true //should the domain name be validated?
+private class Security {
+    private var validatedDN = true //should the domain name be validated?
     
     var isReady = false //is the key processing done?
     var certificates: [NSData]? //the certificates
@@ -786,7 +786,7 @@ public class Security {
     
     :returns: a representation security object to be used with
     */
-    public convenience init(usePublicKeys: Bool = false) {
+    private convenience init(usePublicKeys: Bool = false) {
         let paths = NSBundle.mainBundle().pathsForResourcesOfType("cer", inDirectory: ".")
         var collect = Array<SSLCert>()
         for path in paths {
@@ -805,7 +805,7 @@ public class Security {
     
     :returns: a representation security object to be used with
     */
-    public init(certs: [SSLCert], usePublicKeys: Bool) {
+    private init(certs: [SSLCert], usePublicKeys: Bool) {
         self.usePublicKeys = usePublicKeys
         
         if self.usePublicKeys {
@@ -842,7 +842,7 @@ public class Security {
     
     :returns: if the key was successfully validated
     */
-    public func isValid(trust: SecTrustRef, domain: String?) -> Bool {
+    private func isValid(trust: SecTrustRef, domain: String?) -> Bool {
         
         var tries = 0
         while(!self.isReady) {
