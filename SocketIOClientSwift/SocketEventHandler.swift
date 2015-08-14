@@ -1,6 +1,6 @@
 //
 //  EventHandler.swift
-//  Socket.IO-Swift
+//  Socket.IO-Client-Swift
 //
 //  Created by Erik Little on 1/18/15.
 //

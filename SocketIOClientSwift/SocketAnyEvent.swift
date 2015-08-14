@@ -1,6 +1,6 @@
 //
 //  SocketAnyEvent.swift
-//  Socket.IO-Swift
+//  Socket.IO-Client-Swift
 //
 //  Created by Erik Little on 3/28/15.
 //

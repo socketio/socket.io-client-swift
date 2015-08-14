@@ -1,6 +1,6 @@
 //
 //  SocketAckManager.swift
-//  SocketIO-Swift
+//  Socket.IO-Client-Swift
 //
 //  Created by Erik Little on 4/3/15.
 //

@@ -1,6 +1,6 @@
 //
 //  SocketLogger.swift
-//  SocketIO-Swift
+//  Socket.IO-Client-Swift
 //
 //  Created by Erik Little on 4/11/15.
 //

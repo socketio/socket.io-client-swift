@@ -1,6 +1,6 @@
 //
 //  SocketTypes.swift
-//  SocketIO-Swift
+//  Socket.IO-Client-Swift
 //
 //  Created by Erik Little on 4/8/15.
 //
@@ -31,12 +31,3 @@ public typealias NormalCallback = (NSArray?, AckEmitter?) -> Void
 public typealias NormalCallbackObjectiveC = (NSArray?, AckEmitterObjectiveC?) -> Void
 public typealias OnAckCallback = (timeoutAfter:UInt64, callback:AckCallback) -> Void
 
-
-@objc public enum SocketIOClientStatus: Int, CustomStringConvertible {
-    public var description: String {
-        return String(self.rawValue)
-    }
-    
-    case NotConnected, Closed, Connecting, Connected, Reconnecting
-    
-}

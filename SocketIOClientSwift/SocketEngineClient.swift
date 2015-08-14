@@ -1,6 +1,6 @@
 //
 //  SocketEngineClient.swift
-//  Socket.IO-Swift
+//  Socket.IO-Client-Swift
 //
 //  Created by Erik Little on 3/19/15.
 //
