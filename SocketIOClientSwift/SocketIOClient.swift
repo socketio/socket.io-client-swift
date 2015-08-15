@@ -237,14 +237,14 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     /**
     Send a message to the server
     */
-    public func emit(event:String, _ items:AnyObject...) {
+    public func emit(event: String, _ items: AnyObject...) {
         emit(event, withItems: items)
     }
     
     /**
     Same as emit, but meant for Objective-C
     */
-    public func emit(event:String, withItems items:[AnyObject]) {
+    public func emit(event: String, withItems items: [AnyObject]) {
         guard status == SocketIOClientStatus.Connected else {
             return
         }
@@ -258,18 +258,18 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     Sends a message to the server, requesting an ack. Use the onAck method of SocketAckHandler to add
     an ack.
     */
-    public func emitWithAck(event:String, _ items:AnyObject...) -> OnAckCallback {
+    public func emitWithAck(event: String, _ items: AnyObject...) -> OnAckCallback {
         return createOnAck(event, items: items)
     }
     
     /**
     Same as emitWithAck, but for Objective-C
     */
-    public func emitWithAck(event:String, withItems items:[AnyObject]) -> OnAckCallback {
+    public func emitWithAck(event: String, withItems items: [AnyObject]) -> OnAckCallback {
         return createOnAck(event, items: items)
     }
     
-    private func _emit(event:String, _ args:[AnyObject], ack:Int? = nil) {
+    private func _emit(event: String, _ args: [AnyObject], ack: Int? = nil) {
         guard status == SocketIOClientStatus.Connected else {
             return
         }

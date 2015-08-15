@@ -28,7 +28,7 @@ import Foundation
     public var description: String {
         let des: String
         
-        switch self.rawValue {
+        switch rawValue {
         case 0:
             des = "Not Connected"
         case 1:
