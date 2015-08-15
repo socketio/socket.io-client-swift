@@ -366,6 +366,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     public func engineDidClose(reason:String) {
         _connected = false
         _connecting = false
+        // Clear all pending data (this matches what the JS client does)
+        waitingData.removeAll()
         
         if closed || !reconnects {
             didDisconnect(reason)
