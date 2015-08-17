@@ -39,7 +39,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     var waitingData = [SocketPacket]()
     
     public let socketURL: String
-    public let handleAckQueue = dispatch_queue_create("handleAckQueue", DISPATCH_QUEUE_SERIAL)
     public let handleQueue: dispatch_queue_t!
     public let emitQueue = dispatch_queue_create("emitQueue", DISPATCH_QUEUE_SERIAL)
     
