@@ -26,12 +26,12 @@ import Foundation
 
 private func emitAckCallback(socket: SocketIOClient?, num: Int?)
     (items: AnyObject...) -> Void {
-        socket?.emitAck(num ?? -1, withData: items)
+        socket?.emitAck(num ?? -1, withItems: items)
 }
 
 private func emitAckCallbackObjectiveC(socket: SocketIOClient?, num: Int?)
     (items: NSArray) -> Void {
-        socket?.emitAck(num ?? -1, withData: items as [AnyObject])
+        socket?.emitAck(num ?? -1, withItems: items as [AnyObject])
 }
 
 struct SocketEventHandler {

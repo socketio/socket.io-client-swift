@@ -57,6 +57,10 @@ struct SocketPacket {
         return better
     }
     
+    var packetString: String {
+        return createPacketString()
+    }
+    
     init(type: SocketPacket.PacketType, data: [AnyObject] = [AnyObject](), id: Int = -1,
         nsp: String, placeholders: Int = 0, binary: [NSData] = [NSData]()) {
         self.data = data
@@ -86,8 +90,6 @@ struct SocketPacket {
     private func completeMessage(var message: String, ack: Bool) -> String {
         if data.count == 0 {
             return message + "]"
-        } else if !ack {
-            message += ","
         }
         
         for arg in data {
@@ -120,7 +122,7 @@ struct SocketPacket {
         return message + "]"
     }
     
-    func createAck() -> String {
+    private func createAck() -> String {
         let msg: String
         
         if type == PacketType.Ack {
@@ -141,40 +143,52 @@ struct SocketPacket {
     }
 
     
-    func createMessageForEvent(event: String) -> String {
+    private func createMessageForEvent() -> String {
         let message: String
         
         if type == PacketType.Event {
             if nsp == "/" {
                 if id == -1 {
-                    message = "2[\"\(event)\""
+                    message = "2["
                 } else {
-                    message = "2\(id)[\"\(event)\""
+                    message = "2\(id)["
                 }
             } else {
                 if id == -1 {
-                    message = "2\(nsp),[\"\(event)\""
+                    message = "2\(nsp),["
                 } else {
-                    message = "2\(nsp),\(id)[\"\(event)\""
+                    message = "2\(nsp),\(id)["
                 }
             }
         } else {
             if nsp == "/" {
                 if id == -1 {
-                    message = "5\(binary.count)-[\"\(event)\""
+                    message = "5\(binary.count)-["
                 } else {
-                    message = "5\(binary.count)-\(id)[\"\(event)\""
+                    message = "5\(binary.count)-\(id)["
                 }
             } else {
                 if id == -1 {
-                    message = "5\(binary.count)-\(nsp),[\"\(event)\""
+                    message = "5\(binary.count)-\(nsp),["
                 } else {
-                    message = "5\(binary.count)-\(nsp),\(id)[\"\(event)\""
+                    message = "5\(binary.count)-\(nsp),\(id)["
                 }
             }
         }
         
         return completeMessage(message, ack: false)
+    }
+    
+    private func createPacketString() -> String {
+        let str: String
+        
+        if type == PacketType.Event || type == PacketType.BinaryEvent {
+            str = createMessageForEvent()
+        } else {
+            str = createAck()
+        }
+        
+        return str
     }
     
     mutating func fillInPlaceholders() {
@@ -255,17 +269,9 @@ extension SocketPacket {
         }
     }
     
-    static func packetFromEmitWithData(data: [AnyObject], id: Int, nsp: String) -> SocketPacket {
-        let (parsedData, binary) = deconstructData(data)
-        let packet = SocketPacket(type: findType(binary.count, ack: false), data: parsedData,
-            id: id, nsp: nsp, placeholders: -1, binary: binary)
-        
-        return packet
-    }
-    
-    static func packetFromEmitAckWithData(data: [AnyObject], id: Int, nsp: String) -> SocketPacket {
-        let (parsedData, binary) = deconstructData(data)
-        let packet = SocketPacket(type: findType(binary.count, ack: true), data: parsedData,
+    static func packetFromEmit(items: [AnyObject], id: Int, nsp: String, ack: Bool) -> SocketPacket {
+        let (parsedData, binary) = deconstructData(items)
+        let packet = SocketPacket(type: findType(binary.count, ack: ack), data: parsedData,
             id: id, nsp: nsp, placeholders: -1, binary: binary)
         
         return packet

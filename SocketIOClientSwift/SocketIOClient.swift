@@ -25,7 +25,7 @@
 import Foundation
 
 public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient {
-    private var anyHandler:((SocketAnyEvent) -> Void)?
+    private var anyHandler: ((SocketAnyEvent) -> Void)?
     private var currentReconnectAttempt = 0
     private var handlers = ContiguousArray<SocketEventHandler>()
     private var connectParams: [String: AnyObject]?
@@ -38,19 +38,19 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     var log = false
     var waitingData = [SocketPacket]()
     
-    public let socketURL: String
-    public let handleQueue: dispatch_queue_t!
     public let emitQueue = dispatch_queue_create("emitQueue", DISPATCH_QUEUE_SERIAL)
+    public let handleQueue: dispatch_queue_t!
+    public let socketURL: String
     
+    public private(set) var engine: SocketEngine?
     public private(set) var secure = false
     public private(set) var status = SocketIOClientStatus.NotConnected
-    
-    public var engine:SocketEngine?
+
     public var nsp = "/"
     public var opts: [String: AnyObject]?
     public var reconnects = true
     public var reconnectWait = 10
-    public var sid:String? {
+    public var sid: String? {
         return engine?.sid
     }
     
@@ -171,13 +171,13 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
             }
     }
     
-    private func createOnAck(event: String, items: [AnyObject]) -> OnAckCallback {
+    private func createOnAck(items: [AnyObject]) -> OnAckCallback {
         return {[weak self, ack = ++currentAck] timeout, callback in
             if let this = self {
                 this.ackHandlers.addAck(ack, callback: callback)
                 
                 dispatch_async(this.emitQueue) {[weak this] in
-                    this?._emit(event, items, ack: ack)
+                    this?._emit(items, ack: ack)
                 }
                 
                 if timeout != 0 {
@@ -249,7 +249,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         }
         
         dispatch_async(emitQueue) {[weak self] in
-            self?._emit(event, items)
+            self?._emit([event] + items)
         }
     }
     
@@ -258,23 +258,23 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     an ack.
     */
     public func emitWithAck(event: String, _ items: AnyObject...) -> OnAckCallback {
-        return createOnAck(event, items: items)
+        return emitWithAck(event, withItems: items)
     }
     
     /**
     Same as emitWithAck, but for Objective-C
     */
     public func emitWithAck(event: String, withItems items: [AnyObject]) -> OnAckCallback {
-        return createOnAck(event, items: items)
+        return createOnAck([event] + items)
     }
     
-    private func _emit(event: String, _ args: [AnyObject], ack: Int? = nil) {
+    private func _emit(data: [AnyObject], ack: Int? = nil) {
         guard status == SocketIOClientStatus.Connected else {
             return
         }
         
-        let packet = SocketPacket.packetFromEmitWithData(args, id: ack ?? -1, nsp: nsp)
-        let str = packet.createMessageForEvent(event)
+        let packet = SocketPacket.packetFromEmit(data, id: ack ?? -1, nsp: nsp, ack: false)
+        let str = packet.packetString
         
         SocketLogger.log("Emitting: %@", client: self, args: str)
         
@@ -286,11 +286,11 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     }
     
     // If the server wants to know that the client received data
-    func emitAck(ack: Int, withData args: [AnyObject]) {
+    func emitAck(ack: Int, withItems items: [AnyObject]) {
         dispatch_async(emitQueue) {[weak self] in
             if let this = self where this.status == SocketIOClientStatus.Connected {
-                let packet = SocketPacket.packetFromEmitAckWithData(args, id: ack ?? -1, nsp: this.nsp)
-                let str = packet.createAck()
+                let packet = SocketPacket.packetFromEmit(items, id: ack ?? -1, nsp: this.nsp, ack: true)
+                let str = packet.packetString
                 
                 SocketLogger.log("Emitting Ack: %@", client: this, args: str)
                 
