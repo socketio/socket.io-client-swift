@@ -306,6 +306,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     }
     
     public func engineDidClose(reason:String) {
+        waitingData.removeAll()
+        
         if status == SocketIOClientStatus.Closed || !reconnects {
             didDisconnect(reason)
         } else if status != SocketIOClientStatus.Reconnecting {
