@@ -64,7 +64,6 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
 
     weak var client: SocketEngineClient?
     var cookies: [NSHTTPCookie]?
-    var log = false
     var sid = ""
     var socketPath = ""
     var urlPolling: String?
@@ -94,7 +93,6 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         forceWebsockets = opts?["forceWebsockets"] as? Bool ?? false
         forcePolling = opts?["forcePolling"] as? Bool ?? false
         cookies = opts?["cookies"] as? [NSHTTPCookie]
-        log = opts?["log"] as? Bool ?? false
         socketPath = opts?["path"] as? String ?? ""
         extraHeaders = opts?["extraHeaders"] as? [String: String]
     }

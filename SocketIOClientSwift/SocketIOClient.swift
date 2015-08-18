@@ -35,7 +35,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     let logType = "SocketClient"
     var ackHandlers = SocketAckManager()
     var currentAck = -1
-    var log = false
     var waitingData = [SocketPacket]()
     
     public let emitQueue = dispatch_queue_create("emitQueue", DISPATCH_QUEUE_SERIAL)
@@ -73,7 +72,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         }
         
         if let log = opts?["log"] as? Bool {
-            self.log = log
+            SocketLogger.log = log
         }
         
         if let nsp = opts?["nsp"] as? String {
