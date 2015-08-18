@@ -380,9 +380,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     }
 
     private func handleMessage(message: String) {
-        if let client = client {
-            client.parseSocketMessage(message)
-        }
+        client?.parseSocketMessage(message)
     }
 
     private func handleNOOP() {
