@@ -45,7 +45,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     public private(set) var engine: SocketEngine?
     public private(set) var secure = false
     public private(set) var status = SocketIOClientStatus.NotConnected
-
+    
     public var nsp = "/"
     public var opts: [String: AnyObject]?
     public var reconnects = true
@@ -438,11 +438,19 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     }
     
     public func parseSocketMessage(msg: String) {
-        SocketParser.parseSocketMessage(msg, socket: self)
+        dispatch_async(handleQueue) {[weak self] in
+            if let this = self {
+                SocketParser.parseSocketMessage(msg, socket: this)
+            }
+        }
     }
     
     public func parseBinaryData(data: NSData) {
-        SocketParser.parseBinaryData(data, socket: self)
+        dispatch_async(handleQueue) {[weak self] in
+            if let this = self {
+                SocketParser.parseBinaryData(data, socket: this)
+            }
+        }
     }
     
     /**

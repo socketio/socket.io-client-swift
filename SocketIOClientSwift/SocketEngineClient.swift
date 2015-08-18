@@ -26,7 +26,6 @@
 import Foundation
 
 @objc public protocol SocketEngineClient {
-    var handleQueue: dispatch_queue_t! {get}
     var socketURL: String {get}
     var secure: Bool {get}
     

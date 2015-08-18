@@ -373,19 +373,15 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                 end: advance(message.startIndex, 2)))
 
             if let data = NSData(base64EncodedString: message,
-                options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters), client = client {
-                    dispatch_async(client.handleQueue) {[weak self] in
-                        self?.client?.parseBinaryData(data)
-                    }
+                options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters) {
+                    client?.parseBinaryData(data)
             }
         }
     }
 
     private func handleMessage(message: String) {
         if let client = client {
-            dispatch_async(client.handleQueue) {[weak client] in
-                client?.parseSocketMessage(message)
-            }
+            client.parseSocketMessage(message)
         }
     }
 
@@ -543,11 +539,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     }
 
     private func parseEngineData(data: NSData) {
-        if let client = client {
-            dispatch_async(client.handleQueue) {[weak self] in
-                self?.client?.parseBinaryData(data.subdataWithRange(NSMakeRange(1, data.length - 1)))
-            }
-        }
+        client?.parseBinaryData(data.subdataWithRange(NSMakeRange(1, data.length - 1)))
     }
 
     private func parseEngineMessage(var message: String, fromPolling: Bool) {
