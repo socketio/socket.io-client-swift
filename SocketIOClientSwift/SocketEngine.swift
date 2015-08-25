@@ -368,7 +368,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         if message.hasPrefix("b4") {
             // binary in base64 string
             message.removeRange(Range<String.Index>(start: message.startIndex,
-                end: advance(message.startIndex, 2)))
+                end: message.startIndex.advancedBy(2)))
 
             if let data = NSData(base64EncodedString: message,
                 options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters) {
