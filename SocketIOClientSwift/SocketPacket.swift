@@ -25,9 +25,11 @@
 import Foundation
 
 struct SocketPacket {
+    private var currentPlace = 0
+    private let placeholders: Int
+
     let nsp: String
     let id: Int
-    let placeholders: Int
     let type: PacketType
     
     enum PacketType: Int {
@@ -42,7 +44,21 @@ struct SocketPacket {
         }
     }
     
-    var currentPlace = 0
+    var args: [AnyObject]? {
+        var arr = data
+        
+        if data.count == 0 {
+            return nil
+        } else {
+            if type == PacketType.Event || type == PacketType.BinaryEvent {
+                arr.removeAtIndex(0)
+                return arr
+            } else {
+                return arr
+            }
+        }
+    }
+    
     var binary: [NSData]
     var data: [AnyObject]
     var description: String {
@@ -55,6 +71,10 @@ struct SocketPacket {
         better = better["~~3"] ~= String(placeholders)
         
         return better
+    }
+    
+    var event: String {
+        return data[0] as! String
     }
     
     var packetString: String {
@@ -230,25 +250,6 @@ struct SocketPacket {
             return newArr
         } else {
             return data
-        }
-    }
-    
-    func getEvent() -> String {
-        return data[0] as! String
-    }
-    
-    func getArgs() -> [AnyObject]? {
-        var arr = data
-
-        if data.count == 0 {
-            return nil
-        } else {
-            if type == PacketType.Event || type == PacketType.BinaryEvent {
-                arr.removeAtIndex(0)
-                return arr
-            } else {
-                return arr
-            }
         }
     }
 }

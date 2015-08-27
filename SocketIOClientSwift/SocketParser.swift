@@ -66,7 +66,7 @@ class SocketParser {
             return
         }
         
-        socket.handleEvent(p.getEvent(), data: p.getArgs(),
+        socket.handleEvent(p.event, data: p.args,
             isInternalMessage: false, wantsAck: p.id)
     }
     
@@ -224,10 +224,10 @@ class SocketParser {
         packet.fillInPlaceholders()
         
         if packet.type != SocketPacket.PacketType.BinaryAck {
-            socket.handleEvent(packet.getEvent(), data: packet.getArgs(),
+            socket.handleEvent(packet.event, data: packet.args,
                 isInternalMessage: false, wantsAck: packet.id)
         } else {
-            socket.handleAck(packet.id, data: packet.getArgs())
+            socket.handleAck(packet.id, data: packet.args)
         }
     }
 }
