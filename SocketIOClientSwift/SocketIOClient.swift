@@ -201,7 +201,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         handleEvent("connect", data: nil, isInternalMessage: false)
     }
     
-    func didDisconnect(reason:String) {
+    func didDisconnect(reason: String) {
         guard status != SocketIOClientStatus.Closed else {
             return
         }
@@ -303,7 +303,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
         }
     }
     
-    public func engineDidClose(reason:String) {
+    public func engineDidClose(reason: String) {
         waitingData.removeAll()
         
         if status == SocketIOClientStatus.Closed || !reconnects {
@@ -327,8 +327,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     /**
     Causes an event to be handled. Only use if you know what you're doing.
     */
-    public func handleEvent(event:String, data:[AnyObject]?, isInternalMessage: Bool,
-        wantsAck ack:Int? = nil) {
+    public func handleEvent(event: String, data: [AnyObject]?, isInternalMessage: Bool,
+        wantsAck ack: Int? = nil) {
             guard status == SocketIOClientStatus.Connected || isInternalMessage else {
                 return
             }
