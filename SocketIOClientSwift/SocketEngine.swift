@@ -414,16 +414,24 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         if let json = NSJSONSerialization.JSONObjectWithData(mesData,
             options: NSJSONReadingOptions.AllowFragments,
             error: &err) as? NSDictionary, sid = json["sid"] as? String {
+                let upgradeWs: Bool
+                
                 self.sid = sid
                 _connected = true
                 
-                if !forcePolling && !forceWebsockets {
-                    createWebsocket(andConnect: true)
+                if let upgrades = json["upgrades"] as? [String] {
+                    upgradeWs = upgrades.filter {$0 == "websocket"}.count != 0
+                } else {
+                    upgradeWs = false
                 }
                 
                 if let pingInterval = json["pingInterval"] as? Double, pingTimeout = json["pingTimeout"] as? Double {
                     self.pingInterval = pingInterval / 1000.0
                     self.pingTimeout = pingTimeout / 1000.0
+                }
+                
+                if !forcePolling && !forceWebsockets && upgradeWs {
+                    createWebsocket(andConnect: true)
                 }
         } else {
             client?.didError("Engine failed to handshake")
