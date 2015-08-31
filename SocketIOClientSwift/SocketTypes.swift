@@ -1,6 +1,6 @@
 //
 //  SocketTypes.swift
-//  SocketIO-Swift
+//  Socket.IO-Client-Swift
 //
 //  Created by Erik Little on 4/8/15.
 //
@@ -24,11 +24,10 @@
 
 import Foundation
 
-// @objc_block is undocumented, but is used because Swift assumes that all
-// Objective-C blocks are copied, but Objective-C assumes that Swift will copy it.
-// And the way things are done here, the bridging fails to copy the block in
-// SocketAckMap#addAck
-public typealias AckCallback = @objc_block (NSArray?) -> Void
+public typealias AckCallback = (NSArray?) -> Void
 public typealias AckEmitter = (AnyObject...) -> Void
+public typealias AckEmitterObjectiveC = (NSArray) -> Void
 public typealias NormalCallback = (NSArray?, AckEmitter?) -> Void
+public typealias NormalCallbackObjectiveC = (NSArray?, AckEmitterObjectiveC?) -> Void
 public typealias OnAckCallback = (timeoutAfter:UInt64, callback:AckCallback) -> Void
+
