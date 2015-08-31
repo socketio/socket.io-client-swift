@@ -387,25 +387,33 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
 
     private func handleOpen(openData: String) {
         let mesData = openData.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!
-
         do {
             let json = try NSJSONSerialization.JSONObjectWithData(mesData,
                 options: NSJSONReadingOptions.AllowFragments) as? NSDictionary
             if let sid = json?["sid"] as? String {
+                let upgradeWs: Bool
+
                 self.sid = sid
                 connected = true
-
-                if !forcePolling && !forceWebsockets {
-                    createWebsocket(andConnect: true)
+                
+                if let upgrades = json?["upgrades"] as? [String] {
+                    upgradeWs = upgrades.filter {$0 == "websocket"}.count != 0
+                } else {
+                    upgradeWs = false
                 }
                 
                 if let pingInterval = json?["pingInterval"] as? Double, pingTimeout = json?["pingTimeout"] as? Double {
                     self.pingInterval = pingInterval / 1000.0
                     self.pingTimeout = pingTimeout / 1000.0
                 }
+                
+                if !forcePolling && !forceWebsockets && upgradeWs {
+                    createWebsocket(andConnect: true)
+                }
             }
         } catch {
             SocketLogger.err("Error parsing open packet", client: self)
+            return
         }
 
         startPingTimer()
