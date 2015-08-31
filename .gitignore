@@ -1,6 +1,7 @@
 .DS_Store
 .AppleDouble
 .LSOverride
+*.xcodeproj
 
 # Icon must end with two \r
 Icon
@@ -41,3 +42,5 @@ DerivedData
 *.hmap
 *.ipa
 *.xcuserstate
+
+Socket.IO-Test-Server/node_modules/*

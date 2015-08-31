@@ -93,7 +93,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
     public var headers = Dictionary<String,String>()
     public var voipEnabled = false
     public var selfSignedSSL = false
-    public var security: Security?
+    private var security: Security?
     public var isConnected :Bool {
         return connected
     }
@@ -168,7 +168,6 @@ public class WebSocket : NSObject, NSStreamDelegate {
     //private method that starts the connection
     private func createHTTPRequest() {
         
-        let str: NSString = url.absoluteString!
         let urlRequest = CFHTTPMessageCreateRequest(kCFAllocatorDefault, "GET",
             url, kCFHTTPVersion1_1).takeRetainedValue()
         
@@ -184,24 +183,25 @@ public class WebSocket : NSObject, NSStreamDelegate {
         if self.cookies != nil {
             let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(self.cookies!)
             for (key, value) in headers {
-                self.addHeader(urlRequest, key: key as! String, val: value as! String)
+                self.addHeader(urlRequest, key: key as String, val: value as String)
             }
         }
         
         self.addHeader(urlRequest, key: headerWSUpgradeName, val: headerWSUpgradeValue)
         self.addHeader(urlRequest, key: headerWSConnectionName, val: headerWSConnectionValue)
         if let protocols = optionalProtocols {
-            self.addHeader(urlRequest, key: headerWSProtocolName, val: ",".join(protocols))
+            self.addHeader(urlRequest, key: headerWSProtocolName, val: protocols.joinWithSeparator(","))
         }
         self.addHeader(urlRequest, key: headerWSVersionName, val: headerWSVersionValue)
         self.addHeader(urlRequest, key: headerWSKeyName, val: self.generateWebSocketKey())
-        self.addHeader(urlRequest, key: headerOriginName, val: url.absoluteString!)
+        self.addHeader(urlRequest, key: headerOriginName, val: url.absoluteString)
         self.addHeader(urlRequest, key: headerWSHostName, val: "\(url.host!):\(port!)")
         for (key,value) in headers {
             self.addHeader(urlRequest, key: key, val: value)
         }
         
-        let serializedRequest: NSData = CFHTTPMessageCopySerializedMessage(urlRequest).takeRetainedValue()
+
+        let serializedRequest: NSData = CFHTTPMessageCopySerializedMessage(urlRequest)!.takeRetainedValue()
         self.initStreamsWithData(serializedRequest, Int(port!))
     }
     //Add a header to the CFHTTPMessage by using the NSString bridges to CFString
@@ -220,8 +220,8 @@ public class WebSocket : NSObject, NSStreamDelegate {
             let uni = UnicodeScalar(UInt32(97 + arc4random_uniform(25)))
             key += "\(Character(uni))"
         }
-        var data = key.dataUsingEncoding(NSUTF8StringEncoding)
-        var baseKey = data?.base64EncodedStringWithOptions(NSDataBase64EncodingOptions(0))
+        let data = key.dataUsingEncoding(NSUTF8StringEncoding)
+        let baseKey = data?.base64EncodedStringWithOptions(NSDataBase64EncodingOptions(rawValue: 0))
         return baseKey!
     }
     //Start the stream connection and write the data to the output stream
@@ -250,8 +250,8 @@ public class WebSocket : NSObject, NSStreamDelegate {
         }
         if self.selfSignedSSL {
             let settings: Dictionary<NSObject, NSObject> = [kCFStreamSSLValidatesCertificateChain: NSNumber(bool:false), kCFStreamSSLPeerName: kCFNull]
-            inputStream!.setProperty(settings, forKey: kCFStreamPropertySSLSettings as! String)
-            outputStream!.setProperty(settings, forKey: kCFStreamPropertySSLSettings as! String)
+            inputStream!.setProperty(settings, forKey: kCFStreamPropertySSLSettings as String)
+            outputStream!.setProperty(settings, forKey: kCFStreamPropertySSLSettings as String)
         }
         isRunLoop = true
         inputStream!.scheduleInRunLoop(NSRunLoop.currentRunLoop(), forMode: NSDefaultRunLoopMode)
@@ -261,16 +261,16 @@ public class WebSocket : NSObject, NSStreamDelegate {
         let bytes = UnsafePointer<UInt8>(data.bytes)
         outputStream!.write(bytes, maxLength: data.length)
         while(isRunLoop) {
-            NSRunLoop.currentRunLoop().runMode(NSDefaultRunLoopMode, beforeDate: NSDate.distantFuture() as! NSDate)
+            NSRunLoop.currentRunLoop().runMode(NSDefaultRunLoopMode, beforeDate: NSDate.distantFuture() as NSDate)
         }
     }
     //delegate for the stream methods. Processes incoming bytes
     public func stream(aStream: NSStream, handleEvent eventCode: NSStreamEvent) {
         
         if let sec = security where !certValidated && (eventCode == .HasBytesAvailable || eventCode == .HasSpaceAvailable) {
-            var possibleTrust: AnyObject? = aStream.propertyForKey(kCFStreamPropertySSLPeerTrust as! String)
+            let possibleTrust: AnyObject? = aStream.propertyForKey(kCFStreamPropertySSLPeerTrust as String)
             if let trust: AnyObject = possibleTrust {
-                var domain: AnyObject? = aStream.propertyForKey(kCFStreamSSLPeerName as! String)
+                let domain: AnyObject? = aStream.propertyForKey(kCFStreamSSLPeerName as String)
                 if sec.isValid(trust as! SecTrustRef, domain: domain as! String?) {
                     certValidated = true
                 } else {
@@ -314,7 +314,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
     ///handles the incoming bytes and sending them to the proper processing method
     private func processInputStream() {
         let buf = NSMutableData(capacity: BUFFER_MAX)
-        var buffer = UnsafeMutablePointer<UInt8>(buf!.bytes)
+        let buffer = UnsafeMutablePointer<UInt8>(buf!.bytes)
         let length = inputStream!.read(buffer, maxLength: BUFFER_MAX)
         if length > 0 {
             if !connected {
@@ -340,7 +340,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
             let data = inputQueue[0]
             var work = data
             if (fragBuffer != nil) {
-                var combine = NSMutableData(data: fragBuffer!)
+                let combine = NSMutableData(data: fragBuffer!)
                 combine.appendData(data)
                 work = combine
                 fragBuffer = nil
@@ -388,14 +388,14 @@ public class WebSocket : NSObject, NSStreamDelegate {
     
     ///validates the HTTP is a 101 as per the RFC spec
     private func validateResponse(buffer: UnsafePointer<UInt8>, bufferLen: Int) -> Bool {
-        let response = CFHTTPMessageCreateEmpty(kCFAllocatorDefault, 0).takeRetainedValue()
+        let response = CFHTTPMessageCreateEmpty(kCFAllocatorDefault, false).takeRetainedValue()
         CFHTTPMessageAppendBytes(response, buffer, bufferLen)
         if CFHTTPMessageGetResponseStatusCode(response) != 101 {
             return false
         }
         let cfHeaders = CFHTTPMessageCopyAllHeaderFields(response)
-        let headers: NSDictionary = cfHeaders.takeRetainedValue()
-        let acceptKey = headers[headerWSAcceptName] as! NSString
+        let headers:NSDictionary? = cfHeaders?.takeRetainedValue()
+        let acceptKey = headers?[headerWSAcceptName] as! NSString
         if acceptKey.length > 0 {
             return true
         }
@@ -404,7 +404,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
     
     ///process the websocket data
     private func processRawMessage(buffer: UnsafePointer<UInt8>, bufferLen: Int) {
-        var response = readStack.last
+        let response = readStack.last
         if response != nil && bufferLen < 2  {
             fragBuffer = NSData(bytes: buffer, length: bufferLen)
             return
@@ -420,7 +420,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
             resp.bytesLeft -= len
             resp.buffer?.appendData(NSData(bytes: buffer, length: len))
             processResponse(resp)
-            var offset = bufferLen - extra
+            let offset = bufferLen - extra
             if extra > 0 {
                 processExtra((buffer+offset), bufferLen: extra)
             }
@@ -459,7 +459,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
                 if payloadLen == 1 {
                     code = CloseCode.ProtocolError.rawValue
                 } else if payloadLen > 1 {
-                    var codeBuffer = UnsafePointer<UInt16>((buffer+offset))
+                    let codeBuffer = UnsafePointer<UInt16>((buffer+offset))
                     code = codeBuffer[0].bigEndian
                     if code < 1000 || (code > 1003 && code < 1007) || (code > 1011 && code < 3000) {
                         code = CloseCode.ProtocolError.rawValue
@@ -470,7 +470,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
                     let len = Int(payloadLen-2)
                     if len > 0 {
                         let bytes = UnsafePointer<UInt8>((buffer+offset))
-                        var str: NSString? = NSString(data: NSData(bytes: bytes, length: len), encoding: NSUTF8StringEncoding)
+                        let str: NSString? = NSString(data: NSData(bytes: bytes, length: len), encoding: NSUTF8StringEncoding)
                         if str == nil {
                             code = CloseCode.ProtocolError.rawValue
                         }
@@ -495,7 +495,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
                 dataLength = UInt64(bytes[0].bigEndian)
                 offset += sizeof(UInt16)
             }
-            if bufferLen < offset {
+            if bufferLen < offset || UInt64(bufferLen - offset) < dataLength {
                 fragBuffer = NSData(bytes: buffer, length: bufferLen)
                 return
             }
@@ -599,16 +599,16 @@ public class WebSocket : NSObject, NSStreamDelegate {
                 let data = response.buffer! //local copy so it is perverse for writing
                 dequeueWrite(data, code: OpCode.Pong)
             } else if response.code == .TextFrame {
-                var str: NSString? = NSString(data: response.buffer!, encoding: NSUTF8StringEncoding)
+                let str: NSString? = NSString(data: response.buffer!, encoding: NSUTF8StringEncoding)
                 if str == nil {
                     writeError(CloseCode.Encoding.rawValue)
                     return false
                 }
                 dispatch_async(queue,{
                     if let textBlock = self.onText {
-                        textBlock(str! as! String)
+                        textBlock(str! as String)
                     }
-                    self.delegate?.websocketDidReceiveMessage(self, text: str! as! String)
+                    self.delegate?.websocketDidReceiveMessage(self, text: str! as String)
                 })
             } else if response.code == .BinaryFrame {
                 let data = response.buffer! //local copy so it is perverse for writing
@@ -635,7 +635,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
     ///write a an error to the socket
     private func writeError(code: UInt16) {
         let buf = NSMutableData(capacity: sizeof(UInt16))
-        var buffer = UnsafeMutablePointer<UInt16>(buf!.bytes)
+        let buffer = UnsafeMutablePointer<UInt16>(buf!.bytes)
         buffer[0] = code.bigEndian
         dequeueWrite(NSData(bytes: buffer, length: sizeof(UInt16)), code: .ConnectionClose)
     }
@@ -670,17 +670,17 @@ public class WebSocket : NSObject, NSStreamDelegate {
                 buffer[1] = CUnsignedChar(dataLength)
             } else if dataLength <= Int(UInt16.max) {
                 buffer[1] = 126
-                var sizeBuffer = UnsafeMutablePointer<UInt16>((buffer+offset))
+                let sizeBuffer = UnsafeMutablePointer<UInt16>((buffer+offset))
                 sizeBuffer[0] = UInt16(dataLength).bigEndian
                 offset += sizeof(UInt16)
             } else {
                 buffer[1] = 127
-                var sizeBuffer = UnsafeMutablePointer<UInt64>((buffer+offset))
+                let sizeBuffer = UnsafeMutablePointer<UInt64>((buffer+offset))
                 sizeBuffer[0] = UInt64(dataLength).bigEndian
                 offset += sizeof(UInt64)
             }
             buffer[1] |= self.MaskMask
-            var maskKey = UnsafeMutablePointer<UInt8>(buffer + offset)
+            let maskKey = UnsafeMutablePointer<UInt8>(buffer + offset)
             SecRandomCopyBytes(kSecRandomDefault, Int(sizeof(UInt32)), maskKey)
             offset += sizeof(UInt32)
             
@@ -694,7 +694,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
                     break
                 }
                 let writeBuffer = UnsafePointer<UInt8>(frame!.bytes+total)
-                var len = self.outputStream?.write(writeBuffer, maxLength: offset-total)
+                let len = self.outputStream?.write(writeBuffer, maxLength: offset-total)
                 if len == nil || len! < 0 {
                     var error: NSError?
                     if let streamError = self.outputStream?.streamError {
@@ -771,8 +771,8 @@ public class SSLCert {
     }
 }
 
-public class Security {
-    public var validatedDN = true //should the domain name be validated?
+private class Security {
+    private var validatedDN = true //should the domain name be validated?
     
     var isReady = false //is the key processing done?
     var certificates: [NSData]? //the certificates
@@ -786,11 +786,11 @@ public class Security {
     
     :returns: a representation security object to be used with
     */
-    public convenience init(usePublicKeys: Bool = false) {
+    private convenience init(usePublicKeys: Bool = false) {
         let paths = NSBundle.mainBundle().pathsForResourcesOfType("cer", inDirectory: ".")
         var collect = Array<SSLCert>()
         for path in paths {
-            if let d = NSData(contentsOfFile: path as! String) {
+            if let d = NSData(contentsOfFile: path as String) {
                 collect.append(SSLCert(data: d))
             }
         }
@@ -805,7 +805,7 @@ public class Security {
     
     :returns: a representation security object to be used with
     */
-    public init(certs: [SSLCert], usePublicKeys: Bool) {
+    private init(certs: [SSLCert], usePublicKeys: Bool) {
         self.usePublicKeys = usePublicKeys
         
         if self.usePublicKeys {
@@ -842,7 +842,7 @@ public class Security {
     
     :returns: if the key was successfully validated
     */
-    public func isValid(trust: SecTrustRef, domain: String?) -> Bool {
+    private func isValid(trust: SecTrustRef, domain: String?) -> Bool {
         
         var tries = 0
         while(!self.isReady) {
@@ -854,9 +854,9 @@ public class Security {
         }
         var policy: SecPolicyRef
         if self.validatedDN {
-            policy = SecPolicyCreateSSL(1, domain).takeRetainedValue()
+            policy = SecPolicyCreateSSL(true, domain)
         } else {
-            policy = SecPolicyCreateBasicX509().takeRetainedValue()
+            policy = SecPolicyCreateBasicX509()
         }
         SecTrustSetPolicies(trust,policy)
         if self.usePublicKeys {
@@ -879,7 +879,7 @@ public class Security {
             let serverCerts = certificateChainForTrust(trust)
             var collect = Array<SecCertificate>()
             for cert in certs {
-                collect.append(SecCertificateCreateWithData(nil,cert).takeRetainedValue())
+                collect.append(SecCertificateCreateWithData(nil,cert)!)
             }
             SecTrustSetAnchorCertificates(trust,collect)
             var result: SecTrustResultType = 0
@@ -911,10 +911,9 @@ public class Security {
     :returns: a public key
     */
     func extractPublicKey(data: NSData) -> SecKeyRef? {
-        var publicKey: NSData?
         let possibleCert = SecCertificateCreateWithData(nil,data)
         if let cert = possibleCert {
-            return extractPublicKeyFromCert(cert.takeRetainedValue(),policy: SecPolicyCreateBasicX509().takeRetainedValue())
+            return extractPublicKeyFromCert(cert,policy: SecPolicyCreateBasicX509())
         }
         return nil
     }
@@ -927,13 +926,12 @@ public class Security {
     :returns: a public key
     */
     func extractPublicKeyFromCert(cert: SecCertificate, policy: SecPolicy) -> SecKeyRef? {
-        var possibleTrust: Unmanaged<SecTrust>?
-        SecTrustCreateWithCertificates(cert,policy, &possibleTrust)
-        if let trust = possibleTrust {
-            let t = trust.takeRetainedValue()
+        let possibleTrust = UnsafeMutablePointer<SecTrust?>.alloc(1)
+        SecTrustCreateWithCertificates( cert, policy, possibleTrust)
+        if let trust = possibleTrust.memory {
             var result: SecTrustResultType = 0
-            SecTrustEvaluate(t,&result)
-            return SecTrustCopyPublicKey(t).takeRetainedValue()
+            SecTrustEvaluate(trust,&result)
+            return SecTrustCopyPublicKey(trust)
         }
         return nil
     }
@@ -949,7 +947,7 @@ public class Security {
         var collect = Array<NSData>()
         for var i = 0; i < SecTrustGetCertificateCount(trust); i++ {
             let cert = SecTrustGetCertificateAtIndex(trust,i)
-            collect.append(SecCertificateCopyData(cert.takeRetainedValue()).takeRetainedValue())
+            collect.append(SecCertificateCopyData(cert!))
         }
         return collect
     }
@@ -963,10 +961,10 @@ public class Security {
     */
     func publicKeyChainForTrust(trust: SecTrustRef) -> Array<SecKeyRef> {
         var collect = Array<SecKeyRef>()
-        let policy = SecPolicyCreateBasicX509().takeRetainedValue()
+        let policy = SecPolicyCreateBasicX509()
         for var i = 0; i < SecTrustGetCertificateCount(trust); i++ {
             let cert = SecTrustGetCertificateAtIndex(trust,i)
-            if let key = extractPublicKeyFromCert(cert.takeRetainedValue(), policy: policy) {
+            if let key = extractPublicKeyFromCert(cert!, policy: policy) {
                 collect.append(key)
             }
         }
