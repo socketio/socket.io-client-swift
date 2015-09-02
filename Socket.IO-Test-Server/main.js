@@ -1,5 +1,5 @@
 var app = require('express')()
-var server = app.listen(8080)
+var server = app.listen(6979)
 var io = require('socket.io')(server)
 var acknowledgementsEvents = require("./acknowledgementEvents.js")
 var emitEvents = require("./emitEvents.js")
