@@ -68,7 +68,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
     var socketPath = ""
     var urlPolling: String?
     var urlWebSocket: String?
-    var ws:WebSocket?
+    var ws: WebSocket?
 
     public enum PacketType: Int {
         case Open, Close, Ping, Pong, Message, Upgrade, Noop
@@ -439,11 +439,6 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
         pingTimer?.invalidate()
         waitingForPoll = false
         waitingForPost = false
-
-        // If cancelled we were already closing
-        if client == nil || reason == "cancelled" {
-            return
-        }
 
         if !closed {
             client?.didError(reason)
