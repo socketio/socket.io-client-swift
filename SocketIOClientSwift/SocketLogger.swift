@@ -48,7 +48,7 @@ extension SocketLogger {
             return
         }
         
-        let newArgs = args.map {String($0)}
+        let newArgs = args.map {arg -> CVarArgType in String(arg)}
         let replaced = String(format: message, arguments: newArgs)
         
         NSLog("%@: %@", altType ?? client.logType, replaced)
@@ -59,7 +59,7 @@ extension SocketLogger {
             return
         }
         
-        let newArgs = args.map {String($0)}
+        let newArgs = args.map {arg -> CVarArgType in String(arg)}
         let replaced = String(format: message, arguments: newArgs)
         
         NSLog("ERROR %@: %@", altType ?? client.logType, replaced)
