@@ -12,17 +12,16 @@ class AbstractSocketTest: XCTestCase {
     static let serverURL = "milkbartube.com:6979"
     static let TEST_TIMEOUT = 8.0
     static var socket:SocketIOClient!
-//    var socket:SocketIOClient!
     var testKind:TestKind?
     
     
     func openConnection() {
-        print(AbstractSocketTest.socket.status.description)
         guard AbstractSocketTest.socket.status == SocketIOClientStatus.NotConnected else {return}
+        
         weak var expection = self.expectationWithDescription("connect")
         XCTAssertTrue(AbstractSocketTest.socket.status == SocketIOClientStatus.NotConnected)
         AbstractSocketTest.socket.on("connect") {data, ack in
-            print("Conected")
+            XCTAssertEqual(AbstractSocketTest.socket.status, SocketIOClientStatus.Connected)
             if let expection = expection {
                 expection.fulfill()
             }
