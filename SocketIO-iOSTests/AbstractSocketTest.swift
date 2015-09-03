@@ -9,6 +9,7 @@
 import XCTest
 
 class AbstractSocketTest: XCTestCase {
+    static let serverURL = "milkbartube.com:6979"
     static let TEST_TIMEOUT = 8.0
     var socket:SocketIOClient!
     var testKind:TestKind?

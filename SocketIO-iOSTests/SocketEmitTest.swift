@@ -13,7 +13,7 @@ class SocketEmitTest: AbstractSocketTest {
     override func setUp() {
         super.setUp()
         testKind = TestKind.Emit
-        socket = SocketIOClient(socketURL: "milkbartube.com:6979", opts: [
+        socket = SocketIOClient(socketURL: AbstractSocketTest.serverURL, opts: [
             "reconnects": true, // default true
             "reconnectAttempts": -1, // default -1
             "reconnectWait": 5, // default 10
