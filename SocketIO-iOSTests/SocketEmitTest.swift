@@ -25,7 +25,6 @@ class SocketEmitTest: AbstractSocketTest {
     }
     
     override func tearDown() {
-        socket.close(fast: false)
         super.tearDown()
     }
     

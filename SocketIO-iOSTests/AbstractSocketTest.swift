@@ -14,10 +14,7 @@ class AbstractSocketTest: XCTestCase {
     var socket:SocketIOClient!
     var testKind:TestKind?
     
-    override func tearDown() {
-        super.tearDown()
-        socket.close(fast: false)
-    }
+    
     
     func openConnection() {
         weak var expection = self.expectationWithDescription("connect")
