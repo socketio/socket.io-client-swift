@@ -13,19 +13,21 @@ class SocketEmitTest: AbstractSocketTest {
     override func setUp() {
         super.setUp()
         testKind = TestKind.Emit
-        socket = SocketIOClient(socketURL: "milkbartube.com:6979", opts: [
-            "reconnects": true, // default true
-            "reconnectAttempts": -1, // default -1
-            "reconnectWait": 5, // default 10
-            "forcePolling": false,
-            "forceWebsockets": false,// default false
-            "path": ""]
+        if AbstractSocketTest.socket == nil {
+            AbstractSocketTest.socket = SocketIOClient(socketURL: AbstractSocketTest.serverURL, opts: [
+                "reconnects": true, // default true
+                "reconnectAttempts": -1, // default -1
+                "reconnectWait": 5, // default 10
+                "forcePolling": false,
+                "forceWebsockets": false,// default false
+                "path": ""]
             )
+        }
+        
         openConnection()
     }
     
     override func tearDown() {
-        socket.close(fast: false)
         super.tearDown()
     }
     
