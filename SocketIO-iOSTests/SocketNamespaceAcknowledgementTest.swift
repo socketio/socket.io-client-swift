@@ -13,7 +13,7 @@ class SocketNamespaceAcknowledgementTest: AbstractSocketTest {
     override func setUp() {
         super.setUp()
         testKind = TestKind.Acknowledgement
-        socket = SocketIOClient(socketURL: "127.0.0.1:8080", opts: [
+        socket = SocketIOClient(socketURL: "milkbartube.com:6979", opts: [
             "reconnects": true, // default true
             "reconnectAttempts": -1, // default -1
             "reconnectWait": 5, // default 10
