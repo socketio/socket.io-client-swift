@@ -24,7 +24,7 @@
 
 import Foundation
 
-var Logger: SocketLogger = DefaultSocketLogger(log: false)
+var Logger: SocketLogger = DefaultSocketLogger()
 
 public protocol SocketLogClient {
     /// The type of object being logged
@@ -42,8 +42,8 @@ public protocol SocketLogger {
     func err(message: String, client: SocketLogClient, altType: String?, args: AnyObject...)
 }
 
-extension SocketLogger {
-    public func log(message: String, client: SocketLogClient, altType: String?, args: AnyObject...) {
+public extension SocketLogger {
+    func log(message: String, client: SocketLogClient, altType: String?, args: AnyObject...) {
         if !log {
             return
         }
@@ -54,7 +54,7 @@ extension SocketLogger {
         NSLog("%@: %@", altType ?? client.logType, replaced)
     }
     
-    public func err(message: String, client: SocketLogClient, altType: String?, args: AnyObject...) {
+    func err(message: String, client: SocketLogClient, altType: String?, args: AnyObject...) {
         if !log {
             return
         }
@@ -67,5 +67,5 @@ extension SocketLogger {
 }
 
 struct DefaultSocketLogger: SocketLogger {
-    var log: Bool
+    var log = false
 }
