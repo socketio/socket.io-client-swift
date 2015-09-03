@@ -43,21 +43,15 @@ public protocol SocketLogger {
 }
 
 extension SocketLogger {
-    private var printQueue: dispatch_queue_t {
-        return dispatch_queue_create("printQueue", DISPATCH_QUEUE_SERIAL)
-    }
-    
     public func log(message: String, client: SocketLogClient, altType: String?, args: AnyObject...) {
         if !log {
             return
         }
         
-        dispatch_async(printQueue) {[type = client.logType] in
-            let newArgs = args.map {String($0)}
-            let replaced = String(format: message, arguments: newArgs)
-            
-            NSLog("%@: %@", altType ?? type, replaced)
-        }
+        let newArgs = args.map {String($0)}
+        let replaced = String(format: message, arguments: newArgs)
+        
+        NSLog("%@: %@", altType ?? client.logType, replaced)
     }
     
     public func err(message: String, client: SocketLogClient, altType: String?, args: AnyObject...) {
@@ -65,12 +59,10 @@ extension SocketLogger {
             return
         }
         
-        dispatch_async(printQueue) {[type = client.logType] in
-            let newArgs = args.map {String($0)}
-            let replaced = String(format: message, arguments: newArgs)
-            
-            NSLog("ERROR %@: %@", altType ?? type, replaced)
-        }
+        let newArgs = args.map {String($0)}
+        let replaced = String(format: message, arguments: newArgs)
+        
+        NSLog("ERROR %@: %@", altType ?? client.logType, replaced)
     }
 }
 
