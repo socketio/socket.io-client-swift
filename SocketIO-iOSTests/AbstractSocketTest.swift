@@ -20,10 +20,12 @@ class AbstractSocketTest: XCTestCase {
     }
     
     func openConnection() {
-        let expection = self.expectationWithDescription("connect")
+        weak var expection = self.expectationWithDescription("connect")
         XCTAssertTrue(socket.status == SocketIOClientStatus.NotConnected)
         socket.on("connect") {data, ack in
-            expection.fulfill()
+            if let expection = expection {
+                expection.fulfill()
+            }
         }
         socket.connect()
         XCTAssertEqual(socket.status, SocketIOClientStatus.Connecting)
