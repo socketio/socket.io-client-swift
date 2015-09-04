@@ -29,11 +29,12 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     private typealias ProbeWaitQueue = [Probe]
 
     private let allowedCharacterSet = NSCharacterSet(charactersInString: "!*'();:@&=+$,/?%#[]\" {}").invertedSet
-    private let workQueue = NSOperationQueue()
     private let emitQueue = dispatch_queue_create("engineEmitQueue", DISPATCH_QUEUE_SERIAL)
-    private let parseQueue = dispatch_queue_create("engineParseQueue", DISPATCH_QUEUE_SERIAL)
     private let handleQueue = dispatch_queue_create("engineHandleQueue", DISPATCH_QUEUE_SERIAL)
+    private let logType = "SocketEngine"
+    private let parseQueue = dispatch_queue_create("engineParseQueue", DISPATCH_QUEUE_SERIAL)
     private let session: NSURLSession!
+    private let workQueue = NSOperationQueue()
 
     private var closed = false
     private var extraHeaders: [String: String]?
@@ -96,11 +97,11 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     }
 
     deinit {
-        Logger.log("Engine is being deinit", client: self, altType: nil)
+        Logger.log("Engine is being deinit", type: logType)
     }
 
     public func close(fast fast: Bool) {
-        Logger.log("Engine is being closed. Fast: %@", client: self, altType: nil, args: fast)
+        Logger.log("Engine is being closed. Fast: %@", type: logType, args: fast)
 
         pingTimer?.invalidate()
         closed = true
@@ -198,7 +199,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     private func doFastUpgrade() {
         if waitingForPoll {
             Logger.error("Outstanding poll when switched to WebSockets," +
-                "we'll probably disconnect soon. You should report this.", client: self, altType: nil)
+                "we'll probably disconnect soon. You should report this.", type: logType)
         }
 
         sendWebSocketMessage("", withType: PacketType.Upgrade, datas: nil)
@@ -238,7 +239,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
 
         req.cachePolicy = NSURLRequestCachePolicy.ReloadIgnoringLocalAndRemoteCacheData
 
-        Logger.log("Doing polling request", client: self, altType: nil)
+        Logger.log("Doing polling request", type: logType)
 
         session.dataTaskWithRequest(req) {[weak self] data, res, err in
             if let this = self {
@@ -246,12 +247,12 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
                     if this.polling {
                         this.handlePollingFailed(err?.localizedDescription ?? "Error")
                     } else {
-                        Logger.error(err?.localizedDescription ?? "Error", client: this, altType: nil)
+                        Logger.error(err?.localizedDescription ?? "Error", type: this.logType)
                     }
                     return
                 }
 
-                Logger.log("Got polling response", client: this, altType: nil)
+                Logger.log("Got polling response", type: this.logType)
 
                 if let str = NSString(data: data!, encoding: NSUTF8StringEncoding) as? String {
                     dispatch_async(this.parseQueue) {[weak this] in
@@ -270,7 +271,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     }
 
     private func flushProbeWait() {
-        Logger.log("Flushing probe wait", client: self, altType: nil)
+        Logger.log("Flushing probe wait", type: logType)
 
         dispatch_async(emitQueue) {[weak self] in
             if let this = self {
@@ -323,7 +324,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
 
         waitingForPost = true
 
-        Logger.log("POSTing: %@", client: self, altType: nil, args: postStr)
+        Logger.log("POSTing: %@", type: logType, args: postStr)
 
         session.dataTaskWithRequest(req) {[weak self] data, res, err in
             if let this = self {
@@ -410,7 +411,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
                 }
             }
         } catch {
-            Logger.error("Error parsing open packet", client: self, altType: nil)
+            Logger.error("Error parsing open packet", type: logType)
             return
         }
 
@@ -446,14 +447,14 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
 
     public func open(opts: [String: AnyObject]? = nil) {
         if connected {
-            Logger.error("Tried to open while connected", client: self, altType: nil)
+            Logger.error("Tried to open while connected", type: logType)
             client?.didError("Tried to open while connected")
             
             return
         }
 
-        Logger.log("Starting engine", client: self, altType: nil)
-        Logger.log("Handshaking", client: self, altType: nil)
+        Logger.log("Starting engine", type: logType)
+        Logger.log("Handshaking", type: logType)
 
         closed = false
 
@@ -510,7 +511,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
                 length += chr
             } else {
                 if length == "" || testLength(length, n: &n) {
-                    Logger.error("Parsing error: %@", client: self, altType: nil, args: str)
+                    Logger.error("Parsing error: %@", type: logType, args: str)
                     handlePollingFailed("Error parsing XHR message")
                     return
                 }
@@ -518,7 +519,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
                 msg = String(strArray[i+1...i+n])
 
                 if let lengthInt = Int(length) where lengthInt != msg.characters.count {
-                    Logger.error("Parsing error: %@", client: self, altType: nil, args: str)
+                    Logger.error("Parsing error: %@", type: logType, args: str)
                     return
                 }
 
@@ -540,7 +541,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     }
 
     private func parseEngineMessage(var message: String, fromPolling: Bool) {
-        Logger.log("Got message: %@", client: self, altType: nil, args: message)
+        Logger.log("Got message: %@", type: logType, args: message)
 
         if fromPolling {
             fixDoubleUTF8(&message)
@@ -565,7 +566,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
         case PacketType.Close:
             handleClose()
         default:
-            Logger.log("Got unknown packet type", client: self, altType: nil)
+            Logger.log("Got unknown packet type", type: logType)
         }
     }
 
@@ -600,7 +601,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     /// Only call on emitQueue
     private func sendPollMessage(var msg: String, withType type: PacketType,
         datas:[NSData]? = nil) {
-            Logger.log("Sending poll: %@ as type: %@", client: self, altType: nil, args: msg, type.rawValue)
+            Logger.log("Sending poll: %@ as type: %@", type: logType, args: msg, type.rawValue)
 
             doubleEncodeUTF8(&msg)
             let strMsg = "\(type.rawValue)\(msg)"
@@ -624,7 +625,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     /// Only call on emitQueue
     private func sendWebSocketMessage(str: String, withType type: PacketType,
         datas:[NSData]? = nil) {
-            Logger.log("Sending ws: %@ as type: %@", client: self, altType: nil, args: str, type.rawValue)
+            Logger.log("Sending ws: %@ as type: %@", type: logType, args: str, type.rawValue)
 
             ws?.writeString("\(type.rawValue)\(str)")
 
@@ -659,7 +660,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
 
     private func upgradeTransport() {
         if websocketConnected {
-            Logger.log("Upgrading transport to WebSockets", client: self, altType: nil)
+            Logger.log("Upgrading transport to WebSockets", type: logType)
 
             fastUpgrade = true
             sendPollMessage("", withType: PacketType.Noop)
@@ -674,12 +675,12 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
         dispatch_async(emitQueue) {[weak self] in
             if let this = self where this.connected {
                 if this.websocket {
-                    Logger.log("Writing ws: %@ has data: %@", client: this, altType: nil,
-                        args: msg, data == nil ? false : true)
+                    Logger.log("Writing ws: %@ has data: %@", type: this.logType, args: msg,
+                        data == nil ? false : true)
                     this.sendWebSocketMessage(msg, withType: type, datas: data)
                 } else {
-                    Logger.log("Writing poll: %@ has data: %@", client: this, altType: nil,
-                        args: msg, data == nil ? false : true)
+                    Logger.log("Writing poll: %@ has data: %@", type: this.logType, args: msg,
+                        data == nil ? false : true)
                     this.sendPollMessage(msg, withType: type, datas: data)
                 }
             }
