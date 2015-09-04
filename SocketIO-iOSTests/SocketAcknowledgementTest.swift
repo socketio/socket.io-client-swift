@@ -21,6 +21,8 @@ class SocketAcknowledgementTest: AbstractSocketTest {
             "forcePolling": false,
             "forceWebsockets": false,// default false
             "path": ""])
+        }else {
+            AbstractSocketTest.socket.leaveNamespace()
         }
         
         openConnection()
