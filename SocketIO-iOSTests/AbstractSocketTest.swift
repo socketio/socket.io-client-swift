@@ -9,7 +9,8 @@
 import XCTest
 
 class AbstractSocketTest: XCTestCase {
-    static let serverURL = "milkbartube.com:6979"
+    static let testLocal = false
+    static let serverURL = AbstractSocketTest.testLocal ? "localhost:6979" : "milkbartube.com:6979"
     static let TEST_TIMEOUT = 8.0
     static var socket:SocketIOClient!
     var testKind:TestKind?
@@ -22,6 +23,7 @@ class AbstractSocketTest: XCTestCase {
         XCTAssertTrue(AbstractSocketTest.socket.status == SocketIOClientStatus.NotConnected)
         AbstractSocketTest.socket.on("connect") {data, ack in
             XCTAssertEqual(AbstractSocketTest.socket.status, SocketIOClientStatus.Connected)
+            XCTAssertFalse(AbstractSocketTest.socket.secure)
             if let expection = expection {
                 expection.fulfill()
             }

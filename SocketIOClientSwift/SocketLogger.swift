@@ -26,43 +26,34 @@ import Foundation
 
 var Logger: SocketLogger = DefaultSocketLogger()
 
-public protocol SocketLogClient {
-    /// The type of object being logged
-    var logType: String {get}
-}
-
 public protocol SocketLogger {
     /// Whether to log or not
     var log: Bool {get set}
     
     /// Normal log messages
-    func log(message: String, client: SocketLogClient, altType: String?, args: AnyObject...)
+    func log(message: String, client: AnyObject, altType: String?, args: AnyObject...)
     
     /// Error Messages
-    func err(message: String, client: SocketLogClient, altType: String?, args: AnyObject...)
+    func error(message: String, client: AnyObject, altType: String?, args: AnyObject...)
 }
 
 public extension SocketLogger {
-    func log(message: String, client: SocketLogClient, altType: String?, args: AnyObject...) {
-        if !log {
-            return
-        }
-        
-        let newArgs = args.map {arg -> CVarArgType in String(arg)}
-        let replaced = String(format: message, arguments: newArgs)
-        
-        NSLog("%@: %@", altType ?? client.logType, replaced)
+    func log(message: String, client: AnyObject, altType: String?, args: AnyObject...) {
+        abstractLog("Log", message: message, client: client, altType: altType, args: args)
     }
     
-    func err(message: String, client: SocketLogClient, altType: String?, args: AnyObject...) {
-        if !log {
-            return
-        }
+    func error(message: String, client: AnyObject, altType: String?, args: AnyObject...) {
+        abstractLog("ERROR", message: message, client: client, altType: altType, args: args)
+    
+    }
+    
+    private func abstractLog(type:String, message: String, client: AnyObject, altType: String?, args:Array<AnyObject>) {
+        guard log else { return }
         
         let newArgs = args.map {arg -> CVarArgType in String(arg)}
         let replaced = String(format: message, arguments: newArgs)
-        
-        NSLog("ERROR %@: %@", altType ?? client.logType, replaced)
+        let sourceString =  NSStringFromClass(object_getClass(client))
+        NSLog("%@ %@: %@",type, altType ?? sourceString, replaced)
     }
 }
 

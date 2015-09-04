@@ -22,6 +22,8 @@ class SocketEmitTest: AbstractSocketTest {
                 "forceWebsockets": false,// default false
                 "path": ""]
             )
+        }else {
+            AbstractSocketTest.socket.leaveNamespace()
         }
         
         openConnection()
