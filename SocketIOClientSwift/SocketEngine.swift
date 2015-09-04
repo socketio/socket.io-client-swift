@@ -24,9 +24,7 @@
 
 import Foundation
 
-public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
-    public let logType = "SocketEngine"
-    
+public final class SocketEngine: NSObject, WebSocketDelegate {    
     private typealias Probe = (msg: String, type: PacketType, data: [NSData]?)
     private typealias ProbeWaitQueue = [Probe]
 
@@ -199,7 +197,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
 
     private func doFastUpgrade() {
         if waitingForPoll {
-            Logger.err("Outstanding poll when switched to WebSockets," +
+            Logger.error("Outstanding poll when switched to WebSockets," +
                 "we'll probably disconnect soon. You should report this.", client: self, altType: nil)
         }
 
@@ -248,7 +246,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                     if this.polling {
                         this.handlePollingFailed(err?.localizedDescription ?? "Error")
                     } else {
-                        Logger.err(err?.localizedDescription ?? "Error", client: this, altType: nil)
+                        Logger.error(err?.localizedDescription ?? "Error", client: this, altType: nil)
                     }
                     return
                 }
@@ -412,7 +410,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                 }
             }
         } catch {
-            Logger.err("Error parsing open packet", client: self, altType: nil)
+            Logger.error("Error parsing open packet", client: self, altType: nil)
             return
         }
 
@@ -448,7 +446,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
 
     public func open(opts: [String: AnyObject]? = nil) {
         if connected {
-            Logger.err("Tried to open while connected", client: self, altType: nil)
+            Logger.error("Tried to open while connected", client: self, altType: nil)
             client?.didError("Tried to open while connected")
             
             return
@@ -512,7 +510,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                 length += chr
             } else {
                 if length == "" || testLength(length, n: &n) {
-                    Logger.err("Parsing error: %@", client: self, altType: nil, args: str)
+                    Logger.error("Parsing error: %@", client: self, altType: nil, args: str)
                     handlePollingFailed("Error parsing XHR message")
                     return
                 }
@@ -520,7 +518,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate, SocketLogClient {
                 msg = String(strArray[i+1...i+n])
 
                 if let lengthInt = Int(length) where lengthInt != msg.characters.count {
-                    Logger.err("Parsing error: %@", client: self, altType: nil, args: str)
+                    Logger.error("Parsing error: %@", client: self, altType: nil, args: str)
                     return
                 }
 

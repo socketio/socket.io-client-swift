@@ -210,7 +210,7 @@ class SocketParser {
     
     static func parseBinaryData(data: NSData, socket: SocketIOClient) {
         if socket.waitingData.count == 0 {
-            Logger.err("Got data when not remaking packet", client: socket, altType: "SocketParser")
+            Logger.error("Got data when not remaking packet", client: socket, altType: "SocketParser")
             return
         }
         

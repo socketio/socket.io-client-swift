@@ -24,7 +24,7 @@
 
 import Foundation
 
-public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient {
+public final class SocketIOClient: NSObject, SocketEngineClient {
     private var anyHandler: ((SocketAnyEvent) -> Void)?
     private var currentReconnectAttempt = 0
     private var handlers = ContiguousArray<SocketEventHandler>()
@@ -38,7 +38,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     
     public let emitQueue = dispatch_queue_create("emitQueue", DISPATCH_QUEUE_SERIAL)
     public let handleQueue: dispatch_queue_t!
-    public let logType = "SocketClient"
     public let socketURL: String
     
     public private(set) var engine: SocketEngine?
@@ -224,7 +223,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     
     /// error
     public func didError(reason: AnyObject) {
-        Logger.err("%@", client: self, altType: nil, args: reason)
+        Logger.error("%@", client: self, altType: nil, args: reason)
         
         handleEvent("error", data: reason as? [AnyObject] ?? [reason],
             isInternalMessage: true)
