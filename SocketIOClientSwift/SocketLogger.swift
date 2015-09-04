@@ -24,41 +24,48 @@
 
 import Foundation
 
-protocol SocketLogClient {
+var Logger: SocketLogger = DefaultSocketLogger()
+
+public protocol SocketLogClient {
+    /// The type of object being logged
     var logType: String {get}
 }
 
-final class SocketLogger {
-    private static let printQueue = dispatch_queue_create("printQueue", DISPATCH_QUEUE_SERIAL)
-    static var log = false
+public protocol SocketLogger {
+    /// Whether to log or not
+    var log: Bool {get set}
     
-    private static func toCVArgType(item: AnyObject) -> CVarArgType {
-        return String(item)
-    }
+    /// Normal log messages
+    func log(message: String, client: SocketLogClient, altType: String?, args: AnyObject...)
     
-    static func log(message: String, client: SocketLogClient, altType: String? = nil, args: AnyObject...) {
+    /// Error Messages
+    func err(message: String, client: SocketLogClient, altType: String?, args: AnyObject...)
+}
+
+public extension SocketLogger {
+    func log(message: String, client: SocketLogClient, altType: String?, args: AnyObject...) {
         if !log {
             return
         }
         
-        dispatch_async(printQueue) {[type = client.logType] in
-            let newArgs = args.map(SocketLogger.toCVArgType)
-            let replaced = String(format: message, arguments: newArgs)
-            
-            NSLog("%@: %@", altType ?? type, replaced)
-        }
+        let newArgs = args.map {arg -> CVarArgType in String(arg)}
+        let replaced = String(format: message, arguments: newArgs)
+        
+        NSLog("%@: %@", altType ?? client.logType, replaced)
     }
     
-    static func err(message: String, client: SocketLogClient, altType: String? = nil, args: AnyObject...) {
+    func err(message: String, client: SocketLogClient, altType: String?, args: AnyObject...) {
         if !log {
             return
         }
         
-        dispatch_async(printQueue) {[type = client.logType] in
-            let newArgs = args.map(SocketLogger.toCVArgType)
-            let replaced = String(format: message, arguments: newArgs)
-            
-            NSLog("ERROR %@: %@", altType ?? type, replaced)
-        }
+        let newArgs = args.map {arg -> CVarArgType in String(arg)}
+        let replaced = String(format: message, arguments: newArgs)
+        
+        NSLog("ERROR %@: %@", altType ?? client.logType, replaced)
     }
+}
+
+struct DefaultSocketLogger: SocketLogger {
+    var log = false
 }

@@ -1,6 +1,6 @@
 //
 //  AbstractSocketTest.swift
-//  Socket.IO-Client-Swift
+//  AbstractSocketTest.socket.IO-Client-Swift
 //
 //  Created by Lukas Schmidt on 02.08.15.
 //
@@ -9,23 +9,25 @@
 import XCTest
 
 class AbstractSocketTest: XCTestCase {
+    static let serverURL = "milkbartube.com:6979"
     static let TEST_TIMEOUT = 8.0
-    var socket:SocketIOClient!
+    static var socket:SocketIOClient!
     var testKind:TestKind?
     
-    override func tearDown() {
-        super.tearDown()
-        socket.close(fast: false)
-    }
     
     func openConnection() {
-        let expection = self.expectationWithDescription("connect")
-        XCTAssertTrue(socket.status == SocketIOClientStatus.NotConnected)
-        socket.on("connect") {data, ack in
-            expection.fulfill()
+        guard AbstractSocketTest.socket.status == SocketIOClientStatus.NotConnected else {return}
+        
+        weak var expection = self.expectationWithDescription("connect")
+        XCTAssertTrue(AbstractSocketTest.socket.status == SocketIOClientStatus.NotConnected)
+        AbstractSocketTest.socket.on("connect") {data, ack in
+            XCTAssertEqual(AbstractSocketTest.socket.status, SocketIOClientStatus.Connected)
+            if let expection = expection {
+                expection.fulfill()
+            }
         }
-        socket.connect()
-        XCTAssertEqual(socket.status, SocketIOClientStatus.Connecting)
+        AbstractSocketTest.socket.connect()
+        XCTAssertEqual(AbstractSocketTest.socket.status, SocketIOClientStatus.Connecting)
         waitForExpectationsWithTimeout(AbstractSocketTest.TEST_TIMEOUT, handler: nil)
     }
     
@@ -34,8 +36,8 @@ class AbstractSocketTest: XCTestCase {
     }
     
     func checkConnectionStatus() {
-        XCTAssertEqual(socket.status, SocketIOClientStatus.Connected)
-        XCTAssertFalse(socket.secure)
+        XCTAssertEqual(AbstractSocketTest.socket.status, SocketIOClientStatus.Connected)
+        XCTAssertFalse(AbstractSocketTest.socket.secure)
     }
     
     func socketMultipleEmit(testName:String, emitData:Array<AnyObject>, callback:NormalCallback){
@@ -48,8 +50,8 @@ class AbstractSocketTest: XCTestCase {
             }
         }
         
-        socket.emit(finalTestname, withItems: emitData)
-        socket.on(finalTestname + "Return", callback: didGetEmit)
+        AbstractSocketTest.socket.emit(finalTestname, withItems: emitData)
+        AbstractSocketTest.socket.on(finalTestname + "Return", callback: didGetEmit)
         waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
     }
     
@@ -65,11 +67,11 @@ class AbstractSocketTest: XCTestCase {
             
         }
         
-        socket.on(finalTestname + "Return", callback: didGetEmit)
+        AbstractSocketTest.socket.on(finalTestname + "Return", callback: didGetEmit)
         if let emitData = emitData {
-            socket.emit(finalTestname, emitData)
+            AbstractSocketTest.socket.emit(finalTestname, emitData)
         } else {
-            socket.emit(finalTestname)
+            AbstractSocketTest.socket.emit(finalTestname)
         }
         
         waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
@@ -85,7 +87,7 @@ class AbstractSocketTest: XCTestCase {
             }
         }
         
-        socket.emitWithAck(finalTestname, withItems: Data)(timeoutAfter: 5, callback: didGetResult)
+        AbstractSocketTest.socket.emitWithAck(finalTestname, withItems: Data)(timeoutAfter: 5, callback: didGetResult)
         waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
     }
     
@@ -100,9 +102,9 @@ class AbstractSocketTest: XCTestCase {
         }
         var ack:OnAckCallback!
         if let Data = Data {
-            ack = socket.emitWithAck(finalTestname, Data)
+            ack = AbstractSocketTest.socket.emitWithAck(finalTestname, Data)
         } else {
-            ack = socket.emitWithAck(finalTestname)
+            ack = AbstractSocketTest.socket.emitWithAck(finalTestname)
         }
         ack(timeoutAfter: 20, callback: didGet)
         

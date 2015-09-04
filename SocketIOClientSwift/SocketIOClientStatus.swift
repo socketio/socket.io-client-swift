@@ -47,5 +47,4 @@ import Foundation
     }
     
     case NotConnected, Closed, Connecting, Connected, Reconnecting
-    
 }

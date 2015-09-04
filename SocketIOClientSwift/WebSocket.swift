@@ -67,7 +67,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
     let headerWSKeyName         = "Sec-WebSocket-Key"
     let headerOriginName        = "Origin"
     let headerWSAcceptName      = "Sec-WebSocket-Accept"
-    let BUFFER_MAX              = 2048
+    let BUFFER_MAX              = 4096
     let FinMask: UInt8          = 0x80
     let OpCodeMask: UInt8       = 0x0F
     let RSVMask: UInt8          = 0x70
@@ -133,13 +133,15 @@ public class WebSocket : NSObject, NSStreamDelegate {
         if isCreated {
             return
         }
+        unowned let weakSelf = self
+        
         dispatch_async(queue,{
-            self.didDisconnect = false
+            weakSelf.didDisconnect = false
         })
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT,0), {
-            self.isCreated = true
-            self.createHTTPRequest()
-            self.isCreated = false
+            weakSelf.isCreated = true
+            weakSelf.createHTTPRequest()
+            weakSelf.isCreated = false
         })
     }
     
@@ -318,8 +320,8 @@ public class WebSocket : NSObject, NSStreamDelegate {
         let length = inputStream!.read(buffer, maxLength: BUFFER_MAX)
         if length > 0 {
             if !connected {
-                connected = processHTTP(buffer, bufferLen: length)
-                if !connected {
+                let status = processHTTP(buffer, bufferLen: length)
+                if !status {
                     self.doDisconnect(self.errorWithDetail("Invalid HTTP upgrade", code: 1))
                 }
             } else {
@@ -368,12 +370,14 @@ public class WebSocket : NSObject, NSStreamDelegate {
             }
         }
         if totalSize > 0 {
+            unowned let weakSelf = self
             if validateResponse(buffer, bufferLen: totalSize) {
                 dispatch_async(queue,{
-                    if let connectBlock = self.onConnect {
+                    weakSelf.connected = true
+                    if let connectBlock = weakSelf.onConnect {
                         connectBlock()
                     }
-                    self.delegate?.websocketDidConnect(self)
+                    weakSelf.delegate?.websocketDidConnect(self)
                 })
                 totalSize += 1 //skip the last \n
                 let restSize = bufferLen - totalSize
@@ -511,7 +515,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
                 data = NSData(bytes: UnsafePointer<UInt8>((buffer+offset)), length: Int(len))
             }
             if receivedOpcode == OpCode.Pong.rawValue {
-                dispatch_async(queue,{
+                dispatch_async(queue,{[unowned self] in
                     if let pongBlock = self.onPong {
                         pongBlock()
                     }
@@ -604,7 +608,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
                     writeError(CloseCode.Encoding.rawValue)
                     return false
                 }
-                dispatch_async(queue,{
+                dispatch_async(queue,{[unowned self] in
                     if let textBlock = self.onText {
                         textBlock(str! as String)
                     }
@@ -612,7 +616,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
                 })
             } else if response.code == .BinaryFrame {
                 let data = response.buffer! //local copy so it is perverse for writing
-                dispatch_async(queue,{
+                dispatch_async(queue,{[unowned self] in
                     if let dataBlock = self.onData {
                         dataBlock(data)
                     }
@@ -719,7 +723,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
     ///used to preform the disconnect delegate
     private func doDisconnect(error: NSError?) {
         if !self.didDisconnect {
-            dispatch_async(queue,{
+            dispatch_async(queue,{[unowned self] in
                 self.didDisconnect = true
                 if let disconnect = self.onDisconnect {
                     disconnect(error)
