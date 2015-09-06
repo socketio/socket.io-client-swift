@@ -8,7 +8,7 @@ Socket.IO-client for iOS/OS X.
 let socket = SocketIOClient(socketURL: "localhost:8080")
 
 socket.on("connect") {data, ack in
-    println("socket connected")
+    print("socket connected")
 }
 
 socket.on("currentAmount") {data, ack in

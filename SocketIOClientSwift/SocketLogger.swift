@@ -44,7 +44,6 @@ public extension SocketLogger {
     
     func error(message: String, type: String, args: AnyObject...) {
         abstractLog("ERROR", message: message, type: type, args: args)
-    
     }
     
     private func abstractLog(logType: String, message: String, type: String, args: [AnyObject]) {
