@@ -168,14 +168,14 @@ class SocketParser {
     static func parseSocketMessage(stringMessage: String, socket: SocketIOClient) {
         guard !stringMessage.isEmpty else { return }
         
-        Logger.log("Parsing %@", client: socket, altType: "SocketParser", args: stringMessage)
+        Logger.log("Parsing %@", type: "SocketParser", args: stringMessage)
         
         guard let pack = parseString(stringMessage) else {
             socket.didError("Error parsing packet")
             return
         }
         
-        Logger.log("Decoded packet as: %@", client: socket, altType: "SocketParser", args: pack.description)
+        Logger.log("Decoded packet as: %@", type: "SocketParser", args: pack.description)
         
         switch pack.type {
         case .Event:
@@ -197,7 +197,7 @@ class SocketParser {
     
     static func parseBinaryData(data: NSData, socket: SocketIOClient) {
         if socket.waitingData.count == 0 {
-            Logger.err("Got data when not remaking packet", client: socket, altType: "SocketParser")
+            Logger.error("Got data when not remaking packet", type: "SocketParser")
             return
         }
         
