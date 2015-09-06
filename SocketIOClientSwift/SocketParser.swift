@@ -173,38 +173,33 @@ class SocketParser {
     
     // Parses messages recieved
     static func parseSocketMessage(stringMessage: String, socket: SocketIOClient) {
-        if stringMessage == "" {
-            return
-        }
+        guard !stringMessage.isEmpty else { return }
+        print(stringMessage)
         
         Logger.log("Parsing %@", client: socket, altType: "SocketParser", args: stringMessage)
         
-        let p: SocketPacket
-        
-        if let pack = parseString(stringMessage) {
-            p = pack
-        } else {
+        guard let pack = parseString(stringMessage) else {
             socket.didError("Error parsing packet")
             return
         }
         
-        Logger.log("Decoded packet as: %@", client: socket, altType: "SocketParser", args: p.description)
+        Logger.log("Decoded packet as: %@", client: socket, altType: "SocketParser", args: pack.description)
         
-        switch p.type {
+        switch pack.type {
         case SocketPacket.PacketType.Event:
-            handleEvent(p, socket: socket)
+            handleEvent(pack, socket: socket)
         case SocketPacket.PacketType.Ack:
-            handleAck(p, socket: socket)
+            handleAck(pack, socket: socket)
         case SocketPacket.PacketType.BinaryEvent:
-            handleBinaryEvent(p, socket: socket)
+            handleBinaryEvent(pack, socket: socket)
         case SocketPacket.PacketType.BinaryAck:
-            handleBinaryAck(p, socket: socket)
+            handleBinaryAck(pack, socket: socket)
         case SocketPacket.PacketType.Connect:
-            handleConnect(p, socket: socket)
+            handleConnect(pack, socket: socket)
         case SocketPacket.PacketType.Disconnect:
             socket.didDisconnect("Got Disconnect")
         case SocketPacket.PacketType.Error:
-            socket.didError("Error: \(p.data)")
+            socket.didError("Error: \(pack.data)")
         }
     }
     

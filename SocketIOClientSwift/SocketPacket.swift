@@ -62,15 +62,7 @@ struct SocketPacket {
     var binary: [NSData]
     var data: [AnyObject]
     var description: String {
-        var better = "SocketPacket {type: ~~0; data: ~~1; " +
-        "id: ~~2; placeholders: ~~3;}"
-        
-        better = better["~~0"] ~= String(type.rawValue)
-        better = better["~~1"] ~= String(data)
-        better = better["~~2"] ~= String(id)
-        better = better["~~3"] ~= String(placeholders)
-        
-        return better
+        return "SocketPacket {type: \(String(type.rawValue)); data: \(String(data)); id: \(id); placeholders: \(placeholders);}"
     }
     
     var event: String {
