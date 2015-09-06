@@ -23,6 +23,7 @@
 import Foundation
 
 class SocketParser {
+    
     private static func isCorrectNamespace(nsp: String, _ socket: SocketIOClient) -> Bool {
         return nsp == socket.nsp
     }
@@ -72,12 +73,12 @@ class SocketParser {
     
     // Translation of socket.io-client#decodeString
     static func parseString(str: String) -> SocketPacket? {
-        let arr = Array(str.characters)
-        guard let type = SocketPacket.PacketType(str: String(arr[0])) else {
+        let messageCharacters = Array(str.characters)
+        guard let type = SocketPacket.PacketType(str: String(messageCharacters[0])) else {
             NSLog("Error parsing \(str)")
             return nil}
         
-        if arr.count == 1 {
+        if messageCharacters.count == 1 {
             return SocketPacket(type: type, nsp: "/")
         }
         
@@ -89,14 +90,14 @@ class SocketParser {
         if type == .BinaryEvent || type == .BinaryAck {
             var buf = ""
             
-            while arr[++i] != "-" {
-                buf += String(arr[i])
-                if i == arr.count {
+            while messageCharacters[++i] != "-" {
+                buf += String(messageCharacters[i])
+                if i == messageCharacters.count {
                     break
                 }
             }
             
-            if let holders = Int(buf) where arr[i] == "-" {
+            if let holders = Int(buf) where messageCharacters[i] == "-" {
                 placeholders = holders
             } else {
                 NSLog("Error parsing \(str)")
@@ -104,11 +105,11 @@ class SocketParser {
             }
         }
         
-        if arr[i + 1] == "/" {
+        if messageCharacters[i + 1] == "/" {
             nsp = ""
             
-            while ++i < arr.count {
-                let c = arr[i]
+            while ++i < messageCharacters.count {
+                let c = messageCharacters[i]
                 
                 if c == "," {
                     break
@@ -118,17 +119,17 @@ class SocketParser {
             }
         }
         
-        if i + 1 >= arr.count {
+        if i + 1 >= messageCharacters.count {
             return SocketPacket(type: type, id: id ?? -1,
                 nsp: nsp ?? "/", placeholders: placeholders)
         }
         
-        let next = String(arr[i + 1])
+        let next = String(messageCharacters[i + 1])
         
         if Int(next) != nil {
             var c = ""
-            while ++i < arr.count {
-                if let int = Int(String(arr[i])) {
+            while ++i < messageCharacters.count {
+                if let int = Int(String(messageCharacters[i])) {
                     c += String(int)
                 } else {
                     --i
@@ -139,7 +140,7 @@ class SocketParser {
             id = Int(c)
         }
         
-        if ++i < arr.count {
+        if ++i < messageCharacters.count {
             let d = str[str.startIndex.advancedBy(i)...str.startIndex.advancedBy(str.characters.count-1)]
             let noPlaceholders = d["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] ~= "\"~~$2\""
             let data = SocketParser.parseData(noPlaceholders) as? [AnyObject] ?? [noPlaceholders]
@@ -153,24 +154,14 @@ class SocketParser {
     
     // Parses data for events
     static func parseData(data: String) -> AnyObject? {
-        var err: NSError?
         let stringData = data.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)
-        let parsed: AnyObject?
-        
         do {
-            parsed = try NSJSONSerialization.JSONObjectWithData(stringData!,
+            return try NSJSONSerialization.JSONObjectWithData(stringData!,
                         options: NSJSONReadingOptions.MutableContainers)
         } catch let error as NSError {
-            err = error
-            parsed = nil
-        }
-        
-        if err != nil {
-            // println(err)
+            //TODO Log error
             return nil
         }
-        
-        return parsed
     }
     
     // Parses messages recieved
