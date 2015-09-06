@@ -73,10 +73,12 @@ class SocketParser {
     // Translation of socket.io-client#decodeString
     static func parseString(str: String) -> SocketPacket? {
         let arr = Array(str.characters)
-        let type = String(arr[0])
+        guard let type = SocketPacket.PacketType(str: String(arr[0])) else {
+            NSLog("Error parsing \(str)")
+            return nil}
         
         if arr.count == 1 {
-            return SocketPacket(type: SocketPacket.PacketType(str: type)!, nsp: "/")
+            return SocketPacket(type: type, nsp: "/")
         }
         
         var id: Int?
@@ -84,7 +86,7 @@ class SocketParser {
         var i = 0
         var placeholders = -1
         
-        if type == "5" || type == "6" {
+        if type == .BinaryEvent || type == .BinaryAck {
             var buf = ""
             
             while arr[++i] != "-" {
@@ -117,7 +119,7 @@ class SocketParser {
         }
         
         if i + 1 >= arr.count {
-            return SocketPacket(type: SocketPacket.PacketType(str: type)!, id: id ?? -1,
+            return SocketPacket(type: type, id: id ?? -1,
                 nsp: nsp ?? "/", placeholders: placeholders)
         }
         
@@ -142,7 +144,7 @@ class SocketParser {
             let noPlaceholders = d["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] ~= "\"~~$2\""
             let data = SocketParser.parseData(noPlaceholders) as? [AnyObject] ?? [noPlaceholders]
             
-            return SocketPacket(type: SocketPacket.PacketType(str: type)!, data: data, id: id ?? -1,
+            return SocketPacket(type: type, data: data, id: id ?? -1,
                 nsp: nsp ?? "/", placeholders: placeholders)
         }
         
@@ -174,7 +176,6 @@ class SocketParser {
     // Parses messages recieved
     static func parseSocketMessage(stringMessage: String, socket: SocketIOClient) {
         guard !stringMessage.isEmpty else { return }
-        print(stringMessage)
         
         Logger.log("Parsing %@", client: socket, altType: "SocketParser", args: stringMessage)
         
@@ -186,19 +187,19 @@ class SocketParser {
         Logger.log("Decoded packet as: %@", client: socket, altType: "SocketParser", args: pack.description)
         
         switch pack.type {
-        case SocketPacket.PacketType.Event:
+        case .Event:
             handleEvent(pack, socket: socket)
-        case SocketPacket.PacketType.Ack:
+        case .Ack:
             handleAck(pack, socket: socket)
-        case SocketPacket.PacketType.BinaryEvent:
+        case .BinaryEvent:
             handleBinaryEvent(pack, socket: socket)
-        case SocketPacket.PacketType.BinaryAck:
+        case .BinaryAck:
             handleBinaryAck(pack, socket: socket)
-        case SocketPacket.PacketType.Connect:
+        case .Connect:
             handleConnect(pack, socket: socket)
-        case SocketPacket.PacketType.Disconnect:
+        case .Disconnect:
             socket.didDisconnect("Got Disconnect")
-        case SocketPacket.PacketType.Error:
+        case .Error:
             socket.didError("Error: \(pack.data)")
         }
     }

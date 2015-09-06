@@ -57,7 +57,8 @@ class SocketParserTest: XCTestCase {
     
     func testInvalidInput() {
         let message = "10"
-        validateParseResult(message)
+        let packet = SocketParser.parseString(message)
+        XCTAssertNil(packet)
     }
     
     func validateParseResult(message:String) {
@@ -75,7 +76,13 @@ class SocketParserTest: XCTestCase {
         }
     }
     
-//    func testParsePerformance() {
-//        
-//    }
+    func testParsePerformance() {
+        let keys = Array(SocketParserTest.packetTypes.keys)
+        measureBlock({
+            for item in keys.enumerate() {
+                SocketParser.parseString(item.element)
+            }
+        })
+        
+    }
 }
