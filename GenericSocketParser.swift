@@ -45,4 +45,8 @@ struct GenericParser {
         
         return subString.substringToIndex(foundRange.location)
     }
+    
+    mutating func readUntilEnd() ->String {
+        return read(messageCharacters.count - currentIndex)!
+    }
 }

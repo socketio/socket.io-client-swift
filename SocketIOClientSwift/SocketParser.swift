@@ -98,7 +98,7 @@ class SocketParser {
             }
         }
         if parser.currentCharacter == "/" {
-            nsp = parser.readUntilStringOccurence(",")
+            nsp = parser.readUntilStringOccurence(",") ?? parser.readUntilEnd()
             parser.currentIndex++
         }
         
@@ -178,7 +178,7 @@ class SocketParser {
     }
     
     static func parseBinaryData(data: NSData, socket: SocketIOClient) {
-        if socket.waitingData.count == 0 {
+        guard !socket.waitingData.isEmpty else {
             Logger.error("Got data when not remaking packet", type: "SocketParser")
             return
         }
