@@ -22,43 +22,8 @@
 
 import Foundation
 
-struct GenericParser {
-    let message: String
-    var currentIndex:Int
-    var messageCharacters: Array<Character> {
-        get {
-            return Array(message.characters)
-        }
-    }
-    var currentCharacter: String? {
-        get{
-            if currentIndex >= messageCharacters.count {
-                return nil
-            }
-            return String(messageCharacters[currentIndex])
-        }
-    }
-    
-    mutating func read(characterLength:Int) -> String? {
-        let startIndex = message.startIndex.advancedBy(currentIndex)
-        let range = Range<String.Index>(start: startIndex, end: startIndex.advancedBy(characterLength))
-        currentIndex = currentIndex + characterLength
-        
-        return message.substringWithRange(range)
-    }
-    
-    mutating func readUntilStringOccurence(string:String) -> String? {
-        let startIndex = message.startIndex.advancedBy(currentIndex)
-        let range = Range<String.Index>(start: startIndex, end: message.endIndex)
-        let subString = message.substringWithRange(range) as NSString
-        let foundRange = subString.rangeOfString(string)
-        if foundRange.location == Int.max {
-            return nil
-        }
-        currentIndex = currentIndex + foundRange.location
-        
-        return subString.substringToIndex(foundRange.location)
-    }
+enum SocketParserError: ErrorType {
+    case InvalidMessageType, InvalidBinaryPalceholder
 }
 
 class SocketParser {
@@ -111,12 +76,12 @@ class SocketParser {
     }
     
     // Translation of socket.io-client#decodeString
-    static func parseString(str: String) -> SocketPacket? {
+    static func parseString(str: String) throws -> SocketPacket {
         var parser = GenericParser(message: str, currentIndex: 0)
         let messageCharacters = Array(str.characters)
         guard let typeString = parser.read(1), let type = SocketPacket.PacketType(str: typeString) else {
-            NSLog("Error parsing \(str)")
-            return nil}
+            throw SocketParserError.InvalidMessageType
+        }
         
         if messageCharacters.count == 1 {
             return SocketPacket(type: type, nsp: "/")
@@ -129,8 +94,7 @@ class SocketParser {
             if let buffer = parser.readUntilStringOccurence("-"), let holders = Int(buffer) where parser.read(1)! == "-" {
                 placeholders = holders
             } else {
-                NSLog("Error parsing \(str)")
-                return nil
+               throw SocketParserError.InvalidBinaryPalceholder
             }
         }
         if parser.currentCharacter == "/" {
@@ -154,16 +118,12 @@ class SocketParser {
             }
         }
         
-        if parser.currentIndex < messageCharacters.count {
-            let d = str[str.startIndex.advancedBy(parser.currentIndex + 1)...str.startIndex.advancedBy(str.characters.count-1)]
-            let noPlaceholders = d["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] ~= "\"~~$2\""
-            let data = SocketParser.parseData(noPlaceholders) as? [AnyObject] ?? [noPlaceholders]
-            
-            return SocketPacket(type: type, data: data, id: Int(idString) ?? -1,
-                nsp: nsp ?? "/", placeholders: placeholders)
-        }
+        let d = str[str.startIndex.advancedBy(parser.currentIndex + 1)...str.startIndex.advancedBy(str.characters.count - 1)]
+        let noPlaceholders = d["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] ~= "\"~~$2\""
+        let data = SocketParser.parseData(noPlaceholders) as? [AnyObject] ?? [noPlaceholders]
         
-        return nil
+        return SocketPacket(type: type, data: data, id: Int(idString) ?? -1,
+            nsp: nsp ?? "/", placeholders: placeholders)
     }
     
     // Parses data for events
@@ -184,29 +144,37 @@ class SocketParser {
         
         Logger.log("Parsing %@", type: "SocketParser", args: stringMessage)
         
-        guard let pack = parseString(stringMessage) else {
-            socket.didError("Error parsing packet")
-            return
+        do {
+            let pack = try parseString(stringMessage)
+            Logger.log("Decoded packet as: %@", type: "SocketParser", args: pack.description)
+            
+            switch pack.type {
+            case .Event:
+                handleEvent(pack, socket: socket)
+            case .Ack:
+                handleAck(pack, socket: socket)
+            case .BinaryEvent:
+                handleBinaryEvent(pack, socket: socket)
+            case .BinaryAck:
+                handleBinaryAck(pack, socket: socket)
+            case .Connect:
+                handleConnect(pack, socket: socket)
+            case .Disconnect:
+                socket.didDisconnect("Got Disconnect")
+            case .Error:
+                socket.didError("Error: \(pack.data)")
+            }
+            
+        }catch SocketParserError.InvalidBinaryPalceholder {
+            Logger.error("Parsed Invalid Binary Placeholder", type: "SocketParser")
         }
-        
-        Logger.log("Decoded packet as: %@", type: "SocketParser", args: pack.description)
-        
-        switch pack.type {
-        case .Event:
-            handleEvent(pack, socket: socket)
-        case .Ack:
-            handleAck(pack, socket: socket)
-        case .BinaryEvent:
-            handleBinaryEvent(pack, socket: socket)
-        case .BinaryAck:
-            handleBinaryAck(pack, socket: socket)
-        case .Connect:
-            handleConnect(pack, socket: socket)
-        case .Disconnect:
-            socket.didDisconnect("Got Disconnect")
-        case .Error:
-            socket.didError("Error: \(pack.data)")
+        catch SocketParserError.InvalidMessageType {
+            Logger.error("Parsed Invalid Binary Placeholder", type: "SocketParser")
         }
+        catch {
+            
+        }
+
     }
     
     static func parseBinaryData(data: NSData, socket: SocketIOClient) {
