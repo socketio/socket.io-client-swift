@@ -61,9 +61,10 @@ class SocketParser {
     }
     
     // Translation of socket.io-client#decodeString
-    static func parseString(str: String) throws -> SocketPacket {
-        var parser = GenericParser(message: str, currentIndex: 0)
-        guard let typeString = parser.read(1), let type = SocketPacket.PacketType(str: typeString) else {
+    static func parseString(message: String) throws -> SocketPacket {
+        var parser = GenericSocketParser(message: message, currentIndex: 0)
+        guard let typeString = parser.read(1),
+            let type = SocketPacket.PacketType(str: typeString) else {
             throw SocketParserError.InvalidMessageType
         }
         
@@ -71,24 +72,25 @@ class SocketParser {
             return SocketPacket(type: type, nsp: "/")
         }
         
-        var nsp:String?
+        var namespace: String?
         var placeholders = -1
         
         if type == .BinaryEvent || type == .BinaryAck {
-            if let buffer = parser.readUntilStringOccurence("-"), let holders = Int(buffer) where parser.read(1)! == "-" {
+            if let buffer = parser.readUntilStringOccurence("-"), let holders = Int(buffer)
+                where parser.read(1)! == "-" {
                 placeholders = holders
             } else {
                throw SocketParserError.InvalidBinaryPalceholder
             }
         }
         if parser.currentCharacter == "/" {
-            nsp = parser.readUntilStringOccurence(",") ?? parser.readUntilEnd()
+            namespace = parser.readUntilStringOccurence(",") ?? parser.readUntilEnd()
             parser.currentIndex++
         }
         
         if parser.currentIndex >= parser.messageCharacters.count {
             return SocketPacket(type: type, id: -1,
-                nsp: nsp ?? "/", placeholders: placeholders)
+                nsp: namespace ?? "/", placeholders: placeholders)
         }
         
         var idString = ""
@@ -101,12 +103,12 @@ class SocketParser {
             }
         }
         
-        let d = str[str.startIndex.advancedBy(parser.currentIndex + 1)...str.startIndex.advancedBy(str.characters.count - 1)]
+        let d = message[message.startIndex.advancedBy(parser.currentIndex + 1)...message.startIndex.advancedBy(message.characters.count - 1)]
         let noPlaceholders = d["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] ~= "\"~~$2\""
-        let data = SocketParser.parseData(noPlaceholders) as? [AnyObject] ?? [noPlaceholders]
+        let data = parseData(noPlaceholders) as? [AnyObject] ?? [noPlaceholders]
         
         return SocketPacket(type: type, data: data, id: Int(idString) ?? -1,
-            nsp: nsp ?? "/", placeholders: placeholders)
+            nsp: namespace ?? "/", placeholders: placeholders)
     }
     
     // Parses data for events
@@ -122,13 +124,13 @@ class SocketParser {
     }
     
     // Parses messages recieved
-    static func parseSocketMessage(stringMessage: String, socket: SocketIOClient) {
-        guard !stringMessage.isEmpty else { return }
+    static func parseSocketMessage(message: String, socket: SocketIOClient) {
+        guard !message.isEmpty else { return }
         
-        Logger.log("Parsing %@", type: "SocketParser", args: stringMessage)
+        Logger.log("Parsing %@", type: "SocketParser", args: message)
         
         do {
-            let pack = try parseString(stringMessage)
+            let pack = try parseString(message)
             Logger.log("Decoded packet as: %@", type: "SocketParser", args: pack.description)
             
             switch pack.type {

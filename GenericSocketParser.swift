@@ -8,10 +8,10 @@
 
 import Foundation
 
-struct GenericParser {
+struct GenericSocketParser {
     let message: String
-    var currentIndex:Int
-    var messageCharacters: Array<Character> {
+    var currentIndex: Int
+    var messageCharacters: [Character] {
         get {
             return Array(message.characters)
         }
