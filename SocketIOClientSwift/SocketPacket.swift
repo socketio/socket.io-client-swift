@@ -212,17 +212,13 @@ struct SocketPacket {
     }
     
     mutating func fillInPlaceholders() {
-        let newArr = NSMutableArray(array: data)
-        
         for i in 0..<data.count {
             if let str = data[i] as? String, num = str["~~(\\d)"].groups() {
-                newArr[i] = binary[Int(num[1])!]
+                data[i] = binary[Int(num[1])!]
             } else if data[i] is NSDictionary || data[i] is NSArray {
-                newArr[i] = _fillInPlaceholders(data[i])
+                data[i] = _fillInPlaceholders(data[i])
             }
         }
-        
-        data = newArr as [AnyObject]
     }
     
     private mutating func _fillInPlaceholders(data: AnyObject) -> AnyObject {
@@ -287,22 +283,18 @@ private extension SocketPacket {
             binary.append(bin)
             
             return placeholder
-        } else if let arr = data as? NSArray {
-            let newArr = NSMutableArray(array: arr)
-            
+        } else if var arr = data as? [AnyObject] {
             for i in 0..<arr.count {
-                newArr[i] = shred(arr[i], binary: &binary)
+                arr[i] = shred(arr[i], binary: &binary)
             }
             
-            return newArr
-        } else if let dict = data as? NSDictionary {
-            let newDict = NSMutableDictionary(dictionary: dict)
-            
-            for (key, value) in newDict {
-                newDict[key as! NSCopying] = shred(value, binary: &binary)
+            return arr
+        } else if var dict = data as? [String: AnyObject] {
+            for (key, value) in dict {
+                dict[key] = shred(value, binary: &binary)
             }
             
-            return newDict
+            return dict
         } else {
             return data
         }
