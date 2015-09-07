@@ -289,9 +289,9 @@ private extension SocketPacket {
             }
             
             return arr
-        } else if var dict = data as? [String: AnyObject] {
+        } else if let dict = data as? NSMutableDictionary {
             for (key, value) in dict {
-                dict[key] = shred(value, binary: &binary)
+                dict[key as! NSCopying] = shred(value, binary: &binary)
             }
             
             return dict
