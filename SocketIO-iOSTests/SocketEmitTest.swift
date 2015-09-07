@@ -22,11 +22,12 @@ class SocketEmitTest: AbstractSocketTest {
                 "forceWebsockets": false,// default false
                 "path": ""]
             )
+            openConnection()
         }else {
             AbstractSocketTest.socket.leaveNamespace()
         }
         
-        openConnection()
+        
     }
     
     override func tearDown() {

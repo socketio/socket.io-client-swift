@@ -22,13 +22,12 @@ class SocketNamespaceEmitTest: AbstractSocketTest {
             "forceWebsockets": false,// default false
             "path": "",
             "nsp": "/swift"])
+            openConnection()
         }else {
             AbstractSocketTest.socket.joinNamespace("/swift")
         }
-        
-        openConnection()
     }
-    
+
     func testConnectionStatus() {
         super.checkConnectionStatus()
     }

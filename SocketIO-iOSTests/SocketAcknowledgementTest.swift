@@ -21,11 +21,12 @@ class SocketAcknowledgementTest: AbstractSocketTest {
             "forcePolling": false,
             "forceWebsockets": false,// default false
             "path": ""])
+             openConnection()
         }else {
             AbstractSocketTest.socket.leaveNamespace()
         }
         
-        openConnection()
+       
     }
     
     func testConnectionStatus() {
