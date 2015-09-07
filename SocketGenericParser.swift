@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct GenericSocketParser {
+struct SocketGenericParser {
     let message: String
     var currentIndex: Int
     var messageCharacters: [Character] {

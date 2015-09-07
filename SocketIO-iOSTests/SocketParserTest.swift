@@ -68,39 +68,37 @@ class SocketParserTest: XCTestCase {
     
     func testInvalidInput() {
         let message = "8"
-        do {
-            try SocketParser.parseString(message)
-            XCTFail("Should throw exeption")
-        } catch {
-            
-        }
+        XCTAssertNil(SocketParser.parseString(message))
     }
     
     func testGenericParser() {
-        var parser = GenericSocketParser(message: "61-/swift,", currentIndex: 0)
+        var parser = SocketGenericParser(message: "61-/swift,", currentIndex: 0)
         XCTAssertEqual(parser.read(1), "6")
         XCTAssertEqual(parser.currentCharacter, "1")
         XCTAssertEqual(parser.readUntilStringOccurence("-"), "1")
         XCTAssertEqual(parser.currentCharacter, "-")
-        
     }
     
     func validateParseResult(message:String) {
         let validValues = SocketParserTest.packetTypes[message]!
-        let packet = try! SocketParser.parseString(message)
+        let packet = SocketParser.parseString(message)
         let type = message.substringWithRange(Range<String.Index>(start: message.startIndex, end: message.startIndex.advancedBy(1)))
-        XCTAssertEqual(packet.type, SocketPacket.PacketType(str:type)!)
-        XCTAssertEqual(packet.nsp, validValues.0)
-        XCTAssertTrue((packet.data as NSArray).isEqualToArray(validValues.1))
-        XCTAssertTrue((packet.binary as NSArray).isEqualToArray(validValues.2))
-        XCTAssertEqual(packet.id, validValues.3)
+        if let packet = packet {
+            XCTAssertEqual(packet.type, SocketPacket.PacketType(str:type)!)
+            XCTAssertEqual(packet.nsp, validValues.0)
+            XCTAssertTrue((packet.data as NSArray).isEqualToArray(validValues.1))
+            XCTAssertTrue((packet.binary as NSArray).isEqualToArray(validValues.2))
+            XCTAssertEqual(packet.id, validValues.3)
+        }else {
+            XCTFail()
+        }
     }
     
     func testParsePerformance() {
         let keys = Array(SocketParserTest.packetTypes.keys)
         measureBlock({
             for item in keys.enumerate() {
-                try! SocketParser.parseString(item.element)
+                SocketParser.parseString(item.element)
             }
         })
     }

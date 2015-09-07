@@ -22,10 +22,6 @@
 
 import Foundation
 
-enum SocketParserError: ErrorType {
-    case InvalidMessageType, InvalidBinaryPalceholder
-}
-
 class SocketParser {
     
     private static func isCorrectNamespace(nsp: String, _ socket: SocketIOClient) -> Bool {
@@ -61,11 +57,11 @@ class SocketParser {
     }
     
     // Translation of socket.io-client#decodeString
-    static func parseString(message: String) throws -> SocketPacket {
-        var parser = GenericSocketParser(message: message, currentIndex: 0)
+    static func parseString(message: String) -> SocketPacket? {
+        var parser = SocketGenericParser(message: message, currentIndex: 0)
         guard let typeString = parser.read(1),
             let type = SocketPacket.PacketType(str: typeString) else {
-            throw SocketParserError.InvalidMessageType
+            return nil
         }
         
         if parser.messageCharacters.count == 1 {
@@ -80,7 +76,7 @@ class SocketParser {
                 where parser.read(1)! == "-" {
                 placeholders = holders
             } else {
-               throw SocketParserError.InvalidBinaryPalceholder
+               return nil
             }
         }
         if parser.currentCharacter == "/" {
@@ -129,35 +125,27 @@ class SocketParser {
         
         Logger.log("Parsing %@", type: "SocketParser", args: message)
         
-        do {
-            let pack = try parseString(message)
-            Logger.log("Decoded packet as: %@", type: "SocketParser", args: pack.description)
-            
-            switch pack.type {
-            case .Event:
-                handleEvent(pack, socket: socket)
-            case .Ack:
-                handleAck(pack, socket: socket)
-            case .BinaryEvent:
-                handleBinary(pack, socket: socket)
-            case .BinaryAck:
-                handleBinary(pack, socket: socket)
-            case .Connect:
-                handleConnect(pack, socket: socket)
-            case .Disconnect:
-                socket.didDisconnect("Got Disconnect")
-            case .Error:
-                socket.didError("Error: \(pack.data)")
-            }
-            
-        }catch SocketParserError.InvalidBinaryPalceholder {
-            Logger.error("Parsed Invalid Binary Placeholder", type: "SocketParser")
+        guard let pack = parseString(message) else {
+            Logger.error("Parsing message", type: "SocketParser", args: message)
+            return
         }
-        catch SocketParserError.InvalidMessageType {
-            Logger.error("Parsed Invalid Binary Placeholder", type: "SocketParser")
-        }
-        catch {
-            
+        Logger.log("Decoded packet as: %@", type: "SocketParser", args: pack.description)
+        
+        switch pack.type {
+        case .Event:
+            handleEvent(pack, socket: socket)
+        case .Ack:
+            handleAck(pack, socket: socket)
+        case .BinaryEvent:
+            handleBinary(pack, socket: socket)
+        case .BinaryAck:
+            handleBinary(pack, socket: socket)
+        case .Connect:
+            handleConnect(pack, socket: socket)
+        case .Disconnect:
+            socket.didDisconnect("Got Disconnect")
+        case .Error:
+            socket.didError("Error: \(pack.data)")
         }
 
     }
