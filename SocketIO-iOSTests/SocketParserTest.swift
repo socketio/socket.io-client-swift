@@ -61,6 +61,15 @@ class SocketParserTest: XCTestCase {
         XCTAssertNil(packet)
     }
     
+    func testGenericParser() {
+        var parser = GenericParser(message: "61-/swift,", currentIndex: 0)
+        XCTAssertEqual(parser.read(1), "6")
+        XCTAssertEqual(parser.currentCharacter, "1")
+        XCTAssertEqual(parser.readUntilStringOccurence("-"), "1")
+       XCTAssertEqual(parser.currentCharacter, "-")
+        
+    }
+    
     func validateParseResult(message:String) {
         let validValues = SocketParserTest.packetTypes[message]!
         let packet = SocketParser.parseString(message)

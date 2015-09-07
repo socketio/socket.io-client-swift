@@ -22,6 +22,45 @@
 
 import Foundation
 
+struct GenericParser {
+    let message: String
+    var currentIndex:Int
+    var messageCharacters: Array<Character> {
+        get {
+            return Array(message.characters)
+        }
+    }
+    var currentCharacter: String? {
+        get{
+            if currentIndex >= messageCharacters.count {
+                return nil
+            }
+            return String(messageCharacters[currentIndex])
+        }
+    }
+    
+    mutating func read(characterLength:Int) -> String? {
+        let startIndex = message.startIndex.advancedBy(currentIndex)
+        let range = Range<String.Index>(start: startIndex, end: startIndex.advancedBy(characterLength))
+        currentIndex = currentIndex + characterLength
+        
+        return message.substringWithRange(range)
+    }
+    
+    mutating func readUntilStringOccurence(string:String) -> String? {
+        let startIndex = message.startIndex.advancedBy(currentIndex)
+        let range = Range<String.Index>(start: startIndex, end: message.endIndex)
+        let subString = message.substringWithRange(range) as NSString
+        let foundRange = subString.rangeOfString(string)
+        if foundRange.location == Int.max {
+            return nil
+        }
+        currentIndex = foundRange.location + 1
+        
+        return subString.substringToIndex(foundRange.location)
+    }
+}
+
 class SocketParser {
     
     private static func isCorrectNamespace(nsp: String, _ socket: SocketIOClient) -> Bool {
@@ -73,8 +112,9 @@ class SocketParser {
     
     // Translation of socket.io-client#decodeString
     static func parseString(str: String) -> SocketPacket? {
+        var parser = GenericParser(message: str, currentIndex: 0)
         let messageCharacters = Array(str.characters)
-        guard let type = SocketPacket.PacketType(str: String(messageCharacters[0])) else {
+        guard let typeString = parser.read(1), let type = SocketPacket.PacketType(str: typeString) else {
             NSLog("Error parsing \(str)")
             return nil}
         
@@ -88,21 +128,14 @@ class SocketParser {
         var placeholders = -1
         
         if type == .BinaryEvent || type == .BinaryAck {
-            var buf = ""
-            
-            while messageCharacters[++i] != "-" {
-                buf += String(messageCharacters[i])
-                if i == messageCharacters.count {
-                    break
-                }
-            }
-            
-            if let holders = Int(buf) where messageCharacters[i] == "-" {
+            if let buffer = parser.readUntilStringOccurence("-"), let holders = Int(buffer) where parser.read(1) == "-" {
                 placeholders = holders
             } else {
                 NSLog("Error parsing \(str)")
                 return nil
             }
+
+            i = parser.currentIndex - 1
         }
         
         if messageCharacters[i + 1] == "/" {
