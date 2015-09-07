@@ -32,26 +32,20 @@ class SocketParser {
         return nsp == socket.nsp
     }
     
+    private static func handleEvent(p: SocketPacket, socket: SocketIOClient) {
+        guard isCorrectNamespace(p.nsp, socket) else { return }
+        socket.handleEvent(p.event, data: p.args,
+            isInternalMessage: false, wantsAck: p.id)
+    }
+    
     private static func handleAck(p: SocketPacket, socket: SocketIOClient) {
-        if !isCorrectNamespace(p.nsp, socket) {
-            return
-        }
+        guard isCorrectNamespace(p.nsp, socket) else { return }
         
         socket.handleAck(p.id, data: p.data)
     }
     
-    private static func handleBinaryAck(p: SocketPacket, socket: SocketIOClient) {
-        if !isCorrectNamespace(p.nsp, socket) {
-            return
-        }
-        
-        socket.waitingData.append(p)
-    }
-    
-    private static func handleBinaryEvent(p: SocketPacket, socket: SocketIOClient) {
-        if !isCorrectNamespace(p.nsp, socket) {
-            return
-        }
+    private static func handleBinary(p: SocketPacket, socket: SocketIOClient) {
+        guard isCorrectNamespace(p.nsp, socket) else { return }
         
         socket.waitingData.append(p)
     }
@@ -66,24 +60,14 @@ class SocketParser {
         }
     }
     
-    private static func handleEvent(p: SocketPacket, socket: SocketIOClient) {
-        if !isCorrectNamespace(p.nsp, socket) {
-            return
-        }
-        
-        socket.handleEvent(p.event, data: p.args,
-            isInternalMessage: false, wantsAck: p.id)
-    }
-    
     // Translation of socket.io-client#decodeString
     static func parseString(str: String) throws -> SocketPacket {
         var parser = GenericParser(message: str, currentIndex: 0)
-        let messageCharacters = Array(str.characters)
         guard let typeString = parser.read(1), let type = SocketPacket.PacketType(str: typeString) else {
             throw SocketParserError.InvalidMessageType
         }
         
-        if messageCharacters.count == 1 {
+        if parser.messageCharacters.count == 1 {
             return SocketPacket(type: type, nsp: "/")
         }
         
@@ -107,9 +91,8 @@ class SocketParser {
                 nsp: nsp ?? "/", placeholders: placeholders)
         }
         
-        
         var idString = ""
-        while parser.currentIndex < messageCharacters.count {
+        while parser.currentIndex < parser.messageCharacters.count {
             if let next = parser.read(1), let int = Int(next) {
                 idString += String(int)
             } else {
@@ -132,8 +115,8 @@ class SocketParser {
         do {
             return try NSJSONSerialization.JSONObjectWithData(stringData!,
                         options: NSJSONReadingOptions.MutableContainers)
-        } catch let error as NSError {
-            //TODO Log error
+        } catch {
+            Logger.error("Parsing JSON: %@", type: "SocketParser", args: data)
             return nil
         }
     }
@@ -154,9 +137,9 @@ class SocketParser {
             case .Ack:
                 handleAck(pack, socket: socket)
             case .BinaryEvent:
-                handleBinaryEvent(pack, socket: socket)
+                handleBinary(pack, socket: socket)
             case .BinaryAck:
-                handleBinaryAck(pack, socket: socket)
+                handleBinary(pack, socket: socket)
             case .Connect:
                 handleConnect(pack, socket: socket)
             case .Disconnect:
@@ -184,15 +167,12 @@ class SocketParser {
         }
         
         let shouldExecute = socket.waitingData[0].addData(data)
-        
-        if !shouldExecute {
-            return
-        }
+        guard shouldExecute else { return }
         
         var packet = socket.waitingData.removeAtIndex(0)
         packet.fillInPlaceholders()
         
-        if packet.type != SocketPacket.PacketType.BinaryAck {
+        if packet.type != .BinaryAck {
             socket.handleEvent(packet.event, data: packet.args,
                 isInternalMessage: false, wantsAck: packet.id)
         } else {
