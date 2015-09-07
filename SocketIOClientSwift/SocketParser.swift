@@ -122,9 +122,7 @@ class SocketParser {
             return SocketPacket(type: type, nsp: "/")
         }
         
-        var id: Int?
         var nsp:String?
-        var i = 0
         var placeholders = -1
         
         if type == .BinaryEvent || type == .BinaryAck {
@@ -134,41 +132,34 @@ class SocketParser {
                 NSLog("Error parsing \(str)")
                 return nil
             }
-
-            i = parser.currentIndex - 1
         }
         if parser.currentCharacter == "/" {
             nsp = parser.readUntilStringOccurence(",")
-            i = parser.currentIndex
+            parser.currentIndex++
         }
         
-        if parser.currentIndex + 1 >= parser.messageCharacters.count {
-            return SocketPacket(type: type, id: id ?? -1,
+        if parser.currentIndex >= parser.messageCharacters.count {
+            return SocketPacket(type: type, id: -1,
                 nsp: nsp ?? "/", placeholders: placeholders)
         }
         
-        let next = String(messageCharacters[i + 1])
         
-        if Int(next) != nil {
-            var c = ""
-            while ++i < messageCharacters.count {
-                if let int = Int(String(messageCharacters[i])) {
-                    c += String(int)
-                } else {
-                    --i
-                    break
-                }
+        var idString = ""
+        while parser.currentIndex < messageCharacters.count {
+            if let next = parser.read(1), let int = Int(next) {
+                idString += String(int)
+            } else {
+                parser.currentIndex -= 2
+                break
             }
-            
-            id = Int(c)
         }
         
-        if ++i < messageCharacters.count {
-            let d = str[str.startIndex.advancedBy(i)...str.startIndex.advancedBy(str.characters.count-1)]
+        if parser.currentIndex < messageCharacters.count {
+            let d = str[str.startIndex.advancedBy(parser.currentIndex + 1)...str.startIndex.advancedBy(str.characters.count-1)]
             let noPlaceholders = d["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] ~= "\"~~$2\""
             let data = SocketParser.parseData(noPlaceholders) as? [AnyObject] ?? [noPlaceholders]
             
-            return SocketPacket(type: type, data: data, id: id ?? -1,
+            return SocketPacket(type: type, data: data, id: Int(idString) ?? -1,
                 nsp: nsp ?? "/", placeholders: placeholders)
         }
         

@@ -16,7 +16,7 @@ class SocketParserTest: XCTestCase {
         "2/swift,[\"testArrayEmitReturn\",[\"test3\",\"test4\"]]": ("/swift", ["testArrayEmitReturn", ["test3", "test4"]], [], -1),
         "51-/swift,[\"testMultipleItemsWithBufferEmitReturn\",[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]": ("/swift", ["testMultipleItemsWithBufferEmitReturn", [1, 2], ["test": "bob"], 25, "polo", "~~0"], [], -1),
         "3/swift,0[[\"test3\",\"test4\"]]": ("/swift", [["test3", "test4"]], [], 0),
-        "61-/swift,9[[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]": ("/swift", [ [1, 2], ["test": "bob"], 25, "polo", "~~0"], [], 9),
+        "61-/swift,19[[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]": ("/swift", [ [1, 2], ["test": "bob"], 25, "polo", "~~0"], [], 19),
         "4/swift,": ("/swift", [], [], -1),
         "10": ("/swift", [], [], -1)]
     
@@ -46,7 +46,7 @@ class SocketParserTest: XCTestCase {
     }
     
     func testNameSpaceBinaryAckParse() {
-        let message = "61-/swift,9[[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]"
+        let message = "61-/swift,19[[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]"
         validateParseResult(message)
     }
     
