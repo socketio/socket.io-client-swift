@@ -25,8 +25,8 @@
 import Foundation
 
 struct SocketPacket {
-    private var currentPlace = 0
     private let placeholders: Int
+    private var currentPlace = 0
 
     let nsp: String
     let id: Int
