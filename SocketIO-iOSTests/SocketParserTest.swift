@@ -17,7 +17,7 @@ class SocketParserTest: XCTestCase {
         "51-/swift,[\"testMultipleItemsWithBufferEmitReturn\",[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]": ("/swift", ["testMultipleItemsWithBufferEmitReturn", [1, 2], ["test": "bob"], 25, "polo", "~~0"], [], -1),
         "3/swift,0[[\"test3\",\"test4\"]]": ("/swift", [["test3", "test4"]], [], 0),
         "61-/swift,9[[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]": ("/swift", [ [1, 2], ["test": "bob"], 25, "polo", "~~0"], [], 9),
-        "4/swift": ("/swift", [], [], -1),
+        "4/swift,": ("/swift", [], [], -1),
         "10": ("/swift", [], [], -1)]
     
     func testDisconnect() {
@@ -51,12 +51,12 @@ class SocketParserTest: XCTestCase {
     }
     
     func testNamespaceErrorParse() {
-        let message = "4/swift"
+        let message = "4/swift,"
         validateParseResult(message)
     }
     
     func testInvalidInput() {
-        let message = "10"
+        let message = "8"
         let packet = SocketParser.parseString(message)
         XCTAssertNil(packet)
     }

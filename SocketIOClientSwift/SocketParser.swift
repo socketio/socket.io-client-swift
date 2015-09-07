@@ -55,7 +55,7 @@ struct GenericParser {
         if foundRange.location == Int.max {
             return nil
         }
-        currentIndex = foundRange.location + 1
+        currentIndex = currentIndex + foundRange.location
         
         return subString.substringToIndex(foundRange.location)
     }
@@ -128,7 +128,7 @@ class SocketParser {
         var placeholders = -1
         
         if type == .BinaryEvent || type == .BinaryAck {
-            if let buffer = parser.readUntilStringOccurence("-"), let holders = Int(buffer) where parser.read(1) == "-" {
+            if let buffer = parser.readUntilStringOccurence("-"), let holders = Int(buffer) where parser.read(1)! == "-" {
                 placeholders = holders
             } else {
                 NSLog("Error parsing \(str)")
@@ -137,22 +137,12 @@ class SocketParser {
 
             i = parser.currentIndex - 1
         }
-        
-        if messageCharacters[i + 1] == "/" {
-            nsp = ""
-            
-            while ++i < messageCharacters.count {
-                let c = messageCharacters[i]
-                
-                if c == "," {
-                    break
-                }
-                
-                nsp! += String(c)
-            }
+        if parser.currentCharacter == "/" {
+            nsp = parser.readUntilStringOccurence(",")
+            i = parser.currentIndex
         }
         
-        if i + 1 >= messageCharacters.count {
+        if parser.currentIndex + 1 >= parser.messageCharacters.count {
             return SocketPacket(type: type, id: id ?? -1,
                 nsp: nsp ?? "/", placeholders: placeholders)
         }
