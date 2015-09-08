@@ -281,12 +281,14 @@ private extension SocketPacket {
             }
             
             return arr
-        } else if let dict = data as? NSMutableDictionary {
+        } else if let dict = data as? NSDictionary {
+            let mutDict = NSMutableDictionary(dictionary: dict)
+            
             for (key, value) in dict {
-                dict[key as! NSCopying] = shred(value, binary: &binary)
+                mutDict[key as! NSCopying] = shred(value, binary: &binary)
             }
             
-            return dict
+            return mutDict
         } else {
             return data
         }
