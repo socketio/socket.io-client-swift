@@ -76,7 +76,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketLogClient
     Create a new SocketIOClient. opts can be omitted
     */
     public init(var socketURL:String, opts:[String: AnyObject]? = nil) {
-        if socketURL["https://"].matches().count != 0 {
+        if socketURL["https://"].matches().count != 0 || opts?["secure"] as? Bool == true {
             self._secure = true
         }
         
