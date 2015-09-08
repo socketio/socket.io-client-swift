@@ -73,7 +73,7 @@ final class SocketPacket: Printable {
     }
     
     func getEvent() -> String {
-        let event = data?.removeAtIndex(0)
+        let event: AnyObject? = data?.removeAtIndex(0)
         
         return event as? String ?? String(stringInterpolationSegment: event!)
     }
