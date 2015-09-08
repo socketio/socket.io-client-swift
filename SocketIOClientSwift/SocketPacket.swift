@@ -66,7 +66,7 @@ struct SocketPacket {
     }
     
     var event: String {
-        return data[0] as! String
+        return data[0] as? String ?? String(data[0])
     }
     
     var packetString: String {
