@@ -30,6 +30,7 @@ class SocketParser {
     
     private static func handleEvent(p: SocketPacket, socket: SocketIOClient) {
         guard isCorrectNamespace(p.nsp, socket) else { return }
+        
         socket.handleEvent(p.event, data: p.args,
             isInternalMessage: false, wantsAck: p.id)
     }
@@ -59,10 +60,9 @@ class SocketParser {
     // Translation of socket.io-client#decodeString
     static func parseString(message: String) -> SocketPacket? {
         var parser = SocketGenericParser(message: message, currentIndex: 0)
-        guard let typeString = parser.read(1),
-            let type = SocketPacket.PacketType(str: typeString) else {
-            return nil
-        }
+        
+        guard let typeString = parser.read(1), type = SocketPacket.PacketType(str: typeString)
+            else {return nil}
         
         if parser.messageCharacters.count == 1 {
             return SocketPacket(type: type, nsp: "/")
@@ -129,6 +129,7 @@ class SocketParser {
             Logger.error("Parsing message", type: "SocketParser", args: message)
             return
         }
+        
         Logger.log("Decoded packet as: %@", type: "SocketParser", args: pack.description)
         
         switch pack.type {

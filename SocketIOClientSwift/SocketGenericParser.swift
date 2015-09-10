@@ -36,9 +36,11 @@ struct SocketGenericParser {
         let range = Range<String.Index>(start: startIndex, end: message.endIndex)
         let subString = message.substringWithRange(range) as NSString
         let foundRange = subString.rangeOfString(string)
+        
         if foundRange.location == Int.max {
             return nil
         }
+        
         currentIndex = currentIndex + foundRange.location
         
         return subString.substringToIndex(foundRange.location)

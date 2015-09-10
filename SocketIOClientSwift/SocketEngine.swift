@@ -69,11 +69,11 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     var urlWebSocket: String?
     var ws: WebSocket?
     
-    public enum PacketType: Int {
+    @objc public enum PacketType: Int {
         case Open, Close, Ping, Pong, Message, Upgrade, Noop
 
-        init?(str: String?) {
-            if let value = Int(str ?? ""), raw = PacketType(rawValue: value) {
+        init?(str: String) {
+            if let value = Int(str), raw = PacketType(rawValue: value) {
                 self = raw
             } else {
                 return nil
@@ -547,7 +547,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
             fixDoubleUTF8(&message)
         }
 
-        let type = PacketType(str: (message["^(\\d)"].groups()?[1])) ?? {
+        let type = PacketType(str: (message["^(\\d)"].groups()?[1]) ?? "") ?? {
             self.checkIfMessageIsBase64Binary(message)
             return PacketType.Noop
             }()
@@ -684,23 +684,6 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
                     this.sendPollMessage(msg, withType: type, datas: data)
                 }
             }
-        }
-    }
-
-    /**
-    Write a message, independent of transport. For Objective-C. withData should be an NSArray of NSData
-    */
-    public func writeObjc(msg: String, withType type: Int, withData data: NSArray?) {
-        if let pType = PacketType(rawValue: type) {
-            var arr = [NSData]()
-
-            if let data = data {
-                for d in data {
-                    arr.append(d as! NSData)
-                }
-            }
-
-            write(msg, withType: pType, withData: arr)
         }
     }
 
