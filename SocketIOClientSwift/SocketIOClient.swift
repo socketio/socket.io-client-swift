@@ -25,10 +25,11 @@
 import Foundation
 
 public final class SocketIOClient: NSObject, SocketEngineClient {
-    public let emitQueue = dispatch_queue_create("emitQueue", DISPATCH_QUEUE_SERIAL)
-    public let handleQueue: dispatch_queue_t!
-    public let socketURL: String
-    
+    private let emitQueue = dispatch_queue_create("emitQueue", DISPATCH_QUEUE_SERIAL)
+    private let handleQueue: dispatch_queue_t!
+
+	public let socketURL: String
+
     public private(set) var engine: SocketEngine?
     public private(set) var secure = false
     public private(set) var status = SocketIOClientStatus.NotConnected
@@ -49,10 +50,11 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     private var connectParams: [String: AnyObject]?
     private var reconnectTimer: NSTimer?
     
-    let reconnectAttempts: Int!
-    var ackHandlers = SocketAckManager()
-    var currentAck = -1
-    var waitingData = [SocketPacket]()
+    private let reconnectAttempts: Int!
+    private var ackHandlers = SocketAckManager()
+    private var currentAck = -1
+
+	internal var waitingData = [SocketPacket]()
     
     /**
     Create a new SocketIOClient. opts can be omitted
