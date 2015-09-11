@@ -114,10 +114,13 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         engine?.close(fast: true)
     }
     
-    private func addEngine() {
+    private func addEngine() -> SocketEngine {
         Logger.log("Adding engine", type: logType)
-        
-        engine = SocketEngine(client: self, opts: opts)
+
+		let newEngine = SocketEngine(client: self, opts: opts)
+
+        engine = newEngine
+		return newEngine
     }
     
     private func clearReconnectTimer() {
@@ -162,8 +165,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
             }
             
             status = SocketIOClientStatus.Connecting
-            addEngine()
-            engine?.open(connectParams)
+            addEngine().open(connectParams)
             
             guard timeoutAfter != 0 else {
                 return
