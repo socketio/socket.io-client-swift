@@ -24,7 +24,7 @@
 
 import Foundation
 
-public final class SocketEngine: NSObject, WebSocketDelegate {    
+public final class SocketEngine: NSObject, WebSocketDelegate {
     private typealias Probe = (msg: String, type: PacketType, data: [NSData]?)
     private typealias ProbeWaitQueue = [Probe]
 
@@ -350,8 +350,10 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     // We had packets waiting for send when we upgraded
     // Send them raw
     private func flushWaitingForPostToWebSocket() {
-        for msg in postWait {
-            ws?.writeString(msg)
+        if let ws = ws {
+            for msg in postWait {
+                ws.writeString(msg)
+            }
         }
 
         postWait.removeAll(keepCapacity: true)
@@ -495,7 +497,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
         var n = 0
         var msg = ""
 
-        func testLength(length:String, inout n:Int) -> Bool {
+        func testLength(length: String, inout n: Int) -> Bool {
             if let num = Int(length) {
                 n = num
                 return false
@@ -525,8 +527,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
 
                 if msg.characters.count != 0 {
                     // Be sure to capture the value of the msg
-                    dispatch_async(handleQueue) {[weak self, msg] in
-                        self?.parseEngineMessage(msg, fromPolling: true)
+                    dispatch_async(handleQueue) {
+                        self.parseEngineMessage(msg, fromPolling: true)
                     }
                 }
 
@@ -549,7 +551,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
 
         let type = PacketType(str: (message["^(\\d)"].groups()?[1]) ?? "") ?? {
             self.checkIfMessageIsBase64Binary(message)
-            return PacketType.Noop
+            return .Noop
             }()
 
         switch type {
@@ -608,12 +610,10 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
 
             postWait.append(strMsg)
 
-            if let datas = datas {
-                for data in datas {
-                    let (_, b64Data) = createBinaryDataForSend(data)
+            for data in datas ?? [] {
+                let (_, b64Data) = createBinaryDataForSend(data)
 
-                    postWait.append(b64Data!)
-                }
+                postWait.append(b64Data!)
             }
 
             if !waitingForPost {
@@ -629,26 +629,22 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
 
             ws?.writeString("\(type.rawValue)\(str)")
 
-            if let datas = datas {
-                for data in datas {
-                    let (data, _) = createBinaryDataForSend(data)
-                    if data != nil {
-                        ws?.writeData(data!)
-                    }
+            for data in datas ?? [] {
+                let (data, _) = createBinaryDataForSend(data)
+                if data != nil {
+                    ws?.writeData(data!)
                 }
             }
     }
 
     // Starts the ping timer
     private func startPingTimer() {
-        guard pingInterval != nil else {
-            return
-        }
+        if let pingInterval = pingInterval {
+            pingTimer?.invalidate()
+            pingTimer = nil
 
-        pingTimer?.invalidate()
-        dispatch_async(dispatch_get_main_queue()) {[weak self] in
-            if let this = self {
-                this.pingTimer = NSTimer.scheduledTimerWithTimeInterval(this.pingInterval!, target: this,
+            dispatch_async(dispatch_get_main_queue()) {
+                self.pingTimer = NSTimer.scheduledTimerWithTimeInterval(pingInterval, target: self,
                     selector: Selector("sendPing"), userInfo: nil, repeats: true)
             }
         }
@@ -672,16 +668,16 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     Write a message, independent of transport.
     */
     public func write(msg: String, withType type: PacketType, withData data: [NSData]?) {
-        dispatch_async(emitQueue) {[weak self] in
-            if let this = self where this.connected {
-                if this.websocket {
-                    Logger.log("Writing ws: %@ has data: %@", type: this.logType, args: msg,
+        dispatch_async(emitQueue) {
+            if self.connected {
+                if self.websocket {
+                    Logger.log("Writing ws: %@ has data: %@", type: self.logType, args: msg,
                         data == nil ? false : true)
-                    this.sendWebSocketMessage(msg, withType: type, datas: data)
+                    self.sendWebSocketMessage(msg, withType: type, datas: data)
                 } else {
-                    Logger.log("Writing poll: %@ has data: %@", type: this.logType, args: msg,
+                    Logger.log("Writing poll: %@ has data: %@", type: self.logType, args: msg,
                         data == nil ? false : true)
-                    this.sendPollMessage(msg, withType: type, datas: data)
+                    self.sendPollMessage(msg, withType: type, datas: data)
                 }
             }
         }
