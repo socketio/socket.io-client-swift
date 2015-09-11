@@ -28,6 +28,8 @@ struct SocketPacket {
     private let placeholders: Int
     private var currentPlace = 0
 
+	private static let logType = "SocketPacket"
+
     let nsp: String
     let id: Int
     let type: PacketType
@@ -113,7 +115,7 @@ struct SocketPacket {
                     
                     message += jsonString! as String + ","
                 } catch {
-                    print("Error creating JSON object in SocketPacket.completeMessage")
+					Logger.error("Error creating JSON object in SocketPacket.completeMessage", type: SocketPacket.logType)
                 }
             } else if var str = arg as? String {
                 str = str["\n"] ~= "\\\\n"
