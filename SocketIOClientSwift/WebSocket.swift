@@ -750,7 +750,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
 import Foundation
 import Security
 
-public class SSLCert {
+private class SSLCert {
     var certData: NSData?
     var key: SecKeyRef?
     
@@ -761,7 +761,7 @@ public class SSLCert {
     
     :returns: a representation security object to be used with
     */
-    public init(data: NSData) {
+    init(data: NSData) {
         self.certData = data
     }
     
@@ -772,7 +772,7 @@ public class SSLCert {
     
     :returns: a representation security object to be used with
     */
-    public init(key: SecKeyRef) {
+    init(key: SecKeyRef) {
         self.key = key
     }
 }
