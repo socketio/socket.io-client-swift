@@ -36,12 +36,11 @@ public class SwiftRegex: NSObject, BooleanType {
         }
         super.init()
     }
-    
-    static func failure(message: String) {
-        print("SwiftRegex: "+message)
-        //assert(false,"SwiftRegex: failed")
-    }
-    
+	
+	private static func failure(message: String) {
+		fatalError("SwiftRegex: \(message)")
+	}
+
     final var targetRange: NSRange {
         return NSRange(location: 0,length: target.utf16.count)
     }
