@@ -378,7 +378,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
         }
         if totalSize > 0 {
             if validateResponse(buffer, bufferLen: totalSize) {
-				dispatch_async(queue, {
+                dispatch_async(queue, {
                     self.connected = true
                     if let connectBlock = self.onConnect {
                         connectBlock()
@@ -522,7 +522,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
             }
             if receivedOpcode == OpCode.Pong.rawValue {
                 dispatch_async(queue, {
-					self.onPong?()
+                    self.onPong?()
                     self.pongDelegate?.websocketDidReceivePong(self)
                 })
                 
@@ -609,20 +609,20 @@ public class WebSocket : NSObject, NSStreamDelegate {
             } else if response.code == .TextFrame {
                 let str: NSString? = NSString(data: response.buffer!, encoding: NSUTF8StringEncoding)
 
-				if let str = str as String? {
-					dispatch_async(queue, {
-						self.onText?(str)
-						self.delegate?.websocketDidReceiveMessage(self, text: str)
-					})
-				} else {
-					writeError(CloseCode.Encoding.rawValue)
-					return false
-				}
+                if let str = str as String? {
+                    dispatch_async(queue, {
+                        self.onText?(str)
+                        self.delegate?.websocketDidReceiveMessage(self, text: str)
+                    })
+                } else {
+                    writeError(CloseCode.Encoding.rawValue)
+                    return false
+                }
             } else if response.code == .BinaryFrame {
                 let data = response.buffer! //local copy so it is perverse for writing
-				dispatch_async(queue) {
-					self.onData?(data)
-					self.delegate?.websocketDidReceiveData(self, data: data)
+                dispatch_async(queue) {
+                    self.onData?(data)
+                    self.delegate?.websocketDidReceiveData(self, data: data)
                 }
             }
 
@@ -726,11 +726,11 @@ public class WebSocket : NSObject, NSStreamDelegate {
     ///used to preform the disconnect delegate
     private func doDisconnect(error: NSError?) {
         if !self.didDisconnect {
-			dispatch_async(queue) {
+            dispatch_async(queue) {
                 self.didDisconnect = true
 
-				self.onDisconnect?(error)
-				self.delegate?.websocketDidDisconnect(self, error: error)
+                self.onDisconnect?(error)
+                self.delegate?.websocketDidDisconnect(self, error: error)
             }
         }
     }

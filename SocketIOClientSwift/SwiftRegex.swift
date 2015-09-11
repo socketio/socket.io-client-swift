@@ -37,9 +37,9 @@ internal class SwiftRegex: NSObject, BooleanType {
         super.init()
     }
 
-	private static func failure(message: String) {
-		fatalError("SwiftRegex: \(message)")
-	}
+    private static func failure(message: String) {
+        fatalError("SwiftRegex: \(message)")
+    }
 
     private final var targetRange: NSRange {
         return NSRange(location: 0,length: target.utf16.count)
