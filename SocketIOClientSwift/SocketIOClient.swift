@@ -150,10 +150,13 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     */
     public func connect(timeoutAfter timeoutAfter:Int,
         withTimeoutHandler handler:(() -> Void)?) {
-            guard status != SocketIOClientStatus.Connected else {
+			assert(timeoutAfter >= 0, "Invalid timeout: \(timeoutAfter)")
+
+            guard status != .Connected else {
                 return
             }
-            if status == SocketIOClientStatus.Closed {
+
+            if status == .Closed {
                 Logger.log("Warning! This socket was previously closed. This might be dangerous!",
                     type: logType)
             }
