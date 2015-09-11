@@ -22,6 +22,8 @@ class SocketNamespaceAcknowledgementTest: AbstractSocketTest {
             "forceWebsockets": false,// default false
             "path": "",
             "nsp": "/swift"])
+        }else {
+            AbstractSocketTest.socket.joinNamespace("/swift")
         }
         
         openConnection()
