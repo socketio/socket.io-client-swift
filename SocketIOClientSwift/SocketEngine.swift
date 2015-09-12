@@ -154,7 +154,6 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
         }
 
         if params != nil {
-
             for (key, value) in params! {
                 let keyEsc = key.stringByAddingPercentEncodingWithAllowedCharacters(
                     allowedCharacterSet)!
@@ -350,10 +349,10 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     // We had packets waiting for send when we upgraded
     // Send them raw
     private func flushWaitingForPostToWebSocket() {
-        if let ws = ws {
-            for msg in postWait {
-                ws.writeString(msg)
-            }
+        guard let ws = self.ws else {return}
+        
+        for msg in postWait {
+            ws.writeString(msg)
         }
 
         postWait.removeAll(keepCapacity: true)
@@ -486,54 +485,19 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     }
 
     // Translatation of engine.io-parser#decodePayload
-    private func parsePollingMessage(str:String) {
+    private func parsePollingMessage(str: String) {
         guard str.characters.count != 1 else {
             return
         }
-        // println(str)
-
-        let strArray = Array(str.characters)
-        var length = ""
-        var n = 0
-        var msg = ""
-
-        func testLength(length: String, inout n: Int) -> Bool {
-            if let num = Int(length) {
-                n = num
-                return false
-            } else {
-                return true
-            }
-        }
-
-        for var i = 0, l = str.characters.count; i < l; i++ {
-            let chr = String(strArray[i])
-
-            if chr != ":" {
-                length += chr
-            } else {
-                if length == "" || testLength(length, n: &n) {
-                    Logger.error("Parsing error: %@", type: logType, args: str)
-                    handlePollingFailed("Error parsing XHR message")
-                    return
-                }
-
-                msg = String(strArray[i+1...i+n])
-
-                if let lengthInt = Int(length) where lengthInt != msg.characters.count {
-                    Logger.error("Parsing error: %@", type: logType, args: str)
-                    return
-                }
-
-                if msg.characters.count != 0 {
-                    // Be sure to capture the value of the msg
-                    dispatch_async(handleQueue) {
-                        self.parseEngineMessage(msg, fromPolling: true)
-                    }
-                }
-
-                i += n
-                length = ""
+        
+        var reader = SocketStringReader(message: str, currentIndex: str.startIndex)
+        
+        while reader.hasNext {
+            let n = reader.readUntilStringOccurence(":")
+            let str = reader.read(Int(n)!)
+            
+            dispatch_async(handleQueue) {
+                self.parseEngineMessage(str, fromPolling: true)
             }
         }
     }
