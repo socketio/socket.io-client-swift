@@ -72,7 +72,6 @@ class SocketParser {
         var placeholders = -1
         
         if type == .BinaryEvent || type == .BinaryAck {
-            Logger.log("Got some binary", type: "SocketParser")
             if let holders = Int(parser.readUntilStringOccurence("-")) {
                 placeholders = holders
             } else {
