@@ -59,12 +59,12 @@ class SocketParser {
     
     // Translation of socket.io-client#decodeString
     static func parseString(message: String) -> SocketPacket? {
-        var parser = SocketGenericParser(message: message, currentIndex: 0)
+        var parser = SocketStringReader(message: message, currentIndex: message.startIndex)
         
-        guard let typeString = parser.read(1), type = SocketPacket.PacketType(str: typeString)
+        guard let type = SocketPacket.PacketType(str: parser.read(1))
             else {return nil}
         
-        if parser.messageCharacters.count == 1 {
+        if !parser.hasNext {
             return SocketPacket(type: type, nsp: "/")
         }
         
@@ -72,34 +72,33 @@ class SocketParser {
         var placeholders = -1
         
         if type == .BinaryEvent || type == .BinaryAck {
-            if let buffer = parser.readUntilStringOccurence("-"), let holders = Int(buffer)
-                where parser.read(1)! == "-" {
+            if let holders = Int(parser.readUntilStringOccurence("-")) {
                 placeholders = holders
             } else {
                return nil
             }
         }
+        
         if parser.currentCharacter == "/" {
             namespace = parser.readUntilStringOccurence(",") ?? parser.readUntilEnd()
-            parser.currentIndex++
         }
         
-        if parser.currentIndex >= parser.messageCharacters.count {
+        if !parser.hasNext {
             return SocketPacket(type: type, id: -1,
                 nsp: namespace ?? "/", placeholders: placeholders)
         }
         
         var idString = ""
-        while parser.currentIndex < parser.messageCharacters.count {
-            if let next = parser.read(1), let int = Int(next) {
+        while parser.hasNext {
+            if let int = Int(parser.read(1)) {
                 idString += String(int)
             } else {
-                parser.currentIndex -= 2
+                parser.advanceIndexBy(-2)
                 break
             }
         }
         
-        let d = message[message.startIndex.advancedBy(parser.currentIndex + 1)...message.startIndex.advancedBy(message.characters.count - 1)]
+        let d = message[parser.currentIndex.advancedBy(1)...message.endIndex.predecessor()]
         let noPlaceholders = d["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] ~= "\"~~$2\""
         let data = parseData(noPlaceholders) as? [AnyObject] ?? [noPlaceholders]
         
@@ -126,7 +125,7 @@ class SocketParser {
         Logger.log("Parsing %@", type: "SocketParser", args: message)
         
         guard let pack = parseString(message) else {
-            Logger.error("Parsing message", type: "SocketParser", args: message)
+            Logger.error("Parsing message: %@", type: "SocketParser", args: message)
             return
         }
         

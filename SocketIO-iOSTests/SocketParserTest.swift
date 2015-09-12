@@ -72,24 +72,25 @@ class SocketParserTest: XCTestCase {
     }
     
     func testGenericParser() {
-        var parser = SocketGenericParser(message: "61-/swift,", currentIndex: 0)
+        var parser = SocketStringReader(message: "61-/swift,", currentIndex: "61-/swift,".startIndex)
         XCTAssertEqual(parser.read(1), "6")
         XCTAssertEqual(parser.currentCharacter, "1")
         XCTAssertEqual(parser.readUntilStringOccurence("-"), "1")
-        XCTAssertEqual(parser.currentCharacter, "-")
+        XCTAssertEqual(parser.currentCharacter, "/")
     }
     
-    func validateParseResult(message:String) {
+    func validateParseResult(message: String) {
         let validValues = SocketParserTest.packetTypes[message]!
         let packet = SocketParser.parseString(message)
         let type = message.substringWithRange(Range<String.Index>(start: message.startIndex, end: message.startIndex.advancedBy(1)))
         if let packet = packet {
+            print(packet)
             XCTAssertEqual(packet.type, SocketPacket.PacketType(str:type)!)
             XCTAssertEqual(packet.nsp, validValues.0)
             XCTAssertTrue((packet.data as NSArray).isEqualToArray(validValues.1))
             XCTAssertTrue((packet.binary as NSArray).isEqualToArray(validValues.2))
             XCTAssertEqual(packet.id, validValues.3)
-        }else {
+        } else {
             XCTFail()
         }
     }

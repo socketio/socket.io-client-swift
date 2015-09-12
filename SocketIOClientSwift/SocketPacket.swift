@@ -64,7 +64,8 @@ struct SocketPacket {
     var binary: [NSData]
     var data: [AnyObject]
     var description: String {
-        return "SocketPacket {type: \(String(type.rawValue)); data: \(String(data)); id: \(id); placeholders: \(placeholders);}"
+        return "SocketPacket {type: \(String(type.rawValue)); data: " +
+            "\(String(data)); id: \(id); placeholders: \(placeholders); nsp: \(nsp)}"
     }
     
     var event: String {
