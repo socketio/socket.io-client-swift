@@ -15,10 +15,6 @@ struct SocketStringReader {
         return currentIndex != message.endIndex
     }
     
-    var messageCharacters: [Character] {
-        return Array(message.characters)
-    }
-    
     var currentCharacter: String {
         return String(message[currentIndex])
     }
