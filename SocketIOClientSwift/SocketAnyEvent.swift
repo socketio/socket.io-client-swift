@@ -1,6 +1,6 @@
 //
 //  SocketAnyEvent.swift
-//  Socket.IO-Swift
+//  Socket.IO-Client-Swift
 //
 //  Created by Erik Little on 3/28/15.
 //
@@ -24,11 +24,14 @@
 
 import Foundation
 
-@objc public final class SocketAnyEvent {
-    public let event:String!
-    public let items:NSArray?
+@objc public final class SocketAnyEvent: NSObject {
+    public let event: String!
+    public let items: NSArray?
+    override public var description: String {
+        return "SocketAnyEvent: Event: \(event) items: \(items ?? nil)"
+    }
     
-    init(event:String, items:NSArray?) {
+    init(event: String, items: NSArray?) {
         self.event = event
         self.items = items
     }
