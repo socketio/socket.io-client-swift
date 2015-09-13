@@ -43,10 +43,10 @@ struct SocketStringReader {
     }
     
     mutating func read(readLength: Int) -> String {
-        let range = Range<String.Index>(start: currentIndex, end: currentIndex.advancedBy(readLength))
+        let readString = message[currentIndex..<currentIndex.advancedBy(readLength)]
         advanceIndexBy(readLength)
         
-        return message.substringWithRange(range)
+        return readString
     }
     
     mutating func readUntilStringOccurence(string: String) -> String {
