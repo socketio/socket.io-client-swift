@@ -53,7 +53,7 @@ struct SocketStringReader {
         let range = Range<String.Index>(start: currentIndex, end: message.endIndex)
         let subString = message.substringWithRange(range)
         guard let foundRange = subString.rangeOfString(string) else {
-            let restOfString = message[currentIndex...message.endIndex.predecessor()]
+            let restOfString = message[currentIndex..<message.endIndex]
             currentIndex = message.endIndex
             
             return restOfString

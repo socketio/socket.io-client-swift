@@ -98,7 +98,7 @@ class SocketParser {
             }
         }
         
-        let d = message[parser.currentIndex.advancedBy(1)...message.endIndex.predecessor()]
+        let d = message[parser.currentIndex.advancedBy(1)..<message.endIndex]
         let noPlaceholders = d["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] ~= "\"~~$2\""
         let data = parseData(noPlaceholders) as? [AnyObject] ?? [noPlaceholders]
         
