@@ -6,8 +6,6 @@
 //
 //
 
-import Foundation
-
 struct SocketStringReader {
     let message: String
     var currentIndex: String.Index
@@ -37,19 +35,17 @@ struct SocketStringReader {
     
     mutating func readUntilStringOccurence(string: String) -> String {
         let range = Range<String.Index>(start: currentIndex, end: message.endIndex)
-        let subString = message.substringWithRange(range) as NSString
-        let foundRange = subString.rangeOfString(string)
-        
-        if foundRange.length == 0 {
+        let subString = message.substringWithRange(range)
+        guard let foundRange = subString.rangeOfString(string) else {
             let restOfString = message[currentIndex...message.endIndex.predecessor()]
             currentIndex = message.endIndex
             
             return restOfString
         }
         
-        advanceIndexBy(foundRange.location + 1)
+        advanceIndexBy(message.startIndex.distanceTo(foundRange.startIndex) + 1)
         
-        return subString.substringToIndex(foundRange.location)
+        return subString.substringToIndex(foundRange.startIndex)
     }
     
     mutating func readUntilEnd() -> String {
