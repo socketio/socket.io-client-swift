@@ -57,9 +57,8 @@ class SocketParser {
         }
     }
     
-    // Translation of socket.io-client#decodeString
     static func parseString(message: String) -> SocketPacket? {
-        var parser = SocketStringReader(message: message, currentIndex: message.startIndex)
+        var parser = SocketStringReader(message: message)
         
         guard let type = SocketPacket.PacketType(str: parser.read(1))
             else {return nil}
@@ -89,6 +88,7 @@ class SocketParser {
         }
         
         var idString = ""
+        
         while parser.hasNext {
             if let int = Int(parser.read(1)) {
                 idString += String(int)

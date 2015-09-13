@@ -484,13 +484,12 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
         doRequest(reqPolling)
     }
 
-    // Translatation of engine.io-parser#decodePayload
     private func parsePollingMessage(str: String) {
         guard str.characters.count != 1 else {
             return
         }
         
-        var reader = SocketStringReader(message: str, currentIndex: str.startIndex)
+        var reader = SocketStringReader(message: str)
         
         while reader.hasNext {
             let n = reader.readUntilStringOccurence(":")

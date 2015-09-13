@@ -19,6 +19,11 @@ struct SocketStringReader {
         return String(message[currentIndex])
     }
     
+    init(message: String) {
+        self.message = message
+        currentIndex = message.startIndex
+    }
+    
     mutating func advanceIndexBy(n: Int) {
         currentIndex = currentIndex.advancedBy(n)
     }
