@@ -502,6 +502,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     }
 
     private func parseEngineData(data: NSData) {
+        Logger.log("Got binary data: %@", type: "SocketEngine", args: data)
         client?.parseBinaryData(data.subdataWithRange(NSMakeRange(1, data.length - 1)))
     }
 

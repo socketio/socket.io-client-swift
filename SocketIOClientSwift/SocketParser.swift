@@ -156,10 +156,13 @@ class SocketParser {
             return
         }
         
-        let shouldExecute = socket.waitingData[0].addData(data)
-        guard shouldExecute else { return }
+        let shouldExecute = socket.waitingData[socket.waitingData.count - 1].addData(data)
         
-        var packet = socket.waitingData.removeAtIndex(0)
+        guard shouldExecute else {
+            return
+        }
+        
+        var packet = socket.waitingData.removeLast()
         packet.fillInPlaceholders()
         
         if packet.type != .BinaryAck {

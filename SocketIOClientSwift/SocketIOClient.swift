@@ -54,7 +54,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     private var ackHandlers = SocketAckManager()
     private var currentAck = -1
 
-	internal var waitingData = [SocketPacket]()
+    var waitingData = [SocketPacket]()
     
     /**
     Create a new SocketIOClient. opts can be omitted
