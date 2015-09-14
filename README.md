@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/socketio/socket.io-client-swift.svg?branch=swift-2)](https://travis-ci.org/socketio/socket.io-client-swift)
+[![Build Status](https://travis-ci.org/socketio/socket.io-client-swift.svg?branch=master)](https://travis-ci.org/socketio/socket.io-client-swift)
 
 #Socket.IO-Client-Swift
 Socket.IO-client for iOS/OS X.
