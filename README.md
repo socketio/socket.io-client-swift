@@ -67,7 +67,7 @@ Add this line to your `Cartfile`:
 github "socketio/socket.io-client-swift" ~> 3.0.1 # Or latest version
 ```
 
-Run `carthage update`.
+Run `carthage update --platform ios,macosx`.
 
 Manually (iOS 7+)
 -----------------
