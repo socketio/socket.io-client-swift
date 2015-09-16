@@ -12,12 +12,12 @@ socket.on("connect") {data, ack in
 }
 
 socket.on("currentAmount") {data, ack in
-    if let cur = data?[0] as? Double {
+    if let cur = data[0] as? Double {
         socket.emitWithAck("canUpdate", cur)(timeoutAfter: 0) {data in
             socket.emit("update", ["amount": cur + 2.50])
         }
 
-        ack?("Got your currentAmount", "dude")
+        ack?["Got your currentAmount", "dude"]
     }
 }
 
@@ -28,18 +28,18 @@ socket.connect()
 ```objective-c
 SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8080" options:nil];
 
-[socket onEvent:@"connect" callback:^(NSArray* data, void (^ack)(NSArray*)) {
+[socket on:@"connect" callback:^(NSArray* data, SocketAckEmitter* ack) {
     NSLog(@"socket connected");
 }];
 
-[socket onEvent:@"currentAmount" callback:^(NSArray* data, void (^ack)(NSArray*)) {
+[socket on:@"currentAmount" callback:^(NSArray* data, SocketAckEmitter* ack) {
     double cur = [[data objectAtIndex:0] floatValue];
 
     [socket emitWithAck:@"canUpdate" withItems:@[@(cur)]](0, ^(NSArray* data) {
         [socket emit:@"update" withItems:@[@{@"amount": @(cur + 2.50)}]];
     });
 
-    ack(@[@"Got your currentAmount, ", @"dude"]);
+    ack[@[@"Got your currentAmount, ", @"dude"]];
 }];
 
 [socket connect];
@@ -130,8 +130,7 @@ Options
 
 Methods
 -------
-1. `on(event: String, callback: ((data: NSArray?, ack: AckEmitter?) -> Void))` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
-2. `on(event event: String, callback:((data: NSArray?, ack: AckEmitter?) -> Void))` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
+1. `on(event: String, callback: ((data: [AnyObject], ack: SocketAckEmitter?) -> Void))` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
 3. `onAny(callback:((event: String, items: AnyObject?)) -> Void)` - Adds a handler for all events. It will be called on any received event.
 4. `emit(event: String, _ items: AnyObject...)` - Sends a message. Can send multiple items.
 5. `emit(event: String, withItems items: [AnyObject])` - `emit` for Objective-C
