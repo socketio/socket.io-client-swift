@@ -417,7 +417,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     /**
     Adds a handler for an event.
     */
-    public func onObjectiveC(event: String, callback: NormalCallbackObjectiveC) {
+    public func on(event event: String, callback: NormalCallbackObjectiveC) {
         Logger.log("Adding handler for event: %@", type: logType, args: event)
         
         let handler = SocketEventHandler(event: event, callback: callback)
