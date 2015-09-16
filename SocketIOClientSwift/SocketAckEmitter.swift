@@ -1,8 +1,8 @@
 //
-//  SocketTypes.swift
+//  SocketAckEmitter.swift
 //  Socket.IO-Client-Swift
 //
-//  Created by Erik Little on 4/8/15.
+//  Created by Erik Little on 9/16/15.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,25 @@
 
 import Foundation
 
-public typealias AckCallback = ([AnyObject]) -> Void
-public typealias NormalCallback = ([AnyObject], SocketAckEmitter?) -> Void
-public typealias OnAckCallback = (timeoutAfter: UInt64, callback: AckCallback) -> Void
+
+public class SocketAckEmitter: NSObject {
+    unowned let socket: SocketIOClient
+    var ackNum: Int
+    
+    public subscript(items: AnyObject...) -> Bool {
+        socket.emitAck(ackNum, withItems: items)
+        
+        return true
+    }
+    
+    public subscript(items: [AnyObject]) -> NSString {
+        socket.emitAck(ackNum, withItems: items)
+        
+        return "Done"
+    }
+    
+    init(socket: SocketIOClient, ackNum: Int) {
+        self.socket = socket
+        self.ackNum = ackNum
+    }
+}

@@ -24,37 +24,21 @@
 
 import Foundation
 
-private func emitAckCallback(socket: SocketIOClient?, num: Int?)
-    (items: AnyObject...) -> Void {
-        socket?.emitAck(num ?? -1, withItems: items)
-}
-
-private func emitAckCallbackObjectiveC(socket: SocketIOClient?, num: Int?)
-    (items: NSArray) -> Void {
-        socket?.emitAck(num ?? -1, withItems: items as [AnyObject])
+private func emitAckCallback(socket: SocketIOClient, num: Int?) -> SocketAckEmitter? {
+    return num != nil ? SocketAckEmitter(socket: socket, ackNum: num!) : nil
 }
 
 struct SocketEventHandler {
     let event: String
-    let callback: NormalCallback?
-    let callBackObjectiveC: NormalCallbackObjectiveC?
+    let callback: NormalCallback
     
     init(event: String, callback: NormalCallback) {
         self.event = event
         self.callback = callback
-        self.callBackObjectiveC = nil
     }
     
-    init(event: String, callback: NormalCallbackObjectiveC) {
-        self.event = event
-        self.callback = nil
-        self.callBackObjectiveC = callback
-    }
-    
-    func executeCallback(items:NSArray? = nil, withAck ack:Int? = nil, withAckType type:Int? = nil,
-        withSocket socket:SocketIOClient? = nil) {
-            self.callback != nil ?
-                self.callback?(items, emitAckCallback(socket, num: ack))
-                : self.callBackObjectiveC?(items, emitAckCallbackObjectiveC(socket, num: ack))
+    func executeCallback(items: [AnyObject], withAck ack: Int? = nil, withAckType type: Int? = nil,
+        withSocket socket: SocketIOClient) {
+                self.callback(items, emitAckCallback(socket, num: ack))
     }
 }

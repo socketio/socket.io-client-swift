@@ -56,7 +56,7 @@ struct SocketAckManager {
         acks.insert(SocketAck(ack: ack, callback: callback))
     }
     
-    mutating func executeAck(ack: Int, items: [AnyObject]?) {
+    mutating func executeAck(ack: Int, items: [AnyObject]) {
         let callback = acks.remove(SocketAck(ack: ack))
 
         dispatch_async(dispatch_get_main_queue()) {

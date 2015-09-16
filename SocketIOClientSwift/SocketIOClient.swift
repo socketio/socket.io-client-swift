@@ -211,7 +211,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         
         // Don't handle as internal because something crazy could happen where
         // we disconnect before it's handled
-        handleEvent("connect", data: nil, isInternalMessage: false)
+        handleEvent("connect", data: [], isInternalMessage: false)
     }
     
     func didDisconnect(reason: String) {
@@ -333,13 +333,13 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         Logger.log("Handling ack: %@ with data: %@", type: logType, args: ack, data ?? "")
         
         ackHandlers.executeAck(ack,
-            items: (data as? [AnyObject]?) ?? (data != nil ? [data!] : nil))
+            items: ((data as? [AnyObject]?) ?? (data != nil ? [data!] : nil))!)
     }
     
     /**
     Causes an event to be handled. Only use if you know what you're doing.
     */
-    public func handleEvent(event: String, data: [AnyObject]?, isInternalMessage: Bool,
+    public func handleEvent(event: String, data: [AnyObject], isInternalMessage: Bool,
         wantsAck ack: Int? = nil) {
             guard status == .Connected || isInternalMessage else {
                 return
@@ -360,7 +360,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
                     }
                 } else {
                     dispatch_async(handleQueue) {
-                        handler.executeCallback(data)
+                        handler.executeCallback(data, withAck: ack, withSocket: self)
                     }
                 }
             }
@@ -408,16 +408,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     Adds a handler for an event.
     */
     public func on(event: String, callback: NormalCallback) {
-        Logger.log("Adding handler for event: %@", type: logType, args: event)
-        
-        let handler = SocketEventHandler(event: event, callback: callback)
-        handlers.append(handler)
-    }
-    
-    /**
-    Adds a handler for an event.
-    */
-    public func on(event event: String, callback: NormalCallbackObjectiveC) {
         Logger.log("Adding handler for event: %@", type: logType, args: event)
         
         let handler = SocketEventHandler(event: event, callback: callback)

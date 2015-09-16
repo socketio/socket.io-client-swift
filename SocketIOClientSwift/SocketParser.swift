@@ -31,7 +31,7 @@ class SocketParser {
     private static func handleEvent(p: SocketPacket, socket: SocketIOClient) {
         guard isCorrectNamespace(p.nsp, socket) else { return }
         
-        socket.handleEvent(p.event, data: p.args,
+        socket.handleEvent(p.event, data: p.args ?? [],
             isInternalMessage: false, wantsAck: p.id)
     }
     
@@ -166,7 +166,7 @@ class SocketParser {
         packet.fillInPlaceholders()
         
         if packet.type != .BinaryAck {
-            socket.handleEvent(packet.event, data: packet.args,
+            socket.handleEvent(packet.event, data: packet.args ?? [],
                 isInternalMessage: false, wantsAck: packet.id)
         } else {
             socket.handleAck(packet.id, data: packet.args)
