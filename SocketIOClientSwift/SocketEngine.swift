@@ -99,6 +99,19 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     deinit {
         Logger.log("Engine is being deinit", type: logType)
     }
+    
+    private func checkIfMessageIsBase64Binary(var message: String) {
+        if message.hasPrefix("b4") {
+            // binary in base64 string
+            message.removeRange(Range<String.Index>(start: message.startIndex,
+                end: message.startIndex.advancedBy(2)))
+            
+            if let data = NSData(base64EncodedString: message,
+                options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters) {
+                    client?.parseBinaryData(data)
+            }
+        }
+    }
 
     public func close(fast fast: Bool) {
         Logger.log("Engine is being closed. Fast: %@", type: logType, args: fast)
@@ -364,19 +377,6 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
         }
     }
 
-    private func checkIfMessageIsBase64Binary(var message: String) {
-        if message.hasPrefix("b4") {
-            // binary in base64 string
-            message.removeRange(Range<String.Index>(start: message.startIndex,
-                end: message.startIndex.advancedBy(2)))
-
-            if let data = NSData(base64EncodedString: message,
-                options: NSDataBase64DecodingOptions.IgnoreUnknownCharacters) {
-                    client?.parseBinaryData(data)
-            }
-        }
-    }
-
     private func handleMessage(message: String) {
         client?.parseSocketMessage(message)
     }
@@ -492,11 +492,17 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
         var reader = SocketStringReader(message: str)
         
         while reader.hasNext {
-            let n = reader.readUntilStringOccurence(":")
-            let str = reader.read(Int(n)!)
-            
-            dispatch_async(handleQueue) {
-                self.parseEngineMessage(str, fromPolling: true)
+            if let n = Int(reader.readUntilStringOccurence(":")) {
+                let str = reader.read(n)
+                
+                dispatch_async(handleQueue) {
+                    self.parseEngineMessage(str, fromPolling: true)
+                }
+            } else {
+                dispatch_async(handleQueue) {
+                    self.parseEngineMessage(str, fromPolling: true)
+                }
+                break
             }
         }
     }
