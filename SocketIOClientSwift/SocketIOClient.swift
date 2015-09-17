@@ -425,6 +425,34 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     }
     
     /**
+    Adds a single-use handler for an event.
+    */
+    public func once(event: String, callback: NormalCallback) {
+        Logger.log("Adding once handler for event: %@", type: logType, args: event)
+        
+        let handler = SocketEventHandler(event: event) { data: NSArray?, ack: AckEmitter? in
+            handlers = ContiguousArray(handlers.filter { $0 != handler })
+            callback?(data, ack)
+        }
+
+        handlers.append(handler)
+    }
+    
+    /**
+    Adds a single-use handler for an event.
+    */
+    public func once(event event: String, callback: NormalCallbackObjectiveC) {
+        Logger.log("Adding once handler for event: %@", type: logType, args: event)
+        
+        let handler = SocketEventHandler(event: event) { data: NSArray?, ack: AckEmitterObjectiveC? in
+            handlers = ContiguousArray(handlers.filter { $0 != handler })
+            callback?(data, ack)
+        }
+
+        handlers.append(handler)
+    }
+    
+    /**
     Removes all handlers.
     Can be used after disconnecting to break any potential remaining retain cycles.
     */
