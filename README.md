@@ -107,7 +107,7 @@ Objective-C:
 ##API
 Constructors
 -----------
-`init(socketURL: String, opts:NSDictionary? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values)
+`init(socketURL: String, opts:NSDictionary? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values) note: If your socket.io server is secure, you need to specify `https` in your socketURL.
 
 `convenience init(socketURL: String, options:NSDictionary?)` - Same as above, but meant for Objective-C. See Objective-C Example.
 
