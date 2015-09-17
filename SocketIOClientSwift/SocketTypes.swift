@@ -30,3 +30,4 @@ public typealias AckEmitterObjectiveC = (NSArray) -> Void
 public typealias NormalCallback = (NSArray?, AckEmitter?) -> Void
 public typealias NormalCallbackObjectiveC = (NSArray?, AckEmitterObjectiveC?) -> Void
 public typealias OnAckCallback = (timeoutAfter:UInt64, callback:AckCallback) -> Void
+
