@@ -25,8 +25,10 @@
 import Foundation
 
 struct SocketPacket {
-    private var currentPlace = 0
     private let placeholders: Int
+    private var currentPlace = 0
+
+	private static let logType = "SocketPacket"
 
     let nsp: String
     let id: Int
@@ -62,19 +64,12 @@ struct SocketPacket {
     var binary: [NSData]
     var data: [AnyObject]
     var description: String {
-        var better = "SocketPacket {type: ~~0; data: ~~1; " +
-        "id: ~~2; placeholders: ~~3;}"
-        
-        better = better["~~0"] ~= String(type.rawValue)
-        better = better["~~1"] ~= String(data)
-        better = better["~~2"] ~= String(id)
-        better = better["~~3"] ~= String(placeholders)
-        
-        return better
+        return "SocketPacket {type: \(String(type.rawValue)); data: " +
+            "\(String(data)); id: \(id); placeholders: \(placeholders); nsp: \(nsp)}"
     }
     
     var event: String {
-        return data[0] as! String
+        return data[0] as? String ?? String(data[0])
     }
     
     var packetString: String {
@@ -121,7 +116,7 @@ struct SocketPacket {
                     
                     message += jsonString! as String + ","
                 } catch {
-                    print("Error creating JSON object in SocketPacket.completeMessage")
+					Logger.error("Error creating JSON object in SocketPacket.completeMessage", type: SocketPacket.logType)
                 }
             } else if var str = arg as? String {
                 str = str["\n"] ~= "\\\\n"
@@ -212,17 +207,13 @@ struct SocketPacket {
     }
     
     mutating func fillInPlaceholders() {
-        let newArr = NSMutableArray(array: data)
-        
         for i in 0..<data.count {
             if let str = data[i] as? String, num = str["~~(\\d)"].groups() {
-                newArr[i] = binary[Int(num[1])!]
+                data[i] = binary[Int(num[1])!]
             } else if data[i] is NSDictionary || data[i] is NSArray {
-                newArr[i] = _fillInPlaceholders(data[i])
+                data[i] = _fillInPlaceholders(data[i])
             }
         }
-        
-        data = newArr as [AnyObject]
     }
     
     private mutating func _fillInPlaceholders(data: AnyObject) -> AnyObject {
@@ -287,22 +278,20 @@ private extension SocketPacket {
             binary.append(bin)
             
             return placeholder
-        } else if let arr = data as? NSArray {
-            let newArr = NSMutableArray(array: arr)
-            
+        } else if var arr = data as? [AnyObject] {
             for i in 0..<arr.count {
-                newArr[i] = shred(arr[i], binary: &binary)
+                arr[i] = shred(arr[i], binary: &binary)
             }
             
-            return newArr
+            return arr
         } else if let dict = data as? NSDictionary {
-            let newDict = NSMutableDictionary(dictionary: dict)
+            let mutDict = NSMutableDictionary(dictionary: dict)
             
-            for (key, value) in newDict {
-                newDict[key as! NSCopying] = shred(value, binary: &binary)
+            for (key, value) in dict {
+                mutDict[key as! NSCopying] = shred(value, binary: &binary)
             }
             
-            return newDict
+            return mutDict
         } else {
             return data
         }

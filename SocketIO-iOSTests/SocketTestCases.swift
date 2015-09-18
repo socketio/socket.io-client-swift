@@ -111,6 +111,8 @@ class SocketTestCases: NSObject {
     
     static func testJSONWithBuffer(abstractSocketSend:SocketSendFunction) {
         let testName = "testJSONWithBuffer"
+        let data = "0".dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!
+        
         func didGetResult(result:NSArray?, ack:AckEmitter?) {
             if let json = result?.firstObject as? NSDictionary {
                 XCTAssertEqual((json.valueForKey("testString")! as! String), "test")
@@ -123,7 +125,7 @@ class SocketTestCases: NSObject {
                 XCTFail("Should have NSDictionary as result")
             }
         }
-        let json = ["name": "test", "testArray": ["hallo"], "nestedTest": ["test": "test"], "number": 15]
+        let json = ["name": "test", "testArray": ["hallo"], "nestedTest": ["test": "test"], "number": 15, "buf": data]
         
         abstractSocketSend(testName: testName, emitData: json, callback: didGetResult)
     }

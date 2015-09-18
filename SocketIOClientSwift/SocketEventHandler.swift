@@ -36,17 +36,20 @@ private func emitAckCallbackObjectiveC(socket: SocketIOClient?, num: Int?)
 
 struct SocketEventHandler {
     let event: String
+    let id: NSUUID
     let callback: NormalCallback?
     let callBackObjectiveC: NormalCallbackObjectiveC?
     
-    init(event: String, callback: NormalCallback) {
+    init(event: String, id: NSUUID = NSUUID(), callback: NormalCallback) {
         self.event = event
+        self.id = id
         self.callback = callback
         self.callBackObjectiveC = nil
     }
     
-    init(event: String, callback: NormalCallbackObjectiveC) {
+    init(event: String, id: NSUUID = NSUUID(), callback: NormalCallbackObjectiveC) {
         self.event = event
+        self.id = id
         self.callback = nil
         self.callBackObjectiveC = callback
     }

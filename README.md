@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/socketio/socket.io-client-swift.svg?branch=swift-2)](https://travis-ci.org/socketio/socket.io-client-swift)
+[![Build Status](https://travis-ci.org/socketio/socket.io-client-swift.svg?branch=master)](https://travis-ci.org/socketio/socket.io-client-swift)
 
 #Socket.IO-Client-Swift
 Socket.IO-client for iOS/OS X.
@@ -26,7 +26,7 @@ socket.connect()
 
 ##Objective-C Example
 ```objective-c
-SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8080" options:nil];
+SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8080" opts:nil];
 
 [socket onObjectiveC:@"connect" callback:^(NSArray* data, void (^ack)(NSArray*)) {
     NSLog(@"socket connected");
@@ -56,17 +56,18 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8
 ##Installation
 Requires Swift 2/Xcode 7
 
-If you need Swift 1.2/Xcode 6.3/4 use v2 (Pre-Swift 2 support is no longer maintained)
+If you need Swift 1.2/Xcode 6.3/4 use v2.4.5 (Pre-Swift 2 support is no longer maintained)
+
 If you need Swift 1.1/Xcode 6.2 use v1.5.2. (Pre-Swift 1.2 support is no longer maintained)
 
 Carthage
 -----------------
 Add this line to your `Cartfile`:
 ```
-github "socketio/socket.io-client-swift" ~> 2.4.3 # Or latest version
+github "socketio/socket.io-client-swift" ~> 3.0.2 # Or latest version
 ```
 
-Run `carthage update`.
+Run `carthage update --platform ios,macosx`.
 
 Manually (iOS 7+)
 -----------------
@@ -82,7 +83,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 platform :ios, '8.0'
 use_frameworks!
 
-pod 'Socket.IO-Client-Swift', '~> 2.4.3' # Or latest version
+pod 'Socket.IO-Client-Swift', '~> 3.0.2' # Or latest version
 ```
 
 Install pods:
@@ -106,9 +107,7 @@ Objective-C:
 ##API
 Constructors
 -----------
-`init(socketURL: String, opts:NSDictionary? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values)
-
-`convenience init(socketURL: String, options:NSDictionary?)` - Same as above, but meant for Objective-C. See Objective-C Example.
+`init(socketURL: String, opts: NSDictionary? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values) note: If your socket.io server is secure, you need to specify `https` in your socketURL.
 
 Options
 -------
@@ -129,19 +128,21 @@ Options
 
 Methods
 -------
-1. `on(name:String, callback:((data:NSArray?, ack:AckEmitter?) -> Void))` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
-2. `onObjectiveC(name:String, callback:((data:NSArray?, ack:AckEmitter?) -> Void))` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
-3. `onAny(callback:((event:String, items:AnyObject?)) -> Void)` - Adds a handler for all events. It will be called on any received event.
-4. `emit(event:String, _ items:AnyObject...)` - Sends a message. Can send multiple items.
-5. `emit(event:String, withItems items:[AnyObject])` - `emit` for Objective-C
-6. `emitWithAck(event:String, _ items:AnyObject...) -> (timeoutAfter:UInt64, callback:(NSArray?) -> Void) -> Void` - Sends a message that requests an acknowledgement from the server. Returns a function which you can use to add a handler. See example. Note: The message is not sent until you call the returned function.
-7. `emitWithAck(event:String, withItems items:[AnyObject]) -> (UInt64, (NSArray?) -> Void) -> Void` - `emitWithAck` for Objective-C. Note: The message is not sent until you call the returned function.
+1. `on(name: String, callback: ((data: NSArray?, ack: AckEmitter?) -> Void))` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
+2. `onObjectiveC(name: String, callback: ((data: NSArray?, ack: AckEmitter?) -> Void))` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
+3. `onAny(callback:((event: String, items: AnyObject?)) -> Void)` - Adds a handler for all events. It will be called on any received event.
+4. `emit(event: String, _ items: AnyObject...)` - Sends a message. Can send multiple items.
+5. `emit(event: String, withItems items: [AnyObject])` - `emit` for Objective-C
+6. `emitWithAck(event: String, _ items: AnyObject...) -> (timeoutAfter: UInt64, callback: (NSArray?) -> Void) -> Void` - Sends a message that requests an acknowledgement from the server. Returns a function which you can use to add a handler. See example. Note: The message is not sent until you call the returned function.
+7. `emitWithAck(event: String, withItems items: [AnyObject]) -> (UInt64, (NSArray?) -> Void) -> Void` - `emitWithAck` for Objective-C. Note: The message is not sent until you call the returned function.
 8. `connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
-9. `connect(#timeoutAfter:Int, withTimeoutHandler handler:(() -> Void)?)` - Connect to the server. If it isn't connected after timeoutAfter seconds, the handler is called.
-10. `close(#fast:Bool)` - Closes the socket. Once a socket is closed it should not be reopened. Pass true to fast if you're closing from a background task.
+9. `connect(timeoutAfter timeoutAfter: Int, withTimeoutHandler handler: (() -> Void)?)` - Connect to the server. If it isn't connected after timeoutAfter seconds, the handler is called.
+10. `close()` - Closes the socket. Once a socket is closed it should not be reopened.
 11. `reconnect()` - Causes the client to reconnect to the server.
 12. `joinNamespace()` - Causes the client to join nsp. Shouldn't need to be called unless you change nsp manually.
 13. `leaveNamespace()` - Causes the client to leave the nsp and go back to /
+14. `once(event: String, callback: NormalCallback)` - Adds a handler that will only be executed once.
+15. `once(event event: String, callback: NormalCallbackObjectiveC)` - Adds a handler that will only be executed once.
 
 Client Events
 ------
