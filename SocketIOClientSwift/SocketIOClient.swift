@@ -433,8 +433,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         var handler: SocketEventHandler;
 
         handler = SocketEventHandler(event: event) { (data, ack: AckEmitter?) in
-            self.handlers = ContiguousArray(self.handlers.filter { $0 != handler })
-            callback?(data, ack)
+            self.handlers = ContiguousArray(self.handlers.filter { $0 !== handler })
+            callback(data, ack)
         }
 
         handlers.append(handler)
@@ -449,8 +449,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         var handler: SocketEventHandler;
 
         handler = SocketEventHandler(event: event) { (data, ack: AckEmitterObjectiveC?) in
-            self.handlers = ContiguousArray(self.handlers.filter { $0 != handler })
-            callback?(data, ack)
+            self.handlers = ContiguousArray(self.handlers.filter { $0 !== handler })
+            callback(data, ack)
         }
 
         handlers.append(handler)
