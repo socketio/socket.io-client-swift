@@ -430,7 +430,9 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     public func once(event: String, callback: NormalCallback) {
         Logger.log("Adding once handler for event: %@", type: logType, args: event)
         
-        let handler = SocketEventHandler(event: event) { data, ack in
+        var handler: SocketEventHandler;
+
+        handler = SocketEventHandler(event: event) { data, ack in
             self.handlers = ContiguousArray(self.handlers.filter { $0 != handler })
             callback?(data, ack)
         }
@@ -444,7 +446,9 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     public func once(event event: String, callback: NormalCallbackObjectiveC) {
         Logger.log("Adding once handler for event: %@", type: logType, args: event)
         
-        let handler = SocketEventHandler(event: event) { data, ack in
+        var handler: SocketEventHandler;
+
+        handler = SocketEventHandler(event: event) { data, ack in
             self.handlers = ContiguousArray(self.handlers.filter { $0 != handler })
             callback?(data, ack)
         }
