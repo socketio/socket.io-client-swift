@@ -331,7 +331,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         Logger.log("Handling ack: %@ with data: %@", type: logType, args: ack, data ?? "")
         
         ackHandlers.executeAck(ack,
-            items: ((data as? [AnyObject]?) ?? (data != nil ? [data!] : nil))!)
+            items: (data as? [AnyObject]) ?? (data != nil ? [data!] : []))
     }
     
     /**
