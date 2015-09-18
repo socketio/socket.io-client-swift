@@ -133,12 +133,11 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     Will turn off automatic reconnects.
     Pass true to fast if you're closing from a background task
     */
-    public func close(fast fast: Bool) {
+    public func close() {
         Logger.log("Closing socket", type: logType)
         
         reconnects = false
-        status = SocketIOClientStatus.Closed
-        engine?.close(fast: fast)
+        didDisconnect("Closed")
     }
     
     /**
@@ -151,8 +150,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     /**
     Connect to the server. If we aren't connected after timeoutAfter, call handler
     */
-    public func connect(timeoutAfter timeoutAfter:Int,
-        withTimeoutHandler handler:(() -> Void)?) {
+    public func connect(timeoutAfter timeoutAfter: Int,
+        withTimeoutHandler handler: (() -> Void)?) {
             assert(timeoutAfter >= 0, "Invalid timeout: \(timeoutAfter)")
 
             guard status != .Connected else {
@@ -222,7 +221,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         Logger.log("Disconnected: %@", type: logType, args: reason)
         
         status = .Closed
-        
         reconnects = false
         
         // Make sure the engine is actually dead.
@@ -241,8 +239,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     /**
     Same as close
     */
-    public func disconnect(fast fast: Bool) {
-        close(fast: fast)
+    public func disconnect() {
+        close()
     }
     
     /**
@@ -411,6 +409,23 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         Logger.log("Adding handler for event: %@", type: logType, args: event)
         
         let handler = SocketEventHandler(event: event, callback: callback)
+        handlers.append(handler)
+    }
+    
+    /**
+    Adds a single-use handler for an event.
+    */
+    public func once(event: String, callback: NormalCallback) {
+        Logger.log("Adding once handler for event: %@", type: logType, args: event)
+        
+        let id = NSUUID()
+        
+        let handler = SocketEventHandler(event: event, id: id) {[weak self] (data, ack: SocketAckEmitter?) in
+            guard let this = self else {return}
+            this.handlers = ContiguousArray(this.handlers.filter {$0.id != id})
+            callback(data, ack)
+        }
+
         handlers.append(handler)
     }
     

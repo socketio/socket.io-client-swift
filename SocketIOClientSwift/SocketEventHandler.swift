@@ -31,9 +31,11 @@ private func emitAckCallback(socket: SocketIOClient, num: Int?) -> SocketAckEmit
 struct SocketEventHandler {
     let event: String
     let callback: NormalCallback
+    let id: NSUUID
     
-    init(event: String, callback: NormalCallback) {
+    init(event: String, id: NSUUID = NSUUID(), callback: NormalCallback) {
         self.event = event
+        self.id = id
         self.callback = callback
     }
     
