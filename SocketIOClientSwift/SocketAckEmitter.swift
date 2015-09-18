@@ -24,7 +24,6 @@
 
 import Foundation
 
-
 public final class SocketAckEmitter: NSObject {
     unowned let socket: SocketIOClient
     let ackNum: Int
