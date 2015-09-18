@@ -420,7 +420,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         
         let id = NSUUID()
         
-        let handler = SocketEventHandler(event: event, id: id) {[weak self] (data, ack: SocketAckEmitter?) in
+        let handler = SocketEventHandler(event: event, id: id) {[weak self] data, ack in
             guard let this = self else {return}
             this.handlers = ContiguousArray(this.handlers.filter {$0.id != id})
             callback(data, ack)
