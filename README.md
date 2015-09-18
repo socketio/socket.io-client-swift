@@ -28,11 +28,11 @@ socket.connect()
 ```objective-c
 SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8080" opts:nil];
 
-[socket onObjectiveC:@"connect" callback:^(NSArray* data, void (^ack)(NSArray*)) {
+[socket on:@"connect" callback:^(NSArray* data, SocketAckEmitter* ack) {
     NSLog(@"socket connected");
 }];
 
-[socket onObjectiveC:@"currentAmount" callback:^(NSArray* data, void (^ack)(NSArray*)) {
+[socket on:@"currentAmount" callback:^(NSArray* data, SocketAckEmitter* ack) {
     double cur = [[data objectAtIndex:0] floatValue];
 
     [socket emitWithAck:@"canUpdate" withItems:@[@(cur)]](0, ^(NSArray* data) {
@@ -128,7 +128,7 @@ Options
 
 Methods
 -------
-1. `on(name: String, callback: ((data: [AnyObject], ack: SocketAckEmitter?) -> Void))` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
+1. `on(event: String, callback: ((data: [AnyObject], ack: SocketAckEmitter?) -> Void))` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
 3. `onAny(callback:((event: String, items: AnyObject?)) -> Void)` - Adds a handler for all events. It will be called on any received event.
 4. `emit(event: String, _ items: AnyObject...)` - Sends a message. Can send multiple items.
 5. `emit(event: String, withItems items: [AnyObject])` - `emit` for Objective-C
