@@ -14,7 +14,7 @@ class SocketTestCases: NSObject {
     
     static func testBasic(abstractSocketSend:SocketSendFunction) {
         let testName = "basicTest"
-        func didGetResult(result:NSArray?, ack:AckEmitter?) {
+        func didGetResult(result:[AnyObject], ack:SocketAckEmitter?) {
             
         }
         abstractSocketSend(testName: testName, emitData: nil, callback: didGetResult)
@@ -22,8 +22,8 @@ class SocketTestCases: NSObject {
     
     static func testNull(abstractSocketSend:SocketSendFunction) {
         let testName = "testNull"
-        func didGetResult(result:NSArray?, ack:AckEmitter?) {
-            if let _ = result?.firstObject as? NSNull {
+        func didGetResult(result:[AnyObject], ack:SocketAckEmitter?) {
+            if let _ = result.first as? NSNull {
                 
             }else
             {
@@ -35,8 +35,8 @@ class SocketTestCases: NSObject {
     
     static func testBinary(abstractSocketSend:SocketSendFunction) {
         let testName = "testBinary"
-        func didGetResult(result:NSArray?, ack:AckEmitter?) {
-            if let data = result?.firstObject as? NSData {
+        func didGetResult(result:[AnyObject], ack:SocketAckEmitter?) {
+            if let data = result.first as? NSData {
                 let string = NSString(data: data, encoding: NSUTF8StringEncoding)!
                 XCTAssertEqual(string, "gakgakgak2")
             }else {
@@ -49,8 +49,8 @@ class SocketTestCases: NSObject {
     
     static func testArray(abstractSocketSend:SocketSendFunction) {
         let testName = "testArray"
-        func didGetResult(result:NSArray?, ack:AckEmitter?) {
-            if let array = result?.firstObject as? NSArray {
+        func didGetResult(result:[AnyObject], ack:SocketAckEmitter?) {
+            if let array = result.first as? NSArray {
                 XCTAssertEqual(array.count, 2)
                 XCTAssertEqual((array.firstObject! as! String), "test3")
                 XCTAssertEqual((array.lastObject! as! String), "test4")
@@ -63,8 +63,8 @@ class SocketTestCases: NSObject {
     
     static func testString(abstractSocketSend:SocketSendFunction) {
         let testName = "testString"
-        func didGetResult(result:NSArray?, ack:AckEmitter?) {
-            if let string = result?.firstObject as? String {
+        func didGetResult(result:[AnyObject], ack:SocketAckEmitter?) {
+            if let string = result.first as? String {
                 XCTAssertEqual(string, "polo")
             }else {
                 XCTFail("Should have String as result")
@@ -75,8 +75,8 @@ class SocketTestCases: NSObject {
     
     static func testBool(abstractSocketSend:SocketSendFunction) {
         let testName = "testBool"
-        func didGetResult(result:NSArray?, ack:AckEmitter?) {
-            if let bool = result?.firstObject as? NSNumber {
+        func didGetResult(result:[AnyObject], ack:SocketAckEmitter?) {
+            if let bool = result.first as? NSNumber {
                 XCTAssertTrue(bool.boolValue)
             }else {
                 XCTFail("Should have Boolean as result")
@@ -87,8 +87,8 @@ class SocketTestCases: NSObject {
     
     static func testInteger(abstractSocketSend:SocketSendFunction) {
         let testName = "testInteger"
-        func didGetResult(result:NSArray?, ack:AckEmitter?) {
-            if let integer = result?.firstObject as? Int {
+        func didGetResult(result:[AnyObject], ack:SocketAckEmitter?) {
+            if let integer = result.first as? Int {
                 XCTAssertEqual(integer, 20)
             }else {
                 XCTFail("Should have Integer as result")
@@ -99,8 +99,8 @@ class SocketTestCases: NSObject {
     
     static func testDouble(abstractSocketSend:SocketSendFunction) {
         let testName = "testDouble"
-        func didGetResult(result:NSArray?, ack:AckEmitter?) {
-            if let double = result?.firstObject as? NSNumber {
+        func didGetResult(result:[AnyObject], ack:SocketAckEmitter?) {
+            if let double = result.first as? NSNumber {
                 XCTAssertEqual(double.floatValue, 1.2)
             }else {
                 XCTFail("Should have Double as result")
@@ -113,8 +113,8 @@ class SocketTestCases: NSObject {
         let testName = "testJSONWithBuffer"
         let data = "0".dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!
         
-        func didGetResult(result:NSArray?, ack:AckEmitter?) {
-            if let json = result?.firstObject as? NSDictionary {
+        func didGetResult(result:[AnyObject], ack:SocketAckEmitter?) {
+            if let json = result.first as? NSDictionary {
                 XCTAssertEqual((json.valueForKey("testString")! as! String), "test")
                 XCTAssertEqual((json.valueForKey("testNumber")! as! Int), 15)
                 XCTAssertEqual((json.valueForKey("testArray")! as! Array<AnyObject>).count, 2)
@@ -132,8 +132,8 @@ class SocketTestCases: NSObject {
     
     static func testJSON(abstractSocketSend:SocketSendFunction) {
         let testName = "testJSON"
-        func didGetResult(result:NSArray?, ack:AckEmitter?) {
-            if let json = result?.firstObject as? NSDictionary {
+        func didGetResult(result:[AnyObject], ack:SocketAckEmitter?) {
+            if let json = result.first as? NSDictionary {
                 XCTAssertEqual((json.valueForKey("testString")! as! String), "test")
                 XCTAssertEqual(json.valueForKey("testNumber")! as? Int, 15)
                 XCTAssertEqual((json.valueForKey("testArray")! as! Array<AnyObject>).count, 2)
@@ -151,8 +151,8 @@ class SocketTestCases: NSObject {
     
     static func testUnicode(abstractSocketSend:SocketSendFunction) {
         let testName = "testUnicode"
-        func didGetResult(result:NSArray?, ack:AckEmitter?) {
-            if let unicode = result?.firstObject as? String {
+        func didGetResult(result:[AnyObject], ack:SocketAckEmitter?) {
+            if let unicode = result.first as? String {
                 XCTAssertEqual(unicode, "🚄")
             }else {
                 XCTFail("Should have String as result")
@@ -163,37 +163,37 @@ class SocketTestCases: NSObject {
     
     static func testMultipleItemsWithBuffer(abstractSocketMultipleSend:(testName:String, emitData:Array<AnyObject>, callback:NormalCallback)->()) {
         let testName = "testMultipleItemsWithBuffer"
-        func didGetResult(result:NSArray?, ack:AckEmitter?) {
-            XCTAssertEqual(result!.count, 5)
-            if result!.count != 5 {
+        func didGetResult(result:[AnyObject], ack:SocketAckEmitter?) {
+            XCTAssertEqual(result.count, 5)
+            if result.count != 5 {
                 XCTFail("Fatal Fail. Lost some Data")
                 return
             }
-            if let array = result?.firstObject as? Array<AnyObject> {
+            if let array = result.first as? Array<AnyObject> {
                 XCTAssertEqual((array.last! as! Int), 2)
                 XCTAssertEqual((array.first! as! Int), 1)
             }else {
                 XCTFail("Should have Array as result")
             }
-            if let dict = result?[1] as? NSDictionary {
+            if let dict = result[1] as? NSDictionary {
                 XCTAssertEqual((dict.valueForKey("test") as! String), "bob")
                 
             }else {
                 XCTFail("Should have NSDictionary as result")
             }
-            if let number = result?[2] as? Int {
+            if let number = result[2] as? Int {
                 XCTAssertEqual(number, 25)
                 
             }else {
                 XCTFail("Should have Integer as result")
             }
-            if let string = result?[3] as? String {
+            if let string = result[3] as? String {
                 XCTAssertEqual(string, "polo")
                 
             }else {
                 XCTFail("Should have Integer as result")
             }
-            if let data = result?[4] as? NSData {
+            if let data = result[4] as? NSData {
                 let string = NSString(data: data, encoding: NSUTF8StringEncoding)!
                 XCTAssertEqual(string, "gakgakgak2")
             }else {
@@ -207,36 +207,36 @@ class SocketTestCases: NSObject {
     
     static func testMultipleItems(abstractSocketMultipleSend:(testName:String, emitData:Array<AnyObject>, callback:NormalCallback)->()) {
         let testName = "testMultipleItems"
-        func didGetResult(result:NSArray?, ack:AckEmitter?) {
-            XCTAssertEqual(result!.count, 5)
-            if result!.count != 5 {
+        func didGetResult(result:[AnyObject], ack:SocketAckEmitter?) {
+            XCTAssertEqual(result.count, 5)
+            if result.count != 5 {
                 XCTFail("Fatal Fail. Lost some Data")
                 return
             }
-            if let array = result?.firstObject as? Array<AnyObject> {
+            if let array = result.first as? Array<AnyObject> {
                 XCTAssertEqual((array.last! as! Int), 2)
                 XCTAssertEqual((array.first! as! Int), 1)
             }else {
                 XCTFail("Should have Array as result")
             }
-            if let dict = result?[1] as? NSDictionary {
+            if let dict = result[1] as? NSDictionary {
                 XCTAssertEqual((dict.valueForKey("test") as! String), "bob")
                 
             }else {
                 XCTFail("Should have NSDictionary as result")
             }
-            if let number = result?[2] as? Int {
+            if let number = result[2] as? Int {
                 XCTAssertEqual(number, 25)
                 
             }else {
                 XCTFail("Should have Integer as result")
             }
-            if let string = result?[3] as? String {
+            if let string = result[3] as? String {
                 XCTAssertEqual(string, "polo")
             }else {
                 XCTFail("Should have Integer as result")
             }
-            if let bool = result?[4] as? NSNumber {
+            if let bool = result[4] as? NSNumber {
                 XCTAssertFalse(bool.boolValue)
             }else {
                 XCTFail("Should have NSNumber as result")

@@ -17,7 +17,7 @@ socket.on("currentAmount") {data, ack in
             socket.emit("update", ["amount": cur + 2.50])
         }
 
-        ack?("Got your currentAmount", "dude")
+        ack?.with("Got your currentAmount", "dude")
     }
 }
 
@@ -28,18 +28,18 @@ socket.connect()
 ```objective-c
 SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8080" opts:nil];
 
-[socket onObjectiveC:@"connect" callback:^(NSArray* data, void (^ack)(NSArray*)) {
+[socket on:@"connect" callback:^(NSArray* data, SocketAckEmitter* ack) {
     NSLog(@"socket connected");
 }];
 
-[socket onObjectiveC:@"currentAmount" callback:^(NSArray* data, void (^ack)(NSArray*)) {
+[socket on:@"currentAmount" callback:^(NSArray* data, SocketAckEmitter* ack) {
     double cur = [[data objectAtIndex:0] floatValue];
 
     [socket emitWithAck:@"canUpdate" withItems:@[@(cur)]](0, ^(NSArray* data) {
         [socket emit:@"update" withItems:@[@{@"amount": @(cur + 2.50)}]];
     });
 
-    ack(@[@"Got your currentAmount, ", @"dude"]);
+    [ack with:@[@"Got your currentAmount, ", @"dude"]];
 }];
 
 [socket connect];
@@ -128,8 +128,8 @@ Options
 
 Methods
 -------
-1. `on(name: String, callback: ((data: NSArray?, ack: AckEmitter?) -> Void))` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
-2. `onObjectiveC(name: String, callback: ((data: NSArray?, ack: AckEmitter?) -> Void))` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
+1. `on(event: String, callback: NormalCallback)` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
+2. `once(event: String, callback: NormalCallback)` - Adds a handler that will only be executed once.
 3. `onAny(callback:((event: String, items: AnyObject?)) -> Void)` - Adds a handler for all events. It will be called on any received event.
 4. `emit(event: String, _ items: AnyObject...)` - Sends a message. Can send multiple items.
 5. `emit(event: String, withItems items: [AnyObject])` - `emit` for Objective-C
@@ -141,8 +141,6 @@ Methods
 11. `reconnect()` - Causes the client to reconnect to the server.
 12. `joinNamespace()` - Causes the client to join nsp. Shouldn't need to be called unless you change nsp manually.
 13. `leaveNamespace()` - Causes the client to leave the nsp and go back to /
-14. `once(event: String, callback: NormalCallback)` - Adds a handler that will only be executed once.
-15. `once(event event: String, callback: NormalCallbackObjectiveC)` - Adds a handler that will only be executed once.
 
 Client Events
 ------
