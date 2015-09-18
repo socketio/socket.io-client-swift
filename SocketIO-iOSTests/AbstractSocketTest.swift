@@ -66,7 +66,6 @@ class AbstractSocketTest: XCTestCase {
             if let expection = expection {
                 expection.fulfill()
             }
-            
         }
         
         AbstractSocketTest.socket.on(finalTestname + "Return", callback: didGetEmit)
