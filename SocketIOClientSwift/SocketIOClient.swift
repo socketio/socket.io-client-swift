@@ -430,14 +430,15 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     public func once(event: String, callback: NormalCallback) {
         Logger.log("Adding once handler for event: %@", type: logType, args: event)
         
-        var handler: SocketEventHandler?;
-
-        handler = SocketEventHandler(event: event) { (data, ack: AckEmitter?) in
-            self.handlers = ContiguousArray(self.handlers.filter { $0.id != handler!.id })
+        let id = NSUUID()
+        
+        let handler = SocketEventHandler(event: event, id: id) {[weak self] (data, ack: AckEmitter?) in
+            guard let this = self else {return}
+            this.handlers = ContiguousArray(this.handlers.filter {$0.id != id})
             callback(data, ack)
         }
 
-        handlers.append(handler!)
+        handlers.append(handler)
     }
     
     /**
@@ -446,14 +447,15 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     public func once(event event: String, callback: NormalCallbackObjectiveC) {
         Logger.log("Adding once handler for event: %@", type: logType, args: event)
         
-        var handler: SocketEventHandler?;
-
-        handler = SocketEventHandler(event: event) { (data, ack: AckEmitterObjectiveC?) in
-            self.handlers = ContiguousArray(self.handlers.filter { $0.id != handler!.id })
+        let id = NSUUID()
+        
+        let handler = SocketEventHandler(event: event, id: id) {[weak self] (data, ack: AckEmitterObjectiveC?) in
+            guard let this = self else {return}
+            this.handlers = ContiguousArray(this.handlers.filter {$0.id != id})
             callback(data, ack)
         }
-
-        handlers.append(handler!)
+        
+        handlers.append(handler)
     }
     
     /**

@@ -143,6 +143,8 @@ Methods
 11. `reconnect()` - Causes the client to reconnect to the server.
 12. `joinNamespace()` - Causes the client to join nsp. Shouldn't need to be called unless you change nsp manually.
 13. `leaveNamespace()` - Causes the client to leave the nsp and go back to /
+14. `once(event: String, callback: NormalCallback)` - Adds a handler that will only be executed once.
+15. `once(event event: String, callback: NormalCallbackObjectiveC)` - Adds a handler that will only be executed once.
 
 Client Events
 ------
