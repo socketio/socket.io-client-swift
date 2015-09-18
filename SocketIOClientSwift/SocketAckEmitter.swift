@@ -34,11 +34,11 @@ public class SocketAckEmitter: NSObject {
         self.ackNum = ackNum
     }
     
-    public func ackWith(items: [AnyObject]) {
+    public func with(items: [AnyObject]) {
         socket.emitAck(ackNum, withItems: items)
     }
 }
 
 public func <-(lhs: SocketAckEmitter?, rhs: [AnyObject]) {
-    lhs?.ackWith(rhs)
+    lhs?.with(rhs)
 }

@@ -17,7 +17,7 @@ socket.on("currentAmount") {data, ack in
             socket.emit("update", ["amount": cur + 2.50])
         }
 
-        ack?("Got your currentAmount", "dude")
+        ack <- ["Got your currentAmount", "dude"]
     }
 }
 
@@ -39,7 +39,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8
         [socket emit:@"update" withItems:@[@{@"amount": @(cur + 2.50)}]];
     });
 
-    ack(@[@"Got your currentAmount, ", @"dude"]);
+    [ack with:@[@"Got your ack, ", @"dude"]];
 }];
 
 [socket connect];
