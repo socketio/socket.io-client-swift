@@ -27,22 +27,18 @@ import Foundation
 
 public class SocketAckEmitter: NSObject {
     unowned let socket: SocketIOClient
-    var ackNum: Int
-    
-    public subscript(items: AnyObject...) -> Bool {
-        socket.emitAck(ackNum, withItems: items)
-        
-        return true
-    }
-    
-    public subscript(items: [AnyObject]) -> NSString {
-        socket.emitAck(ackNum, withItems: items)
-        
-        return "Done"
-    }
+    let ackNum: Int
     
     init(socket: SocketIOClient, ackNum: Int) {
         self.socket = socket
         self.ackNum = ackNum
     }
+    
+    public func ackWith(items: [AnyObject]) {
+        socket.emitAck(ackNum, withItems: items)
+    }
+}
+
+public func <-(lhs: SocketAckEmitter?, rhs: [AnyObject]) {
+    lhs?.ackWith(rhs)
 }
