@@ -39,7 +39,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8
         [socket emit:@"update" withItems:@[@{@"amount": @(cur + 2.50)}]];
     });
 
-    [ack with:@[@"Got your ack, ", @"dude"]];
+    [ack with:@[@"Got your currentAmount, ", @"dude"]];
 }];
 
 [socket connect];
