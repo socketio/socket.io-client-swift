@@ -35,6 +35,7 @@ private func emitAckCallbackObjectiveC(socket: SocketIOClient?, num: Int?)
 }
 
 struct SocketEventHandler {
+    let id = NSUUID()
     let event: String
     let callback: NormalCallback?
     let callBackObjectiveC: NormalCallbackObjectiveC?
