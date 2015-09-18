@@ -12,7 +12,7 @@ socket.on("connect") {data, ack in
 }
 
 socket.on("currentAmount") {data, ack in
-    if let cur = data?[0] as? Double {
+    if let cur = data[0] as? Double {
         socket.emitWithAck("canUpdate", cur)(timeoutAfter: 0) {data in
             socket.emit("update", ["amount": cur + 2.50])
         }
