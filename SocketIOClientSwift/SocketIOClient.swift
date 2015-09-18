@@ -133,12 +133,11 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     Will turn off automatic reconnects.
     Pass true to fast if you're closing from a background task
     */
-    public func close(fast fast: Bool) {
+    public func close() {
         Logger.log("Closing socket", type: logType)
         
         reconnects = false
-        status = SocketIOClientStatus.Closed
-        engine?.close(fast: fast)
+        didDisconnect("Closed")
     }
     
     /**
@@ -151,8 +150,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     /**
     Connect to the server. If we aren't connected after timeoutAfter, call handler
     */
-    public func connect(timeoutAfter timeoutAfter:Int,
-        withTimeoutHandler handler:(() -> Void)?) {
+    public func connect(timeoutAfter timeoutAfter: Int,
+        withTimeoutHandler handler: (() -> Void)?) {
             assert(timeoutAfter >= 0, "Invalid timeout: \(timeoutAfter)")
 
             guard status != .Connected else {
@@ -222,7 +221,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         Logger.log("Disconnected: %@", type: logType, args: reason)
         
         status = .Closed
-        
         reconnects = false
         
         // Make sure the engine is actually dead.
@@ -241,8 +239,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     /**
     Same as close
     */
-    public func disconnect(fast fast: Bool) {
-        close(fast: fast)
+    public func disconnect() {
+        close()
     }
     
     /**

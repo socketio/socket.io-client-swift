@@ -137,7 +137,7 @@ Methods
 7. `emitWithAck(event: String, withItems items: [AnyObject]) -> (UInt64, (NSArray?) -> Void) -> Void` - `emitWithAck` for Objective-C. Note: The message is not sent until you call the returned function.
 8. `connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
 9. `connect(timeoutAfter timeoutAfter: Int, withTimeoutHandler handler: (() -> Void)?)` - Connect to the server. If it isn't connected after timeoutAfter seconds, the handler is called.
-10. `close(fast fast: Bool)` - Closes the socket. Once a socket is closed it should not be reopened. Pass true to fast if you're closing from a background task.
+10. `close()` - Closes the socket. Once a socket is closed it should not be reopened.
 11. `reconnect()` - Causes the client to reconnect to the server.
 12. `joinNamespace()` - Causes the client to join nsp. Shouldn't need to be called unless you change nsp manually.
 13. `leaveNamespace()` - Causes the client to leave the nsp and go back to /
