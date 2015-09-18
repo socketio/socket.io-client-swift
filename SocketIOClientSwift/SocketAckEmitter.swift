@@ -25,7 +25,7 @@
 import Foundation
 
 
-public class SocketAckEmitter: NSObject {
+public final class SocketAckEmitter: NSObject {
     unowned let socket: SocketIOClient
     let ackNum: Int
     
@@ -39,6 +39,6 @@ public class SocketAckEmitter: NSObject {
     }
 }
 
-public func <-(lhs: SocketAckEmitter?, rhs: [AnyObject]) {
-    lhs?.with(rhs)
+public func <-(ack: SocketAckEmitter?, items: [AnyObject]) {
+    ack?.with(items)
 }
