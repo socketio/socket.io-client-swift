@@ -1,6 +1,8 @@
-var app = require('express')()
-var server = app.listen(6979)
-var io = require('socket.io')(server)
+var app = require('http').createServer()
+var io = require('socket.io')(app);
+app.listen(6979)
+
+
 var acknowledgementsEvents = require("./acknowledgementEvents.js")
 var emitEvents = require("./emitEvents.js")
 var socketEventRegister = require("./socketEventRegister.js")

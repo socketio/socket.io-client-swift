@@ -9,8 +9,7 @@
 import XCTest
 
 class AbstractSocketTest: XCTestCase {
-    static let testLocal = false
-    static let serverURL = AbstractSocketTest.testLocal ? "localhost:6979" : "milkbartube.com:6979"
+    static let serverURL = "localhost:6979"
     static let TEST_TIMEOUT = 8.0
     static var socket:SocketIOClient!
     var testKind:TestKind?
@@ -30,6 +29,7 @@ class AbstractSocketTest: XCTestCase {
         }
         AbstractSocketTest.socket.connect()
         XCTAssertEqual(AbstractSocketTest.socket.status, SocketIOClientStatus.Connecting)
+        print(AbstractSocketTest.socket.sid)
         waitForExpectationsWithTimeout(AbstractSocketTest.TEST_TIMEOUT, handler: nil)
     }
     
@@ -66,7 +66,6 @@ class AbstractSocketTest: XCTestCase {
             if let expection = expection {
                 expection.fulfill()
             }
-            
         }
         
         AbstractSocketTest.socket.on(finalTestname + "Return", callback: didGetEmit)
