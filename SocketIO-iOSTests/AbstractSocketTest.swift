@@ -29,7 +29,6 @@ class AbstractSocketTest: XCTestCase {
         }
         AbstractSocketTest.socket.connect()
         XCTAssertEqual(AbstractSocketTest.socket.status, SocketIOClientStatus.Connecting)
-        print(AbstractSocketTest.socket.sid)
         waitForExpectationsWithTimeout(AbstractSocketTest.TEST_TIMEOUT, handler: nil)
     }
     
