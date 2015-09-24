@@ -68,7 +68,12 @@ class SocketParserTest: XCTestCase {
     
     func testInvalidInput() {
         let message = "8"
-        XCTAssertNil(SocketParser.parseString(message))
+        switch SocketParser.parseString(message) {
+        case .Left(_):
+            return
+        case .Right(_):
+            XCTFail("Created packet when shouldn't have")
+        }
     }
     
     func testGenericParser() {
@@ -83,7 +88,7 @@ class SocketParserTest: XCTestCase {
         let validValues = SocketParserTest.packetTypes[message]!
         let packet = SocketParser.parseString(message)
         let type = message.substringWithRange(Range<String.Index>(start: message.startIndex, end: message.startIndex.advancedBy(1)))
-        if let packet = packet {
+        if case let .Right(packet) = packet {
             XCTAssertEqual(packet.type, SocketPacket.PacketType(str:type)!)
             XCTAssertEqual(packet.nsp, validValues.0)
             XCTAssertTrue((packet.data as NSArray).isEqualToArray(validValues.1))

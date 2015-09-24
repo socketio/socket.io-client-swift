@@ -129,7 +129,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
         stopPolling()
     }
 
-    private func createBinaryDataForSend(data: NSData) -> (NSData?, String?) {
+    private func createBinaryDataForSend(data: NSData) -> Either<NSData, String> {
         if websocket {
             var byteArray = [UInt8](count: 1, repeatedValue: 0x0)
             byteArray[0] = 4
@@ -137,13 +137,13 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
 
             mutData.appendData(data)
 
-            return (mutData, nil)
+            return Either.Left(mutData)
         } else {
             var str = "b4"
             str += data.base64EncodedStringWithOptions(
                 NSDataBase64EncodingOptions.Encoding64CharacterLineLength)
 
-            return (nil, str)
+            return Either.Right(str)
         }
     }
 
@@ -581,9 +581,9 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
             postWait.append(strMsg)
 
             for data in datas ?? [] {
-                let (_, b64Data) = createBinaryDataForSend(data)
-
-                postWait.append(b64Data!)
+                if case let Either.Right(bin) = createBinaryDataForSend(data) {
+                    postWait.append(bin)
+                }
             }
 
             if !waitingForPost {
@@ -600,9 +600,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
             ws?.writeString("\(type.rawValue)\(str)")
 
             for data in datas ?? [] {
-                let (data, _) = createBinaryDataForSend(data)
-                if data != nil {
-                    ws?.writeData(data!)
+                if case let Either.Left(bin) = createBinaryDataForSend(data) {
+                    ws?.writeData(bin)
                 }
             }
     }
