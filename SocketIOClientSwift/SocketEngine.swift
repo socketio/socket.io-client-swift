@@ -65,8 +65,9 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     var cookies: [NSHTTPCookie]?
     var sid = ""
     var socketPath = ""
-    var urlPolling: String?
-    var urlWebSocket: String?
+    var urlPolling = ""
+    var urlWebSocket = ""
+
     var ws: WebSocket?
     
     @objc public enum PacketType: Int {
@@ -147,13 +148,12 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
         }
     }
 
-    private func createURLs(params: [String: AnyObject]?) -> (String?, String?) {
+    private func createURLs(params: [String: AnyObject]?) -> (String, String) {
         if client == nil {
-            return (nil, nil)
+            return ("", "")
         }
 
         let path = socketPath == "" ? "/socket.io" : socketPath
-
         let url = "\(client!.socketURL)\(path)/?transport="
         var urlPolling: String
         var urlWebSocket: String
@@ -189,7 +189,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     }
 
     private func createWebsocket(andConnect connect: Bool) {
-        let wsUrl = urlWebSocket! + (sid == "" ? "" : "&sid=\(sid)")
+        let wsUrl = urlWebSocket + (sid == "" ? "" : "&sid=\(sid)")
         
         ws = WebSocket(url: NSURL(string: wsUrl)!,
             cookies: cookies)
@@ -228,7 +228,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
         }
 
         waitingForPoll = true
-        let req = NSMutableURLRequest(URL: NSURL(string: urlPolling! + "&sid=\(sid)&b64=1")!)
+        let req = NSMutableURLRequest(URL: NSURL(string: urlPolling + "&sid=\(sid)&b64=1")!)
 
         if cookies != nil {
             let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies!)
@@ -318,7 +318,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
 
         postWait.removeAll(keepCapacity: false)
 
-        let req = NSMutableURLRequest(URL: NSURL(string: urlPolling! + "&sid=\(sid)")!)
+        let req = NSMutableURLRequest(URL: NSURL(string: urlPolling + "&sid=\(sid)")!)
 
         if let cookies = cookies {
             let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies)
@@ -468,7 +468,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
             return
         }
 
-        let reqPolling = NSMutableURLRequest(URL: NSURL(string: urlPolling! + "&b64=1")!)
+        let reqPolling = NSMutableURLRequest(URL: NSURL(string: urlPolling + "&b64=1")!)
 
         if cookies != nil {
             let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies!)
