@@ -137,13 +137,13 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
 
             mutData.appendData(data)
 
-            return Either.Left(mutData)
+            return .Left(mutData)
         } else {
             var str = "b4"
             str += data.base64EncodedStringWithOptions(
                 NSDataBase64EncodingOptions.Encoding64CharacterLineLength)
 
-            return Either.Right(str)
+            return .Right(str)
         }
     }
 
@@ -581,7 +581,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
             postWait.append(strMsg)
 
             for data in datas ?? [] {
-                if case let Either.Right(bin) = createBinaryDataForSend(data) {
+                if case let .Right(bin) = createBinaryDataForSend(data) {
                     postWait.append(bin)
                 }
             }

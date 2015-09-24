@@ -63,8 +63,9 @@ class SocketParser {
     static func parseString(message: String) -> Either<String, SocketPacket> {
         var parser = SocketStringReader(message: message)
         
-        guard let type = SocketPacket.PacketType(str: parser.read(1))
-            else {return .Left("Invalid packet type \(message)")}
+        guard let type = SocketPacket.PacketType(str: parser.read(1)) else {
+            return .Left("Invalid packet type")
+        }
         
         if !parser.hasNext {
             return .Right(SocketPacket(type: type, nsp: "/"))
@@ -77,7 +78,7 @@ class SocketParser {
             if let holders = Int(parser.readUntilStringOccurence("-")) {
                 placeholders = holders
             } else {
-               return .Left("Invalid packet: \(message)")
+               return .Left("Invalid packet")
             }
         }
         
@@ -114,7 +115,7 @@ class SocketParser {
     }
     
     // Parses data for events
-    static func parseData(data: String) -> Either<String, [AnyObject]> {
+    private static func parseData(data: String) -> Either<String, [AnyObject]> {
         let stringData = data.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)
         do {
             if let arr = try NSJSONSerialization.JSONObjectWithData(stringData!,
