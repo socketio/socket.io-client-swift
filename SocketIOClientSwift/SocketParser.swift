@@ -39,17 +39,15 @@ class SocketParser {
     }
     
     private static func handlePacket(pack: SocketPacket, withSocket socket: SocketIOClient) {
-        guard isCorrectNamespace(pack.nsp, socket) else { return }
-
         switch pack.type {
-        case .Event:
+        case .Event where isCorrectNamespace(pack.nsp, socket):
             socket.handleEvent(pack.event, data: pack.args ?? [],
                 isInternalMessage: false, wantsAck: pack.id)
-        case .Ack:
+        case .Ack where isCorrectNamespace(pack.nsp, socket):
             socket.handleAck(pack.id, data: pack.data)
-        case .BinaryEvent:
+        case .BinaryEvent where isCorrectNamespace(pack.nsp, socket):
             socket.waitingData.append(pack)
-        case .BinaryAck:
+        case .BinaryAck where isCorrectNamespace(pack.nsp, socket):
             socket.waitingData.append(pack)
         case .Connect:
             handleConnect(pack, socket: socket)
@@ -57,6 +55,8 @@ class SocketParser {
             socket.didDisconnect("Got Disconnect")
         case .Error:
             socket.didError("Error: \(pack.data)")
+        default:
+            Logger.log("Got invalid packet: %@", type: "SocketParser", args: pack.description)
         }
     }
     
