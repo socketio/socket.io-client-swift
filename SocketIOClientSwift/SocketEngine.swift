@@ -147,7 +147,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
             return .Right(str)
         }
     }
-
+    
     private func createURLs(params: [String: AnyObject]?) -> (String, String) {
         if client == nil {
             return ("", "")
@@ -188,7 +188,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
         return (urlPolling, urlWebSocket)
     }
 
-    private func createWebsocket(andConnect connect: Bool) {
+    private func createWebsocketAndConnect(connect: Bool) {
         let wsUrl = urlWebSocket + (sid == "" ? "" : "&sid=\(sid)")
         
         ws = WebSocket(url: NSURL(string: wsUrl)!,
@@ -408,7 +408,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
                 }
                 
                 if !forcePolling && !forceWebsockets && upgradeWs {
-                    createWebsocket(andConnect: true)
+                    createWebsocketAndConnect(true)
                 }
             }
         } catch {
@@ -464,7 +464,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
         if forceWebsockets {
             polling = false
             websocket = true
-            createWebsocket(andConnect: true)
+            createWebsocketAndConnect(true)
             return
         }
 
@@ -620,7 +620,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     }
 
     func stopPolling() {
-        session.invalidateAndCancel()
+        session.finishTasksAndInvalidate()
     }
 
     private func upgradeTransport() {
