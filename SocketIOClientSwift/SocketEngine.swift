@@ -65,8 +65,9 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     var cookies: [NSHTTPCookie]?
     var sid = ""
     var socketPath = ""
-    var urlPolling: String?
-    var urlWebSocket: String?
+    var urlPolling = ""
+    var urlWebSocket = ""
+
     var ws: WebSocket?
     
     @objc public enum PacketType: Int {
@@ -129,7 +130,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
         stopPolling()
     }
 
-    private func createBinaryDataForSend(data: NSData) -> (NSData?, String?) {
+    private func createBinaryDataForSend(data: NSData) -> Either<NSData, String> {
         if websocket {
             var byteArray = [UInt8](count: 1, repeatedValue: 0x0)
             byteArray[0] = 4
@@ -137,23 +138,22 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
 
             mutData.appendData(data)
 
-            return (mutData, nil)
+            return .Left(mutData)
         } else {
             var str = "b4"
             str += data.base64EncodedStringWithOptions(
                 NSDataBase64EncodingOptions.Encoding64CharacterLineLength)
 
-            return (nil, str)
+            return .Right(str)
         }
     }
 
-    private func createURLs(params: [String: AnyObject]?) -> (String?, String?) {
+    private func createURLs(params: [String: AnyObject]?) -> (String, String) {
         if client == nil {
-            return (nil, nil)
+            return ("", "")
         }
 
         let path = socketPath == "" ? "/socket.io" : socketPath
-
         let url = "\(client!.socketURL)\(path)/?transport="
         var urlPolling: String
         var urlWebSocket: String
@@ -189,7 +189,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     }
 
     private func createWebsocket(andConnect connect: Bool) {
-        let wsUrl = urlWebSocket! + (sid == "" ? "" : "&sid=\(sid)")
+        let wsUrl = urlWebSocket + (sid == "" ? "" : "&sid=\(sid)")
         
         ws = WebSocket(url: NSURL(string: wsUrl)!,
             cookies: cookies)
@@ -228,7 +228,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
         }
 
         waitingForPoll = true
-        let req = NSMutableURLRequest(URL: NSURL(string: urlPolling! + "&sid=\(sid)&b64=1")!)
+        let req = NSMutableURLRequest(URL: NSURL(string: urlPolling + "&sid=\(sid)&b64=1")!)
 
         if cookies != nil {
             let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies!)
@@ -318,7 +318,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
 
         postWait.removeAll(keepCapacity: false)
 
-        let req = NSMutableURLRequest(URL: NSURL(string: urlPolling! + "&sid=\(sid)")!)
+        let req = NSMutableURLRequest(URL: NSURL(string: urlPolling + "&sid=\(sid)")!)
 
         if let cookies = cookies {
             let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies)
@@ -468,7 +468,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
             return
         }
 
-        let reqPolling = NSMutableURLRequest(URL: NSURL(string: urlPolling! + "&b64=1")!)
+        let reqPolling = NSMutableURLRequest(URL: NSURL(string: urlPolling + "&b64=1")!)
 
         if cookies != nil {
             let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies!)
@@ -581,9 +581,9 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
             postWait.append(strMsg)
 
             for data in datas ?? [] {
-                let (_, b64Data) = createBinaryDataForSend(data)
-
-                postWait.append(b64Data!)
+                if case let .Right(bin) = createBinaryDataForSend(data) {
+                    postWait.append(bin)
+                }
             }
 
             if !waitingForPost {
@@ -600,9 +600,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
             ws?.writeString("\(type.rawValue)\(str)")
 
             for data in datas ?? [] {
-                let (data, _) = createBinaryDataForSend(data)
-                if data != nil {
-                    ws?.writeData(data!)
+                if case let Either.Left(bin) = createBinaryDataForSend(data) {
+                    ws?.writeData(bin)
                 }
             }
     }
