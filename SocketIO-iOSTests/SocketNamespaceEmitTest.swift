@@ -44,6 +44,7 @@ class SocketNamespaceEmitTest: AbstractSocketTest {
         SocketTestCases.testBinary(socketEmit)
     }
     
+    
     func testArray() {
         SocketTestCases.testArray(socketEmit)
     }
