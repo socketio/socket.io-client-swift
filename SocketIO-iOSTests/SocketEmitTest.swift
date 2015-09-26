@@ -17,10 +17,6 @@ class SocketEmitTest: AbstractSocketTest {
         openConnection(AbstractSocketTest.socket)
     }
     
-    override func tearDown() {
-        super.tearDown()
-    }
-    
     func testConnectionStatus() {
         super.checkConnectionStatus()
     }

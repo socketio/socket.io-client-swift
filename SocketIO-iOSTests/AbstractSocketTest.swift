@@ -10,7 +10,7 @@ import XCTest
 
 class AbstractSocketTest: XCTestCase {
     static let serverURL = "localhost:6979"
-    static let TEST_TIMEOUT = 8.0
+    static let TEST_TIMEOUT = 3.0
     static var socket: SocketIOClient!
     static let regularSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL, opts: [
         "reconnects": true, // default true
@@ -30,12 +30,6 @@ class AbstractSocketTest: XCTestCase {
         "path": "",
         "nsp": "/swift"])
     var testKind:TestKind?
-    
-//    override func setUp() {
-//        super.setUp()
-//        openConnection(AbstractSocketTest.socket)
-//        openConnection(AbstractSocketTest.namespaceSocket)
-//    }
     
     func openConnection(socket: SocketIOClient) {
         guard socket.status == SocketIOClientStatus.NotConnected else {return}
