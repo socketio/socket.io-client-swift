@@ -12,22 +12,9 @@ import Foundation
 class SocketEmitTest: AbstractSocketTest {
     override func setUp() {
         super.setUp()
+        AbstractSocketTest.socket = AbstractSocketTest.regularSocket
         testKind = TestKind.Emit
-        if AbstractSocketTest.socket == nil {
-            AbstractSocketTest.socket = SocketIOClient(socketURL: AbstractSocketTest.serverURL, opts: [
-                "reconnects": true, // default true
-                "reconnectAttempts": -1, // default -1
-                "reconnectWait": 5, // default 10
-                "forcePolling": false,
-                "forceWebsockets": false,// default false
-                "path": ""]
-            )
-            openConnection()
-        }else {
-            AbstractSocketTest.socket.leaveNamespace()
-        }
-        
-        
+        openConnection(AbstractSocketTest.socket)
     }
     
     override func tearDown() {

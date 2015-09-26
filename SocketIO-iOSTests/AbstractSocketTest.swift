@@ -11,28 +11,50 @@ import XCTest
 class AbstractSocketTest: XCTestCase {
     static let serverURL = "localhost:6979"
     static let TEST_TIMEOUT = 8.0
-    static var socket:SocketIOClient!
+    static var socket: SocketIOClient!
+    static let regularSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL, opts: [
+        "reconnects": true, // default true
+        "reconnectAttempts": -1, // default -1
+        "reconnectWait": 5, // default 10
+        "forcePolling": false,
+        "forceWebsockets": false,// default false
+        "path": ""]
+    )
+    
+    static let namespaceSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL, opts: [
+        "reconnects": true, // default true
+        "reconnectAttempts": -1, // default -1
+        "reconnectWait": 5, // default 10
+        "forcePolling": false,
+        "forceWebsockets": false,// default false
+        "path": "",
+        "nsp": "/swift"])
     var testKind:TestKind?
     
+//    override func setUp() {
+//        super.setUp()
+//        openConnection(AbstractSocketTest.socket)
+//        openConnection(AbstractSocketTest.namespaceSocket)
+//    }
     
-    func openConnection() {
-        guard AbstractSocketTest.socket.status == SocketIOClientStatus.NotConnected else {return}
+    func openConnection(socket: SocketIOClient) {
+        guard socket.status == SocketIOClientStatus.NotConnected else {return}
         
         weak var expection = self.expectationWithDescription("connect")
-        XCTAssertTrue(AbstractSocketTest.socket.status == SocketIOClientStatus.NotConnected)
-        AbstractSocketTest.socket.on("connect") {data, ack in
-            XCTAssertEqual(AbstractSocketTest.socket.status, SocketIOClientStatus.Connected)
-            XCTAssertFalse(AbstractSocketTest.socket.secure)
+        XCTAssertTrue(socket.status == SocketIOClientStatus.NotConnected)
+        socket.on("connect") {data, ack in
+            XCTAssertEqual(socket.status, SocketIOClientStatus.Connected)
+            XCTAssertFalse(socket.secure)
             if let expection = expection {
                 expection.fulfill()
             }
         }
-        AbstractSocketTest.socket.connect()
-        XCTAssertEqual(AbstractSocketTest.socket.status, SocketIOClientStatus.Connecting)
+        socket.connect()
+        XCTAssertEqual(socket.status, SocketIOClientStatus.Connecting)
         waitForExpectationsWithTimeout(AbstractSocketTest.TEST_TIMEOUT, handler: nil)
     }
     
-    func generateTestName(rawTestName:String) ->String {
+    func generateTestName(rawTestName:String) -> String {
         return rawTestName + testKind!.rawValue
     }
     
