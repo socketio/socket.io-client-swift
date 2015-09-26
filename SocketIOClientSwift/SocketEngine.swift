@@ -191,8 +191,14 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     private func createWebsocketAndConnect(connect: Bool) {
         let wsUrl = urlWebSocket + (sid == "" ? "" : "&sid=\(sid)")
         
-        ws = WebSocket(url: NSURL(string: wsUrl)!,
-            cookies: cookies)
+        ws = WebSocket(url: NSURL(string: wsUrl)!)
+        
+        if cookies != nil {
+            let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies!)
+            for (key, value) in headers {
+                ws?.headers[key] = value
+            }
+        }
         
         if extraHeaders != nil {
             for (headerName, value) in extraHeaders! {
