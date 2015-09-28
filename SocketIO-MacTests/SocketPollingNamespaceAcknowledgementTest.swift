@@ -12,7 +12,6 @@ import XCTest
 class SocketPollingNamespaceAcknowledgementTest: SocketNamespaceAcknowledgementTest {
     override func setUp() {
         AbstractSocketTest.socket = AbstractSocketTest.namespacePollingSocket
-        testKind = TestKind.Acknowledgement
-        openConnection(AbstractSocketTest.socket)
+        testKind = .Acknowledgement
     }
 }

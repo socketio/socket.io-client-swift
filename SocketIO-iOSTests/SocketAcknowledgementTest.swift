@@ -13,8 +13,7 @@ class SocketAcknowledgementTest: AbstractSocketTest {
     override func setUp() {
         super.setUp()
         AbstractSocketTest.socket = AbstractSocketTest.regularSocket
-        testKind = TestKind.Acknowledgement
-        openConnection(AbstractSocketTest.socket)
+        testKind = .Acknowledgement
     }
 
     func testConnectionStatus() {
