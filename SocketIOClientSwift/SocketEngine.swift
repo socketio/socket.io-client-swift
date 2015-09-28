@@ -229,7 +229,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     }
 
     private func doPoll() {
-        if websocket || waitingForPoll || !connected {
+        if websocket || waitingForPoll || !connected || closed {
             return
         }
 
@@ -251,7 +251,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     }
 
     private func doRequest(req: NSMutableURLRequest) {
-        if !polling {
+        if !polling || closed {
             return
         }
 
