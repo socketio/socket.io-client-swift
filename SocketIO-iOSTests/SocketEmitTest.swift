@@ -13,7 +13,8 @@ class SocketEmitTest: AbstractSocketTest {
     override func setUp() {
         super.setUp()
         AbstractSocketTest.socket = AbstractSocketTest.regularSocket
-        testKind = .Emit
+        testKind = TestKind.Emit
+        openConnection(AbstractSocketTest.socket)
     }
     
     func testConnectionStatus() {

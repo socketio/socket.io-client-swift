@@ -9,10 +9,12 @@
 import XCTest
 
 class SocketNamespaceAcknowledgementTest: AbstractSocketTest {
+
     override func setUp() {
         super.setUp()
         AbstractSocketTest.socket = AbstractSocketTest.namespaceSocket
-        testKind = .Acknowledgement
+        testKind = TestKind.Acknowledgement
+        openConnection(AbstractSocketTest.socket)
     }
     
     func testConnectionStatus() {

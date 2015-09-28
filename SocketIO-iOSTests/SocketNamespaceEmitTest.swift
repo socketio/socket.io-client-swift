@@ -9,10 +9,12 @@
 import XCTest
 
 class SocketNamespaceEmitTest: AbstractSocketTest {
+    
     override func setUp() {
         super.setUp()
         AbstractSocketTest.socket = AbstractSocketTest.namespaceSocket
-        testKind = .Emit
+        testKind = TestKind.Emit
+        openConnection(AbstractSocketTest.socket)
     }
 
     func testConnectionStatus() {
