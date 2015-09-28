@@ -12,23 +12,12 @@ class AbstractSocketTest: XCTestCase {
     static let serverURL = "localhost:6979"
     static let TEST_TIMEOUT = 3.0
     static var socket: SocketIOClient!
-    static let regularSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL, opts: [
-        "reconnects": true, // default true
-        "reconnectAttempts": -1, // default -1
-        "reconnectWait": 5, // default 10
-        "forcePolling": false,
-        "forceWebsockets": false,// default false
-        "path": ""]
-    )
+    static let regularSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL)
     
-    static let namespaceSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL, opts: [
-        "reconnects": true, // default true
-        "reconnectAttempts": -1, // default -1
-        "reconnectWait": 5, // default 10
-        "forcePolling": false,
-        "forceWebsockets": false,// default false
-        "path": "",
-        "nsp": "/swift"])
+    static let regularPollingSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
+        opts: ["forcePolling": true])
+    
+    static let namespaceSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL, opts: ["nsp": "/swift"])
     var testKind:TestKind?
     
     func openConnection(socket: SocketIOClient) {
