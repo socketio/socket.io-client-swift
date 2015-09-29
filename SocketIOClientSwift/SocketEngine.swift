@@ -99,6 +99,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
 
     deinit {
         Logger.log("Engine is being deinit", type: logType)
+        stopPolling()
     }
     
     private func checkIfMessageIsBase64Binary(var message: String) {
