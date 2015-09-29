@@ -13,11 +13,12 @@ class AbstractSocketTest: XCTestCase {
     static let TEST_TIMEOUT = 5.0
     static var socket: SocketIOClient!
     static let regularSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL)
-    
     static let regularPollingSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
         opts: ["forcePolling": true])
-    static let namespaceSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL, opts: ["nsp": "/swift"])
-    static let namespacePollingSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL, opts: ["forsePolling": true,"nsp": "/swift"])
+    static let namespaceSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
+        opts: ["nsp": "/swift"])
+    static let namespacePollingSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
+        opts: ["forsePolling": true,"nsp": "/swift"])
     var testKind:TestKind?
     
     func openConnection(socket: SocketIOClient) {
