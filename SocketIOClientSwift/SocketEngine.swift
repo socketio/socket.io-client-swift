@@ -41,6 +41,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     private var fastUpgrade = false
     private var forcePolling = false
     private var forceWebsockets = false
+    private var invalidated = false
     private var pingInterval: Double?
     private var pingTimer: NSTimer?
     private var pingTimeout = 0.0 {
@@ -99,6 +100,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
 
     deinit {
         Logger.log("Engine is being deinit", type: logType)
+        closed = true
         stopPolling()
     }
     
@@ -248,19 +250,23 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
             }
         }
         
-        doRequest(req)
+        doLongPoll(req)
+    }
+    
+    private func doRequest(req: NSMutableURLRequest,
+        withCallback callback: (NSData?, NSURLResponse?, NSError?) -> Void) {
+            if !polling || closed || invalidated {
+                return
+            }
+            
+            Logger.log("Doing polling request", type: logType)
+
+            req.cachePolicy = NSURLRequestCachePolicy.ReloadIgnoringLocalAndRemoteCacheData
+            session.dataTaskWithRequest(req, completionHandler: callback).resume()
     }
 
-    private func doRequest(req: NSMutableURLRequest) {
-        if !polling || closed {
-            return
-        }
-
-        req.cachePolicy = NSURLRequestCachePolicy.ReloadIgnoringLocalAndRemoteCacheData
-
-        Logger.log("Doing polling request", type: logType)
-
-        session.dataTaskWithRequest(req) {[weak self] data, res, err in
+    private func doLongPoll(req: NSMutableURLRequest) {
+        doRequest(req) {[weak self] data, res, err in
             if let this = self {
                 if err != nil || data == nil {
                     if this.polling {
@@ -270,23 +276,24 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
                     }
                     return
                 }
-
+                
                 Logger.log("Got polling response", type: this.logType)
-
+                
                 if let str = NSString(data: data!, encoding: NSUTF8StringEncoding) as? String {
                     dispatch_async(this.parseQueue) {[weak this] in
                         this?.parsePollingMessage(str)
                     }
                 }
-
+                
                 this.waitingForPoll = false
-
+                
                 if this.fastUpgrade {
                     this.doFastUpgrade()
                 } else if !this.closed && this.polling {
                     this.doPoll()
                 }
-            }}.resume()
+            }
+        }
     }
 
     private func flushProbeWait() {
@@ -345,13 +352,13 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
 
         Logger.log("POSTing: %@", type: logType, args: postStr)
 
-        session.dataTaskWithRequest(req) {[weak self] data, res, err in
+        doRequest(req) {[weak self] data, res, err in
             if let this = self {
                 if err != nil && this.polling {
                     this.handlePollingFailed(err?.localizedDescription ?? "Error")
                     return
                 } else if err != nil {
-                    NSLog(err?.localizedDescription ?? "Error")
+                    Logger.error(err?.localizedDescription ?? "Error", type: this.logType)
                     return
                 }
 
@@ -363,7 +370,8 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
                         this?.doPoll()
                     }
                 }
-            }}.resume()
+            }
+        }
     }
 
     // We had packets waiting for send when we upgraded
@@ -488,7 +496,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
             }
         }
         
-        doRequest(reqPolling)
+        doLongPoll(reqPolling)
     }
 
     private func parsePollingMessage(str: String) {
@@ -627,6 +635,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     }
 
     func stopPolling() {
+        invalidated = true
         session.finishTasksAndInvalidate()
     }
 
