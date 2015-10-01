@@ -261,7 +261,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
             
             Logger.log("Doing polling request", type: logType)
 
-            req.cachePolicy = NSURLRequestCachePolicy.ReloadIgnoringLocalAndRemoteCacheData
+            req.cachePolicy = .ReloadIgnoringLocalAndRemoteCacheData
             session.dataTaskWithRequest(req, completionHandler: callback).resume()
     }
 
