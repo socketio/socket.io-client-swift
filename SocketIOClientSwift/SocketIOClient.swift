@@ -171,10 +171,10 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
             
             let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeoutAfter) * Int64(NSEC_PER_SEC))
 
-            dispatch_after(time, dispatch_get_main_queue()) {[weak self] in
-                if self != nil && self?.status != .Connected {
-                    self?.status = .Closed
-                    self?.engine?.close(fast: true)
+            dispatch_after(time, handleQueue) {[weak self] in
+                if let this = self where this.status != .Connected {
+                    this.status = .Closed
+                    this.engine?.close(fast: true)
                     
                     handler?()
                 }
