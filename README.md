@@ -64,7 +64,7 @@ Carthage
 -----------------
 Add this line to your `Cartfile`:
 ```
-github "socketio/socket.io-client-swift" ~> 3.1.3 # Or latest version
+github "socketio/socket.io-client-swift" ~> 3.1.4 # Or latest version
 ```
 
 Run `carthage update --platform ios,macosx`.
@@ -83,7 +83,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 platform :ios, '8.0'
 use_frameworks!
 
-pod 'Socket.IO-Client-Swift', '~> 3.1.3' # Or latest version
+pod 'Socket.IO-Client-Swift', '~> 3.1.4' # Or latest version
 ```
 
 Install pods:
