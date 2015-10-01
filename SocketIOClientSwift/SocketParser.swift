@@ -54,7 +54,7 @@ class SocketParser {
         case .Disconnect:
             socket.didDisconnect("Got Disconnect")
         case .Error:
-            socket.didError("Error: \(pack.data)")
+            socket.didError(pack.data)
         default:
             Logger.log("Got invalid packet: %@", type: "SocketParser", args: pack.description)
         }
@@ -93,7 +93,11 @@ class SocketParser {
         
         var idString = ""
         
-        while parser.hasNext {
+        if type == .Error {
+            parser.advanceIndexBy(-1)
+        }
+        
+        while parser.hasNext && type != .Error {
             if let int = Int(parser.read(1)) {
                 idString += String(int)
             } else {
@@ -107,7 +111,13 @@ class SocketParser {
         
         switch parseData(noPlaceholders) {
         case .Left(let err):
-            return .Left(err)
+            // If first you don't succeed, try again
+            if case let .Right(data) = parseData("\([noPlaceholders as AnyObject])") {
+                return .Right(SocketPacket(type: type, data: data, id: Int(idString) ?? -1,
+                    nsp: namespace ?? "/", placeholders: placeholders))
+            } else {
+                return .Left(err)
+            }
         case .Right(let data):
             return .Right(SocketPacket(type: type, data: data, id: Int(idString) ?? -1,
                 nsp: namespace ?? "/", placeholders: placeholders))
