@@ -29,8 +29,8 @@ internal class SwiftRegex: NSObject, BooleanType {
                     NSRegularExpressionOptions.DotMatchesLineSeparators)
                 swiftRegexCache[pattern] = regex
                 self.regex = regex
-            } catch let error1 as NSError {
-                SwiftRegex.failure("Error in pattern: \(pattern) - \(error1)")
+            } catch let error as NSError {
+                SwiftRegex.failure("Error in pattern: \(pattern) - \(error)")
                 self.regex = NSRegularExpression()
             }
         }
@@ -46,7 +46,7 @@ internal class SwiftRegex: NSObject, BooleanType {
     }
     
     private final func substring(range: NSRange) -> String? {
-        if ( range.location != NSNotFound ) {
+        if range.location != NSNotFound {
             return (target as NSString).substringWithRange(range)
         } else {
             return nil
@@ -70,20 +70,19 @@ internal class SwiftRegex: NSObject, BooleanType {
             NSMatchingOptions.WithoutAnchoringBounds, range: targetRange))
     }
     
-    private func groupsForMatch(match: NSTextCheckingResult!) -> [String]? {
-        if match != nil {
-            var groups = [String]()
-            for groupno in 0...regex.numberOfCaptureGroups {
-                if let group = substring(match.rangeAtIndex(groupno)) {
-                    groups += [group]
-                } else {
-                    groups += ["_"] // avoids bridging problems
-                }
-            }
-            return groups
-        } else {
+    private func groupsForMatch(match: NSTextCheckingResult?) -> [String]? {
+        guard let match = match else {
             return nil
         }
+        var groups = [String]()
+        for groupno in 0...regex.numberOfCaptureGroups {
+            if let group = substring(match.rangeAtIndex(groupno)) {
+                groups += [group]
+            } else {
+                groups += ["_"] // avoids bridging problems
+            }
+        }
+        return groups
     }
     
     subscript(groupno: Int) -> String? {
@@ -124,7 +123,7 @@ internal class SwiftRegex: NSObject, BooleanType {
     }
     
     func allGroups() -> [[String]?] {
-        return matchResults().map {self.groupsForMatch($0)}
+        return matchResults().map { self.groupsForMatch($0) }
     }
     
     func dictionary(options: NSMatchingOptions!) -> Dictionary<String,String> {

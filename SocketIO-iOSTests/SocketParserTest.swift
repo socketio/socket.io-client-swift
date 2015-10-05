@@ -19,7 +19,9 @@ class SocketParserTest: XCTestCase {
         "61-/swift,19[[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]": ("/swift", [ [1, 2], ["test": "bob"], 25, "polo", "~~0"], [], 19),
         "4/swift,": ("/swift", [], [], -1),
         "0/swift": ("/swift", [], [], -1),
-        "1/swift": ("/swift", [], [], -1)]
+        "1/swift": ("/swift", [], [], -1),
+        "4\"ERROR\"": ("/", ["ERROR"], [], -1),
+        "41": ("/", [1], [], -1)]
     
     func testDisconnect() {
         let message = "1"
@@ -66,9 +68,24 @@ class SocketParserTest: XCTestCase {
         validateParseResult(message)
     }
     
+    func testErrorTypeString() {
+        let message = "4\"ERROR\""
+        validateParseResult(message)
+    }
+    
+    func testErrorTypeInt() {
+        let message = "41"
+        validateParseResult(message)
+    }
+    
     func testInvalidInput() {
         let message = "8"
-        XCTAssertNil(SocketParser.parseString(message))
+        switch SocketParser.parseString(message) {
+        case .Left(_):
+            return
+        case .Right(_):
+            XCTFail("Created packet when shouldn't have")
+        }
     }
     
     func testGenericParser() {
@@ -83,7 +100,7 @@ class SocketParserTest: XCTestCase {
         let validValues = SocketParserTest.packetTypes[message]!
         let packet = SocketParser.parseString(message)
         let type = message.substringWithRange(Range<String.Index>(start: message.startIndex, end: message.startIndex.advancedBy(1)))
-        if let packet = packet {
+        if case let .Right(packet) = packet {
             XCTAssertEqual(packet.type, SocketPacket.PacketType(str:type)!)
             XCTAssertEqual(packet.nsp, validValues.0)
             XCTAssertTrue((packet.data as NSArray).isEqualToArray(validValues.1))

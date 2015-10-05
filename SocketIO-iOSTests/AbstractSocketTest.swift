@@ -9,8 +9,7 @@
 import XCTest
 
 class AbstractSocketTest: XCTestCase {
-    static let testLocal = false
-    static let serverURL = AbstractSocketTest.testLocal ? "localhost:6979" : "milkbartube.com:6979"
+    static let serverURL = "localhost:6979"
     static let TEST_TIMEOUT = 8.0
     static var socket:SocketIOClient!
     var testKind:TestKind?
@@ -45,7 +44,7 @@ class AbstractSocketTest: XCTestCase {
     func socketMultipleEmit(testName:String, emitData:Array<AnyObject>, callback:NormalCallback){
         let finalTestname = generateTestName(testName)
         weak var expection = self.expectationWithDescription(finalTestname)
-        func didGetEmit(result:NSArray?, ack:AckEmitter?) {
+        func didGetEmit(result:[AnyObject], ack:SocketAckEmitter?) {
             callback(result, ack)
             if let expection = expection {
                 expection.fulfill()
@@ -61,12 +60,11 @@ class AbstractSocketTest: XCTestCase {
     func socketEmit(testName:String, emitData:AnyObject?, callback:NormalCallback){
         let finalTestname = generateTestName(testName)
         weak var expection = self.expectationWithDescription(finalTestname)
-        func didGetEmit(result:NSArray?, ack:AckEmitter?) {
+        func didGetEmit(result:[AnyObject], ack:SocketAckEmitter?) {
             callback(result, ack)
             if let expection = expection {
                 expection.fulfill()
             }
-            
         }
         
         AbstractSocketTest.socket.on(finalTestname + "Return", callback: didGetEmit)
@@ -79,11 +77,12 @@ class AbstractSocketTest: XCTestCase {
         waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
     }
     
+    
     func socketAcknwoledgeMultiple(testName:String, Data:Array<AnyObject>, callback:NormalCallback){
         let finalTestname = generateTestName(testName)
         weak var expection = self.expectationWithDescription(finalTestname)
-        func didGetResult(result:NSArray?) {
-            callback(result, nil)
+        func didGetResult(result: [AnyObject]) {
+            callback(result, SocketAckEmitter(socket: AbstractSocketTest.socket, ackNum: -1))
             if let expection = expection {
                 expection.fulfill()
             }
@@ -96,8 +95,8 @@ class AbstractSocketTest: XCTestCase {
     func socketAcknwoledge(testName:String, Data:AnyObject?, callback:NormalCallback){
         let finalTestname = generateTestName(testName)
         weak var expection = self.expectationWithDescription(finalTestname)
-        func didGet(result:NSArray?) {
-            callback(result, nil)
+        func didGet(result:[AnyObject]) {
+            callback(result, SocketAckEmitter(socket: AbstractSocketTest.socket, ackNum: -1))
             if let expection = expection {
                 expection.fulfill()
             }

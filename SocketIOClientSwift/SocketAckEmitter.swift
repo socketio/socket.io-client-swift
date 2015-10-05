@@ -1,8 +1,8 @@
 //
-//  EventHandler.swift
+//  SocketAckEmitter.swift
 //  Socket.IO-Client-Swift
 //
-//  Created by Erik Little on 1/18/15.
+//  Created by Erik Little on 9/16/15.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -24,23 +24,20 @@
 
 import Foundation
 
-private func emitAckCallback(socket: SocketIOClient, num: Int?) -> SocketAckEmitter? {
-    return num != nil ? SocketAckEmitter(socket: socket, ackNum: num!) : nil
-}
-
-struct SocketEventHandler {
-    let event: String
-    let callback: NormalCallback
-    let id: NSUUID
+public final class SocketAckEmitter: NSObject {
+    let socket: SocketIOClient
+    let ackNum: Int
     
-    init(event: String, id: NSUUID = NSUUID(), callback: NormalCallback) {
-        self.event = event
-        self.id = id
-        self.callback = callback
+    init(socket: SocketIOClient, ackNum: Int) {
+        self.socket = socket
+        self.ackNum = ackNum
     }
     
-    func executeCallback(items: [AnyObject], withAck ack: Int? = nil, withAckType type: Int? = nil,
-        withSocket socket: SocketIOClient) {
-                self.callback(items, emitAckCallback(socket, num: ack))
+    public func with(items: AnyObject...) {
+        socket.emitAck(ackNum, withItems: items)
+    }
+    
+    public func with(items: [AnyObject]) {
+        socket.emitAck(ackNum, withItems: items)
     }
 }
