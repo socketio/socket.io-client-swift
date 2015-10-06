@@ -11,6 +11,7 @@ import XCTest
 
 class SocketPollingAcknowledgementTest: AbstractSocketTest {
     override func setUp() {
+        super.setUp()
         socket = AbstractSocketTest.regularPollingAckSocket
         testKind = TestKind.Acknowledgement
         openConnection(socket)

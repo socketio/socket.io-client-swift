@@ -11,6 +11,7 @@ import XCTest
 
 class SocketPollingEmitTest: AbstractSocketTest {
     override func setUp() {
+        super.setUp()
         socket = AbstractSocketTest.regularPollingSocket
         testKind = TestKind.Emit
         openConnection(socket)
