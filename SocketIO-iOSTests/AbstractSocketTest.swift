@@ -12,18 +12,54 @@ class AbstractSocketTest: XCTestCase {
     static let serverURL = "localhost:6979"
     static let TEST_TIMEOUT = 5.0
     var socket: SocketIOClient!
-    static let regularSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL)
+    static let que: dispatch_queue_t = NSOperationQueue.currentQueue()!.underlyingQueue!
+    static let regularSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL, opts: ["handleQueue": que])
     static let namespaceSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
-        opts: ["nsp": "/swift"])
+        opts: ["nsp": "/swift", "handleQueue": que])
     
     static let regularPollingSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
-        opts: ["forcePolling": true])
+        opts: ["forcePolling": true, "handleQueue": que])
     static let namespacePollingSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
-        opts: ["forcePolling": true,"nsp": "/swift"])
+        opts: ["forcePolling": true,"nsp": "/swift", "handleQueue": que])
     var testKind:TestKind?
+    
+//    override func setUp() {
+//        connectAllOnce()
+//    }
+    
+    func connectAllOnce() {
+        weak var expection = self.expectationWithDescription("connectAll")
+        let t = {
+            if AbstractSocketTest.regularSocket.status == .Connected && AbstractSocketTest.namespaceSocket.status == .Connected && AbstractSocketTest.regularPollingSocket.status == .Connected && AbstractSocketTest.namespacePollingSocket.status == .Connected {
+                if let expection = expection {
+                    expection.fulfill()
+                }
+                print("connected all")
+            }
+        }
+        
+        openConnectionTest(AbstractSocketTest.regularSocket, connected: t)
+        openConnectionTest(AbstractSocketTest.namespaceSocket, connected: t)
+        openConnectionTest(AbstractSocketTest.regularPollingSocket, connected: t)
+        openConnectionTest(AbstractSocketTest.namespacePollingSocket, connected: t)
+        waitForExpectationsWithTimeout(15, handler: nil)
+        
+        
+        
+    }
+    
+    func openConnectionTest(socket: SocketIOClient, connected: ()->()) {
+        
+        socket.on("connect") {data, ack in
+            XCTAssertEqual(socket.status, SocketIOClientStatus.Connected)
+            connected()
+        }
+        socket.connect()
+    }
     
     func openConnection(socket: SocketIOClient) {
         guard socket.status == SocketIOClientStatus.NotConnected else {return}
+        
         
         weak var expection = self.expectationWithDescription("connect")
         XCTAssertTrue(socket.status == SocketIOClientStatus.NotConnected)
