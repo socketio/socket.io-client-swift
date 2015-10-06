@@ -18,7 +18,11 @@ class AbstractSocketTest: XCTestCase {
     
     static let regularPollingSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
         opts: ["forcePolling": true])
+    static let regularPollingAckSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
+        opts: ["forcePolling": true])
     static let namespacePollingSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
+        opts: ["forcePolling": true,"nsp": "/swift"])
+    static let namespacePollingAckSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
         opts: ["forcePolling": true,"nsp": "/swift"])
     var testKind:TestKind?
     
