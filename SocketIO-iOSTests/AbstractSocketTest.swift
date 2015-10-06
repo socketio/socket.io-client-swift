@@ -30,7 +30,6 @@ class AbstractSocketTest: XCTestCase {
     var testKind:TestKind?
     
     func openConnection(socket: SocketIOClient) {
-        print("tryConnect")
         guard socket.status == SocketIOClientStatus.NotConnected else {return}
         
         weak var expection = self.expectationWithDescription("connect")
@@ -56,6 +55,7 @@ class AbstractSocketTest: XCTestCase {
     }
     
     func socketMultipleEmit(testName:String, emitData:Array<AnyObject>, callback:NormalCallback){
+        XCTAssert(socket.status == .Connected)
         let finalTestname = generateTestName(testName)
         weak var expection = self.expectationWithDescription(finalTestname)
         func didGetEmit(result:[AnyObject], ack:SocketAckEmitter?) {
@@ -72,6 +72,7 @@ class AbstractSocketTest: XCTestCase {
     
     
     func socketEmit(testName:String, emitData:AnyObject?, callback:NormalCallback){
+        XCTAssert(socket.status == .Connected)
         let finalTestname = generateTestName(testName)
         weak var expection = self.expectationWithDescription(finalTestname)
         func didGetEmit(result:[AnyObject], ack:SocketAckEmitter?) {
@@ -93,6 +94,7 @@ class AbstractSocketTest: XCTestCase {
     
     
     func socketAcknwoledgeMultiple(testName:String, Data:Array<AnyObject>, callback:NormalCallback){
+        XCTAssert(socket.status == .Connected)
         let finalTestname = generateTestName(testName)
         weak var expection = self.expectationWithDescription(finalTestname)
         func didGetResult(result: [AnyObject]) {
@@ -107,6 +109,7 @@ class AbstractSocketTest: XCTestCase {
     }
     
     func socketAcknwoledge(testName:String, Data:AnyObject?, callback:NormalCallback){
+        XCTAssert(socket.status == .Connected)
         let finalTestname = generateTestName(testName)
         weak var expection = self.expectationWithDescription(finalTestname)
         func didGet(result:[AnyObject]) {
