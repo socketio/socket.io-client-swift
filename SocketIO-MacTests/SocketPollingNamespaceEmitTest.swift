@@ -14,6 +14,9 @@ class SocketPollingNamespaceEmitTest: AbstractSocketTest {
         super.setUp()
         socket = AbstractSocketTest.namespacePollingSocket
         testKind = TestKind.Emit
+    }
+    
+    func testAAConnect() {
         openConnection(socket)
     }
     

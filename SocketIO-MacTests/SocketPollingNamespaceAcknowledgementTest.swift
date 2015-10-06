@@ -14,6 +14,9 @@ class SocketPollingNamespaceAcknowledgementTest: AbstractSocketTest {
         super.setUp()
         socket = AbstractSocketTest.namespacePollingAckSocket
         testKind = TestKind.Acknowledgement
+    }
+    
+    func testAAConnect() {
         openConnection(socket)
     }
     
