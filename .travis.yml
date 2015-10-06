@@ -3,11 +3,13 @@ xcode_project: Socket.IO-Client-Swift.xcodeproj # path to your xcodeproj folder
 xcode_scheme: SocketIO-Mac
 osx_image: xcode7
 before_install:
+	- brew update
+	- brew outdated xctool || brew upgrade xctool
     - cd Socket.IO-Test-Server/
     - npm install
     - cd ..
 install: node Socket.IO-Test-Server/main.js &
-script: xcodebuild -project Socket.IO-Client-Swift.xcodeproj -scheme SocketIO-Mac build test
+script: xctool -project Socket.IO-Client-Swift.xcodeproj -scheme SocketIO-Mac build test
 cache:
   directories:
     - Socket.IO-Test-Server/node_modules
