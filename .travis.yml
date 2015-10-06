@@ -3,8 +3,8 @@ xcode_project: Socket.IO-Client-Swift.xcodeproj # path to your xcodeproj folder
 xcode_scheme: SocketIO-Mac
 osx_image: xcode7
 before_install:
-	- brew update
-	- brew outdated xctool || brew upgrade xctool
+    - brew update
+    - brew outdated xctool || brew upgrade xctool
     - cd Socket.IO-Test-Server/
     - npm install
     - cd ..
