@@ -10,7 +10,7 @@ import XCTest
 
 class AbstractSocketTest: XCTestCase {
     static let serverURL = "localhost:6979"
-    static let TEST_TIMEOUT = 2.0
+    static let TEST_TIMEOUT = 5.0
     var socket: SocketIOClient!
     static let regularSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL)
     static let namespaceSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
