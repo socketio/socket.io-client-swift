@@ -254,6 +254,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     */
     public func emit(event: String, withItems items: [AnyObject]) {
         guard status == .Connected else {
+            Logger.error("Tried to emit while not connectd", type: logType)
             return
         }
 

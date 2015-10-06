@@ -12,24 +12,25 @@ class AbstractSocketTest: XCTestCase {
     static let serverURL = "localhost:6979"
     static let TEST_TIMEOUT = 5.0
     var socket: SocketIOClient!
-    static let regularSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL)
-    static let regularAckSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL)
+    static let regularSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL, opts: ["log": true])
+    static let regularAckSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL, opts: ["log": true])
     static let namespaceSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
-        opts: ["nsp": "/swift"])
+        opts: ["nsp": "/swift", "log": true])
     static let namespaceAckSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
-        opts: ["nsp": "/swift"])
+        opts: ["nsp": "/swift", "log": true])
     
     static let regularPollingSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
-        opts: ["forcePolling": true])
+        opts: ["forcePolling": true, "log": true])
     static let regularPollingAckSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
-        opts: ["forcePolling": true])
+        opts: ["forcePolling": true, "log": true])
     static let namespacePollingSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
-        opts: ["forcePolling": true,"nsp": "/swift"])
+        opts: ["forcePolling": true,"nsp": "/swift", "log": true])
     static let namespacePollingAckSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
-        opts: ["forcePolling": true,"nsp": "/swift"])
+        opts: ["forcePolling": true,"nsp": "/swift", "log": true])
     var testKind:TestKind?
     
     func openConnection(socket: SocketIOClient) {
+        print("tryConnect")
         guard socket.status == SocketIOClientStatus.NotConnected else {return}
         
         weak var expection = self.expectationWithDescription("connect")
