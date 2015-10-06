@@ -12,9 +12,9 @@ class SocketNamespaceEmitTest: AbstractSocketTest {
     
     override func setUp() {
         super.setUp()
-        AbstractSocketTest.socket = AbstractSocketTest.namespaceSocket
+        socket = AbstractSocketTest.namespaceSocket
         testKind = TestKind.Emit
-        openConnection(AbstractSocketTest.socket)
+        openConnection(socket)
     }
 
     func testConnectionStatus() {

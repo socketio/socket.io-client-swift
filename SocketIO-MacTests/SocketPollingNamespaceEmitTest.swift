@@ -11,9 +11,9 @@ import XCTest
 
 class SocketPollingNamespaceEmitTest: AbstractSocketTest {
     override func setUp() {
-        AbstractSocketTest.socket = AbstractSocketTest.namespacePollingSocket
+        socket = AbstractSocketTest.namespacePollingSocket
         testKind = TestKind.Emit
-        openConnection(AbstractSocketTest.socket)
+        openConnection(socket)
     }
     
     func testConnectionStatus() {

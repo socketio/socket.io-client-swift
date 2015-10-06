@@ -1,6 +1,6 @@
 //
 //  AbstractSocketTest.swift
-//  AbstractSocketTest.socket.IO-Client-Swift
+//  socket.IO-Client-Swift
 //
 //  Created by Lukas Schmidt on 02.08.15.
 //
@@ -10,15 +10,16 @@ import XCTest
 
 class AbstractSocketTest: XCTestCase {
     static let serverURL = "localhost:6979"
-    static let TEST_TIMEOUT = 5.0
-    static var socket: SocketIOClient!
+    static let TEST_TIMEOUT = 2.0
+    var socket: SocketIOClient!
     static let regularSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL)
-    static let regularPollingSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
-        opts: ["forcePolling": true])
     static let namespaceSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
         opts: ["nsp": "/swift"])
+    
+    static let regularPollingSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
+        opts: ["forcePolling": true])
     static let namespacePollingSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
-        opts: ["forsePolling": true,"nsp": "/swift"])
+        opts: ["forcePolling": true,"nsp": "/swift"])
     var testKind:TestKind?
     
     func openConnection(socket: SocketIOClient) {
@@ -43,8 +44,8 @@ class AbstractSocketTest: XCTestCase {
     }
     
     func checkConnectionStatus() {
-        XCTAssertEqual(AbstractSocketTest.socket.status, SocketIOClientStatus.Connected)
-        XCTAssertFalse(AbstractSocketTest.socket.secure)
+        XCTAssertEqual(socket.status, SocketIOClientStatus.Connected)
+        XCTAssertFalse(socket.secure)
     }
     
     func socketMultipleEmit(testName:String, emitData:Array<AnyObject>, callback:NormalCallback){
@@ -57,8 +58,8 @@ class AbstractSocketTest: XCTestCase {
             }
         }
         
-        AbstractSocketTest.socket.emit(finalTestname, withItems: emitData)
-        AbstractSocketTest.socket.on(finalTestname + "Return", callback: didGetEmit)
+        socket.emit(finalTestname, withItems: emitData)
+        socket.on(finalTestname + "Return", callback: didGetEmit)
         waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
     }
     
@@ -73,11 +74,11 @@ class AbstractSocketTest: XCTestCase {
             }
         }
         
-        AbstractSocketTest.socket.on(finalTestname + "Return", callback: didGetEmit)
+        socket.on(finalTestname + "Return", callback: didGetEmit)
         if let emitData = emitData {
-            AbstractSocketTest.socket.emit(finalTestname, emitData)
+            socket.emit(finalTestname, emitData)
         } else {
-            AbstractSocketTest.socket.emit(finalTestname)
+            socket.emit(finalTestname)
         }
         
         waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
@@ -88,13 +89,13 @@ class AbstractSocketTest: XCTestCase {
         let finalTestname = generateTestName(testName)
         weak var expection = self.expectationWithDescription(finalTestname)
         func didGetResult(result: [AnyObject]) {
-            callback(result, SocketAckEmitter(socket: AbstractSocketTest.socket, ackNum: -1))
+            callback(result, SocketAckEmitter(socket: socket, ackNum: -1))
             if let expection = expection {
                 expection.fulfill()
             }
         }
         
-        AbstractSocketTest.socket.emitWithAck(finalTestname, withItems: Data)(timeoutAfter: 5, callback: didGetResult)
+        socket.emitWithAck(finalTestname, withItems: Data)(timeoutAfter: 5, callback: didGetResult)
         waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
     }
     
@@ -102,16 +103,16 @@ class AbstractSocketTest: XCTestCase {
         let finalTestname = generateTestName(testName)
         weak var expection = self.expectationWithDescription(finalTestname)
         func didGet(result:[AnyObject]) {
-            callback(result, SocketAckEmitter(socket: AbstractSocketTest.socket, ackNum: -1))
+            callback(result, SocketAckEmitter(socket: socket, ackNum: -1))
             if let expection = expection {
                 expection.fulfill()
             }
         }
         var ack:OnAckCallback!
         if let Data = Data {
-            ack = AbstractSocketTest.socket.emitWithAck(finalTestname, Data)
+            ack = socket.emitWithAck(finalTestname, Data)
         } else {
-            ack = AbstractSocketTest.socket.emitWithAck(finalTestname)
+            ack = socket.emitWithAck(finalTestname)
         }
         ack(timeoutAfter: 20, callback: didGet)
         

@@ -7,7 +7,13 @@ function registerSocketForEvents(ioSocket, socketCallback, testKind) {
 			testCase = testCases[testKey]
 			socket.on((testKey + testKind), socketCallback(testKey, socket, testCase))
 		}
+		
+		socket.on('error', function(err) {
+			console.log(err)
+		})
 	})
+	
+	
 }
 
 module.exports.register = registerSocketForEvents

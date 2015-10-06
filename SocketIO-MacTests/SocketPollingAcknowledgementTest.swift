@@ -11,9 +11,9 @@ import XCTest
 
 class SocketPollingAcknowledgementTest: AbstractSocketTest {
     override func setUp() {
-        AbstractSocketTest.socket = AbstractSocketTest.regularPollingSocket
+        socket = AbstractSocketTest.regularPollingSocket
         testKind = TestKind.Acknowledgement
-        openConnection(AbstractSocketTest.socket)
+        openConnection(socket)
     }
     
     func testConnectionStatus() {
@@ -21,55 +21,55 @@ class SocketPollingAcknowledgementTest: AbstractSocketTest {
     }
     
     func testBasic() {
-        SocketTestCases.testBasic(socketEmit)
+        SocketTestCases.testBasic(socketAcknwoledge)
     }
     
     func testNull() {
-        SocketTestCases.testNull(socketEmit)
+        SocketTestCases.testNull(socketAcknwoledge)
     }
     
     func testBinary() {
-        SocketTestCases.testBinary(socketEmit)
+        SocketTestCases.testBinary(socketAcknwoledge)
     }
     
     
     func testArray() {
-        SocketTestCases.testArray(socketEmit)
+        SocketTestCases.testArray(socketAcknwoledge)
     }
     
     func testString() {
-        SocketTestCases.testString(socketEmit)
+        SocketTestCases.testString(socketAcknwoledge)
     }
     
     func testBool() {
-        SocketTestCases.testBool(socketEmit)
+        SocketTestCases.testBool(socketAcknwoledge)
     }
     
     func testInteger() {
-        SocketTestCases.testInteger(socketEmit)
+        SocketTestCases.testInteger(socketAcknwoledge)
     }
     
     func testDouble() {
-        SocketTestCases.testDouble(socketEmit)
+        SocketTestCases.testDouble(socketAcknwoledge)
     }
     
     func testJSON() {
-        SocketTestCases.testJSON(socketEmit)
+        SocketTestCases.testJSON(socketAcknwoledge)
     }
     
     func testJSONWithBuffer() {
-        SocketTestCases.testJSONWithBuffer(socketEmit)
+        SocketTestCases.testJSONWithBuffer(socketAcknwoledge)
     }
     
     func testUnicode() {
-        SocketTestCases.testUnicode(socketEmit)
+        SocketTestCases.testUnicode(socketAcknwoledge)
     }
     
     func testMultipleItems() {
-        SocketTestCases.testMultipleItems(socketMultipleEmit)
+        SocketTestCases.testMultipleItems(socketAcknwoledgeMultiple)
     }
     
     func testMultipleWithBuffer() {
-        SocketTestCases.testMultipleItemsWithBuffer(socketMultipleEmit)
+        SocketTestCases.testMultipleItemsWithBuffer(socketAcknwoledgeMultiple)
     }
 }

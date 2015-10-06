@@ -12,9 +12,9 @@ import Foundation
 class SocketEmitTest: AbstractSocketTest {
     override func setUp() {
         super.setUp()
-        AbstractSocketTest.socket = AbstractSocketTest.regularSocket
+        socket = AbstractSocketTest.regularSocket
         testKind = TestKind.Emit
-        openConnection(AbstractSocketTest.socket)
+        openConnection(socket)
     }
     
     func testConnectionStatus() {
