@@ -1,6 +1,6 @@
 language: objective-c
 xcode_project: Socket.IO-Client-Swift.xcodeproj # path to your xcodeproj folder
-xcode_scheme: SocketIO-iOS
+xcode_scheme: SocketIO-Mac
 osx_image: xcode7
 before_install:
     - cd Socket.IO-Test-Server/
