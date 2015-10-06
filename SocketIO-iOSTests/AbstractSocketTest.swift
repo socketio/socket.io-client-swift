@@ -10,19 +10,17 @@ import XCTest
 
 class AbstractSocketTest: XCTestCase {
     static let serverURL = "localhost:6979"
-    static let TEST_TIMEOUT = 15.0
+    static let TEST_TIMEOUT = 5.0
     var socket: SocketIOClient!
-    static let que: dispatch_queue_t = NSOperationQueue.currentQueue()!.underlyingQueue!
-    static let regularSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL, opts: ["handleQueue": que])
+    static let regularSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL)
     static let namespaceSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
-        opts: ["nsp": "/swift", "handleQueue": que])
+        opts: ["nsp": "/swift"])
     
     static let regularPollingSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
-        opts: ["forcePolling": true, "handleQueue": que])
+        opts: ["forcePolling": true])
     static let namespacePollingSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
-        opts: ["forcePolling": true,"nsp": "/swift", "handleQueue": que])
+        opts: ["forcePolling": true,"nsp": "/swift"])
     var testKind:TestKind?
-    
     
     func openConnection(socket: SocketIOClient) {
         guard socket.status == SocketIOClientStatus.NotConnected else {return}

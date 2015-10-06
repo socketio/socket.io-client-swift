@@ -4,7 +4,7 @@ xcode_scheme: SocketIO-Mac
 osx_image: xcode7
 before_install:
     - brew update
-    - brew outdated xctool || brew upgrade xctool
+    - brew upgrade -v --HEAD xctool
     - cd Socket.IO-Test-Server/
     - npm install
     - cd ..
