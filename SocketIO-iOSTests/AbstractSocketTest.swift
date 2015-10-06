@@ -13,7 +13,10 @@ class AbstractSocketTest: XCTestCase {
     static let TEST_TIMEOUT = 5.0
     var socket: SocketIOClient!
     static let regularSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL)
+    static let regularAckSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL)
     static let namespaceSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
+        opts: ["nsp": "/swift"])
+    static let namespaceAckSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
         opts: ["nsp": "/swift"])
     
     static let regularPollingSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL,
