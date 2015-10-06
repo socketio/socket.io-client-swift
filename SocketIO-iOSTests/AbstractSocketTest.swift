@@ -42,7 +42,7 @@ class AbstractSocketTest: XCTestCase {
         }
         socket.connect()
         XCTAssertEqual(socket.status, SocketIOClientStatus.Connecting)
-        waitForExpectationsWithTimeout(AbstractSocketTest.TEST_TIMEOUT, handler: nil)
+        waitForExpectationsWithTimeout(10, handler: nil)
     }
     
     func generateTestName(rawTestName:String) -> String {
@@ -54,7 +54,10 @@ class AbstractSocketTest: XCTestCase {
         XCTAssertFalse(socket.secure)
     }
     
-    func socketMultipleEmit(testName:String, emitData:Array<AnyObject>, callback:NormalCallback){
+    func socketMultipleEmit(testName:String, emitData:Array<AnyObject>, callback:NormalCallback) {
+        if socket.status != .Connected {
+            NSThread.sleepForTimeInterval(0.4)
+        }
         XCTAssert(socket.status == .Connected)
         let finalTestname = generateTestName(testName)
         weak var expection = self.expectationWithDescription(finalTestname)
@@ -72,6 +75,9 @@ class AbstractSocketTest: XCTestCase {
     
     
     func socketEmit(testName:String, emitData:AnyObject?, callback:NormalCallback){
+        if socket.status != .Connected {
+            NSThread.sleepForTimeInterval(0.4)
+        }
         XCTAssert(socket.status == .Connected)
         let finalTestname = generateTestName(testName)
         weak var expection = self.expectationWithDescription(finalTestname)
@@ -94,6 +100,9 @@ class AbstractSocketTest: XCTestCase {
     
     
     func socketAcknwoledgeMultiple(testName:String, Data:Array<AnyObject>, callback:NormalCallback){
+        if socket.status != .Connected {
+            NSThread.sleepForTimeInterval(0.4)
+        }
         XCTAssert(socket.status == .Connected)
         let finalTestname = generateTestName(testName)
         weak var expection = self.expectationWithDescription(finalTestname)
@@ -109,6 +118,9 @@ class AbstractSocketTest: XCTestCase {
     }
     
     func socketAcknwoledge(testName:String, Data:AnyObject?, callback:NormalCallback){
+        if socket.status != .Connected {
+            NSThread.sleepForTimeInterval(0.4)
+        }
         XCTAssert(socket.status == .Connected)
         let finalTestname = generateTestName(testName)
         weak var expection = self.expectationWithDescription(finalTestname)
