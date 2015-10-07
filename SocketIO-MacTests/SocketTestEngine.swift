@@ -27,14 +27,15 @@
 // Test engine used to test SocketIOClient
 
 import Foundation
+import XCTest
 
 class SocketTestEngine: NSObject, SocketEngineSpec {
     private let expectedNumberOfBinary: Int
     private let expectedSendString: String
     private var expectedBinary: [NSData]?
     private var binary: [NSData]?
-    private var sendString: String!
-    private var numOfBinary: Int!
+    private var sendString = ""
+    private var numOfBinary = -1
     
     private(set) var sid = ""
     private(set) var cookies: [NSHTTPCookie]?
@@ -44,6 +45,7 @@ class SocketTestEngine: NSObject, SocketEngineSpec {
     private(set) var ws: WebSocket?
     
     weak var client: SocketEngineClient?
+    var expectation: XCTestExpectation?
     
     init(client: SocketIOClient, expectedSendString: String, expectedNumberOfBinary: Int, expectedBinary: [NSData]?) {
         self.client = client
@@ -72,9 +74,14 @@ class SocketTestEngine: NSObject, SocketEngineSpec {
     }
     
     func socketDidCorrectlyCreatePacket() -> Bool {
-        return expectedNumberOfBinary == numOfBinary
+        if expectedNumberOfBinary == numOfBinary
             && sendString == expectedSendString
-            && expectedBinary ?? [] == binary ?? []
+            && expectedBinary ?? [] == binary ?? [] {
+                expectation?.fulfill()
+                return true
+        } else {
+            return false
+        }
     }
     
     func write(msg: String, withType type: SocketEnginePacketType, withData data: [NSData]?) {}

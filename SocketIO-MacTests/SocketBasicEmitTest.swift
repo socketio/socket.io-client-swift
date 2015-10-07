@@ -94,4 +94,43 @@ class SocketBasicEmitTest: XCTestCase {
         socket.emitTest("test", ["data1": data, "data2": data2])
         XCTAssert(engine.socketDidCorrectlyCreatePacket())
     }
+    
+    func testEmitWithAck() {
+        let engine = SocketTestEngine(client: socket,
+            expectedSendString: "20[\"test\"]",
+            expectedNumberOfBinary: 0,
+            expectedBinary: nil)
+        
+        engine.expectation = expectationWithDescription("emitWithAck")
+        socket.setTestEngine(engine)
+        socket.emitWithAck("test")(timeoutAfter: 0) {data in
+            engine.socketDidCorrectlyCreatePacket()
+        }
+
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 10000), dispatch_get_main_queue()) {
+            self.socket.parseSocketMessage("30[]")
+        }
+        
+        waitForExpectationsWithTimeout(2, handler: nil)
+    }
+    
+    func testEmitDataWithAck() {
+        let data = "test".dataUsingEncoding(NSUTF8StringEncoding)!
+        let engine = SocketTestEngine(client: socket,
+            expectedSendString: "51-0[\"test\",{\"num\":0,\"_placeholder\":true}]",
+            expectedNumberOfBinary: 1,
+            expectedBinary: [data])
+        
+        engine.expectation = expectationWithDescription("emitWithAck")
+        socket.setTestEngine(engine)
+        socket.emitWithAck("test", data)(timeoutAfter: 0) {data in
+            engine.socketDidCorrectlyCreatePacket()
+        }
+        
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 10000), dispatch_get_main_queue()) {
+            self.socket.parseSocketMessage("30[]")
+        }
+        
+        waitForExpectationsWithTimeout(3, handler: nil)
+    }
 }
