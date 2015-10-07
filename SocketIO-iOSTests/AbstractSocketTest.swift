@@ -30,19 +30,23 @@ class AbstractSocketTest: XCTestCase {
     var testKind:TestKind?
     
     func openConnection(socket: SocketIOClient) {
-        guard socket.status == SocketIOClientStatus.NotConnected else { return }
-        var finished = false
-        dispatch_semaphore_create(0)
+        if socket.status == .Connected {
+            return
+        }
+        weak var expection = self.expectationWithDescription("Connect")
         socket.on("connect") {data, ack in
             XCTAssertEqual(socket.status, SocketIOClientStatus.Connected)
             XCTAssertFalse(socket.secure)
-            finished = true
+            expection?.fulfill()
         }
-        socket.connect()
-        XCTAssertEqual(socket.status, SocketIOClientStatus.Connecting)
-        while !finished {
-            NSRunLoop.currentRunLoop().runMode(NSDefaultRunLoopMode, beforeDate: NSDate.distantFuture() as NSDate)
+        if socket.status == .Connecting {
+            
+        }else {
+            socket.connect()
         }
+        waitForExpectationsWithTimeout(10, handler: nil)
+        
+        
     }
     
     func generateTestName(rawTestName:String) -> String {
