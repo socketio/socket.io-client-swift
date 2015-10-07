@@ -56,7 +56,7 @@ class AbstractSocketTest: XCTestCase {
     
     func socketMultipleEmit(testName:String, emitData:Array<AnyObject>, callback:NormalCallback) {
         if socket.status != .Connected {
-            NSThread.sleepForTimeInterval(1)
+           openConnection(socket)
         }
         XCTAssert(socket.status == .Connected)
         let finalTestname = generateTestName(testName)
@@ -76,7 +76,7 @@ class AbstractSocketTest: XCTestCase {
     
     func socketEmit(testName:String, emitData:AnyObject?, callback:NormalCallback){
         if socket.status != .Connected {
-            NSThread.sleepForTimeInterval(0.4)
+            openConnection(socket)
         }
         XCTAssert(socket.status == .Connected)
         let finalTestname = generateTestName(testName)
@@ -101,7 +101,7 @@ class AbstractSocketTest: XCTestCase {
     
     func socketAcknwoledgeMultiple(testName:String, Data:Array<AnyObject>, callback:NormalCallback){
         if socket.status != .Connected {
-            NSThread.sleepForTimeInterval(0.4)
+            openConnection(socket)
         }
         XCTAssert(socket.status == .Connected)
         let finalTestname = generateTestName(testName)
@@ -119,7 +119,7 @@ class AbstractSocketTest: XCTestCase {
     
     func socketAcknwoledge(testName:String, Data:AnyObject?, callback:NormalCallback){
         if socket.status != .Connected {
-            NSThread.sleepForTimeInterval(0.4)
+            openConnection(socket)
         }
         XCTAssert(socket.status == .Connected)
         let finalTestname = generateTestName(testName)
