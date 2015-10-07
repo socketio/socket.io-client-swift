@@ -95,14 +95,29 @@ $ pod install
 Import the module:
 
 Swift:
-```swift
+```
+swift
 import Socket_IO_Client_Swift
 ```
 
 Objective-C:
-```Objective-C
+
+```
+Objective-C
 #import <Socket_IO_Client_Swift/Socket_IO_Client_Swift-Swift.h>
 ```
+
+CocoaSeeds
+-----------------
+
+Add this line to your `Seedfile`:
+
+```
+github "socketio/socket.io-client-swift", "v3.1.4", :files => "SocketIOClientSwift/*.swift" # Or latest version
+```
+
+Run `seed install`.
+
 
 ##API
 Constructors
