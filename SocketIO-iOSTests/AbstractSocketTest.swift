@@ -29,7 +29,7 @@ class AbstractSocketTest: XCTestCase {
         opts: ["forcePolling": true,"nsp": "/swift"])
     var testKind:TestKind?
     
-    func openConnection(socket: SocketIOClient) {
+    func openConnection(socket: SocketIOClient, didConnect:(()->())? = nil) {
         guard socket.status == SocketIOClientStatus.NotConnected else {return}
         
         weak var expection = self.expectationWithDescription("connect")
@@ -38,6 +38,7 @@ class AbstractSocketTest: XCTestCase {
             XCTAssertFalse(socket.secure)
             if let expection = expection {
                 expection.fulfill()
+                didConnect?()
             }
         }
         socket.connect()
@@ -55,89 +56,105 @@ class AbstractSocketTest: XCTestCase {
     }
     
     func socketMultipleEmit(testName:String, emitData:Array<AnyObject>, callback:NormalCallback) {
-        if socket.status != .Connected {
-           openConnection(socket)
-        }
-        XCTAssert(socket.status == .Connected)
-        let finalTestname = generateTestName(testName)
-        weak var expection = self.expectationWithDescription(finalTestname)
-        func didGetEmit(result:[AnyObject], ack:SocketAckEmitter?) {
-            callback(result, ack)
-            if let expection = expection {
-                expection.fulfill()
+        let didConnect = {
+            XCTAssert(self.socket.status == .Connected)
+            let finalTestname = self.generateTestName(testName)
+            weak var expection = self.expectationWithDescription(finalTestname)
+            func didGetEmit(result:[AnyObject], ack:SocketAckEmitter?) {
+                callback(result, ack)
+                if let expection = expection {
+                    expection.fulfill()
+                }
             }
+            
+            self.socket.emit(finalTestname, withItems: emitData)
+            self.socket.on(finalTestname + "Return", callback: didGetEmit)
+            self.waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
         }
         
-        socket.emit(finalTestname, withItems: emitData)
-        socket.on(finalTestname + "Return", callback: didGetEmit)
-        waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
+        if socket.status != .Connected {
+            openConnection(socket)
+        }else {
+            didConnect()
+        }
     }
     
     
     func socketEmit(testName:String, emitData:AnyObject?, callback:NormalCallback){
+        let didConnect = {
+            XCTAssert(self.socket.status == .Connected)
+            let finalTestname = self.generateTestName(testName)
+            weak var expection = self.expectationWithDescription(finalTestname)
+            func didGetEmit(result:[AnyObject], ack:SocketAckEmitter?) {
+                callback(result, ack)
+                if let expection = expection {
+                    expection.fulfill()
+                }
+            }
+            
+            self.socket.on(finalTestname + "Return", callback: didGetEmit)
+            if let emitData = emitData {
+                self.socket.emit(finalTestname, emitData)
+            } else {
+                self.socket.emit(finalTestname)
+            }
+            
+            self.waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
+        }
         if socket.status != .Connected {
             openConnection(socket)
+        }else {
+            didConnect()
         }
-        XCTAssert(socket.status == .Connected)
-        let finalTestname = generateTestName(testName)
-        weak var expection = self.expectationWithDescription(finalTestname)
-        func didGetEmit(result:[AnyObject], ack:SocketAckEmitter?) {
-            callback(result, ack)
-            if let expection = expection {
-                expection.fulfill()
-            }
-        }
-        
-        socket.on(finalTestname + "Return", callback: didGetEmit)
-        if let emitData = emitData {
-            socket.emit(finalTestname, emitData)
-        } else {
-            socket.emit(finalTestname)
-        }
-        
-        waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
     }
     
     
     func socketAcknwoledgeMultiple(testName:String, Data:Array<AnyObject>, callback:NormalCallback){
+        let didConnect = {
+            XCTAssert(self.socket.status == .Connected)
+            let finalTestname = self.generateTestName(testName)
+            weak var expection = self.expectationWithDescription(finalTestname)
+            func didGetResult(result: [AnyObject]) {
+                callback(result, SocketAckEmitter(socket: self.socket, ackNum: -1))
+                if let expection = expection {
+                    expection.fulfill()
+                }
+            }
+            
+            self.socket.emitWithAck(finalTestname, withItems: Data)(timeoutAfter: 5, callback: didGetResult)
+            self.waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
+        }
         if socket.status != .Connected {
             openConnection(socket)
+        }else {
+            didConnect()
         }
-        XCTAssert(socket.status == .Connected)
-        let finalTestname = generateTestName(testName)
-        weak var expection = self.expectationWithDescription(finalTestname)
-        func didGetResult(result: [AnyObject]) {
-            callback(result, SocketAckEmitter(socket: socket, ackNum: -1))
-            if let expection = expection {
-                expection.fulfill()
-            }
-        }
-        
-        socket.emitWithAck(finalTestname, withItems: Data)(timeoutAfter: 5, callback: didGetResult)
-        waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
     }
     
     func socketAcknwoledge(testName:String, Data:AnyObject?, callback:NormalCallback){
+        let didConnect = {
+            XCTAssert(self.socket.status == .Connected)
+            let finalTestname = self.generateTestName(testName)
+            weak var expection = self.expectationWithDescription(finalTestname)
+            func didGet(result:[AnyObject]) {
+                callback(result, SocketAckEmitter(socket: self.socket, ackNum: -1))
+                if let expection = expection {
+                    expection.fulfill()
+                }
+            }
+            var ack:OnAckCallback!
+            if let Data = Data {
+                ack = self.socket.emitWithAck(finalTestname, Data)
+            } else {
+                ack = self.socket.emitWithAck(finalTestname)
+            }
+            ack(timeoutAfter: 20, callback: didGet)
+            self.waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
+        }
         if socket.status != .Connected {
             openConnection(socket)
+        }else {
+            didConnect()
         }
-        XCTAssert(socket.status == .Connected)
-        let finalTestname = generateTestName(testName)
-        weak var expection = self.expectationWithDescription(finalTestname)
-        func didGet(result:[AnyObject]) {
-            callback(result, SocketAckEmitter(socket: socket, ackNum: -1))
-            if let expection = expection {
-                expection.fulfill()
-            }
-        }
-        var ack:OnAckCallback!
-        if let Data = Data {
-            ack = socket.emitWithAck(finalTestname, Data)
-        } else {
-            ack = socket.emitWithAck(finalTestname)
-        }
-        ack(timeoutAfter: 20, callback: didGet)
-        
-        waitForExpectationsWithTimeout(SocketEmitTest.TEST_TIMEOUT, handler: nil)
     }
 }
