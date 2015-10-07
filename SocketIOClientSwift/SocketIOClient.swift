@@ -25,12 +25,9 @@
 import Foundation
 
 public final class SocketIOClient: NSObject, SocketEngineClient {
-    private let emitQueue = dispatch_queue_create("com.socketio.emitQueue", DISPATCH_QUEUE_SERIAL)
-    private let handleQueue: dispatch_queue_t!
-
     public let socketURL: String
 
-    public private(set) var engine: SocketEngine?
+    public private(set) var engine: SocketEngineSpec?
     public private(set) var secure = false
     public private(set) var status = SocketIOClientStatus.NotConnected
     
@@ -42,15 +39,16 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         return engine?.sid
     }
     
+    private let emitQueue = dispatch_queue_create("com.socketio.emitQueue", DISPATCH_QUEUE_SERIAL)
+    private let handleQueue: dispatch_queue_t!
     private let logType = "SocketIOClient"
+    private let reconnectAttempts: Int!
     
     private var anyHandler: ((SocketAnyEvent) -> Void)?
     private var currentReconnectAttempt = 0
     private var handlers = ContiguousArray<SocketEventHandler>()
     private var connectParams: [String: AnyObject]?
     private var reconnectTimer: NSTimer?
-    
-    private let reconnectAttempts: Int!
     private var ackHandlers = SocketAckManager()
     private var currentAck = -1
 

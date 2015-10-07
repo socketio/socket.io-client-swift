@@ -24,8 +24,17 @@
 
 import Foundation
 
-public final class SocketEngine: NSObject, WebSocketDelegate {
-    private typealias Probe = (msg: String, type: PacketType, data: [NSData]?)
+public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
+    public private(set) var sid = ""
+    public private(set) var cookies: [NSHTTPCookie]?
+    public private(set) var socketPath = ""
+    public private(set) var urlPolling = ""
+    public private(set) var urlWebSocket = ""
+    public private(set) var ws: WebSocket?
+
+    public weak var client: SocketEngineClient?
+
+    private typealias Probe = (msg: String, type: SocketEnginePacketType, data: [NSData]?)
     private typealias ProbeWaitQueue = [Probe]
 
     private let allowedCharacterSet = NSCharacterSet(charactersInString: "!*'();:@&=+$,/?%#[]\" {}").invertedSet
@@ -61,27 +70,6 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     private(set) var connected = false
     private(set) var polling = true
     private(set) var websocket = false
-
-    weak var client: SocketEngineClient?
-    var cookies: [NSHTTPCookie]?
-    var sid = ""
-    var socketPath = ""
-    var urlPolling = ""
-    var urlWebSocket = ""
-
-    var ws: WebSocket?
-
-    @objc public enum PacketType: Int {
-        case Open, Close, Ping, Pong, Message, Upgrade, Noop
-
-        init?(str: String) {
-            if let value = Int(str), raw = PacketType(rawValue: value) {
-                self = raw
-            } else {
-                return nil
-            }
-        }
-    }
 
     public init(client: SocketEngineClient, sessionDelegate: NSURLSessionDelegate?) {
         self.client = client
@@ -126,7 +114,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
         ws?.disconnect()
 
         if fast || polling {
-            write("", withType: PacketType.Close, withData: nil)
+            write("", withType: .Close, withData: nil)
             client?.engineDidClose("Disconnect")
         }
 
@@ -223,7 +211,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
                 "we'll probably disconnect soon. You should report this.", type: logType)
         }
 
-        sendWebSocketMessage("", withType: PacketType.Upgrade, datas: nil)
+        sendWebSocketMessage("", withType: .Upgrade, datas: nil)
         websocket = true
         polling = false
         fastUpgrade = false
@@ -534,23 +522,23 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
             fixDoubleUTF8(&message)
         }
 
-        let type = PacketType(str: (message["^(\\d)"].groups()?[1]) ?? "") ?? {
+        let type = SocketEnginePacketType(str: (message["^(\\d)"].groups()?[1]) ?? "") ?? {
             self.checkIfMessageIsBase64Binary(message)
             return .Noop
             }()
 
         switch type {
-        case PacketType.Message:
+        case .Message:
             message.removeAtIndex(message.startIndex)
             handleMessage(message)
-        case PacketType.Noop:
+        case .Noop:
             handleNOOP()
-        case PacketType.Pong:
+        case .Pong:
             handlePong(message)
-        case PacketType.Open:
+        case .Open:
             message.removeAtIndex(message.startIndex)
             handleOpen(message)
-        case PacketType.Close:
+        case .Close:
             handleClose()
         default:
             Logger.log("Got unknown packet type", type: logType)
@@ -559,16 +547,16 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
 
     private func probeWebSocket() {
         if websocketConnected {
-            sendWebSocketMessage("probe", withType: PacketType.Ping)
+            sendWebSocketMessage("probe", withType: .Ping)
         }
     }
 
     /// Send an engine message (4)
     public func send(msg: String, withData datas: [NSData]?) {
         if probing {
-            probeWait.append((msg, PacketType.Message, datas))
+            probeWait.append((msg, .Message, datas))
         } else {
-            write(msg, withType: PacketType.Message, withData: datas)
+            write(msg, withType: .Message, withData: datas)
         }
     }
 
@@ -581,12 +569,12 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
         }
 
         ++pongsMissed
-        write("", withType: PacketType.Ping, withData: nil)
+        write("", withType: .Ping, withData: nil)
     }
 
     /// Send polling message.
     /// Only call on emitQueue
-    private func sendPollMessage(var msg: String, withType type: PacketType,
+    private func sendPollMessage(var msg: String, withType type: SocketEnginePacketType,
         datas:[NSData]? = nil) {
             Logger.log("Sending poll: %@ as type: %@", type: logType, args: msg, type.rawValue)
 
@@ -608,7 +596,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
 
     /// Send message on WebSockets
     /// Only call on emitQueue
-    private func sendWebSocketMessage(str: String, withType type: PacketType,
+    private func sendWebSocketMessage(str: String, withType type: SocketEnginePacketType,
         datas:[NSData]? = nil) {
             Logger.log("Sending ws: %@ as type: %@", type: logType, args: str, type.rawValue)
 
@@ -634,7 +622,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
         }
     }
 
-    func stopPolling() {
+    public func stopPolling() {
         invalidated = true
         session.finishTasksAndInvalidate()
     }
@@ -644,7 +632,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
             Logger.log("Upgrading transport to WebSockets", type: logType)
 
             fastUpgrade = true
-            sendPollMessage("", withType: PacketType.Noop)
+            sendPollMessage("", withType: .Noop)
             // After this point, we should not send anymore polling messages
         }
     }
@@ -652,7 +640,7 @@ public final class SocketEngine: NSObject, WebSocketDelegate {
     /**
     Write a message, independent of transport.
     */
-    public func write(msg: String, withType type: PacketType, withData data: [NSData]?) {
+    public func write(msg: String, withType type: SocketEnginePacketType, withData data: [NSData]?) {
         dispatch_async(emitQueue) {
             if self.connected {
                 if self.websocket {
