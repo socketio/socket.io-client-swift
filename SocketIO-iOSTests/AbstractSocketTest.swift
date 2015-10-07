@@ -56,7 +56,7 @@ class AbstractSocketTest: XCTestCase {
     
     func socketMultipleEmit(testName:String, emitData:Array<AnyObject>, callback:NormalCallback) {
         if socket.status != .Connected {
-            NSThread.sleepForTimeInterval(0.4)
+            NSThread.sleepForTimeInterval(1)
         }
         XCTAssert(socket.status == .Connected)
         let finalTestname = generateTestName(testName)

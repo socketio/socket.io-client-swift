@@ -88,7 +88,6 @@
 		945B653F1B5FCEEA0081E995 /* SocketTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF861B51F254004FF46E /* SocketTypes.swift */; };
 		945B65401B5FCEEA0081E995 /* SwiftRegex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF871B51F254004FF46E /* SwiftRegex.swift */; };
 		945B65411B5FCEEA0081E995 /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF881B51F254004FF46E /* WebSocket.swift */; };
-		94ADAC491B652D3300FD79AE /* SocketNamespaceEmitTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94ADAC481B652D3300FD79AE /* SocketNamespaceEmitTest.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -552,7 +551,6 @@
 				945B653F1B5FCEEA0081E995 /* SocketTypes.swift in Sources */,
 				74781D5B1B7E83930042CACA /* SocketIOClientStatus.swift in Sources */,
 				945B653B1B5FCEEA0081E995 /* SocketIOClient.swift in Sources */,
-				94ADAC491B652D3300FD79AE /* SocketNamespaceEmitTest.swift in Sources */,
 				945B65411B5FCEEA0081E995 /* WebSocket.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
