@@ -33,20 +33,38 @@ class AbstractSocketTest: XCTestCase {
         if socket.status == .Connected {
             return
         }
-        weak var expection = self.expectationWithDescription("Connect")
+        
+        //weak var expection = self.expectationWithDescription("Connect")
+        dispatch_group_enter(AbstractSocketTest.dispatchGroup)
         socket.on("connect") {data, ack in
             XCTAssertEqual(socket.status, SocketIOClientStatus.Connected)
             XCTAssertFalse(socket.secure)
-            expection?.fulfill()
+            dispatch_group_leave(AbstractSocketTest.dispatchGroup)
+            //expection?.fulfill()
         }
         if socket.status == .Connecting {
             
         }else {
             socket.connect()
         }
-        waitForExpectationsWithTimeout(10, handler: nil)
+        //waitForExpectationsWithTimeout(10, handler: nil)
         
         
+    }
+    
+    static var dispatchGroup:dispatch_group_t = dispatch_group_create()
+    
+    static func waitForGroup()
+    {
+        var didComplete = false;
+        dispatch_group_notify(self.dispatchGroup, dispatch_get_main_queue(), {
+            didComplete = true
+        })
+        
+        while !didComplete {
+            NSRunLoop.currentRunLoop().runMode(NSDefaultRunLoopMode,
+                beforeDate: NSDate.distantFuture())
+        }
     }
     
     func generateTestName(rawTestName:String) -> String {
@@ -59,6 +77,7 @@ class AbstractSocketTest: XCTestCase {
     }
     
     func socketMultipleEmit(testName:String, emitData:Array<AnyObject>, callback:NormalCallback) {
+       AbstractSocketTest.waitForGroup()
         XCTAssert(self.socket.status == .Connected)
         let finalTestname = self.generateTestName(testName)
         weak var expection = self.expectationWithDescription(finalTestname)
@@ -76,6 +95,7 @@ class AbstractSocketTest: XCTestCase {
     
     
     func socketEmit(testName:String, emitData:AnyObject?, callback:NormalCallback){
+        AbstractSocketTest.waitForGroup()
         XCTAssert(self.socket.status == .Connected)
         let finalTestname = self.generateTestName(testName)
         weak var expection = self.expectationWithDescription(finalTestname)
@@ -98,6 +118,7 @@ class AbstractSocketTest: XCTestCase {
     
     
     func socketAcknwoledgeMultiple(testName:String, Data:Array<AnyObject>, callback:NormalCallback){
+        AbstractSocketTest.waitForGroup()
         XCTAssert(self.socket.status == .Connected)
         let finalTestname = self.generateTestName(testName)
         weak var expection = self.expectationWithDescription(finalTestname)
@@ -113,6 +134,7 @@ class AbstractSocketTest: XCTestCase {
     }
     
     func socketAcknwoledge(testName:String, Data:AnyObject?, callback:NormalCallback){
+        AbstractSocketTest.waitForGroup()
         XCTAssert(self.socket.status == .Connected)
         let finalTestname = self.generateTestName(testName)
         weak var expection = self.expectationWithDescription(finalTestname)

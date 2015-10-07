@@ -12,7 +12,7 @@ class SocketNamespaceEmitTest: AbstractSocketTest {
     
     override func setUp() {
         super.setUp()
-        socket = AbstractSocketTest.regularPollingSocket
+        socket = AbstractSocketTest.namespaceSocket
         testKind = TestKind.Emit
         openConnection(socket)
     }

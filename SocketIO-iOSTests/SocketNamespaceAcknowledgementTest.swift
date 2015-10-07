@@ -12,7 +12,7 @@ class SocketNamespaceAcknowledgementTest: AbstractSocketTest {
 
     override func setUp() {
         super.setUp()
-        socket = AbstractSocketTest.regularPollingSocket
+        socket = AbstractSocketTest.namespaceAckSocket
         testKind = TestKind.Acknowledgement
         openConnection(socket)
     }
