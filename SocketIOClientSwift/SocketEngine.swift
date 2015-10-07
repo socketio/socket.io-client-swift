@@ -622,7 +622,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
         }
     }
 
-    public func stopPolling() {
+    func stopPolling() {
         invalidated = true
         session.finishTasksAndInvalidate()
     }

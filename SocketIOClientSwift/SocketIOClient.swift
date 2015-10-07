@@ -464,7 +464,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     Tries to reconnect to the server.
     */
     public func reconnect() {
-        engine?.stopPolling()
         tryReconnect()
     }
     
@@ -502,5 +501,20 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         
         currentReconnectAttempt++
         connect()
+    }
+}
+
+// Test extensions
+extension SocketIOClient {
+    func setTestable() {
+        status = .Connected
+    }
+    
+    func setTestEngine(engine: SocketEngineSpec?) {
+        self.engine = engine
+    }
+    
+    func emitTest(event: String, _ data: AnyObject...) {
+        self._emit([event] + data)
     }
 }

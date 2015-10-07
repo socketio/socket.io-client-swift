@@ -40,6 +40,5 @@ import Foundation
     func close(fast fast: Bool)
     func open(opts: [String: AnyObject]?)
     func send(msg: String, withData datas: [NSData]?)
-    func stopPolling()
     func write(msg: String, withType type: SocketEnginePacketType, withData data: [NSData]?)
 }
