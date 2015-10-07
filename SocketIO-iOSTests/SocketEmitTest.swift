@@ -12,7 +12,7 @@ import Foundation
 class SocketEmitTest: AbstractSocketTest {
     override func setUp() {
         super.setUp()
-        socket = AbstractSocketTest.regularSocket
+        socket = AbstractSocketTest.regularPollingSocket
         testKind = TestKind.Emit
         openConnection(socket)
     }
