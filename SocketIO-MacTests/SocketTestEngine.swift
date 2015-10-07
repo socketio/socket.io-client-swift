@@ -31,6 +31,8 @@ import Foundation
 class SocketTestEngine: NSObject, SocketEngineSpec {
     private let expectedNumberOfBinary: Int
     private let expectedSendString: String
+    private var expectedBinary: [NSData]?
+    private var binary: [NSData]?
     private var sendString: String!
     private var numOfBinary: Int!
     
@@ -43,10 +45,11 @@ class SocketTestEngine: NSObject, SocketEngineSpec {
     
     weak var client: SocketEngineClient?
     
-    init(client: SocketIOClient, expectedSendString: String, expectedNumberOfBinary: Int) {
+    init(client: SocketIOClient, expectedSendString: String, expectedNumberOfBinary: Int, expectedBinary: [NSData]?) {
         self.client = client
         self.expectedSendString = expectedSendString
         self.expectedNumberOfBinary = expectedNumberOfBinary
+        self.expectedBinary = expectedBinary
     }
     
     required init(client: SocketEngineClient, sessionDelegate: NSURLSessionDelegate?) {
@@ -65,10 +68,13 @@ class SocketTestEngine: NSObject, SocketEngineSpec {
     func send(msg: String, withData datas: [NSData]?) {
         sendString = msg
         numOfBinary = datas?.count ?? 0
+        binary = datas
     }
     
     func socketDidCorrectlyCreatePacket() -> Bool {
-        return expectedNumberOfBinary == numOfBinary && sendString == expectedSendString
+        return expectedNumberOfBinary == numOfBinary
+            && sendString == expectedSendString
+            && expectedBinary ?? [] == binary ?? []
     }
     
     func write(msg: String, withType type: SocketEnginePacketType, withData data: [NSData]?) {}
