@@ -29,21 +29,20 @@ class AbstractSocketTest: XCTestCase {
         opts: ["forcePolling": true,"nsp": "/swift"])
     var testKind:TestKind?
     
-    func openConnection(socket: SocketIOClient, didConnect:(()->())? = nil) {
-        guard socket.status == SocketIOClientStatus.NotConnected else {return}
-        
-        weak var expection = self.expectationWithDescription("connect")
+    func openConnection(socket: SocketIOClient) {
+        guard socket.status == SocketIOClientStatus.NotConnected else { return }
+        var finished = false
+        let semaphore = dispatch_semaphore_create(0)
         socket.on("connect") {data, ack in
             XCTAssertEqual(socket.status, SocketIOClientStatus.Connected)
             XCTAssertFalse(socket.secure)
-            if let expection = expection {
-                expection.fulfill()
-                didConnect?()
-            }
+            finished = true
         }
         socket.connect()
         XCTAssertEqual(socket.status, SocketIOClientStatus.Connecting)
-        waitForExpectationsWithTimeout(10, handler: nil)
+        while !finished {
+            NSRunLoop.currentRunLoop().runMode(NSDefaultRunLoopMode, beforeDate: NSDate.distantFuture() as NSDate)
+        }
     }
     
     func generateTestName(rawTestName:String) -> String {
