@@ -1,5 +1,6 @@
 var app = require('http').createServer()
 var io = require('socket.io')(app);
+io.set("transports", ["xhr-polling", "polling", "websocket"])
 app.listen(6979)
 
 
