@@ -33,23 +33,19 @@ class AbstractSocketTest: XCTestCase {
         if socket.status == .Connected {
             return
         }
-        
-        //weak var expection = self.expectationWithDescription("Connect")
+        let timer = NSDate()
         dispatch_group_enter(AbstractSocketTest.dispatchGroup)
         socket.on("connect") {data, ack in
             XCTAssertEqual(socket.status, SocketIOClientStatus.Connected)
             XCTAssertFalse(socket.secure)
             dispatch_group_leave(AbstractSocketTest.dispatchGroup)
-            //expection?.fulfill()
+            print(NSDate(), timer)
         }
         if socket.status == .Connecting {
             
         }else {
             socket.connect()
         }
-        //waitForExpectationsWithTimeout(10, handler: nil)
-        
-        
     }
     
     static var dispatchGroup:dispatch_group_t = dispatch_group_create()
@@ -77,7 +73,7 @@ class AbstractSocketTest: XCTestCase {
     }
     
     func socketMultipleEmit(testName:String, emitData:Array<AnyObject>, callback:NormalCallback) {
-       AbstractSocketTest.waitForGroup()
+        AbstractSocketTest.waitForGroup()
         XCTAssert(self.socket.status == .Connected)
         let finalTestname = self.generateTestName(testName)
         weak var expection = self.expectationWithDescription(finalTestname)
