@@ -44,7 +44,7 @@ class SocketParserTest: XCTestCase {
         validateParseResult(message)
     }
     
-    func testNamespaceEvent() {
+    func testIdEvent() {
         let message = "25[\"test\"]"
         validateParseResult(message)
     }
