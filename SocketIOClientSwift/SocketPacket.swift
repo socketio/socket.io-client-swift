@@ -151,7 +151,7 @@ struct SocketPacket {
             if nsp == "/" {
                 msg = "6\(binary.count)-\(id)["
             } else {
-                msg = "6\(binary.count)-/\(nsp),\(id)["
+                msg = "6\(binary.count)-\(nsp),\(id)["
             }
         }
         
