@@ -13,6 +13,7 @@ class SocketParserTest: XCTestCase {
     //Format key: message; namespace-data-binary-id
     static let packetTypes: Dictionary<String, (String, [AnyObject], [NSData], Int)> = [
         "0": ("/", [], [], -1), "1": ("/", [], [], -1),
+        "25[\"test\"]": ("/", ["test"], [], 5),
         "2/swift,[\"testArrayEmitReturn\",[\"test3\",\"test4\"]]": ("/swift", ["testArrayEmitReturn", ["test3", "test4"]], [], -1),
         "51-/swift,[\"testMultipleItemsWithBufferEmitReturn\",[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]": ("/swift", ["testMultipleItemsWithBufferEmitReturn", [1, 2], ["test": "bob"], 25, "polo", "~~0"], [], -1),
         "3/swift,0[[\"test3\",\"test4\"]]": ("/swift", [["test3", "test4"]], [], 0),
@@ -40,6 +41,11 @@ class SocketParserTest: XCTestCase {
     
     func testConnecttNameSpace() {
         let message = "0/swift"
+        validateParseResult(message)
+    }
+    
+    func testNamespaceEvent() {
+        let message = "25[\"test\"]"
         validateParseResult(message)
     }
     

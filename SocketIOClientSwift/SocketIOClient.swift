@@ -50,8 +50,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     private var connectParams: [String: AnyObject]?
     private var reconnectTimer: NSTimer?
     private var ackHandlers = SocketAckManager()
-    private var currentAck = -1
-
+    
+    private(set) var currentAck = -1
     var waitingData = [SocketPacket]()
     
     /**

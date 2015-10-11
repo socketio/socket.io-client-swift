@@ -80,7 +80,6 @@ class SocketTestEngine: NSObject, SocketEngineSpec {
                 expectation?.fulfill()
                 return true
         } else {
-            print(sendString)
             return false
         }
     }
