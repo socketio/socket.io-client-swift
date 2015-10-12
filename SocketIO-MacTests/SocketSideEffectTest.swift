@@ -70,4 +70,21 @@ class SocketSideEffectTest: XCTestCase {
         socket.parseBinaryData(data)
         waitForExpectationsWithTimeout(3, handler: nil)
     }
+    
+    func testHandleMultipleBinaryEvent() {
+        let expectation = expectationWithDescription("handled multiple binary event")
+        socket.on("test") {data, ack in
+            if let dict = data[0] as? NSDictionary, data = dict["test"] as? NSData,
+                data2 = dict["test2"] as? NSData {
+                    XCTAssertEqual(data, self.data)
+                    XCTAssertEqual(data2, self.data2)
+                    expectation.fulfill()
+            }
+        }
+        
+        socket.parseSocketMessage("52-[\"test\",{\"test\":{\"_placeholder\":true,\"num\":0},\"test2\":{\"_placeholder\":true,\"num\":1}}]")
+        socket.parseBinaryData(data)
+        socket.parseBinaryData(data2)
+        waitForExpectationsWithTimeout(3, handler: nil)
+    }
 }
