@@ -66,7 +66,7 @@ class SocketSideEffectTest: XCTestCase {
             }
         }
         
-        socket.parseSocketMessage("2[\"test\",{\"test\":{\"_placeholder\":true,\"num\":0}}]")
+        socket.parseSocketMessage("51-[\"test\",{\"test\":{\"_placeholder\":true,\"num\":0}}]")
         socket.parseBinaryData(data)
         waitForExpectationsWithTimeout(3, handler: nil)
     }
