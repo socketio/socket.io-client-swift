@@ -9,6 +9,8 @@
 import XCTest
 
 class SocketSideEffectTest: XCTestCase {
+    let data = "test".dataUsingEncoding(NSUTF8StringEncoding)!
+    let data2 = "test2".dataUsingEncoding(NSUTF8StringEncoding)!
     private var socket: SocketIOClient!
 
     override func setUp() {
@@ -30,7 +32,7 @@ class SocketSideEffectTest: XCTestCase {
         socket.emitWithAck("test")(timeoutAfter: 0) {data in}
         socket.emitWithAck("test")(timeoutAfter: 0) {data in}
 
-        XCTAssertEqual(self.socket.currentAck, 1)
+        XCTAssertEqual(socket.currentAck, 1)
     }
     
     func testHandleAck() {
@@ -40,7 +42,7 @@ class SocketSideEffectTest: XCTestCase {
             expectation.fulfill()
         }
         
-        socket.handleAck(0, data: ["hello world"])
+        socket.parseSocketMessage("30[\"hello world\"]")
         waitForExpectationsWithTimeout(3, handler: nil)
     }
     
@@ -52,6 +54,20 @@ class SocketSideEffectTest: XCTestCase {
         }
         
         socket.parseSocketMessage("2[\"test\",\"hello world\"]")
+        waitForExpectationsWithTimeout(3, handler: nil)
+    }
+    
+    func testHandleBinaryEvent() {
+        let expectation = expectationWithDescription("handled binary event")
+        socket.on("test") {data, ack in
+            if let dict = data[0] as? NSDictionary, data = dict["test"] as? NSData {
+                XCTAssertEqual(data, self.data)
+                expectation.fulfill()
+            }
+        }
+        
+        socket.parseSocketMessage("2[\"test\",{\"test\":{\"_placeholder\":true,\"num\":0}}]")
+        socket.parseBinaryData(data)
         waitForExpectationsWithTimeout(3, handler: nil)
     }
 }
