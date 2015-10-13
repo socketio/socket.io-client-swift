@@ -518,14 +518,14 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
     private func parseEngineMessage(var message: String, fromPolling: Bool) {
         Logger.log("Got message: %@", type: logType, args: message)
 
-        if fromPolling {
-            fixDoubleUTF8(&message)
-        }
-
         let type = SocketEnginePacketType(str: (message["^(\\d)"].groups()?[1]) ?? "") ?? {
             self.checkIfMessageIsBase64Binary(message)
             return .Noop
             }()
+
+        if fromPolling && type != .Noop {
+            fixDoubleUTF8(&message)
+        }
 
         switch type {
         case .Message:
