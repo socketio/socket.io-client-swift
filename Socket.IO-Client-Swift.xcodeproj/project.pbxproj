@@ -42,10 +42,10 @@
 		74781D5B1B7E83930042CACA /* SocketIOClientStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74781D591B7E83930042CACA /* SocketIOClientStatus.swift */; };
 		74781D5C1B7E83930042CACA /* SocketIOClientStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74781D591B7E83930042CACA /* SocketIOClientStatus.swift */; };
 		74781D5D1B7E83930042CACA /* SocketIOClientStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74781D591B7E83930042CACA /* SocketIOClientStatus.swift */; };
-		749A7F8B1BA9D42D00782993 /* SocketAckEmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749A7F8A1BA9D42D00782993 /* SocketAckEmitter.swift */; settings = {ASSET_TAGS = (); }; };
-		749A7F8C1BA9D42D00782993 /* SocketAckEmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749A7F8A1BA9D42D00782993 /* SocketAckEmitter.swift */; settings = {ASSET_TAGS = (); }; };
-		749A7F8F1BA9D42D00782993 /* SocketAckEmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749A7F8A1BA9D42D00782993 /* SocketAckEmitter.swift */; settings = {ASSET_TAGS = (); }; };
-		749A7F901BA9D42D00782993 /* SocketAckEmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749A7F8A1BA9D42D00782993 /* SocketAckEmitter.swift */; settings = {ASSET_TAGS = (); }; };
+		749A7F8B1BA9D42D00782993 /* SocketAckEmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749A7F8A1BA9D42D00782993 /* SocketAckEmitter.swift */; };
+		749A7F8C1BA9D42D00782993 /* SocketAckEmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749A7F8A1BA9D42D00782993 /* SocketAckEmitter.swift */; };
+		749A7F8F1BA9D42D00782993 /* SocketAckEmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749A7F8A1BA9D42D00782993 /* SocketAckEmitter.swift */; };
+		749A7F901BA9D42D00782993 /* SocketAckEmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749A7F8A1BA9D42D00782993 /* SocketAckEmitter.swift */; };
 		74D765621B9F0D870028551C /* SocketStringReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74D765611B9F0D870028551C /* SocketStringReader.swift */; };
 		74D765631B9F0D9F0028551C /* SocketStringReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74D765611B9F0D870028551C /* SocketStringReader.swift */; };
 		74D765641B9F0DA40028551C /* SocketStringReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74D765611B9F0D870028551C /* SocketStringReader.swift */; };
@@ -562,7 +562,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BITCODE_GENERATION_MODE = bitcode;
-				CODE_SIGN_IDENTITY = "Developer ID Application";
 				ENABLE_BITCODE = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = SocketIO;
@@ -574,7 +573,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BITCODE_GENERATION_MODE = bitcode;
-				CODE_SIGN_IDENTITY = "Developer ID Application";
 				ENABLE_BITCODE = YES;
 				PRODUCT_NAME = SocketIO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
@@ -598,7 +596,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -652,7 +650,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -795,7 +793,6 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
@@ -850,7 +847,6 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
