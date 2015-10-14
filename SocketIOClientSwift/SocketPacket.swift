@@ -210,6 +210,7 @@ struct SocketPacket {
     mutating func fillInPlaceholders() {
         for i in 0..<data.count {
             if let str = data[i] as? String, num = str["~~(\\d)"].groups() {
+                // Fill in binary placeholder with data
                 data[i] = binary[Int(num[1])!]
             } else if data[i] is NSDictionary || data[i] is NSArray {
                 data[i] = _fillInPlaceholders(data[i])

@@ -14,6 +14,7 @@ class SocketParserTest: XCTestCase {
     static let packetTypes: Dictionary<String, (String, [AnyObject], [NSData], Int)> = [
         "0": ("/", [], [], -1), "1": ("/", [], [], -1),
         "25[\"test\"]": ("/", ["test"], [], 5),
+        "2[\"test\",\"~~0\"]": ("/", ["test", "~~0"], [], -1),
         "2/swift,[\"testArrayEmitReturn\",[\"test3\",\"test4\"]]": ("/swift", ["testArrayEmitReturn", ["test3", "test4"]], [], -1),
         "51-/swift,[\"testMultipleItemsWithBufferEmitReturn\",[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]": ("/swift", ["testMultipleItemsWithBufferEmitReturn", [1, 2], ["test": "bob"], 25, "polo", "~~0"], [], -1),
         "3/swift,0[[\"test3\",\"test4\"]]": ("/swift", [["test3", "test4"]], [], 0),
@@ -46,6 +47,11 @@ class SocketParserTest: XCTestCase {
     
     func testIdEvent() {
         let message = "25[\"test\"]"
+        validateParseResult(message)
+    }
+    
+    func testBinaryPlaceholderAsString() {
+        let message = "2[\"test\",\"~~0\"]"
         validateParseResult(message)
     }
     
