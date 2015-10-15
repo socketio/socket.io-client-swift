@@ -30,7 +30,7 @@ class SocketEngineTest: XCTestCase {
         waitForExpectationsWithTimeout(3, handler: nil)
     }
     
-    func twoPacketsInOnePollTest() {
+    func testTwoPacketsInOnePollTest() {
         let finalExpectation = expectationWithDescription("Final packet in poll test")
         var gotBlank = false
         
@@ -40,13 +40,13 @@ class SocketEngineTest: XCTestCase {
         
         client.on("stringTest") {data, ack in
             if let str = data[0] as? String where gotBlank {
-                if str == "line one\nline two" {
+                if str == "hello" {
                     finalExpectation.fulfill()
                 }
             }
         }
         
-        engine.parsePollingMessage("15:42[\"blankTest\"]37:42[\"stringTest\",\"line one\nline two\"]")
+        engine.parsePollingMessage("15:42[\"blankTest\"]24:42[\"stringTest\",\"hello\"]")
         waitForExpectationsWithTimeout(3, handler: nil)
     }
 }
