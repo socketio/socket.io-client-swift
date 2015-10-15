@@ -14,7 +14,7 @@ class SocketAcknowledgementTest: AbstractSocketTest {
         super.setUp()
         socket = AbstractSocketTest.regularAckSocket
         testKind = TestKind.Acknowledgement
-        openConnection(socket)
+        
     }
 
     func testConnectionStatus() {

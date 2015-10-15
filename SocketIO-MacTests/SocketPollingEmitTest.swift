@@ -14,7 +14,7 @@ class SocketPollingEmitTest: AbstractSocketTest {
         super.setUp()
         socket = AbstractSocketTest.regularPollingSocket
         testKind = TestKind.Emit
-        openConnection(socket)
+        
     }
     
     func testConnectionStatus() {

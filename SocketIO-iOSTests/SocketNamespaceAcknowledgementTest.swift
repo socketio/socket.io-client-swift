@@ -14,7 +14,7 @@ class SocketNamespaceAcknowledgementTest: AbstractSocketTest {
         super.setUp()
         socket = AbstractSocketTest.namespaceAckSocket
         testKind = TestKind.Acknowledgement
-        openConnection(socket)
+        
     }
     
     func testConnectionStatus() {

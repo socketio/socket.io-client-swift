@@ -29,6 +29,8 @@ class AbstractSocketTest: XCTestCase {
         opts: ["forcePolling": true,"nsp": "/swift"])
     var testKind:TestKind?
     
+    
+    
     func openConnection(socket: SocketIOClient) {
         if socket.status == .Connected {
             return

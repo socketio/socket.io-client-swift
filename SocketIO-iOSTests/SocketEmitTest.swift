@@ -14,7 +14,6 @@ class SocketEmitTest: AbstractSocketTest {
         super.setUp()
         socket = AbstractSocketTest.regularSocket
         testKind = TestKind.Emit
-        openConnection(socket)
     }
     
     func testConnectionStatus() {

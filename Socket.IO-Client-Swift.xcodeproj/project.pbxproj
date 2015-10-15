@@ -88,6 +88,7 @@
 		945B653F1B5FCEEA0081E995 /* SocketTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF861B51F254004FF46E /* SocketTypes.swift */; };
 		945B65401B5FCEEA0081E995 /* SwiftRegex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF871B51F254004FF46E /* SwiftRegex.swift */; };
 		945B65411B5FCEEA0081E995 /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5764DF881B51F254004FF46E /* WebSocket.swift */; };
+		94CA0D6B1BD045DD00E121DF /* SocketConnectionTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CA0D6A1BD045DD00E121DF /* SocketConnectionTest.swift */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -145,6 +146,7 @@
 		94A20D601B99E22F00BF9E44 /* SocketAckManagerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketAckManagerTest.swift; path = "../SocketIO-iOSTests/SocketAckManagerTest.swift"; sourceTree = "<group>"; };
 		94ADAC481B652D3300FD79AE /* SocketNamespaceEmitTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketNamespaceEmitTest.swift; path = "../SocketIO-iOSTests/SocketNamespaceEmitTest.swift"; sourceTree = "<group>"; };
 		94ADAC4A1B6632DD00FD79AE /* SocketAcknowledgementTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketAcknowledgementTest.swift; path = "../SocketIO-iOSTests/SocketAcknowledgementTest.swift"; sourceTree = "<group>"; };
+		94CA0D6A1BD045DD00E121DF /* SocketConnectionTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketConnectionTest.swift; sourceTree = "<group>"; };
 		94CB8F0A1B6E48B90019ED53 /* SocketTestCases.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketTestCases.swift; path = "../SocketIO-iOSTests/SocketTestCases.swift"; sourceTree = "<group>"; };
 		94CB8F0C1B6E66E60019ED53 /* AbstractSocketTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AbstractSocketTest.swift; path = "../SocketIO-iOSTests/AbstractSocketTest.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -267,6 +269,7 @@
 				94CB8F0C1B6E66E60019ED53 /* AbstractSocketTest.swift */,
 				941A4AB91B67A56C00C42318 /* TestKind.swift */,
 				572EF2471B51F18A00EEBB58 /* Supporting Files */,
+				94CA0D6A1BD045DD00E121DF /* SocketConnectionTest.swift */,
 			);
 			path = "SocketIO-MacTests";
 			sourceTree = "<group>";
@@ -598,6 +601,7 @@
 				7472A5ED1BB6ECE800CD4F59 /* SwiftRegex.swift in Sources */,
 				7472A5EE1BB6ECE800CD4F59 /* WebSocket.swift in Sources */,
 				745895381BB59A0A0050ACC8 /* SocketAckManagerTest.swift in Sources */,
+				94CA0D6B1BD045DD00E121DF /* SocketConnectionTest.swift in Sources */,
 				745895391BB59A0A0050ACC8 /* SocketAcknowledgementTest.swift in Sources */,
 				7458953A1BB59A0A0050ACC8 /* SocketEmitTest.swift in Sources */,
 				743AC4211BB9BF65009F615E /* SocketPollingNamespaceEmitTest.swift in Sources */,

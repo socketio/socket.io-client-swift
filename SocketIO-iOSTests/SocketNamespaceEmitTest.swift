@@ -14,7 +14,7 @@ class SocketNamespaceEmitTest: AbstractSocketTest {
         super.setUp()
         socket = AbstractSocketTest.namespaceSocket
         testKind = TestKind.Emit
-        openConnection(socket)
+        
     }
     
     func testConnectionStatus() {
