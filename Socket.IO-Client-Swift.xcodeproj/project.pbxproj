@@ -585,6 +585,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				94CA0D6B1BD045DD00E121DF /* AASocketConnectionTest.swift in Sources */,
 				743AC4231BB9C032009F615E /* SocketPollingNamespaceAcknowledgementTest.swift in Sources */,
 				7472A5E11BB6ECE800CD4F59 /* SocketAckManager.swift in Sources */,
 				7472A5E21BB6ECE800CD4F59 /* SocketAnyEvent.swift in Sources */,
@@ -601,7 +602,6 @@
 				7472A5ED1BB6ECE800CD4F59 /* SwiftRegex.swift in Sources */,
 				7472A5EE1BB6ECE800CD4F59 /* WebSocket.swift in Sources */,
 				745895381BB59A0A0050ACC8 /* SocketAckManagerTest.swift in Sources */,
-				94CA0D6B1BD045DD00E121DF /* AASocketConnectionTest.swift in Sources */,
 				745895391BB59A0A0050ACC8 /* SocketAcknowledgementTest.swift in Sources */,
 				7458953A1BB59A0A0050ACC8 /* SocketEmitTest.swift in Sources */,
 				743AC4211BB9BF65009F615E /* SocketPollingNamespaceEmitTest.swift in Sources */,
