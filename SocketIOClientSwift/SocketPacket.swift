@@ -21,6 +21,7 @@
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
+//
 
 import Foundation
 
@@ -150,7 +151,7 @@ struct SocketPacket {
             if nsp == "/" {
                 msg = "6\(binary.count)-\(id)["
             } else {
-                msg = "6\(binary.count)-/\(nsp),\(id)["
+                msg = "6\(binary.count)-\(nsp),\(id)["
             }
         }
         
@@ -209,6 +210,7 @@ struct SocketPacket {
     mutating func fillInPlaceholders() {
         for i in 0..<data.count {
             if let str = data[i] as? String, num = str["~~(\\d)"].groups() {
+                // Fill in binary placeholder with data
                 data[i] = binary[Int(num[1])!]
             } else if data[i] is NSDictionary || data[i] is NSArray {
                 data[i] = _fillInPlaceholders(data[i])
