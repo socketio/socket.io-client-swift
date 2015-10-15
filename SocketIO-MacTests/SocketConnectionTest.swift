@@ -11,65 +11,65 @@ import XCTest
 class AASocketConnectionTest: AbstractSocketTest {
     
     func testConnectRegularSocket() {
-        let expection = expectationWithDescription("connectNormal")
+        weak var expection = expectationWithDescription("connectNormal")
         openConnection(AbstractSocketTest.regularSocket) {
-            expection.fulfill()
+            expection?.fulfill()
         }
         waitForExpectationsWithTimeout(AbstractSocketTest.TEST_TIMEOUT, handler: nil)
     }
     
     func testConnectNamespaceSocket() {
-        let expection = expectationWithDescription("connectNormalNamespace")
+        weak var expection = expectationWithDescription("connectNormalNamespace")
         openConnection(AbstractSocketTest.namespaceSocket) {
-            expection.fulfill()
+            expection?.fulfill()
         }
         waitForExpectationsWithTimeout(AbstractSocketTest.TEST_TIMEOUT, handler: nil)
     }
     
     func testConnectAckSocket() {
-        let expection = expectationWithDescription("connectAck")
+        weak var expection = expectationWithDescription("connectAck")
         openConnection(AbstractSocketTest.regularAckSocket) {
-            expection.fulfill()
+            expection?.fulfill()
         }
         waitForExpectationsWithTimeout(AbstractSocketTest.TEST_TIMEOUT, handler: nil)
     }
     
     func testConnectAckNamespaceSocket() {
-        let expection = expectationWithDescription("connectNormalAckNamespace")
+        weak var expection = expectationWithDescription("connectNormalAckNamespace")
         openConnection(AbstractSocketTest.namespaceAckSocket) {
-            expection.fulfill()
+            expection?.fulfill()
         }
         waitForExpectationsWithTimeout(AbstractSocketTest.TEST_TIMEOUT, handler: nil)
     }
     
     func testConnectPollingSocket() {
-        let expection = expectationWithDescription("connectPolling")
+        weak var expection = expectationWithDescription("connectPolling")
         openConnection(AbstractSocketTest.regularPollingSocket) {
-            expection.fulfill()
+            expection?.fulfill()
         }
         waitForExpectationsWithTimeout(AbstractSocketTest.TEST_TIMEOUT, handler: nil)
     }
     
     func testConnectPollingNamespaceSocket() {
-        let expection = expectationWithDescription("connectPollingNamesapce")
+        weak var expection = expectationWithDescription("connectPollingNamesapce")
         openConnection(AbstractSocketTest.namespacePollingSocket) {
-            expection.fulfill()
+            expection?.fulfill()
         }
         waitForExpectationsWithTimeout(AbstractSocketTest.TEST_TIMEOUT, handler: nil)
     }
     
     func testConnectPollingeAck() {
-        let expection = expectationWithDescription("connectPollingAck")
+        weak var expection = expectationWithDescription("connectPollingAck")
         openConnection(AbstractSocketTest.regularPollingAckSocket) {
-            expection.fulfill()
+            expection?.fulfill()
         }
         waitForExpectationsWithTimeout(AbstractSocketTest.TEST_TIMEOUT, handler: nil)
     }
     
     func testConnectPollingNamesapceAck() {
-        let expection = expectationWithDescription("connectPollingNamesapceAck")
+        weak var expection = expectationWithDescription("connectPollingNamesapceAck")
         openConnection(AbstractSocketTest.namespacePollingAckSocket) {
-            expection.fulfill()
+            expection?.fulfill()
         }
         waitForExpectationsWithTimeout(AbstractSocketTest.TEST_TIMEOUT, handler: nil)
     }
