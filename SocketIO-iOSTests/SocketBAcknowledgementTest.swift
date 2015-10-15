@@ -8,7 +8,7 @@
 
 import XCTest
 
-class SocketAcknowledgementTest: AbstractSocketTest {
+class SocketBAcknowledgementTest: AbstractSocketTest {
     
     override func setUp() {
         super.setUp()
