@@ -455,7 +455,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
 }
 
 // Polling methods
-private extension SocketEngine {
+extension SocketEngine {
     func doPoll() {
         if websocket || waitingForPoll || !connected || closed {
             return
@@ -583,7 +583,7 @@ private extension SocketEngine {
     
     // We had packets waiting for send when we upgraded
     // Send them raw
-    private func flushWaitingForPostToWebSocket() {
+    func flushWaitingForPostToWebSocket() {
         guard let ws = self.ws else {return}
         
         for msg in postWait {
