@@ -131,8 +131,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
 
             return .Left(mutData)
         } else {
-            var str = "b4"
-            str += data.base64EncodedStringWithOptions(
+            let str = "b4" + data.base64EncodedStringWithOptions(
                 NSDataBase64EncodingOptions.Encoding64CharacterLineLength)
 
             return .Right(str)
