@@ -26,13 +26,15 @@
 import Foundation
 
 func fixDoubleUTF8(inout name: String) {
-    let utf8 = name.dataUsingEncoding(NSISOLatin1StringEncoding)!
-    let latin1 = NSString(data: utf8, encoding: NSUTF8StringEncoding)!
-    name = latin1 as String
+    if let utf8 = name.dataUsingEncoding(NSISOLatin1StringEncoding),
+        latin1 = NSString(data: utf8, encoding: NSUTF8StringEncoding) {
+            name = latin1 as String
+    }
 }
 
 func doubleEncodeUTF8(inout str: String) {
-    let latin1 = str.dataUsingEncoding(NSUTF8StringEncoding)!
-    let utf8 = NSString(data: latin1, encoding: NSISOLatin1StringEncoding)!
-    str = utf8 as String
+    if let latin1 = str.dataUsingEncoding(NSUTF8StringEncoding),
+        utf8 = NSString(data: latin1, encoding: NSISOLatin1StringEncoding) {
+            str = utf8 as String
+    }
 }
