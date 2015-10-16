@@ -261,6 +261,7 @@
 		572EF2461B51F18A00EEBB58 /* SocketIO-MacTests */ = {
 			isa = PBXGroup;
 			children = (
+				94CA0D6A1BD045DD00E121DF /* ASocketAAConnectionTest.swift */,
 				9453B0AD1BC3B71F0075973B /* Offline-Tests */,
 				9453B0B01BC3B7AA0075973B /* Namespace */,
 				9453B0AF1BC3B79D0075973B /* Emit */,
@@ -269,7 +270,6 @@
 				94CB8F0C1B6E66E60019ED53 /* AbstractSocketTest.swift */,
 				941A4AB91B67A56C00C42318 /* TestKind.swift */,
 				572EF2471B51F18A00EEBB58 /* Supporting Files */,
-				94CA0D6A1BD045DD00E121DF /* ASocketAAConnectionTest.swift */,
 			);
 			path = "SocketIO-MacTests";
 			sourceTree = "<group>";

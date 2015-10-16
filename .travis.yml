@@ -9,7 +9,7 @@ before_install:
     - npm install
     - cd ..
 install: node Socket.IO-Test-Server/main.js &
-script: xctool -project Socket.IO-Client-Swift.xcodeproj -scheme SocketIO-Mac test
+script: xctool -project Socket.IO-Client-Swift.xcodeproj -scheme SocketIO-Mac clean test
 cache:
   directories:
     - Socket.IO-Test-Server/node_modules
