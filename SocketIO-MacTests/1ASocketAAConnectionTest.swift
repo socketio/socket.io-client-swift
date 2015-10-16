@@ -8,7 +8,7 @@
 
 import XCTest
 
-class ASocketAAConnectionTest: AbstractSocketTest {
+class AASocketAAConnectionTest: XCTestCase {
     
     func testAConnectRegularSocket() {
         weak var expection = expectationWithDescription("connectNormal")
