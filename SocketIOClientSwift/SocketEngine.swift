@@ -131,8 +131,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
 
             return .Left(mutData)
         } else {
-            let str = "b4" + data.base64EncodedStringWithOptions(
-                NSDataBase64EncodingOptions.Encoding64CharacterLineLength)
+            let str = "b4" + data.base64EncodedStringWithOptions(.Encoding64CharacterLineLength)
 
             return .Right(str)
         }
@@ -456,7 +455,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
 
 // Polling methods
 extension SocketEngine {
-    func doPoll() {
+    private func doPoll() {
         if websocket || waitingForPoll || !connected || closed {
             return
         }
@@ -478,7 +477,7 @@ extension SocketEngine {
         doLongPoll(req)
     }
     
-    func doRequest(req: NSMutableURLRequest,
+    private func doRequest(req: NSMutableURLRequest,
         withCallback callback: (NSData?, NSURLResponse?, NSError?) -> Void) {
             if !polling || closed || invalidated {
                 return
@@ -490,7 +489,7 @@ extension SocketEngine {
             session.dataTaskWithRequest(req, completionHandler: callback).resume()
     }
     
-    func doLongPoll(req: NSMutableURLRequest) {
+    private func doLongPoll(req: NSMutableURLRequest) {
         doRequest(req) {[weak self] data, res, err in
             if let this = self {
                 if err != nil || data == nil {
@@ -521,7 +520,7 @@ extension SocketEngine {
         }
     }
     
-    func flushWaitingForPost() {
+    private func flushWaitingForPost() {
         if postWait.count == 0 || !connected {
             return
         } else if websocket {
@@ -583,7 +582,7 @@ extension SocketEngine {
     
     // We had packets waiting for send when we upgraded
     // Send them raw
-    func flushWaitingForPostToWebSocket() {
+    private func flushWaitingForPostToWebSocket() {
         guard let ws = self.ws else {return}
         
         for msg in postWait {
@@ -618,7 +617,7 @@ extension SocketEngine {
     
     /// Send polling message.
     /// Only call on emitQueue
-    func sendPollMessage(var msg: String, withType type: SocketEnginePacketType,
+    private func sendPollMessage(var msg: String, withType type: SocketEnginePacketType,
         datas:[NSData]? = nil) {
             Logger.log("Sending poll: %@ as type: %@", type: logType, args: msg, type.rawValue)
             
@@ -638,7 +637,7 @@ extension SocketEngine {
             }
     }
     
-    func stopPolling() {
+    private func stopPolling() {
         invalidated = true
         session.finishTasksAndInvalidate()
     }
