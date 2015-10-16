@@ -34,7 +34,6 @@ import Foundation
     var urlWebSocket: String {get}
     var ws: WebSocket? {get}
     
-    init(client: SocketEngineClient, sessionDelegate: NSURLSessionDelegate?)
     init(client: SocketEngineClient, opts: NSDictionary?)
     
     func close(fast fast: Bool)

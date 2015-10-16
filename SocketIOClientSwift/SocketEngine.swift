@@ -70,15 +70,12 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
     private(set) var connected = false
     private(set) var polling = true
     private(set) var websocket = false
-
-    public init(client: SocketEngineClient, sessionDelegate: NSURLSessionDelegate?) {
+    
+    public init(client: SocketEngineClient, opts: NSDictionary?) {
         self.client = client
-        self.session = NSURLSession(configuration: NSURLSessionConfiguration.defaultSessionConfiguration(),
-            delegate: sessionDelegate, delegateQueue: workQueue)
-    }
-
-    public convenience init(client: SocketEngineClient, opts: NSDictionary?) {
-        self.init(client: client, sessionDelegate: opts?["sessionDelegate"] as? NSURLSessionDelegate)
+        session = NSURLSession(configuration: .defaultSessionConfiguration(),
+            delegate: opts?["sessionDelegate"] as? NSURLSessionDelegate,
+            delegateQueue: workQueue)
         forceWebsockets = opts?["forceWebsockets"] as? Bool ?? false
         forcePolling = opts?["forcePolling"] as? Bool ?? false
         cookies = opts?["cookies"] as? [NSHTTPCookie]
