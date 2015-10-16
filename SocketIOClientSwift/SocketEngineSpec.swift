@@ -32,7 +32,6 @@ import Foundation
     var socketPath: String {get}
     var urlPolling: String {get}
     var urlWebSocket: String {get}
-    var ws: WebSocket? {get}
     
     init(client: SocketEngineClient, opts: NSDictionary?)
     
