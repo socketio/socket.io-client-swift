@@ -76,7 +76,7 @@ class AASocketAAConnectionTest: XCTestCase {
     
     func openConnection(socket: SocketIOClient, isConnectedCallback:()->()) {
         if socket.status == .Connected {
-            return
+            isConnectedCallback()
         }
         socket.on("connect") {data, ack in
             XCTAssertEqual(socket.status, SocketIOClientStatus.Connected)
