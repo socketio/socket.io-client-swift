@@ -10,7 +10,7 @@ import XCTest
 
 class AbstractSocketTest: XCTestCase {
     static let serverURL = "milkbartube.com:6979"
-    static let TEST_TIMEOUT = 10.0
+    static let TEST_TIMEOUT = 30.0
     var socket: SocketIOClient!
     static let regularSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL)
     static let regularAckSocket = SocketIOClient(socketURL: AbstractSocketTest.serverURL)
@@ -30,7 +30,7 @@ class AbstractSocketTest: XCTestCase {
     var testKind:TestKind?
     
     func generateTestName(rawTestName:String) -> String {
-        return rawTestName + testKind!.rawValue
+        return rawTestName + testKind!.rawValue + NSUUID().UUIDString
     }
     
     func checkConnectionStatus() {
