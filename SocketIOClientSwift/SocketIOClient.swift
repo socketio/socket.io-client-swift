@@ -32,7 +32,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     public private(set) var status = SocketIOClientStatus.NotConnected
     
     public var nsp = "/"
-    public var opts: [String: AnyObject]?
+    public var opts: SocketOptionsDictionary?
     public var reconnects = true
     public var reconnectWait = 10
     public var sid: String? {
@@ -57,7 +57,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     /**
     Create a new SocketIOClient. opts can be omitted
     */
-    public init(var socketURL: String, opts: [String: AnyObject]? = nil) {
+    public init(var socketURL: String, opts: SocketOptionsDictionary? = nil) {
         if socketURL["https://"].matches().count != 0 {
             self.secure = true
         }
@@ -68,43 +68,48 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         self.socketURL = socketURL
         self.opts = opts
         
-        if let connectParams = opts?["connectParams"] as? [String: AnyObject] {
+        if let connectParams = opts?[.ConnectParams] as? [String: AnyObject] {
             self.connectParams = connectParams
         }
         
-        if let logger = opts?["logger"] as? SocketLogger {
+        if let logger = opts?[.Logger] as? SocketLogger {
             Logger = logger
         }
         
-        if let log = opts?["log"] as? Bool {
+        if let log = opts?[.Log] as? Bool {
             Logger.log = log
         }
         
-        if let nsp = opts?["nsp"] as? String {
+        if let nsp = opts?[.Nsp] as? String {
             self.nsp = nsp
         }
         
-        if let reconnects = opts?["reconnects"] as? Bool {
+        if let reconnects = opts?[.Reconnects] as? Bool {
             self.reconnects = reconnects
         }
         
-        if let reconnectAttempts = opts?["reconnectAttempts"] as? Int {
+        if let reconnectAttempts = opts?[.ReconnectAttempts] as? Int {
             self.reconnectAttempts = reconnectAttempts
         } else {
             self.reconnectAttempts = -1
         }
         
-        if let reconnectWait = opts?["reconnectWait"] as? Int {
+        if let reconnectWait = opts?[.ReconnectWait] as? Int {
             self.reconnectWait = abs(reconnectWait)
         }
         
-        if let handleQueue = opts?["handleQueue"] as? dispatch_queue_t {
+        if let handleQueue = opts?[.HandleQueue] as? dispatch_queue_t {
             self.handleQueue = handleQueue
         } else {
             self.handleQueue = dispatch_get_main_queue()
         }
         
         super.init()
+    }
+    
+    public convenience init(socketURL: String, opts: NSDictionary?) {
+        self.init(socketURL: socketURL,
+            opts: SocketIOClientOptions.NSDictionaryToSocketOptionsDictionary(opts ?? [:]))
     }
     
     deinit {
@@ -114,7 +119,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     private func addEngine() -> SocketEngine {
         Logger.log("Adding engine", type: logType)
 
-        let newEngine = SocketEngine(client: self, opts: opts)
+        let newEngine = SocketEngine(client: self, opts:
+            SocketIOClientOptions.SocketOptionsDictionaryToNSDictionary(opts ?? [:]))
 
         engine = newEngine
         return newEngine
