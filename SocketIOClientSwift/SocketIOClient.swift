@@ -55,7 +55,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     var waitingData = [SocketPacket]()
     
     /**
-    Create a new SocketIOClient. opts can be omitted
+    Type safe way to create a new SocketIOClient. opts can be omitted
     */
     public init(var socketURL: String, opts: SocketOptionsDictionary? = nil) {
         if socketURL["https://"].matches().count != 0 {
@@ -107,6 +107,10 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         super.init()
     }
     
+    /**
+    Not so type safe way to create a SocketIOClient, meant for Objective-C compatiblity.
+    If using Swift it's recommended to use `init(var socketURL: String, opts: SocketOptionsDictionary? = nil)`
+    */
     public convenience init(socketURL: String, opts: NSDictionary?) {
         self.init(socketURL: socketURL,
             opts: SocketIOClientOptions.NSDictionaryToSocketOptionsDictionary(opts ?? [:]))
