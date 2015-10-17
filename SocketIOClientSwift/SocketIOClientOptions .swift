@@ -41,7 +41,7 @@ public enum SocketIOClientOptions: String {
     case HandleQueue = "handleQueue"
     
     static func NSDictionaryToSocketOptionsDictionary(dict: NSDictionary) -> SocketOptionsDictionary {
-        var options = [SocketIOClientOptions: AnyObject]()
+        var options = SocketOptionsDictionary()
                 
         for (rawKey, value) in dict {
             if let key = rawKey as? String, opt = SocketIOClientOptions(rawValue: key) {
