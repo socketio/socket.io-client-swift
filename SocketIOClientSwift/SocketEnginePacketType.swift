@@ -1,8 +1,8 @@
 //
-//  SocketFixUTF8.swift
+//  SocketEnginePacketType.swift
 //  Socket.IO-Client-Swift
 //
-//  Created by Erik Little on 3/16/15.
+//  Created by Erik Little on 10/7/15.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -25,16 +25,14 @@
 
 import Foundation
 
-func fixDoubleUTF8(inout name: String) {
-    if let utf8 = name.dataUsingEncoding(NSISOLatin1StringEncoding),
-        latin1 = NSString(data: utf8, encoding: NSUTF8StringEncoding) {
-            name = latin1 as String
-    }
-}
-
-func doubleEncodeUTF8(inout str: String) {
-    if let latin1 = str.dataUsingEncoding(NSUTF8StringEncoding),
-        utf8 = NSString(data: latin1, encoding: NSISOLatin1StringEncoding) {
-            str = utf8 as String
+@objc public enum SocketEnginePacketType: Int {
+    case Open, Close, Ping, Pong, Message, Upgrade, Noop
+    
+    init?(str: String) {
+        if let value = Int(str), raw = SocketEnginePacketType(rawValue: value) {
+            self = raw
+        } else {
+            return nil
+        }
     }
 }

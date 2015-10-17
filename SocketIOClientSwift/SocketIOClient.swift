@@ -25,12 +25,9 @@
 import Foundation
 
 public final class SocketIOClient: NSObject, SocketEngineClient {
-    private let emitQueue = dispatch_queue_create("com.socketio.emitQueue", DISPATCH_QUEUE_SERIAL)
-    private let handleQueue: dispatch_queue_t!
-
     public let socketURL: String
 
-    public private(set) var engine: SocketEngine?
+    public private(set) var engine: SocketEngineSpec?
     public private(set) var secure = false
     public private(set) var status = SocketIOClientStatus.NotConnected
     
@@ -42,18 +39,19 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         return engine?.sid
     }
     
+    private let emitQueue = dispatch_queue_create("com.socketio.emitQueue", DISPATCH_QUEUE_SERIAL)
+    private let handleQueue: dispatch_queue_t!
     private let logType = "SocketIOClient"
+    private let reconnectAttempts: Int!
     
     private var anyHandler: ((SocketAnyEvent) -> Void)?
     private var currentReconnectAttempt = 0
     private var handlers = ContiguousArray<SocketEventHandler>()
     private var connectParams: [String: AnyObject]?
     private var reconnectTimer: NSTimer?
-    
-    private let reconnectAttempts: Int!
     private var ackHandlers = SocketAckManager()
-    private var currentAck = -1
-
+    
+    private(set) var currentAck = -1
     var waitingData = [SocketPacket]()
     
     /**
@@ -466,7 +464,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     Tries to reconnect to the server.
     */
     public func reconnect() {
-        engine?.stopPolling()
         tryReconnect()
     }
     
@@ -504,5 +501,20 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         
         currentReconnectAttempt++
         connect()
+    }
+}
+
+// Test extensions
+extension SocketIOClient {
+    func setTestable() {
+        status = .Connected
+    }
+    
+    func setTestEngine(engine: SocketEngineSpec?) {
+        self.engine = engine
+    }
+    
+    func emitTest(event: String, _ data: AnyObject...) {
+        self._emit([event] + data)
     }
 }

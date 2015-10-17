@@ -1,8 +1,8 @@
 //
-//  SocketFixUTF8.swift
+//  SocketEngineSpec.swift
 //  Socket.IO-Client-Swift
 //
-//  Created by Erik Little on 3/16/15.
+//  Created by Erik Little on 10/7/15.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -25,16 +25,19 @@
 
 import Foundation
 
-func fixDoubleUTF8(inout name: String) {
-    if let utf8 = name.dataUsingEncoding(NSISOLatin1StringEncoding),
-        latin1 = NSString(data: utf8, encoding: NSUTF8StringEncoding) {
-            name = latin1 as String
-    }
-}
-
-func doubleEncodeUTF8(inout str: String) {
-    if let latin1 = str.dataUsingEncoding(NSUTF8StringEncoding),
-        utf8 = NSString(data: latin1, encoding: NSISOLatin1StringEncoding) {
-            str = utf8 as String
-    }
+@objc public protocol SocketEngineSpec {
+    weak var client: SocketEngineClient? {get set}
+    var cookies: [NSHTTPCookie]? {get}
+    var sid: String {get}
+    var socketPath: String {get}
+    var urlPolling: String {get}
+    var urlWebSocket: String {get}
+    var ws: WebSocket? {get}
+    
+    init(client: SocketEngineClient, opts: NSDictionary?)
+    
+    func close(fast fast: Bool)
+    func open(opts: [String: AnyObject]?)
+    func send(msg: String, withData datas: [NSData]?)
+    func write(msg: String, withType type: SocketEnginePacketType, withData data: [NSData]?)
 }

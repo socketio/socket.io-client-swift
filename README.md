@@ -60,19 +60,19 @@ If you need Swift 1.2/Xcode 6.3/4 use v2.4.5 (Pre-Swift 2 support is no longer m
 
 If you need Swift 1.1/Xcode 6.2 use v1.5.2. (Pre-Swift 1.2 support is no longer maintained)
 
-Carthage
------------------
-Add this line to your `Cartfile`:
-```
-github "socketio/socket.io-client-swift" ~> 3.1.4 # Or latest version
-```
-
-Run `carthage update --platform ios,macosx`.
-
 Manually (iOS 7+)
 -----------------
 1. Copy the SocketIOClientSwift folder into your Xcode project. (Make sure you add the files to your target(s))
 2. If you plan on using this from Objective-C, read [this](https://developer.apple.com/library/ios/documentation/Swift/Conceptual/BuildingCocoaApps/MixandMatch.html) on exposing Swift code to Objective-C.
+
+Carthage
+-----------------
+Add this line to your `Cartfile`:
+```
+github "socketio/socket.io-client-swift" ~> 3.1.6 # Or latest version
+```
+
+Run `carthage update --platform ios,macosx`.
 
 CocoaPods 0.36.0 or later (iOS 8+)
 ------------------
@@ -83,7 +83,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 platform :ios, '8.0'
 use_frameworks!
 
-pod 'Socket.IO-Client-Swift', '~> 3.1.4' # Or latest version
+pod 'Socket.IO-Client-Swift', '~> 3.1.6' # Or latest version
 ```
 
 Install pods:
@@ -100,9 +100,22 @@ import Socket_IO_Client_Swift
 ```
 
 Objective-C:
+
 ```Objective-C
 #import <Socket_IO_Client_Swift/Socket_IO_Client_Swift-Swift.h>
 ```
+
+CocoaSeeds
+-----------------
+
+Add this line to your `Seedfile`:
+
+```
+github "socketio/socket.io-client-swift", "v3.1.6", :files => "SocketIOClientSwift/*.swift" # Or latest version
+```
+
+Run `seed install`.
+
 
 ##API
 Constructors
