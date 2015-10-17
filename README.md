@@ -122,22 +122,22 @@ Constructors
 -----------
 `init(socketURL: String, opts: NSDictionary? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values) note: If your socket.io server is secure, you need to specify `https` in your socketURL.
 
-Options
+Options (use SocketInitialOptions as keys)
 -------
-- `connectParams: [String: AnyObject]?` - Dictionary whose contents will be passed with the connection.
-- `reconnects: Bool` Default is `true`
-- `reconnectAttempts: Int` Default is `-1` (infinite tries)
-- `reconnectWait: Int` Default is `10`
-- `forcePolling: Bool` Default is `false`. `true` forces the client to use xhr-polling.
-- `forceWebsockets: Bool` Default is `false`. `true` forces the client to use WebSockets.
-- `nsp: String` Default is `"/"`. Connects to a namespace.
-- `cookies: [NSHTTPCookie]?` An array of NSHTTPCookies. Passed during the handshake. Default is nil.
-- `log: Bool` If `true` socket will log debug messages. Default is false.
-- `logger: SocketLogger` If you wish to implement your own logger that conforms to SocketLogger you can pass it in here. Will use the default logging defined under the protocol otherwise.
-- `sessionDelegate: NSURLSessionDelegate` Sets an NSURLSessionDelegate for the underlying engine. Useful if you need to handle self-signed certs. Default is nil.
-- `path: String` - If the server uses a custom path. ex: `"/swift"`. Default is `""`
-- `extraHeaders: [String: String]?` - Adds custom headers to the initial request. Default is nil.
-- `handleQueue: dispatch_queue_t` - The dispatch queue that handlers are run on. Default is the main queue.
+- `SocketInitialOptions.ConnectionParameter: [String: AnyObject]?` - Dictionary whose contents will be passed with the connection.
+- `SocketInitialOptions.Reconnects: Bool` Default is `true`
+- `SocketInitialOptions.ReconnectAttempts: Int` Default is `-1` (infinite tries)
+- `SocketInitialOptions.ReconnectWait: Int` Default is `10`
+- `SocketInitialOptions.ForcePolling: Bool` Default is `false`. `true` forces the client to use xhr-polling.
+- `SocketInitialOptions.ForceWebsockets: Bool` Default is `false`. `true` forces the client to use WebSockets.
+- `SocketInitialOptions.namespace: String` Default is `"/"`. Connects to a namespace.
+- `SocketInitialOptions.Cookies: [NSHTTPCookie]?` An array of NSHTTPCookies. Passed during the handshake. Default is nil.
+- `SocketInitialOptions.Log: Bool` If `true` socket will log debug messages. Default is false.
+- `SocketInitialOptions.CustomLogger: SocketLogger` If you wish to implement your own logger that conforms to SocketLogger you can pass it in here. Will use the default logging defined under the protocol otherwise.
+- `SocketInitialOptions.SessionDelegate: NSURLSessionDelegate` Sets an NSURLSessionDelegate for the underlying engine. Useful if you need to handle self-signed certs. Default is nil.
+- `SocketInitialOptions.Path: String` - If the server uses a custom path. ex: `"/swift"`. Default is `""`
+- `SocketInitialOptions.ExtraHeaders: [String: String]?` - Adds custom headers to the initial request. Default is nil.
+- `SocketInitialOptions.HandleQueue: dispatch_queue_t` - The dispatch queue that handlers are run on. Default is the main queue.
 
 Methods
 -------
