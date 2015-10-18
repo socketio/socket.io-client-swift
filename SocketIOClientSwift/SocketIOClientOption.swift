@@ -91,8 +91,8 @@ public enum SocketIOClientOption: CustomStringConvertible, Hashable {
        return Mirror(reflecting: self).children.first?.value as? AnyObject
     }
     
-    static func NSDictionaryToSocketOptionsSet(dict: NSDictionary) -> SocketOptionsSet {
-        var options = SocketOptionsSet()
+    static func NSDictionaryToSocketOptionsSet(dict: NSDictionary) -> Set<SocketIOClientOption> {
+        var options = Set<SocketIOClientOption>()
                 
         for (rawKey, value) in dict {
             if let key = rawKey as? String, opt = keyValueToSocketIOClientOption(key, value: value) {
@@ -103,7 +103,7 @@ public enum SocketIOClientOption: CustomStringConvertible, Hashable {
         return options
     }
     
-    static func SocketOptionsSetToNSDictionary(set: SocketOptionsSet) -> NSDictionary {
+    static func SocketOptionsSetToNSDictionary(set: Set<SocketIOClientOption>) -> NSDictionary {
         let options = NSMutableDictionary()
         
         for option in set {

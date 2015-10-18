@@ -32,7 +32,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     public private(set) var status = SocketIOClientStatus.NotConnected
     
     public var nsp = "/"
-    public var options: SocketOptionsSet?
+    public var options: Set<SocketIOClientOption>?
     public var reconnects = true
     public var reconnectWait = 10
     public var sid: String? {
@@ -57,7 +57,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     /**
     Type safe way to create a new SocketIOClient. opts can be omitted
     */
-    public init(var socketURL: String, options: SocketOptionsSet? = nil) {
+    public init(var socketURL: String, options: Set<SocketIOClientOption>? = nil) {
         if socketURL["https://"].matches().count != 0 {
             self.secure = true
         }
