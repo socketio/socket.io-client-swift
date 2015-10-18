@@ -113,7 +113,7 @@ public enum SocketIOClientOption: CustomStringConvertible, Hashable {
     }
     
     static func getSocketIOOptionValue(option: SocketIOClientOption) -> AnyObject? {
-        if let value = Mirror(reflecting: option).children.first!.value as? AnyObject {
+        if let value = Mirror(reflecting: option).children.first?.value as? AnyObject {
             return value
         } else {
             return nil
