@@ -97,6 +97,7 @@
 		945E28E91BD2B57500BBE223 /* SocketInitialOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94D6C48A1BD252E000EA97C9 /* SocketInitialOptions.swift */; settings = {ASSET_TAGS = (); }; };
 		945E28EA1BD2B57600BBE223 /* SocketInitialOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94D6C48A1BD252E000EA97C9 /* SocketInitialOptions.swift */; settings = {ASSET_TAGS = (); }; };
 		945E28EB1BD2B57600BBE223 /* SocketInitialOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94D6C48A1BD252E000EA97C9 /* SocketInitialOptions.swift */; settings = {ASSET_TAGS = (); }; };
+		947F81DE1BD401F300C06840 /* InitialOptionsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 947F81DD1BD401F300C06840 /* InitialOptionsTest.swift */; settings = {ASSET_TAGS = (); }; };
 		949FAE8D1B9B94E600073BE9 /* SocketParserTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 949FAE8C1B9B94E600073BE9 /* SocketParserTest.swift */; };
 		94A20D611B99E22F00BF9E44 /* SocketAckManagerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94A20D601B99E22F00BF9E44 /* SocketAckManagerTest.swift */; };
 /* End PBXBuildFile section */
@@ -151,6 +152,7 @@
 		74F124E21BC5697B002966F4 /* SocketEngineSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketEngineSpec.swift; path = SocketIOClientSwift/SocketEngineSpec.swift; sourceTree = "<group>"; };
 		74F124E71BC56BFC002966F4 /* SocketEnginePacketType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketEnginePacketType.swift; path = SocketIOClientSwift/SocketEnginePacketType.swift; sourceTree = "<group>"; };
 		74F124EF1BC574CF002966F4 /* SocketBasicPacketTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketBasicPacketTest.swift; sourceTree = "<group>"; };
+		947F81DD1BD401F300C06840 /* InitialOptionsTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InitialOptionsTest.swift; sourceTree = "<group>"; };
 		949FAE8C1B9B94E600073BE9 /* SocketParserTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketParserTest.swift; path = "../SocketIO-iOSTests/SocketParserTest.swift"; sourceTree = "<group>"; };
 		94A20D601B99E22F00BF9E44 /* SocketAckManagerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketAckManagerTest.swift; path = "../SocketIO-iOSTests/SocketAckManagerTest.swift"; sourceTree = "<group>"; };
 		94D6C48A1BD252E000EA97C9 /* SocketInitialOptions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketInitialOptions.swift; path = SocketIOClientSwift/SocketInitialOptions.swift; sourceTree = "<group>"; };
@@ -273,6 +275,7 @@
 				949FAE8C1B9B94E600073BE9 /* SocketParserTest.swift */,
 				7472C65E1BCAC46E003CA70D /* SocketSideEffectTest.swift */,
 				572EF2471B51F18A00EEBB58 /* Supporting Files */,
+				947F81DD1BD401F300C06840 /* InitialOptionsTest.swift */,
 			);
 			path = "SocketIO-MacTests";
 			sourceTree = "<group>";
@@ -585,6 +588,7 @@
 				7472A5EC1BB6ECE800CD4F59 /* SocketTypes.swift in Sources */,
 				741F39EF1BD025D80026C9CC /* SocketEngineTest.swift in Sources */,
 				7472A5ED1BB6ECE800CD4F59 /* SwiftRegex.swift in Sources */,
+				947F81DE1BD401F300C06840 /* InitialOptionsTest.swift in Sources */,
 				7472A5EE1BB6ECE800CD4F59 /* WebSocket.swift in Sources */,
 				745895381BB59A0A0050ACC8 /* SocketAckManagerTest.swift in Sources */,
 				7458953D1BB59A0A0050ACC8 /* SocketParserTest.swift in Sources */,
