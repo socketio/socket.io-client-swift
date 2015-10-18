@@ -32,7 +32,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     public private(set) var status = SocketIOClientStatus.NotConnected
     
     public var nsp = "/"
-    public var opts: SocketOptionsSet?
+    public var options: SocketOptionsSet?
     public var reconnects = true
     public var reconnectWait = 10
     public var sid: String? {
@@ -57,7 +57,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     /**
     Type safe way to create a new SocketIOClient. opts can be omitted
     */
-    public init(var socketURL: String, opts: SocketOptionsSet? = nil) {
+    public init(var socketURL: String, options: SocketOptionsSet? = nil) {
         if socketURL["https://"].matches().count != 0 {
             self.secure = true
         }
@@ -66,9 +66,9 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         socketURL = socketURL["https://"] ~= ""
         
         self.socketURL = socketURL
-        self.opts = opts
+        self.options = options
         
-        for option in opts ?? [] {
+        for option in options ?? [] {
             switch option {
             case .ConnectParams(let params):
                 connectParams = params
@@ -98,9 +98,9 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     Not so type safe way to create a SocketIOClient, meant for Objective-C compatiblity.
     If using Swift it's recommended to use `init(var socketURL: String, opts: SocketOptionsDictionary? = nil)`
     */
-    public convenience init(socketURL: String, opts: NSDictionary?) {
+    public convenience init(socketURL: String, options: NSDictionary?) {
         self.init(socketURL: socketURL,
-            opts: SocketIOClientOption.NSDictionaryToSocketOptionsSet(opts ?? [:]))
+            options: SocketIOClientOption.NSDictionaryToSocketOptionsSet(options ?? [:]))
     }
     
     deinit {
@@ -111,7 +111,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         Logger.log("Adding engine", type: logType)
 
         let newEngine = SocketEngine(client: self, opts:
-            SocketIOClientOption.SocketOptionsSetToNSDictionary(opts ?? []))
+            SocketIOClientOption.SocketOptionsSetToNSDictionary(options ?? []))
 
         engine = newEngine
         return newEngine
