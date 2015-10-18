@@ -41,35 +41,10 @@ public enum SocketIOClientOption: CustomStringConvertible, Hashable {
     case HandleQueue(dispatch_queue_t)
     
     public var description: String {
-        switch self {
-        case .ConnectParams:
-            return "connectParams"
-        case .Reconnects:
-            return "reconnects"
-        case .ReconnectAttempts:
-            return "reconnectAttempts"
-        case .ReconnectWait:
-            return "reconnectWait"
-        case .ForcePolling:
-            return "forcePolling"
-        case .ForceWebsockets:
-            return "forceWebsockets"
-        case .Nsp:
-            return "nsp"
-        case .Cookies:
-            return "cookies"
-        case .Log:
-            return "log"
-        case .Logger:
-            return "logger"
-        case .SessionDelegate:
-            return "sessionDelegate"
-        case .Path:
-            return "path"
-        case .ExtraHeaders:
-            return "extraHeaders"
-        case .HandleQueue:
-            return "handleQueue"
+        if let label = Mirror(reflecting: self).children.first?.label {
+            return String(label[label.startIndex]).lowercaseString + String(label.characters.dropFirst())
+        } else {
+            return ""
         }
     }
     
