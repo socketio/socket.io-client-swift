@@ -57,6 +57,14 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     /**
     Create a new SocketIOClient. opts can be omitted
     */
+    convenience init(var url: String, optionSet: Set<SocketInitialOptions>? = nil) {
+        let options = SocketInitialOptions.transformOptionSetIntoDictionary(optionSet)
+        self.init(socketURL: url, opts: options)
+    }
+    
+    /**
+    Create a new SocketIOClient. opts can be omitted
+    */
     public init(var socketURL: String, opts: [String: AnyObject]? = nil) {
         if socketURL["https://"].matches().count != 0 {
             self.secure = true
