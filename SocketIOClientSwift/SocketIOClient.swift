@@ -77,7 +77,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
             case .ReconnectAttempts(let attempts):
                 reconnectAttempts = attempts
             case .ReconnectWait(let wait):
-                reconnectWait = wait
+                reconnectWait = abs(wait)
             case .Nsp(let nsp):
                 self.nsp = nsp
             case .Log(let log):
