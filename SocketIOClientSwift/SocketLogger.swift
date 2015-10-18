@@ -26,7 +26,7 @@ import Foundation
 
 var Logger: SocketLogger = DefaultSocketLogger()
 
-public protocol SocketLogger {
+public protocol SocketLogger: class {
     /// Whether to log or not
     var log: Bool {get set}
     
@@ -56,6 +56,6 @@ public extension SocketLogger {
     }
 }
 
-struct DefaultSocketLogger: SocketLogger {
+class DefaultSocketLogger: SocketLogger {
     var log = false
 }
