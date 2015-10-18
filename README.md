@@ -158,6 +158,8 @@ Methods
 11. `reconnect()` - Causes the client to reconnect to the server.
 12. `joinNamespace()` - Causes the client to join nsp. Shouldn't need to be called unless you change nsp manually.
 13. `leaveNamespace()` - Causes the client to leave the nsp and go back to /
+14. `off(event: String)` - Removes all event handlers for event.
+15. `removeAllHandlers()` - Removes all handlers.s
 
 Client Events
 ------
