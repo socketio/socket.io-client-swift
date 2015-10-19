@@ -5,7 +5,7 @@ Socket.IO-client for iOS/OS X.
 
 ##Example
 ```swift
-let socket = SocketIOClient(socketURL: "localhost:8080")
+let socket = SocketIOClient(socketURL: "localhost:8080", options: [.Log(true), .ForcePolling(true)])
 
 socket.on("connect") {data, ack in
     print("socket connected")
@@ -26,7 +26,7 @@ socket.connect()
 
 ##Objective-C Example
 ```objective-c
-SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8080" opts:nil];
+SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:@"localhost:8080" options:@{@"log": @YES, @"forcePolling": @YES}];
 
 [socket on:@"connect" callback:^(NSArray* data, SocketAckEmitter* ack) {
     NSLog(@"socket connected");
@@ -120,25 +120,29 @@ Run `seed install`.
 ##API
 Constructors
 -----------
-`init(socketURL: String, opts: NSDictionary? = nil)` - Constructs a new client for the given URL. opts can be omitted (will use default values) note: If your socket.io server is secure, you need to specify `https` in your socketURL.
+`init(var socketURL: String, options: Set<SocketIOClientOption>? = nil)` - Creates a new SocketIOClient. opts is a Set of SocketIOClientOption. If your socket.io server is secure, you need to specify `https` in your socketURL.
+`convenience init(socketURL: String, options: NSDictionary?)` - Same as above, but meant for Objective-C. See Options on how convert between SocketIOClientOptions and dictionary keys.
 
 Options
 -------
-- `connectParams: [String: AnyObject]?` - Dictionary whose contents will be passed with the connection.
-- `reconnects: Bool` Default is `true`
-- `reconnectAttempts: Int` Default is `-1` (infinite tries)
-- `reconnectWait: Int` Default is `10`
-- `forcePolling: Bool` Default is `false`. `true` forces the client to use xhr-polling.
-- `forceWebsockets: Bool` Default is `false`. `true` forces the client to use WebSockets.
-- `nsp: String` Default is `"/"`. Connects to a namespace.
-- `cookies: [NSHTTPCookie]?` An array of NSHTTPCookies. Passed during the handshake. Default is nil.
-- `log: Bool` If `true` socket will log debug messages. Default is false.
-- `logger: SocketLogger` If you wish to implement your own logger that conforms to SocketLogger you can pass it in here. Will use the default logging defined under the protocol otherwise.
-- `sessionDelegate: NSURLSessionDelegate` Sets an NSURLSessionDelegate for the underlying engine. Useful if you need to handle self-signed certs. Default is nil.
-- `path: String` - If the server uses a custom path. ex: `"/swift"`. Default is `""`
-- `extraHeaders: [String: String]?` - Adds custom headers to the initial request. Default is nil.
-- `handleQueue: dispatch_queue_t` - The dispatch queue that handlers are run on. Default is the main queue.
+All options are a case of SocketIOClientOption. To get the Objective-C Option, convert the name to lowerCamelCase.
 
+```swift
+case ConnectParams([String: AnyObject]) // Dictionary whose contents will be passed with the connection.
+case Reconnects(Bool) // Whether to reconnect on server lose. Default is `true`
+case ReconnectAttempts(Int) // How many times to reconnect. Default is `-1` (infinite tries)
+case ReconnectWait(Int) // Amount of time to wait between reconnects. Default is `10`
+case ForcePolling(Bool) // `true` forces the client to use xhr-polling. Default is `false`
+case ForceWebsockets(Bool) // `true` forces the client to use WebSockets. Default is `false`
+case Nsp(String) // The namespace to connect to. Must begin with /. Default is `/`
+case Cookies([NSHTTPCookie]) // An array of NSHTTPCookies. Passed during the handshake. Default is nil.
+case Log(Bool) // If `true` socket will log debug messages. Default is false.
+case Logger(SocketLogger) // Custom logger that conforms to SocketLogger. Will use the default logging otherwise.
+case SessionDelegate(NSURLSessionDelegate) // Sets an NSURLSessionDelegate for the underlying engine. Useful if you need to handle self-signed certs. Default is nil.
+case Path(String) // If the server uses a custom path. ex: `"/swift"`. Default is `""`
+case ExtraHeaders([String: String]) // Adds custom headers to the initial request. Default is nil.
+case HandleQueue(dispatch_queue_t) // The dispatch queue that handlers are run on. Default is the main queue.
+```
 Methods
 -------
 1. `on(event: String, callback: NormalCallback)` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example.
@@ -154,6 +158,8 @@ Methods
 11. `reconnect()` - Causes the client to reconnect to the server.
 12. `joinNamespace()` - Causes the client to join nsp. Shouldn't need to be called unless you change nsp manually.
 13. `leaveNamespace()` - Causes the client to leave the nsp and go back to /
+14. `off(event: String)` - Removes all event handlers for event.
+15. `removeAllHandlers()` - Removes all handlers.
 
 Client Events
 ------
