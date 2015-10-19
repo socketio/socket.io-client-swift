@@ -35,7 +35,7 @@ import Foundation
     
     init(client: SocketEngineClient, opts: NSDictionary?)
     
-    func close(fast fast: Bool)
+    func close()
     func open(opts: [String: AnyObject]?)
     func send(msg: String, withData datas: [NSData]?)
     func write(msg: String, withType type: SocketEnginePacketType, withData data: [NSData]?)

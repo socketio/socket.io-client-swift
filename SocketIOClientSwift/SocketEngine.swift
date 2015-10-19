@@ -102,19 +102,20 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
         }
     }
 
-    public func close(fast fast: Bool) {
-        Logger.log("Engine is being closed. Fast: %@", type: logType, args: fast)
+    public func close() {
+        Logger.log("Engine is being closed.", type: logType)
 
         pingTimer?.invalidate()
         closed = true
 
-        ws?.disconnect()
-
-        if fast || polling {
-            write("", withType: .Close, withData: nil)
-            client?.engineDidClose("Disconnect")
+        if websocket {
+            sendWebSocketMessage("", withType: .Close)
+        } else {
+            sendPollMessage("", withType: .Close)
         }
-
+        
+        ws?.disconnect()
+        client?.engineDidClose("Disconnect")
         stopPolling()
     }
 

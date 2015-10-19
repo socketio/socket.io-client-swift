@@ -169,7 +169,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
             dispatch_after(time, handleQueue) {[weak self] in
                 if let this = self where this.status != .Connected {
                     this.status = .Closed
-                    this.engine?.close(fast: true)
+                    this.engine?.close()
                     
                     handler?()
                 }
@@ -218,7 +218,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         reconnects = false
         
         // Make sure the engine is actually dead.
-        engine?.close(fast: true)
+        engine?.close()
         handleEvent("disconnect", data: [reason], isInternalMessage: true)
     }
     
@@ -322,6 +322,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     
     // Called when the socket gets an ack for something it sent
     func handleAck(ack: Int, data: AnyObject?) {
+        guard status == .Connected else {return}
+        
         Logger.log("Handling ack: %@ with data: %@", type: logType, args: ack, data ?? "")
         
         ackHandlers.executeAck(ack,
