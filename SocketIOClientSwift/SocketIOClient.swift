@@ -105,6 +105,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     
     deinit {
         Logger.log("Client is being deinit", type: logType)
+        engine?.close()
     }
     
     private func addEngine() -> SocketEngine {
