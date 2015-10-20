@@ -115,8 +115,8 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
         }
         
         ws?.disconnect()
-        client?.engineDidClose("Disconnect")
         stopPolling()
+        client?.engineDidClose("Disconnect")
     }
 
     private func createBinaryDataForSend(data: NSData) -> Either<NSData, String> {
