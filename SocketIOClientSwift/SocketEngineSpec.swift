@@ -33,7 +33,7 @@ import Foundation
     var urlPolling: String {get}
     var urlWebSocket: String {get}
     
-    init(client: SocketEngineClient, opts: NSDictionary?)
+    init(client: SocketEngineClient, options: NSDictionary?)
     
     func close()
     func open(opts: [String: AnyObject]?)

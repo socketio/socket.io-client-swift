@@ -42,7 +42,6 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
     private let handleQueue = dispatch_queue_create("com.socketio.engineHandleQueue", DISPATCH_QUEUE_SERIAL)
     private let logType = "SocketEngine"
     private let parseQueue = dispatch_queue_create("com.socketio.engineParseQueue", DISPATCH_QUEUE_SERIAL)
-    private let session: NSURLSession!
     private let workQueue = NSOperationQueue()
 
     private var closed = false
@@ -63,6 +62,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
     private var postWait = [String]()
     private var probing = false
     private var probeWait = ProbeWaitQueue()
+    private var session: NSURLSession!
     private var waitingForPoll = false
     private var waitingForPost = false
     private var websocketConnected = false
@@ -71,16 +71,33 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
     private(set) var polling = true
     private(set) var websocket = false
     
-    public init(client: SocketEngineClient, opts: NSDictionary?) {
+    init(client: SocketEngineClient, options: Set<SocketIOClientOption>) {
         self.client = client
-        session = NSURLSession(configuration: .defaultSessionConfiguration(),
-            delegate: opts?["sessionDelegate"] as? NSURLSessionDelegate,
-            delegateQueue: workQueue)
-        forceWebsockets = opts?["forceWebsockets"] as? Bool ?? false
-        forcePolling = opts?["forcePolling"] as? Bool ?? false
-        cookies = opts?["cookies"] as? [NSHTTPCookie]
-        socketPath = opts?["path"] as? String ?? ""
-        extraHeaders = opts?["extraHeaders"] as? [String: String]
+        for option in options {
+            switch option {
+            case .SessionDelegate(let delegate):
+                session = NSURLSession(configuration: .defaultSessionConfiguration(),
+                    delegate: delegate,
+                    delegateQueue: workQueue)
+            case .ForcePolling(let force):
+                forcePolling = force
+            case .ForceWebsockets(let force):
+                forceWebsockets = force
+            case .Cookies(let cookies):
+                self.cookies = cookies
+            case .Path(let path):
+                socketPath = path
+            case .ExtraHeaders(let headers):
+                extraHeaders = headers
+            default:
+                continue
+            }
+        }
+    }
+    
+    public convenience init(client: SocketEngineClient, options: NSDictionary?) {
+        self.init(client: client,
+            options: SocketIOClientOption.NSDictionaryToSocketOptionsSet(options ?? [:]))
     }
 
     deinit {

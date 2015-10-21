@@ -111,8 +111,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     private func addEngine() -> SocketEngine {
         Logger.log("Adding engine", type: logType)
 
-        let newEngine = SocketEngine(client: self, opts:
-            SocketIOClientOption.SocketOptionsSetToNSDictionary(options ?? []))
+        let newEngine = SocketEngine(client: self, options: options ?? [])
 
         engine = newEngine
         return newEngine
