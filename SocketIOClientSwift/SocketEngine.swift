@@ -93,6 +93,12 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
                 continue
             }
         }
+        
+        if session == nil {
+            session = NSURLSession(configuration: .defaultSessionConfiguration(),
+                delegate: nil,
+                delegateQueue: workQueue)
+        }
     }
     
     public convenience init(client: SocketEngineClient, options: NSDictionary?) {
