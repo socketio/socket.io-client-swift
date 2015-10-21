@@ -27,12 +27,4 @@ import Foundation
 
 @objc public enum SocketEnginePacketType: Int {
     case Open, Close, Ping, Pong, Message, Upgrade, Noop
-    
-    init?(str: String) {
-        if let value = Int(str), raw = SocketEnginePacketType(rawValue: value) {
-            self = raw
-        } else {
-            return nil
-        }
-    }
 }

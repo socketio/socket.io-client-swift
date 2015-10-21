@@ -487,7 +487,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
             return
         }
         
-        
         if reconnectAttempts != -1 && currentReconnectAttempt + 1 > reconnectAttempts || !reconnects {
             clearReconnectTimer()
             didDisconnect("Reconnect Failed")

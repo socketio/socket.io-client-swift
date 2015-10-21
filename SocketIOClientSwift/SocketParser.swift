@@ -63,7 +63,7 @@ class SocketParser {
     static func parseString(message: String) -> Either<String, SocketPacket> {
         var parser = SocketStringReader(message: message)
         
-        guard let type = SocketPacket.PacketType(str: parser.read(1)) else {
+        guard let type = SocketPacket.PacketType(rawValue: Int(parser.read(1)) ?? -1) else {
             return .Left("Invalid packet type")
         }
         

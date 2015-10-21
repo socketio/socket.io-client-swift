@@ -37,14 +37,6 @@ struct SocketPacket {
     
     enum PacketType: Int {
         case Connect, Disconnect, Event, Ack, Error, BinaryEvent, BinaryAck
-        
-        init?(str: String) {
-            if let int = Int(str), raw = PacketType(rawValue: int) {
-                self = raw
-            } else {
-                return nil
-            }
-        }
     }
     
     var args: [AnyObject]? {
