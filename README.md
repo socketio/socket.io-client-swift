@@ -69,7 +69,7 @@ Carthage
 -----------------
 Add this line to your `Cartfile`:
 ```
-github "socketio/socket.io-client-swift" ~> 4.0.3 # Or latest version
+github "socketio/socket.io-client-swift" ~> 4.0.4 # Or latest version
 ```
 
 Run `carthage update --platform ios,macosx`.
@@ -83,7 +83,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 platform :ios, '8.0'
 use_frameworks!
 
-pod 'Socket.IO-Client-Swift', '~> 4.0.3' # Or latest version
+pod 'Socket.IO-Client-Swift', '~> 4.0.4' # Or latest version
 ```
 
 Install pods:
@@ -111,7 +111,7 @@ CocoaSeeds
 Add this line to your `Seedfile`:
 
 ```
-github "socketio/socket.io-client-swift", "v4.0.3", :files => "SocketIOClientSwift/*.swift" # Or latest version
+github "socketio/socket.io-client-swift", "v4.0.4", :files => "SocketIOClientSwift/*.swift" # Or latest version
 ```
 
 Run `seed install`.
@@ -143,6 +143,7 @@ case SessionDelegate(NSURLSessionDelegate) // Sets an NSURLSessionDelegate for t
 case Path(String) // If the server uses a custom path. ex: `"/swift"`. Default is `""`
 case ExtraHeaders([String: String]) // Adds custom headers to the initial request. Default is nil.
 case HandleQueue(dispatch_queue_t) // The dispatch queue that handlers are run on. Default is the main queue.
+case VoipEnabled(Bool) // Only use this option if you're using the client with VoIP services. Changes the way the WebSocket is created. Default is false
 ```
 Methods
 -------

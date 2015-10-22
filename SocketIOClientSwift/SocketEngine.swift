@@ -63,6 +63,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
     private var probing = false
     private var probeWait = ProbeWaitQueue()
     private var session: NSURLSession!
+    private var voipEnabled = false
     private var waitingForPoll = false
     private var waitingForPost = false
     private var websocketConnected = false
@@ -71,8 +72,9 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
     private(set) var polling = true
     private(set) var websocket = false
     
-    init(client: SocketEngineClient, options: Set<SocketIOClientOption>) {
+    public init(client: SocketEngineClient, options: Set<SocketIOClientOption>) {
         self.client = client
+
         for option in options {
             switch option {
             case .SessionDelegate(let delegate):
@@ -89,6 +91,8 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
                 socketPath = path
             case .ExtraHeaders(let headers):
                 extraHeaders = headers
+            case .VoipEnabled(let enable):
+                voipEnabled = enable
             default:
                 continue
             }
@@ -217,6 +221,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
         }
 
         ws?.queue = handleQueue
+        ws?.voipEnabled = voipEnabled
         ws?.delegate = self
 
         if connect {

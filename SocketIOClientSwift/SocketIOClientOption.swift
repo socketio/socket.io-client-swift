@@ -39,6 +39,7 @@ public enum SocketIOClientOption: CustomStringConvertible, Hashable {
     case Path(String)
     case ExtraHeaders([String: String])
     case HandleQueue(dispatch_queue_t)
+    case VoipEnabled(Bool)
     
     public var description: String {
         if let label = Mirror(reflecting: self).children.first?.label {
@@ -82,6 +83,8 @@ public enum SocketIOClientOption: CustomStringConvertible, Hashable {
             return .ExtraHeaders(value as! [String: String])
         case "handleQueue" where value is dispatch_queue_t:
             return .HandleQueue(value as! dispatch_queue_t)
+        case "voipEnabled" where value is Bool:
+            return .VoipEnabled(value as! Bool)
         default:
             return nil
         }
