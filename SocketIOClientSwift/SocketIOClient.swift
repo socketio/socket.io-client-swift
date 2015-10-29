@@ -58,15 +58,16 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     Type safe way to create a new SocketIOClient. opts can be omitted
     */
     public init(var socketURL: String, options: Set<SocketIOClientOption>? = nil) {
+        self.options = options
+
         if socketURL["https://"].matches().count != 0 {
-            self.secure = true
+            self.options?.insertIgnore(.Secure(true))
         }
         
         socketURL = socketURL["http://"] ~= ""
         socketURL = socketURL["https://"] ~= ""
         
         self.socketURL = socketURL
-        self.options = options
         
         for option in options ?? [] {
             switch option {
