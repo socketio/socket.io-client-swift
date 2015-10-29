@@ -27,7 +27,7 @@ import Foundation
 public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
     public private(set) var sid = ""
     public private(set) var cookies: [NSHTTPCookie]?
-    public private(set) var socketPath = ""
+    public private(set) var socketPath = "/engine.io"
     public private(set) var urlPolling = ""
     public private(set) var urlWebSocket = ""
     public private(set) var ws: WebSocket?
@@ -42,6 +42,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
     private let handleQueue = dispatch_queue_create("com.socketio.engineHandleQueue", DISPATCH_QUEUE_SERIAL)
     private let logType = "SocketEngine"
     private let parseQueue = dispatch_queue_create("com.socketio.engineParseQueue", DISPATCH_QUEUE_SERIAL)
+    private let url: String
     private let workQueue = NSOperationQueue()
 
     private var closed = false
@@ -62,6 +63,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
     private var postWait = [String]()
     private var probing = false
     private var probeWait = ProbeWaitQueue()
+    private var secure = false
     private var session: NSURLSession!
     private var voipEnabled = false
     private var waitingForPoll = false
@@ -72,8 +74,9 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
     private(set) var polling = true
     private(set) var websocket = false
     
-    public init(client: SocketEngineClient, options: Set<SocketIOClientOption>) {
+    public init(client: SocketEngineClient, url: String, options: Set<SocketIOClientOption>) {
         self.client = client
+        self.url = url
 
         for option in options {
             switch option {
@@ -93,6 +96,8 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
                 extraHeaders = headers
             case .VoipEnabled(let enable):
                 voipEnabled = enable
+            case .Secure(let secure):
+                self.secure = secure
             default:
                 continue
             }
@@ -105,8 +110,8 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
         }
     }
     
-    public convenience init(client: SocketEngineClient, options: NSDictionary?) {
-        self.init(client: client,
+    public convenience init(client: SocketEngineClient, url: String, options: NSDictionary?) {
+        self.init(client: client, url: url,
             options: SocketIOClientOption.NSDictionaryToSocketOptionsSet(options ?? [:]))
     }
 
@@ -167,17 +172,16 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
             return ("", "")
         }
 
-        let path = socketPath == "" ? "/socket.io" : socketPath
-        let url = "\(client!.socketURL)\(path)/?transport="
+        let socketURL = "\(url)\(socketPath)/?transport="
         var urlPolling: String
         var urlWebSocket: String
 
-        if client!.secure {
-            urlPolling = "https://" + url + "polling"
-            urlWebSocket = "wss://" + url + "websocket"
+        if secure {
+            urlPolling = "https://" + socketURL + "polling"
+            urlWebSocket = "wss://" + socketURL + "websocket"
         } else {
-            urlPolling = "http://" + url + "polling"
-            urlWebSocket = "ws://" + url + "websocket"
+            urlPolling = "http://" + socketURL + "polling"
+            urlWebSocket = "ws://" + socketURL + "websocket"
         }
 
         if params != nil {

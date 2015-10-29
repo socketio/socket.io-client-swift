@@ -15,7 +15,7 @@ class SocketEngineTest: XCTestCase {
     override func setUp() {
         super.setUp()
         client = SocketIOClient(socketURL: "")
-        engine = SocketEngine(client: client, options: nil)
+        engine = SocketEngine(client: client, url: "", options: nil)
         
         client.setTestable()
     }

@@ -24,21 +24,24 @@
 
 import Foundation
 
-public enum SocketIOClientOption: CustomStringConvertible, Hashable {
+protocol ClientOptions {}
+
+public enum SocketIOClientOption: CustomStringConvertible, Hashable, ClientOptions {
     case ConnectParams([String: AnyObject])
+    case Cookies([NSHTTPCookie])
+    case ExtraHeaders([String: String])
+    case ForcePolling(Bool)
+    case ForceWebsockets(Bool)
+    case HandleQueue(dispatch_queue_t)
+    case Log(Bool)
+    case Logger(SocketLogger)
+    case Nsp(String)
+    case Path(String)
     case Reconnects(Bool)
     case ReconnectAttempts(Int)
     case ReconnectWait(Int)
-    case ForcePolling(Bool)
-    case ForceWebsockets(Bool)
-    case Nsp(String)
-    case Cookies([NSHTTPCookie])
-    case Log(Bool)
-    case Logger(SocketLogger)
+    case Secure(Bool)
     case SessionDelegate(NSURLSessionDelegate)
-    case Path(String)
-    case ExtraHeaders([String: String])
-    case HandleQueue(dispatch_queue_t)
     case VoipEnabled(Bool)
     
     public var description: String {
@@ -85,6 +88,8 @@ public enum SocketIOClientOption: CustomStringConvertible, Hashable {
             return .HandleQueue(value as! dispatch_queue_t)
         case "voipEnabled" where value is Bool:
             return .VoipEnabled(value as! Bool)
+        case "secure" where value is Bool:
+            return .Secure(value as! Bool)
         default:
             return nil
         }
@@ -119,4 +124,18 @@ public enum SocketIOClientOption: CustomStringConvertible, Hashable {
 
 public func ==(lhs: SocketIOClientOption, rhs: SocketIOClientOption) -> Bool {
     return lhs.description == rhs.description
+}
+
+extension Set where Element: ClientOptions {
+    mutating func insertIgnore(element: Element) {
+        let (insertType, _) = Mirror(reflecting: element).children.first!
+        for item in self {
+            let (name, _) = Mirror(reflecting: item).children.first!
+            if insertType == name {
+                return
+            }
+        }
+        
+        self.insert(element)
+    }
 }

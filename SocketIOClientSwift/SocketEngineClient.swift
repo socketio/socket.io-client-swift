@@ -26,9 +26,6 @@
 import Foundation
 
 @objc public protocol SocketEngineClient {
-    var socketURL: String {get}
-    var secure: Bool {get}
-    
     func didError(reason: AnyObject)
     func engineDidClose(reason: String)
     func parseSocketMessage(msg: String)

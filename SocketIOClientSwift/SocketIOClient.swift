@@ -91,6 +91,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
             }
         }
         
+        self.options?.insertIgnore(.Path("/socket.io"))
+        
         super.init()
     }
     
@@ -111,7 +113,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     private func addEngine() -> SocketEngine {
         Logger.log("Adding engine", type: logType)
 
-        let newEngine = SocketEngine(client: self, options: options ?? [])
+        let newEngine = SocketEngine(client: self, url: socketURL, options: options ?? [])
 
         engine = newEngine
         return newEngine
