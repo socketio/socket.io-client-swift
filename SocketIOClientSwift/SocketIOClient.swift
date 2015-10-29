@@ -347,9 +347,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
             Logger.log("Handling event: %@ with data: %@", type: logType, args: event, data ?? "")
             
             dispatch_async(handleQueue) {
-                if self.anyHandler != nil {
-                    self.anyHandler?(SocketAnyEvent(event: event, items: data))
-                }
+                self.anyHandler?(SocketAnyEvent(event: event, items: data))
                 
                 for handler in self.handlers where handler.event == event {
                     if let ack = ack {
