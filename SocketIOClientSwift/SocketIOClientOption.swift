@@ -24,9 +24,11 @@
 
 import Foundation
 
-protocol ClientOptions {}
+protocol ClientOption: CustomStringConvertible, Hashable {
+    func getSocketIOOptionValue() -> AnyObject?
+}
 
-public enum SocketIOClientOption: CustomStringConvertible, Hashable, ClientOptions {
+public enum SocketIOClientOption: ClientOption {
     case ConnectParams([String: AnyObject])
     case Cookies([NSHTTPCookie])
     case ExtraHeaders([String: String])
@@ -98,35 +100,13 @@ public enum SocketIOClientOption: CustomStringConvertible, Hashable, ClientOptio
     func getSocketIOOptionValue() -> AnyObject? {
        return Mirror(reflecting: self).children.first?.value as? AnyObject
     }
-    
-    static func NSDictionaryToSocketOptionsSet(dict: NSDictionary) -> Set<SocketIOClientOption> {
-        var options = Set<SocketIOClientOption>()
-                
-        for (rawKey, value) in dict {
-            if let key = rawKey as? String, opt = keyValueToSocketIOClientOption(key, value: value) {
-                options.insert(opt)
-            }
-        }
-        
-        return options
-    }
-    
-    static func SocketOptionsSetToNSDictionary(set: Set<SocketIOClientOption>) -> NSDictionary {
-        let options = NSMutableDictionary()
-        
-        for option in set {
-            options[option.description] = option.getSocketIOOptionValue()
-        }
-        
-        return options
-    }
 }
 
 public func ==(lhs: SocketIOClientOption, rhs: SocketIOClientOption) -> Bool {
     return lhs.description == rhs.description
 }
 
-extension Set where Element: ClientOptions {
+extension Set where Element: ClientOption {
     mutating func insertIgnore(element: Element) {
         let (insertType, _) = Mirror(reflecting: element).children.first!
         for item in self {
@@ -137,5 +117,27 @@ extension Set where Element: ClientOptions {
         }
         
         self.insert(element)
+    }
+    
+    static func NSDictionaryToSocketOptionsSet(dict: NSDictionary) -> Set<SocketIOClientOption> {
+        var options = Set<SocketIOClientOption>()
+        
+        for (rawKey, value) in dict {
+            if let key = rawKey as? String, opt = SocketIOClientOption.keyValueToSocketIOClientOption(key, value: value) {
+                options.insert(opt)
+            }
+        }
+        
+        return options
+    }
+    
+    func SocketOptionsSetToNSDictionary() -> NSDictionary {
+        let options = NSMutableDictionary()
+        
+        for option in self {
+            options[option.description] = option.getSocketIOOptionValue()
+        }
+        
+        return options
     }
 }

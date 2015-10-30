@@ -112,7 +112,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
     
     public convenience init(client: SocketEngineClient, url: String, options: NSDictionary?) {
         self.init(client: client, url: url,
-            options: SocketIOClientOption.NSDictionaryToSocketOptionsSet(options ?? [:]))
+            options: Set<SocketIOClientOption>.NSDictionaryToSocketOptionsSet(options ?? [:]))
     }
 
     deinit {
@@ -210,7 +210,6 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
         let wsUrl = urlWebSocket + (sid == "" ? "" : "&sid=\(sid)")
 
         ws = WebSocket(url: NSURL(string: wsUrl)!)
-
         if cookies != nil {
             let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies!)
             for (key, value) in headers {
