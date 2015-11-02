@@ -12,6 +12,7 @@ Pod::Spec.new do |s|
   s.author       = { "Erik" => "nuclear.ace@gmail.com" }
   s.ios.deployment_target = '8.0'
   s.osx.deployment_target = '10.10'
+  s.tvos.deployment_target = '9.0'
   s.source       = { :git => "https://github.com/socketio/socket.io-client-swift.git", :tag => 'v4.1.0' }
   s.source_files  = "SocketIOClientSwift/**/*.swift"
   s.requires_arc = true
