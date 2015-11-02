@@ -32,7 +32,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     public private(set) var status = SocketIOClientStatus.NotConnected
     
     public var nsp = "/"
-    public var options: Set<SocketIOClientOption>?
+    public var options: Set<SocketIOClientOption>
     public var reconnects = true
     public var reconnectWait = 10
     public var sid: String? {
@@ -59,11 +59,11 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     /**
      Type safe way to create a new SocketIOClient. opts can be omitted
      */
-    public init(var socketURL: String, options: Set<SocketIOClientOption>? = nil) {
+    public init(var socketURL: String, options: Set<SocketIOClientOption> = []) {
         self.options = options
         
         if socketURL["https://"].matches().count != 0 {
-            self.options?.insertIgnore(.Secure(true))
+            self.options.insertIgnore(.Secure(true))
         }
         
         socketURL = socketURL["http://"] ~= ""
@@ -94,7 +94,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
             }
         }
         
-        self.options?.insertIgnore(.Path("/socket.io"))
+        self.options.insertIgnore(.Path("/socket.io"))
         
         super.init()
     }
