@@ -298,7 +298,7 @@ private extension SocketPacket {
             if data[i] is NSArray || data[i] is NSDictionary {
                 data[i] = shred(data[i], binary: &binary)
             } else if let bin = data[i] as? NSData {
-                data[i] = ["_placeholder" :true, "num": binary.count]
+                data[i] = ["_placeholder": true, "num": binary.count]
                 binary.append(bin)
             }
         }
