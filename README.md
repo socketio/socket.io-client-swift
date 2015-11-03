@@ -120,7 +120,7 @@ Run `seed install`.
 ##API
 Constructors
 -----------
-`init(var socketURL: String, options: Set<SocketIOClientOption>? = nil)` - Creates a new SocketIOClient. opts is a Set of SocketIOClientOption. If your socket.io server is secure, you need to specify `https` in your socketURL.
+`init(var socketURL: String, options: Set<SocketIOClientOption> = [])` - Creates a new SocketIOClient. opts is a Set of SocketIOClientOption. If your socket.io server is secure, you need to specify `https` in your socketURL.
 
 `convenience init(socketURL: String, options: NSDictionary?)` - Same as above, but meant for Objective-C. See Options on how convert between SocketIOClientOptions and dictionary keys.
 
