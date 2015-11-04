@@ -109,7 +109,8 @@ struct SocketPacket {
                     
                     message += jsonString! as String + ","
                 } catch {
-                    Logger.error("Error creating JSON object in SocketPacket.completeMessage", type: SocketPacket.logType)
+                    DefaultSocketLogger.Logger.error("Error creating JSON object in SocketPacket.completeMessage",
+                        type: SocketPacket.logType)
                 }
             } else if var str = arg as? String {
                 str = str["\n"] ~= "\\\\n"

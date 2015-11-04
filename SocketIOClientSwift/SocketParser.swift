@@ -56,7 +56,7 @@ class SocketParser {
         case .Error:
             socket.didError(pack.data)
         default:
-            Logger.log("Got invalid packet: %@", type: "SocketParser", args: pack.description)
+            DefaultSocketLogger.Logger.log("Got invalid packet: %@", type: "SocketParser", args: pack.description)
         }
     }
     
@@ -143,20 +143,20 @@ class SocketParser {
     static func parseSocketMessage(message: String, socket: SocketIOClient) {
         guard !message.isEmpty else { return }
         
-        Logger.log("Parsing %@", type: "SocketParser", args: message)
+        DefaultSocketLogger.Logger.log("Parsing %@", type: "SocketParser", args: message)
         
         switch parseString(message) {
         case .Left(let err):
-            Logger.error("\(err): %@", type: "SocketParser", args: message)
+            DefaultSocketLogger.Logger.error("\(err): %@", type: "SocketParser", args: message)
         case .Right(let pack):
-            Logger.log("Decoded packet as: %@", type: "SocketParser", args: pack.description)
+            DefaultSocketLogger.Logger.log("Decoded packet as: %@", type: "SocketParser", args: pack.description)
             handlePacket(pack, withSocket: socket)
         }
     }
     
     static func parseBinaryData(data: NSData, socket: SocketIOClient) {
         guard !socket.waitingData.isEmpty else {
-            Logger.error("Got data when not remaking packet", type: "SocketParser")
+            DefaultSocketLogger.Logger.error("Got data when not remaking packet", type: "SocketParser")
             return
         }
         

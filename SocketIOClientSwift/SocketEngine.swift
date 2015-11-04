@@ -116,7 +116,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
     }
 
     deinit {
-        Logger.log("Engine is being deinit", type: logType)
+        DefaultSocketLogger.Logger.log("Engine is being deinit", type: logType)
         closed = true
         stopPolling()
     }
@@ -135,7 +135,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
     }
 
     public func close() {
-        Logger.log("Engine is being closed.", type: logType)
+        DefaultSocketLogger.Logger.log("Engine is being closed.", type: logType)
 
         pingTimer?.invalidate()
         closed = true
@@ -234,7 +234,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
 
     private func doFastUpgrade() {
         if waitingForPoll {
-            Logger.error("Outstanding poll when switched to WebSockets," +
+            DefaultSocketLogger.Logger.error("Outstanding poll when switched to WebSockets," +
                 "we'll probably disconnect soon. You should report this.", type: logType)
         }
 
@@ -247,7 +247,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
     }
 
     private func flushProbeWait() {
-        Logger.log("Flushing probe wait", type: logType)
+        DefaultSocketLogger.Logger.log("Flushing probe wait", type: logType)
 
         dispatch_async(emitQueue) {[weak self] in
             if let this = self {
@@ -305,7 +305,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
                 }
             }
         } catch {
-            Logger.error("Error parsing open packet", type: logType)
+            DefaultSocketLogger.Logger.error("Error parsing open packet", type: logType)
             return
         }
 
@@ -341,14 +341,14 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
 
     public func open(opts: [String: AnyObject]? = nil) {
         if connected {
-            Logger.error("Tried to open while connected", type: logType)
+            DefaultSocketLogger.Logger.error("Tried to open while connected", type: logType)
             client?.didError("Tried to open while connected")
 
             return
         }
 
-        Logger.log("Starting engine", type: logType)
-        Logger.log("Handshaking", type: logType)
+        DefaultSocketLogger.Logger.log("Starting engine", type: logType)
+        DefaultSocketLogger.Logger.log("Handshaking", type: logType)
 
         closed = false
 
@@ -378,12 +378,12 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
     }
 
     private func parseEngineData(data: NSData) {
-        Logger.log("Got binary data: %@", type: "SocketEngine", args: data)
+        DefaultSocketLogger.Logger.log("Got binary data: %@", type: "SocketEngine", args: data)
         client?.parseBinaryData(data.subdataWithRange(NSMakeRange(1, data.length - 1)))
     }
 
     private func parseEngineMessage(var message: String, fromPolling: Bool) {
-        Logger.log("Got message: %@", type: logType, args: message)
+        DefaultSocketLogger.Logger.log("Got message: %@", type: logType, args: message)
 
         let type = SocketEnginePacketType(rawValue: Int((message["^(\\d)"].groups()?[1]) ?? "") ?? -1) ?? {
             self.checkIfMessageIsBase64Binary(message)
@@ -408,7 +408,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
         case .Close:
             handleClose()
         default:
-            Logger.log("Got unknown packet type", type: logType)
+            DefaultSocketLogger.Logger.log("Got unknown packet type", type: logType)
         }
     }
 
@@ -454,7 +454,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
 
     private func upgradeTransport() {
         if websocketConnected {
-            Logger.log("Upgrading transport to WebSockets", type: logType)
+            DefaultSocketLogger.Logger.log("Upgrading transport to WebSockets", type: logType)
 
             fastUpgrade = true
             sendPollMessage("", withType: .Noop)
@@ -469,11 +469,11 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
         dispatch_async(emitQueue) {
             if self.connected {
                 if self.websocket {
-                    Logger.log("Writing ws: %@ has data: %@", type: self.logType, args: msg,
+                    DefaultSocketLogger.Logger.log("Writing ws: %@ has data: %@", type: self.logType, args: msg,
                         data == nil ? false : true)
                     self.sendWebSocketMessage(msg, withType: type, datas: data)
                 } else {
-                    Logger.log("Writing poll: %@ has data: %@", type: self.logType, args: msg,
+                    DefaultSocketLogger.Logger.log("Writing poll: %@ has data: %@", type: self.logType, args: msg,
                         data == nil ? false : true)
                     self.sendPollMessage(msg, withType: type, datas: data)
                 }
@@ -512,7 +512,7 @@ extension SocketEngine {
                 return
             }
             
-            Logger.log("Doing polling request", type: logType)
+            DefaultSocketLogger.Logger.log("Doing polling request", type: logType)
             
             req.cachePolicy = .ReloadIgnoringLocalAndRemoteCacheData
             session.dataTaskWithRequest(req, completionHandler: callback).resume()
@@ -525,12 +525,12 @@ extension SocketEngine {
                     if this.polling {
                         this.handlePollingFailed(err?.localizedDescription ?? "Error")
                     } else {
-                        Logger.error(err?.localizedDescription ?? "Error", type: this.logType)
+                        DefaultSocketLogger.Logger.error(err?.localizedDescription ?? "Error", type: this.logType)
                     }
                     return
                 }
                 
-                Logger.log("Got polling response", type: this.logType)
+                DefaultSocketLogger.Logger.log("Got polling response", type: this.logType)
                 
                 if let str = NSString(data: data!, encoding: NSUTF8StringEncoding) as? String {
                     dispatch_async(this.parseQueue) {[weak this] in
@@ -585,7 +585,7 @@ extension SocketEngine {
         
         waitingForPost = true
         
-        Logger.log("POSTing: %@", type: logType, args: postStr)
+        DefaultSocketLogger.Logger.log("POSTing: %@", type: logType, args: postStr)
         
         doRequest(req) {[weak self] data, res, err in
             if let this = self {
@@ -593,7 +593,7 @@ extension SocketEngine {
                     this.handlePollingFailed(err?.localizedDescription ?? "Error")
                     return
                 } else if err != nil {
-                    Logger.error(err?.localizedDescription ?? "Error", type: this.logType)
+                    DefaultSocketLogger.Logger.error(err?.localizedDescription ?? "Error", type: this.logType)
                     return
                 }
                 
@@ -648,7 +648,7 @@ extension SocketEngine {
     /// Only call on emitQueue
     private func sendPollMessage(var msg: String, withType type: SocketEnginePacketType,
         datas:[NSData]? = nil) {
-            Logger.log("Sending poll: %@ as type: %@", type: logType, args: msg, type.rawValue)
+            DefaultSocketLogger.Logger.log("Sending poll: %@ as type: %@", type: logType, args: msg, type.rawValue)
             
             doubleEncodeUTF8(&msg)
             let strMsg = "\(type.rawValue)\(msg)"
@@ -678,7 +678,7 @@ extension SocketEngine {
     /// Only call on emitQueue
     private func sendWebSocketMessage(str: String, withType type: SocketEnginePacketType,
         datas:[NSData]? = nil) {
-            Logger.log("Sending ws: %@ as type: %@", type: logType, args: str, type.rawValue)
+            DefaultSocketLogger.Logger.log("Sending ws: %@ as type: %@", type: logType, args: str, type.rawValue)
             
             ws?.writeString("\(type.rawValue)\(str)")
             
