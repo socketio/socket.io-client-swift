@@ -254,6 +254,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
      */
     public func emit(event: String, withItems items: [AnyObject]) {
         guard status == .Connected else {
+            handleEvent("error", data: ["Tried emitting \(event) when not connected"], isInternalMessage: true)
             return
         }
         
@@ -279,6 +280,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     
     private func _emit(data: [AnyObject], ack: Int? = nil) {
         guard status == .Connected else {
+            handleEvent("error", data: ["Tried emitting when not connected"], isInternalMessage: true)
             return
         }
         
@@ -339,7 +341,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
      Causes an event to be handled. Only use if you know what you're doing.
      */
     public func handleEvent(event: String, data: [AnyObject], isInternalMessage: Bool,
-        wantsAck ack: Int? = nil) {
+        withAck ack: Int? = nil) {
             guard status == .Connected || isInternalMessage else {
                 return
             }

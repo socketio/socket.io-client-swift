@@ -42,7 +42,7 @@ class SocketParser {
         switch pack.type {
         case .Event where isCorrectNamespace(pack.nsp, socket):
             socket.handleEvent(pack.event, data: pack.args ?? [],
-                isInternalMessage: false, wantsAck: pack.id)
+                isInternalMessage: false, withAck: pack.id)
         case .Ack where isCorrectNamespace(pack.nsp, socket):
             socket.handleAck(pack.id, data: pack.data)
         case .BinaryEvent where isCorrectNamespace(pack.nsp, socket):
@@ -170,7 +170,7 @@ class SocketParser {
         
         if packet.type != .BinaryAck {
             socket.handleEvent(packet.event, data: packet.args ?? [],
-                isInternalMessage: false, wantsAck: packet.id)
+                isInternalMessage: false, withAck: packet.id)
         } else {
             socket.handleAck(packet.id, data: packet.args)
         }

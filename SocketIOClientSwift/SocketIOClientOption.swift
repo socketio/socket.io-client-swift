@@ -124,7 +124,7 @@ extension Set where Element: ClientOption {
         
         for (rawKey, value) in dict {
             if let key = rawKey as? String, opt = SocketIOClientOption.keyValueToSocketIOClientOption(key, value: value) {
-                options.insert(opt)
+                options.insertIgnore(opt)
             }
         }
         
