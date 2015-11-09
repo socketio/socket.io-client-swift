@@ -341,7 +341,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
      Causes an event to be handled. Only use if you know what you're doing.
      */
     public func handleEvent(event: String, data: [AnyObject], isInternalMessage: Bool,
-        withAck ack: Int? = nil) {
+        withAck ack: Int = -1) {
             guard status == .Connected || isInternalMessage else {
                 return
             }
@@ -352,11 +352,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
                 self.anyHandler?(SocketAnyEvent(event: event, items: data))
                 
                 for handler in self.handlers where handler.event == event {
-                    if let ack = ack {
-                        handler.executeCallback(data, withAck: ack, withSocket: self)
-                    } else {
-                        handler.executeCallback(data, withAck: ack, withSocket: self)
-                    }
+                    handler.executeCallback(data, withAck: ack, withSocket: self)
                 }
             }
             
@@ -406,7 +402,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     public func on(event: String, callback: NormalCallback) {
         DefaultSocketLogger.Logger.log("Adding handler for event: %@", type: logType, args: event)
         
-        let handler = SocketEventHandler(event: event, callback: callback)
+        let handler = SocketEventHandler(event: event, id: NSUUID(), callback: callback)
         handlers.append(handler)
     }
     
