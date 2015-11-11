@@ -24,16 +24,12 @@
 
 import Foundation
 
-private func emitAckCallback(socket: SocketIOClient, num: Int) -> SocketAckEmitter? {
-    return num != -1 ? SocketAckEmitter(socket: socket, ackNum: num) : nil
-}
-
 struct SocketEventHandler {
     let event: String
     let id: NSUUID
     let callback: NormalCallback
     
-    func executeCallback(items: [AnyObject], withAck ack: Int = -1, withSocket socket: SocketIOClient) {
-                self.callback(items, emitAckCallback(socket, num: ack))
+    func executeCallback(items: [AnyObject], withAck ack: Int, withSocket socket: SocketIOClient) {
+        self.callback(items, SocketAckEmitter(socket: socket, ackNum: ack))
     }
 }
