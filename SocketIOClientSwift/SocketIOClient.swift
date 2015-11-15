@@ -28,7 +28,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     public let socketURL: String
     
     public private(set) var engine: SocketEngineSpec?
-    public private(set) var secure = false
     public private(set) var status = SocketIOClientStatus.NotConnected
     
     public var nsp = "/"
