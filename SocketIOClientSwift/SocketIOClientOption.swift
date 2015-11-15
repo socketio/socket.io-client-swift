@@ -108,15 +108,9 @@ public func ==(lhs: SocketIOClientOption, rhs: SocketIOClientOption) -> Bool {
 
 extension Set where Element: ClientOption {
     mutating func insertIgnore(element: Element) {
-        let (insertType, _) = Mirror(reflecting: element).children.first!
-        for item in self {
-            let (name, _) = Mirror(reflecting: item).children.first!
-            if insertType == name {
-                return
-            }
+        if !contains({$0.description == element.description}) {
+            insert(element)
         }
-        
-        self.insert(element)
     }
     
     static func NSDictionaryToSocketOptionsSet(dict: NSDictionary) -> Set<SocketIOClientOption> {
