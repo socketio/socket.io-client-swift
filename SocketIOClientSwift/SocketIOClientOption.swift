@@ -108,7 +108,7 @@ public func ==(lhs: SocketIOClientOption, rhs: SocketIOClientOption) -> Bool {
 
 extension Set where Element: ClientOption {
     mutating func insertIgnore(element: Element) {
-        if !contains({$0.description == element.description}) {
+        if !contains(element) {
             insert(element)
         }
     }
