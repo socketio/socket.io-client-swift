@@ -45,7 +45,7 @@ struct SocketPacket {
         if data.count == 0 {
             return nil
         } else {
-            if type == PacketType.Event || type == PacketType.BinaryEvent {
+            if type == .Event || type == .BinaryEvent {
                 arr.removeAtIndex(0)
                 return arr
             } else {

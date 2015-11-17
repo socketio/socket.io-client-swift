@@ -44,7 +44,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     
     private var anyHandler: ((SocketAnyEvent) -> Void)?
     private var currentReconnectAttempt = 0
-    private var handlers = ContiguousArray<SocketEventHandler>()
+    private var handlers = [SocketEventHandler]()
     private var connectParams: [String: AnyObject]?
     private var reconnectTimer: NSTimer?
     private var ackHandlers = SocketAckManager()
@@ -288,11 +288,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         
         DefaultSocketLogger.Logger.log("Emitting: %@", type: logType, args: str)
         
-        if packet.type == .BinaryEvent {
-            engine?.send(str, withData: packet.binary)
-        } else {
-            engine?.send(str, withData: nil)
-        }
+        engine?.send(str, withData: packet.binary)
     }
     
     // If the server wants to know that the client received data
@@ -304,12 +300,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
                 
                 DefaultSocketLogger.Logger.log("Emitting Ack: %@", type: self.logType, args: str)
                 
-                if packet.type == SocketPacket.PacketType.BinaryAck {
-                    self.engine?.send(str, withData: packet.binary)
-                } else {
-                    self.engine?.send(str, withData: nil)
-                }
-                
+                self.engine?.send(str, withData: packet.binary)
             }
         }
     }
@@ -362,7 +353,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
      */
     public func leaveNamespace() {
         if nsp != "/" {
-            engine?.send("1\(nsp)", withData: nil)
+            engine?.send("1\(nsp)", withData: [])
             nsp = "/"
         }
     }
@@ -374,7 +365,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         DefaultSocketLogger.Logger.log("Joining namespace", type: logType)
         
         if nsp != "/" {
-            engine?.send("0\(nsp)", withData: nil)
+            engine?.send("0\(nsp)", withData: [])
         }
     }
     
@@ -392,7 +383,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     public func off(event: String) {
         DefaultSocketLogger.Logger.log("Removing handler for event: %@", type: logType, args: event)
         
-        handlers = ContiguousArray(handlers.filter { $0.event != event })
+        handlers = handlers.filter { $0.event != event }
     }
     
     /**
@@ -415,7 +406,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         
         let handler = SocketEventHandler(event: event, id: id) {[weak self] data, ack in
             guard let this = self else {return}
-            this.handlers = ContiguousArray(this.handlers.filter {$0.id != id})
+            this.handlers = this.handlers.filter {$0.id != id}
             callback(data, ack)
         }
         

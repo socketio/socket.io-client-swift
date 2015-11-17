@@ -37,6 +37,6 @@ import Foundation
     
     func close()
     func open(opts: [String: AnyObject]?)
-    func send(msg: String, withData datas: [NSData]?)
-    func write(msg: String, withType type: SocketEnginePacketType, withData data: [NSData]?)
+    func send(msg: String, withData datas: [NSData])
+    func write(msg: String, withType type: SocketEnginePacketType, withData data: [NSData])
 }

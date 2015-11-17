@@ -30,6 +30,6 @@ struct SocketEventHandler {
     let callback: NormalCallback
     
     func executeCallback(items: [AnyObject], withAck ack: Int, withSocket socket: SocketIOClient) {
-        self.callback(items, SocketAckEmitter(socket: socket, ackNum: ack))
+        callback(items, SocketAckEmitter(socket: socket, ackNum: ack))
     }
 }
