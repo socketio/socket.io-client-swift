@@ -109,6 +109,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     
     deinit {
         DefaultSocketLogger.Logger.log("Client is being deinit", type: logType)
+        DefaultSocketLogger.Logger.log = false
         engine?.close()
     }
     
@@ -337,7 +338,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
             }
             
             DefaultSocketLogger.Logger.log("Handling event: %@ with data: %@", type: logType, args: event, data ?? "")
-            
+             
             dispatch_async(handleQueue) {
                 self.anyHandler?(SocketAnyEvent(event: event, items: data))
                 
