@@ -469,12 +469,12 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
         dispatch_async(emitQueue) {
             if self.connected {
                 if self.websocket {
-                    DefaultSocketLogger.Logger.log("Writing ws: %@ has data: %@", type: self.logType, args: msg,
-                        data.count == 0 ? false : true)
+                    DefaultSocketLogger.Logger.log("Writing ws: %@ has data: %@",
+                        type: self.logType, args: msg, data.count == 0)
                     self.sendWebSocketMessage(msg, withType: type, datas: data)
                 } else {
-                    DefaultSocketLogger.Logger.log("Writing poll: %@ has data: %@", type: self.logType, args: msg,
-                        data.count == 0 ? false : true)
+                    DefaultSocketLogger.Logger.log("Writing poll: %@ has data: %@",
+                        type: self.logType, args: msg, data.count == 0)
                     self.sendPollMessage(msg, withType: type, datas: data)
                 }
             }
