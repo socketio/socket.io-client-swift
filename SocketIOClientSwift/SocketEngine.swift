@@ -484,14 +484,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
 
 // Polling methods
 extension SocketEngine {
-    private func doPoll() {
-        if websocket || waitingForPoll || !connected || closed {
-            return
-        }
-        
-        waitingForPoll = true
-        let req = NSMutableURLRequest(URL: NSURL(string: urlPolling + "&sid=\(sid)&b64=1")!)
-        
+    private func addHeaders(req: NSMutableURLRequest) {
         if cookies != nil {
             let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies!)
             req.allHTTPHeaderFields = headers
@@ -502,6 +495,17 @@ extension SocketEngine {
                 req.setValue(value, forHTTPHeaderField: headerName)
             }
         }
+    }
+    
+    private func doPoll() {
+        if websocket || waitingForPoll || !connected || closed {
+            return
+        }
+        
+        waitingForPoll = true
+        let req = NSMutableURLRequest(URL: NSURL(string: urlPolling + "&sid=\(sid)&b64=1")!)
+        
+        addHeaders(req)
         
         doLongPoll(req)
     }
@@ -569,10 +573,7 @@ extension SocketEngine {
         
         let req = NSMutableURLRequest(URL: NSURL(string: urlPolling + "&sid=\(sid)")!)
         
-        if let cookies = cookies {
-            let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies)
-            req.allHTTPHeaderFields = headers
-        }
+        addHeaders(req)
         
         req.HTTPMethod = "POST"
         req.setValue("text/plain; charset=UTF-8", forHTTPHeaderField: "Content-Type")

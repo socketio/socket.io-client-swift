@@ -338,7 +338,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
             }
             
             DefaultSocketLogger.Logger.log("Handling event: %@ with data: %@", type: logType, args: event, data ?? "")
-             
+            
             dispatch_async(handleQueue) {
                 self.anyHandler?(SocketAnyEvent(event: event, items: data))
                 
