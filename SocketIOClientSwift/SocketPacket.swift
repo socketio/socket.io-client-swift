@@ -296,12 +296,7 @@ private extension SocketPacket {
         var binary = [NSData]()
         
         for i in 0..<data.count {
-            if data[i] is NSArray || data[i] is NSDictionary {
-                data[i] = shred(data[i], binary: &binary)
-            } else if let bin = data[i] as? NSData {
-                data[i] = ["_placeholder": true, "num": binary.count]
-                binary.append(bin)
-            }
+            data[i] = shred(data[i], binary: &binary)
         }
         
         return (data, binary)

@@ -121,7 +121,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
         stopPolling()
     }
 
-    private func checkIfMessageIsBase64Binary(var message: String) {
+    private func checkIfMessageIsBase64Binary(var message: String) -> Bool {
         if message.hasPrefix("b4") {
             // binary in base64 string
             message.removeRange(Range(start: message.startIndex,
@@ -131,6 +131,10 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
                 options: .IgnoreUnknownCharacters) {
                     client?.parseBinaryData(data)
             }
+            
+            return true
+        } else {
+            return false
         }
     }
 
@@ -384,11 +388,20 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
 
     private func parseEngineMessage(var message: String, fromPolling: Bool) {
         DefaultSocketLogger.Logger.log("Got message: %@", type: logType, args: message)
+        
+        func handleOther(msg: String) -> SocketEnginePacketType {
+            if checkIfMessageIsBase64Binary(msg) {
+                return .Noop
+            } else {
+                DefaultSocketLogger.Logger.error("Got message: %@", type: logType, args: msg)
+                return .Close
+            }
+        }
+        
+        let reader = SocketStringReader(message: message)
 
-        let type = SocketEnginePacketType(rawValue: Int((message["^(\\d)"].groups()?[1]) ?? "") ?? -1) ?? {
-            self.checkIfMessageIsBase64Binary(message)
-            return .Noop
-            }()
+        let type = SocketEnginePacketType(rawValue: Int(reader.currentCharacter) ?? -1)
+            ?? handleOther(message)
 
         if fromPolling && type != .Noop {
             fixDoubleUTF8(&message)
@@ -524,31 +537,31 @@ extension SocketEngine {
     
     private func doLongPoll(req: NSMutableURLRequest) {
         doRequest(req) {[weak self] data, res, err in
-            if let this = self {
-                if err != nil || data == nil {
-                    if this.polling {
-                        this.handlePollingFailed(err?.localizedDescription ?? "Error")
-                    } else {
-                        DefaultSocketLogger.Logger.error(err?.localizedDescription ?? "Error", type: this.logType)
-                    }
-                    return
+            guard let this = self else {return}
+            
+            if err != nil || data == nil {
+                if this.polling {
+                    this.handlePollingFailed(err?.localizedDescription ?? "Error")
+                } else {
+                    DefaultSocketLogger.Logger.error(err?.localizedDescription ?? "Error", type: this.logType)
                 }
-                
-                DefaultSocketLogger.Logger.log("Got polling response", type: this.logType)
-                
-                if let str = NSString(data: data!, encoding: NSUTF8StringEncoding) as? String {
-                    dispatch_async(this.parseQueue) {[weak this] in
-                        this?.parsePollingMessage(str)
-                    }
+                return
+            }
+            
+            DefaultSocketLogger.Logger.log("Got polling response", type: this.logType)
+            
+            if let str = NSString(data: data!, encoding: NSUTF8StringEncoding) as? String {
+                dispatch_async(this.parseQueue) {[weak this] in
+                    this?.parsePollingMessage(str)
                 }
-                
-                this.waitingForPoll = false
-                
-                if this.fastUpgrade {
-                    this.doFastUpgrade()
-                } else if !this.closed && this.polling {
-                    this.doPoll()
-                }
+            }
+            
+            this.waitingForPoll = false
+            
+            if this.fastUpgrade {
+                this.doFastUpgrade()
+            } else if !this.closed && this.polling {
+                this.doPoll()
             }
         }
     }
