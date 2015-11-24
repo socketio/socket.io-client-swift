@@ -34,7 +34,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
         //B-F reserved.
     }
     
-    enum CloseCode : UInt16 {
+    public enum CloseCode : UInt16 {
         case Normal                 = 1000
         case GoingAway              = 1001
         case ProtocolError          = 1002
@@ -46,6 +46,8 @@ public class WebSocket : NSObject, NSStreamDelegate {
         case PolicyViolated         = 1008
         case MessageTooBig          = 1009
     }
+    
+    public static let ErrorDomain = "WebSocket"
     
     enum InternalErrorCode : UInt16 {
         // 0-999 WebSocket status codes not used
@@ -138,9 +140,29 @@ public class WebSocket : NSObject, NSStreamDelegate {
             })
     }
     
-    ///disconnect from the websocket server
-    public func disconnect() {
-        writeError(CloseCode.Normal.rawValue)
+    /**
+     Disconnect from the server. I send a Close control frame to the server, then expect the server to respond with a Close control frame and close the socket from its end. I notify my delegate once the socket has been closed.
+     
+     If you supply a non-nil `forceTimeout`, I wait at most that long (in seconds) for the server to close the socket. After the timeout expires, I close the socket and notify my delegate.
+     
+     If you supply a zero (or negative) `forceTimeout`, I immediately close the socket (without sending a Close control frame) and notify my delegate.
+     
+     - Parameter forceTimeout: Maximum time to wait for the server to close the socket.
+     */
+    public func disconnect(forceTimeout forceTimeout: NSTimeInterval? = nil) {
+        switch forceTimeout {
+        case .Some(let seconds) where seconds > 0:
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(seconds * Double(NSEC_PER_SEC))), queue, { [unowned self] in
+                self.disconnectStream(nil)
+                })
+            fallthrough
+        case .None:
+            writeError(CloseCode.Normal.rawValue)
+            
+        default:
+            self.disconnectStream(nil)
+            break
+        }
     }
     
     ///write a string to the websocket. This sends it as a text frame.
@@ -400,9 +422,10 @@ public class WebSocket : NSObject, NSStreamDelegate {
         }
         if let cfHeaders = CFHTTPMessageCopyAllHeaderFields(response) {
             let headers = cfHeaders.takeRetainedValue() as NSDictionary
-            let acceptKey = headers[headerWSAcceptName] as! NSString
-            if acceptKey.length > 0 {
-                return true
+            if let acceptKey = headers[headerWSAcceptName] as? NSString {
+                if acceptKey.length > 0 {
+                    return true
+                }
             }
         }
         return false
@@ -632,7 +655,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
     private func errorWithDetail(detail: String, code: UInt16) -> NSError {
         var details = Dictionary<String,String>()
         details[NSLocalizedDescriptionKey] =  detail
-        return NSError(domain: "Websocket", code: Int(code), userInfo: details)
+        return NSError(domain: WebSocket.ErrorDomain, code: Int(code), userInfo: details)
     }
     
     ///write a an error to the socket

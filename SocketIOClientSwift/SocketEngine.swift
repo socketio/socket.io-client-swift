@@ -214,6 +214,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
         let wsUrl = urlWebSocket + (sid == "" ? "" : "&sid=\(sid)")
 
         ws = WebSocket(url: NSURL(string: wsUrl)!)
+        
         if cookies != nil {
             let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies!)
             for (key, value) in headers {
@@ -268,10 +269,8 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
         }
     }
 
-    private func handleClose() {
-        if let client = client where polling == true {
-            client.engineDidClose("Disconnect")
-        }
+    private func handleClose(reason: String) {
+        client?.engineDidClose(reason)
     }
 
     private func handleMessage(message: String) {
@@ -419,7 +418,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
             message.removeAtIndex(message.startIndex)
             handleOpen(message)
         case .Close:
-            handleClose()
+            handleClose(message)
         default:
             DefaultSocketLogger.Logger.log("Got unknown packet type", type: logType)
         }
@@ -540,11 +539,12 @@ extension SocketEngine {
             guard let this = self else {return}
             
             if err != nil || data == nil {
+                DefaultSocketLogger.Logger.error(err?.localizedDescription ?? "Error", type: this.logType)
+
                 if this.polling {
                     this.handlePollingFailed(err?.localizedDescription ?? "Error")
-                } else {
-                    DefaultSocketLogger.Logger.error(err?.localizedDescription ?? "Error", type: this.logType)
                 }
+                
                 return
             }
             
@@ -602,22 +602,24 @@ extension SocketEngine {
         DefaultSocketLogger.Logger.log("POSTing: %@", type: logType, args: postStr)
         
         doRequest(req) {[weak self] data, res, err in
-            if let this = self {
-                if err != nil && this.polling {
+            guard let this = self else {return}
+            
+            if err != nil {
+                DefaultSocketLogger.Logger.error(err?.localizedDescription ?? "Error", type: this.logType)
+                
+                if this.polling {
                     this.handlePollingFailed(err?.localizedDescription ?? "Error")
-                    return
-                } else if err != nil {
-                    DefaultSocketLogger.Logger.error(err?.localizedDescription ?? "Error", type: this.logType)
-                    return
                 }
                 
-                this.waitingForPost = false
-                
-                dispatch_async(this.emitQueue) {[weak this] in
-                    if !(this?.fastUpgrade ?? true) {
-                        this?.flushWaitingForPost()
-                        this?.doPoll()
-                    }
+                return
+            }
+            
+            this.waitingForPost = false
+            
+            dispatch_async(this.emitQueue) {[weak this] in
+                if !(this?.fastUpgrade ?? true) {
+                    this?.flushWaitingForPost()
+                    this?.doPoll()
                 }
             }
         }
