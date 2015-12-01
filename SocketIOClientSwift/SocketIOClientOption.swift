@@ -32,6 +32,7 @@ public enum SocketIOClientOption: ClientOption {
     case ConnectParams([String: AnyObject])
     case Cookies([NSHTTPCookie])
     case ExtraHeaders([String: String])
+    case ForceNew(Bool)
     case ForcePolling(Bool)
     case ForceWebsockets(Bool)
     case HandleQueue(dispatch_queue_t)
@@ -68,6 +69,8 @@ public enum SocketIOClientOption: ClientOption {
             return .ReconnectAttempts(value as! Int)
         case "reconnectWait" where value is Int:
             return .ReconnectWait(value as! Int)
+        case "forceNew" where value is Bool:
+            return .ForceNew(value as! Bool)
         case "forcePolling" where value is Bool:
             return .ForcePolling(value as! Bool)
         case "forceWebsockets" where value is Bool:
