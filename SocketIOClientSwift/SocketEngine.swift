@@ -333,6 +333,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
             }
         } catch {
             DefaultSocketLogger.Logger.error("Error parsing open packet", type: logType)
+            client?.didError("Error parsing open packet")
             return
         }
 
@@ -408,7 +409,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
             }
         }
 
-        doLongPoll(reqPolling)
+        doLongPoll(reqPolling, open: true)
     }
 
     private func parseEngineData(data: NSData) {
@@ -580,7 +581,7 @@ extension SocketEngine {
             session?.dataTaskWithRequest(req, completionHandler: callback).resume()
     }
     
-    private func doLongPoll(req: NSMutableURLRequest) {
+    private func doLongPoll(req: NSMutableURLRequest, open: Bool = false) {
         doRequest(req) {[weak self] data, res, err in
             guard let this = self else {return}
             
@@ -598,7 +599,11 @@ extension SocketEngine {
             
             if let str = NSString(data: data!, encoding: NSUTF8StringEncoding) as? String {
                 dispatch_async(this.parseQueue) {[weak this] in
-                    this?.parsePollingMessage(str)
+                    if open {
+                        this?.handleOpen(str)
+                    } else {
+                        this?.parsePollingMessage(str)
+                    }
                 }
             }
             
