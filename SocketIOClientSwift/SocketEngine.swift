@@ -140,7 +140,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
                     }
             }
         } catch {
-            DefaultSocketLogger.Logger.error("Got message: %@", type: logType, args: msg)
+            logAndError("Got unknown error from server")
         }
     }
 
