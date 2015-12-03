@@ -134,6 +134,7 @@ case Reconnects(Bool) // Whether to reconnect on server lose. Default is `true`
 case ReconnectAttempts(Int) // How many times to reconnect. Default is `-1` (infinite tries)
 case ReconnectWait(Int) // Amount of time to wait between reconnects. Default is `10`
 case ForcePolling(Bool) // `true` forces the client to use xhr-polling. Default is `false`
+case ForceNew(Bool) // Will a create a new engine for each connect. Useful if you find a bug in the engine related to reconnects
 case ForceWebsockets(Bool) // `true` forces the client to use WebSockets. Default is `false`
 case Nsp(String) // The namespace to connect to. Must begin with /. Default is `/`
 case Cookies([NSHTTPCookie]) // An array of NSHTTPCookies. Passed during the handshake. Default is nil.
@@ -145,6 +146,7 @@ case ExtraHeaders([String: String]) // Adds custom headers to the initial reques
 case HandleQueue(dispatch_queue_t) // The dispatch queue that handlers are run on. Default is the main queue.
 case VoipEnabled(Bool) // Only use this option if you're using the client with VoIP services. Changes the way the WebSocket is created. Default is false
 case Secure(Bool) // If the connection should use TLS. Default is false.
+
 ```
 Methods
 -------
