@@ -30,6 +30,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     public private(set) var engine: SocketEngineSpec?
     public private(set) var status = SocketIOClientStatus.NotConnected
     
+    public var forceNew = false
     public var nsp = "/"
     public var options: Set<SocketIOClientOption>
     public var reconnects = true
@@ -88,6 +89,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
                 DefaultSocketLogger.Logger = logger
             case .HandleQueue(let queue):
                 handleQueue = queue
+            case .ForceNew(let force):
+                forceNew = force
             default:
                 continue
             }
@@ -109,7 +112,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     
     deinit {
         DefaultSocketLogger.Logger.log("Client is being deinit", type: logType)
-        DefaultSocketLogger.Logger.log = false
         engine?.close()
     }
     
@@ -154,20 +156,20 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
             assert(timeoutAfter >= 0, "Invalid timeout: \(timeoutAfter)")
             
             guard status != .Connected else {
-                return
-            }
-            
-            if status == .Closed {
-                DefaultSocketLogger.Logger.log("Warning! This socket was previously closed. This might be dangerous!",
+                DefaultSocketLogger.Logger.log("Tried connecting on an already connected socket",
                     type: logType)
-            }
-            
-            status = SocketIOClientStatus.Connecting
-            addEngine().open(connectParams)
-            
-            guard timeoutAfter != 0 else {
                 return
             }
+            
+            status = .Connecting
+            
+            if engine == nil || forceNew {
+                addEngine().open(connectParams)
+            } else {
+                engine?.open(connectParams)
+            }
+            
+            guard timeoutAfter != 0 else { return }
             
             let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeoutAfter) * Int64(NSEC_PER_SEC))
             
