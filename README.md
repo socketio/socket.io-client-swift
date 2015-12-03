@@ -62,7 +62,7 @@ If you need Swift 1.1/Xcode 6.2 use v1.5.2. (Pre-Swift 1.2 support is no longer 
 
 Manually (iOS 7+)
 -----------------
-1. Copy the SocketIOClientSwift folder into your Xcode project. (Make sure you add the files to your target(s))
+1. Copy the Source folder into your Xcode project. (Make sure you add the files to your target(s))
 2. If you plan on using this from Objective-C, read [this](https://developer.apple.com/library/ios/documentation/Swift/Conceptual/BuildingCocoaApps/MixandMatch.html) on exposing Swift code to Objective-C.
 
 Carthage
