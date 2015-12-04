@@ -400,6 +400,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     
     /**
      Adds a handler for an event.
+     Returns: A unique id for the handler
      */
     public func on(event: String, callback: NormalCallback) -> NSUUID {
         DefaultSocketLogger.Logger.log("Adding handler for event: %@", type: logType, args: event)
@@ -412,6 +413,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     
     /**
      Adds a single-use handler for an event.
+     Returns: A unique id for the handler
      */
     public func once(event: String, callback: NormalCallback) -> NSUUID {
         DefaultSocketLogger.Logger.log("Adding once handler for event: %@", type: logType, args: event)
