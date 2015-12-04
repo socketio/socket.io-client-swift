@@ -28,8 +28,8 @@ import Foundation
 struct SocketPacket {
     private let placeholders: Int
     private var currentPlace = 0
-
-	private static let logType = "SocketPacket"
+    
+    private static let logType = "SocketPacket"
 
     let nsp: String
     let id: Int
