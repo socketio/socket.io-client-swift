@@ -390,38 +390,43 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     }
     
     /**
+    Removes a handler with the specified UUID gotten from an `on` or `once`
+    */
+    public func off(id id: NSUUID) {
+        DefaultSocketLogger.Logger.log("Removing handler with id: %@", type: logType, args: id)
+        
+        handlers = handlers.filter { $0.id != id }
+    }
+    
+    /**
      Adds a handler for an event.
      */
-    public func on(event: String, callback: NormalCallback) {
+    public func on(event: String, callback: NormalCallback) -> NSUUID {
         DefaultSocketLogger.Logger.log("Adding handler for event: %@", type: logType, args: event)
         
         let handler = SocketEventHandler(event: event, id: NSUUID(), callback: callback)
         handlers.append(handler)
+        
+        return handler.id
     }
     
     /**
      Adds a single-use handler for an event.
      */
-    public func once(event: String, callback: NormalCallback) {
+    public func once(event: String, callback: NormalCallback) -> NSUUID {
         DefaultSocketLogger.Logger.log("Adding once handler for event: %@", type: logType, args: event)
         
         let id = NSUUID()
         
         let handler = SocketEventHandler(event: event, id: id) {[weak self] data, ack in
             guard let this = self else {return}
-            this.handlers = this.handlers.filter {$0.id != id}
+            this.off(id: id)
             callback(data, ack)
         }
         
         handlers.append(handler)
-    }
-    
-    /**
-     Removes all handlers.
-     Can be used after disconnecting to break any potential remaining retain cycles.
-     */
-    public func removeAllHandlers() {
-        handlers.removeAll(keepCapacity: false)
+        
+        return handler.id
     }
     
     /**
@@ -455,6 +460,14 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
      */
     public func reconnect() {
         tryReconnect()
+    }
+    
+    /**
+     Removes all handlers.
+     Can be used after disconnecting to break any potential remaining retain cycles.
+     */
+    public func removeAllHandlers() {
+        handlers.removeAll(keepCapacity: false)
     }
     
     private func tryReconnect() {
@@ -495,6 +508,10 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
 
 // Test extensions
 extension SocketIOClient {
+    var testHandlers: [SocketEventHandler] {
+        return handlers
+    }
+    
     func setTestable() {
         status = .Connected
     }
