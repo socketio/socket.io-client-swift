@@ -57,6 +57,36 @@ class SocketSideEffectTest: XCTestCase {
         waitForExpectationsWithTimeout(3, handler: nil)
     }
     
+    func testHandleOnceEvent() {
+        let expectation = expectationWithDescription("handled event")
+        socket.once("test") {data, ack in
+            XCTAssertEqual(data[0] as? String, "hello world")
+            XCTAssertEqual(self.socket.testHandlers.count, 0)
+            expectation.fulfill()
+        }
+        
+        socket.parseSocketMessage("2[\"test\",\"hello world\"]")
+        waitForExpectationsWithTimeout(3, handler: nil)
+    }
+    
+    func testOffWithEvent() {
+        socket.on("test") {data, ack in }
+        XCTAssertEqual(socket.testHandlers.count, 1)
+        socket.on("test") {data, ack in }
+        XCTAssertEqual(socket.testHandlers.count, 2)
+        socket.off("test")
+        XCTAssertEqual(socket.testHandlers.count, 0)
+    }
+    
+    func testOffWithId() {
+        let handler = socket.on("test") {data, ack in }
+        XCTAssertEqual(socket.testHandlers.count, 1)
+        socket.on("test") {data, ack in }
+        XCTAssertEqual(socket.testHandlers.count, 2)
+        socket.off(id: handler)
+        XCTAssertEqual(socket.testHandlers.count, 1)
+    }
+    
     func testHandleBinaryEvent() {
         let expectation = expectationWithDescription("handled binary event")
         socket.on("test") {data, ack in
