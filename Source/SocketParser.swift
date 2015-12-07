@@ -60,6 +60,7 @@ class SocketParser {
         }
     }
     
+    /// Parses a messsage from the engine. Returning either a string error or a complete SocketPacket
     static func parseString(message: String) -> Either<String, SocketPacket> {
         var parser = SocketStringReader(message: message)
         
