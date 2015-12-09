@@ -67,6 +67,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
     private var probing = false
     private var probeWait = ProbeWaitQueue()
     private var secure = false
+    private var selfSigned = false
     private var session: NSURLSession?
     private var voipEnabled = false
     private var waitingForPoll = false
@@ -98,6 +99,8 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
                 voipEnabled = enable
             case .Secure(let secure):
                 self.secure = secure
+            case .SelfSigned(let selfSigned):
+                self.selfSigned = selfSigned
             default:
                 continue
             }
@@ -255,6 +258,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
         ws?.queue = handleQueue
         ws?.voipEnabled = voipEnabled
         ws?.delegate = self
+        ws?.selfSignedSSL = selfSigned
 
         if connect {
             ws?.connect()

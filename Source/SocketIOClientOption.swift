@@ -44,6 +44,7 @@ public enum SocketIOClientOption: ClientOption {
     case ReconnectAttempts(Int)
     case ReconnectWait(Int)
     case Secure(Bool)
+    case SelfSigned(Bool)
     case SessionDelegate(NSURLSessionDelegate)
     case VoipEnabled(Bool)
     
@@ -95,6 +96,8 @@ public enum SocketIOClientOption: ClientOption {
             return .VoipEnabled(enable)
         case ("secure", let secure as Bool):
             return .Secure(secure)
+        case ("selfSigned", let selfSigned as Bool):
+            return .SelfSigned(selfSigned)
         default:
             return nil
         }

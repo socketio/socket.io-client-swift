@@ -146,6 +146,7 @@ case ExtraHeaders([String: String]) // Adds custom headers to the initial reques
 case HandleQueue(dispatch_queue_t) // The dispatch queue that handlers are run on. Default is the main queue.
 case VoipEnabled(Bool) // Only use this option if you're using the client with VoIP services. Changes the way the WebSocket is created. Default is false
 case Secure(Bool) // If the connection should use TLS. Default is false.
+case SelfSigned(Bool) // Sets WebSocket.selfSignedSSL (Don't do this, iOS will yell at you)
 
 ```
 Methods
