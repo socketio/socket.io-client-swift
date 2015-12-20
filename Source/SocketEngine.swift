@@ -675,10 +675,10 @@ extension SocketEngine {
     // We had packets waiting for send when we upgraded
     // Send them raw
     private func flushWaitingForPostToWebSocket() {
-        guard let ws = self.ws else {return}
+        guard let ws = self.ws else { return }
         
         for msg in postWait {
-            ws.writeString(msg)
+            ws.writeString(fixDoubleUTF8(msg))
         }
         
         postWait.removeAll(keepCapacity: true)
