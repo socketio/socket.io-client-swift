@@ -25,16 +25,20 @@
 
 import Foundation
 
-func fixDoubleUTF8(inout name: String) {
-    if let utf8 = name.dataUsingEncoding(NSISOLatin1StringEncoding),
+func fixDoubleUTF8(string: String) -> String {
+    if let utf8 = string.dataUsingEncoding(NSISOLatin1StringEncoding),
         latin1 = NSString(data: utf8, encoding: NSUTF8StringEncoding) {
-            name = latin1 as String
+            return latin1 as String
+    } else {
+        return string
     }
 }
 
-func doubleEncodeUTF8(inout str: String) {
-    if let latin1 = str.dataUsingEncoding(NSUTF8StringEncoding),
+func doubleEncodeUTF8(string: String) -> String {
+    if let latin1 = string.dataUsingEncoding(NSUTF8StringEncoding),
         utf8 = NSString(data: latin1, encoding: NSISOLatin1StringEncoding) {
-            str = utf8 as String
+            return utf8 as String
+    } else {
+        return string
     }
 }

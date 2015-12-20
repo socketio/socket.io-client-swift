@@ -147,13 +147,12 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
         }
     }
 
-    private func checkIfMessageIsBase64Binary(var message: String) -> Bool {
+    private func checkIfMessageIsBase64Binary(message: String) -> Bool {
         if message.hasPrefix("b4") {
             // binary in base64 string
-            message.removeRange(Range(start: message.startIndex,
-                end: message.startIndex.advancedBy(2)))
+            let noPrefix = message[message.startIndex.advancedBy(2)..<message.endIndex]
 
-            if let data = NSData(base64EncodedString: message,
+            if let data = NSData(base64EncodedString: noPrefix,
                 options: .IgnoreUnknownCharacters) {
                     client?.parseBinaryData(data)
             }
@@ -282,17 +281,15 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
     private func flushProbeWait() {
         DefaultSocketLogger.Logger.log("Flushing probe wait", type: logType)
 
-        dispatch_async(emitQueue) {[weak self] in
-            if let this = self {
-                for waiter in this.probeWait {
-                    this.write(waiter.msg, withType: waiter.type, withData: waiter.data)
-                }
-
-                this.probeWait.removeAll(keepCapacity: false)
-
-                if this.postWait.count != 0 {
-                    this.flushWaitingForPostToWebSocket()
-                }
+        dispatch_async(emitQueue) {
+            for waiter in self.probeWait {
+                self.write(waiter.msg, withType: waiter.type, withData: waiter.data)
+            }
+            
+            self.probeWait.removeAll(keepCapacity: false)
+            
+            if self.postWait.count != 0 {
+                self.flushWaitingForPostToWebSocket()
             }
         }
     }
@@ -420,10 +417,11 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
         client?.parseBinaryData(data.subdataWithRange(NSMakeRange(1, data.length - 1)))
     }
 
-    private func parseEngineMessage(var message: String, fromPolling: Bool) {
+    private func parseEngineMessage(message: String, fromPolling: Bool) {
         DefaultSocketLogger.Logger.log("Got message: %@", type: logType, args: message)
         
         let reader = SocketStringReader(message: message)
+        let fixedString: String
 
         guard let type = SocketEnginePacketType(rawValue: Int(reader.currentCharacter) ?? -1) else {
             if !checkIfMessageIsBase64Binary(message) {
@@ -434,22 +432,22 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
         }
 
         if fromPolling && type != .Noop {
-            fixDoubleUTF8(&message)
+            fixedString = fixDoubleUTF8(message)
+        } else {
+            fixedString = message
         }
 
         switch type {
         case .Message:
-            message.removeAtIndex(message.startIndex)
-            handleMessage(message)
+            handleMessage(fixedString[fixedString.startIndex.successor()..<fixedString.endIndex])
         case .Noop:
             handleNOOP()
         case .Pong:
-            handlePong(message)
+            handlePong(fixedString)
         case .Open:
-            message.removeAtIndex(message.startIndex)
-            handleOpen(message)
+            handleOpen(fixedString[fixedString.startIndex.successor()..<fixedString.endIndex])
         case .Close:
-            handleClose(message)
+            handleClose(fixedString)
         default:
             DefaultSocketLogger.Logger.log("Got unknown packet type", type: logType)
         }
@@ -567,7 +565,6 @@ extension SocketEngine {
         let req = NSMutableURLRequest(URL: NSURL(string: urlPolling + "&sid=\(sid)&b64=1")!)
         
         addHeaders(req)
-        
         doLongPoll(req)
     }
     
@@ -600,9 +597,9 @@ extension SocketEngine {
             
             DefaultSocketLogger.Logger.log("Got polling response", type: this.logType)
             
-            if let str = NSString(data: data!, encoding: NSUTF8StringEncoding) as? String {
-                dispatch_async(this.parseQueue) {[weak this] in
-                    this?.parsePollingMessage(str)
+            if let str = String(data: data!, encoding: NSUTF8StringEncoding) {
+                dispatch_async(this.parseQueue) {
+                    this.parsePollingMessage(str)
                 }
             }
             
@@ -666,10 +663,10 @@ extension SocketEngine {
             
             this.waitingForPost = false
             
-            dispatch_async(this.emitQueue) {[weak this] in
-                if !(this?.fastUpgrade ?? true) {
-                    this?.flushWaitingForPost()
-                    this?.doPoll()
+            dispatch_async(this.emitQueue) {
+                if !this.fastUpgrade {
+                    this.flushWaitingForPost()
+                    this.doPoll()
                 }
             }
         }
@@ -712,12 +709,11 @@ extension SocketEngine {
     
     /// Send polling message.
     /// Only call on emitQueue
-    private func sendPollMessage(var msg: String, withType type: SocketEnginePacketType,
+    private func sendPollMessage(message: String, withType type: SocketEnginePacketType,
         datas:[NSData]? = nil) {
-            DefaultSocketLogger.Logger.log("Sending poll: %@ as type: %@", type: logType, args: msg, type.rawValue)
-            
-            doubleEncodeUTF8(&msg)
-            let strMsg = "\(type.rawValue)\(msg)"
+            DefaultSocketLogger.Logger.log("Sending poll: %@ as type: %@", type: logType, args: message, type.rawValue)
+            let fixedMessage = doubleEncodeUTF8(message)
+            let strMsg = "\(type.rawValue)\(fixedMessage)"
             
             postWait.append(strMsg)
             
@@ -749,7 +745,7 @@ extension SocketEngine {
             ws?.writeString("\(type.rawValue)\(str)")
             
             for data in datas ?? [] {
-                if case let Either.Left(bin) = createBinaryDataForSend(data) {
+                if case let .Left(bin) = createBinaryDataForSend(data) {
                     ws?.writeData(bin)
                 }
             }

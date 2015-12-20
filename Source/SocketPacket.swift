@@ -95,7 +95,9 @@ struct SocketPacket {
         }
     }
     
-    private func completeMessage(var message: String, ack: Bool) -> String {
+    private func completeMessage(message: String, ack: Bool) -> String {
+        var restOfMessage = ""
+        
         if data.count == 0 {
             return message + "]"
         }
@@ -107,28 +109,25 @@ struct SocketPacket {
                         options: NSJSONWritingOptions(rawValue: 0))
                     let jsonString = NSString(data: jsonSend, encoding: NSUTF8StringEncoding)
                     
-                    message += jsonString! as String + ","
+                    restOfMessage += jsonString! as String + ","
                 } catch {
                     DefaultSocketLogger.Logger.error("Error creating JSON object in SocketPacket.completeMessage",
                         type: SocketPacket.logType)
                 }
-            } else if var str = arg as? String {
-                str = str["\n"] ~= "\\\\n"
-                str = str["\r"] ~= "\\\\r"
-                
-                message += "\"\(str)\","
+            } else if let str = arg as? String {
+                restOfMessage += "\"\((str["\n"] ~= "\\\\n")["\r"] ~= "\\\\r")\","
             } else if arg is NSNull {
-                message += "null,"
+                restOfMessage += "null,"
             } else {
-                message += "\(arg),"
+                restOfMessage += "\(arg),"
             }
         }
         
-        if message != "" {
-            message.removeAtIndex(message.endIndex.predecessor())
+        if restOfMessage != "" {
+            restOfMessage.removeAtIndex(restOfMessage.endIndex.predecessor())
         }
         
-        return message + "]"
+        return message + restOfMessage + "]"
     }
     
     private func createAck() -> String {
@@ -191,7 +190,7 @@ struct SocketPacket {
     private func createPacketString() -> String {
         let str: String
         
-        if type == PacketType.Event || type == PacketType.BinaryEvent {
+        if type == .Event || type == .BinaryEvent {
             str = createMessageForEvent()
         } else {
             str = createAck()
@@ -226,14 +225,8 @@ struct SocketPacket {
             }
             
             return newDict
-        } else if let arr = data as? NSArray {
-            let newArr = NSMutableArray(array: arr)
-            
-            for i in 0..<arr.count {
-                newArr[i] = _fillInPlaceholders(arr[i])
-            }
-            
-            return newArr
+        } else if let arr = data as? [AnyObject] {
+            return arr.map({_fillInPlaceholders($0)})
         } else {
             return data
         }
@@ -268,17 +261,13 @@ extension SocketPacket {
 private extension SocketPacket {
     static func shred(data: AnyObject, inout binary: [NSData]) -> AnyObject {
         if let bin = data as? NSData {
-            let placeholder = ["_placeholder" :true, "num": binary.count]
+            let placeholder = ["_placeholder": true, "num": binary.count]
             
             binary.append(bin)
             
             return placeholder
-        } else if var arr = data as? [AnyObject] {
-            for i in 0..<arr.count {
-                arr[i] = shred(arr[i], binary: &binary)
-            }
-            
-            return arr
+        } else if let arr = data as? [AnyObject] {
+            return arr.map({shred($0, binary: &binary)})
         } else if let dict = data as? NSDictionary {
             let mutDict = NSMutableDictionary(dictionary: dict)
             
@@ -292,13 +281,9 @@ private extension SocketPacket {
         }
     }
     
-    static func deconstructData(var data: [AnyObject]) -> ([AnyObject], [NSData]) {
+    static func deconstructData(data: [AnyObject]) -> ([AnyObject], [NSData]) {
         var binary = [NSData]()
         
-        for i in 0..<data.count {
-            data[i] = shred(data[i], binary: &binary)
-        }
-        
-        return (data, binary)
+        return (data.map({shred($0, binary: &binary)}), binary)
     }
 }
