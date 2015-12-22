@@ -67,8 +67,7 @@ Manually (iOS 7+)
 
 Swift Package Manager
 ---------------------
-1. Add the project as a dependency to your Package.swift:
-
+Add the project as a dependency to your Package.swift:
 ```swift
 import PackageDescription
 
@@ -79,7 +78,8 @@ let package = Package(
     ]
 )
 ```
-2. `import SocketIOClientSwift`
+
+Then import `import SocketIOClientSwift`.
 
 Carthage
 -----------------
