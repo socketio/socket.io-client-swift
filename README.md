@@ -65,6 +65,22 @@ Manually (iOS 7+)
 1. Copy the Source folder into your Xcode project. (Make sure you add the files to your target(s))
 2. If you plan on using this from Objective-C, read [this](https://developer.apple.com/library/ios/documentation/Swift/Conceptual/BuildingCocoaApps/MixandMatch.html) on exposing Swift code to Objective-C.
 
+Swift Package Manager
+---------------------
+1. Add the project as a dependency to your Package.swift:
+
+```swift
+import PackageDescription
+
+let package = Package(
+    name: "YourSocketIOProject",
+    dependencies: [
+        .Package(url: "https://github.com/socketio/socket.io-client-swift", majorVersion: 4)
+    ]
+)
+```
+2. `import SocketIOClientSwift`
+
 Carthage
 -----------------
 Add this line to your `Cartfile`:
