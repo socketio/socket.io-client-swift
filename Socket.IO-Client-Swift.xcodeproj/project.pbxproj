@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		572EF21F1B51F16C00EEBB58 /* SocketIO-iOS.h in Headers */ = {isa = PBXBuildFile; fileRef = 572EF21E1B51F16C00EEBB58 /* SocketIO-iOS.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		572EF2251B51F16C00EEBB58 /* SocketIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 572EF2191B51F16C00EEBB58 /* SocketIO.framework */; };
+		572EF2251B51F16C00EEBB58 /* Socket_IO_Client_Swift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 572EF2191B51F16C00EEBB58 /* Socket_IO_Client_Swift.framework */; };
 		572EF23D1B51F18A00EEBB58 /* SocketIO-Mac.h in Headers */ = {isa = PBXBuildFile; fileRef = 572EF23C1B51F18A00EEBB58 /* SocketIO-Mac.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		572EF2431B51F18A00EEBB58 /* SocketIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 572EF2381B51F18A00EEBB58 /* SocketIO.framework */; };
 		57634A111BD9B46A00E19CD7 /* SocketIO-iOS.h in Headers */ = {isa = PBXBuildFile; fileRef = 572EF21E1B51F16C00EEBB58 /* SocketIO-iOS.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -172,7 +172,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		572EF2191B51F16C00EEBB58 /* SocketIO.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SocketIO.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		572EF2191B51F16C00EEBB58 /* Socket_IO_Client_Swift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Socket_IO_Client_Swift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		572EF21D1B51F16C00EEBB58 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		572EF21E1B51F16C00EEBB58 /* SocketIO-iOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SocketIO-iOS.h"; sourceTree = "<group>"; };
 		572EF2241B51F16C00EEBB58 /* SocketIO-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SocketIO-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -223,7 +223,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				572EF2251B51F16C00EEBB58 /* SocketIO.framework in Frameworks */,
+				572EF2251B51F16C00EEBB58 /* Socket_IO_Client_Swift.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -275,7 +275,7 @@
 		572EF21A1B51F16C00EEBB58 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				572EF2191B51F16C00EEBB58 /* SocketIO.framework */,
+				572EF2191B51F16C00EEBB58 /* Socket_IO_Client_Swift.framework */,
 				572EF2241B51F16C00EEBB58 /* SocketIO-iOSTests.xctest */,
 				572EF2381B51F18A00EEBB58 /* SocketIO.framework */,
 				572EF2421B51F18A00EEBB58 /* SocketIO-MacTests.xctest */,
@@ -428,7 +428,7 @@
 			);
 			name = "SocketIO-iOS";
 			productName = "SocketIO-iOS";
-			productReference = 572EF2191B51F16C00EEBB58 /* SocketIO.framework */;
+			productReference = 572EF2191B51F16C00EEBB58 /* Socket_IO_Client_Swift.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		572EF2231B51F16C00EEBB58 /* SocketIO-iOSTests */ = {
@@ -884,6 +884,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = Socket_IO_Client_Swift;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -933,6 +934,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_NAME = Socket_IO_Client_Swift;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
