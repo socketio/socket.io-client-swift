@@ -12,7 +12,7 @@ class SocketSideEffectTest: XCTestCase {
     let data = "test".dataUsingEncoding(NSUTF8StringEncoding)!
     let data2 = "test2".dataUsingEncoding(NSUTF8StringEncoding)!
     private var socket: SocketIOClient!
-
+    
     override func setUp() {
         super.setUp()
         socket = SocketIOClient(socketURL: "")
@@ -31,7 +31,7 @@ class SocketSideEffectTest: XCTestCase {
     func testSecondAck() {
         socket.emitWithAck("test")(timeoutAfter: 0) {data in}
         socket.emitWithAck("test")(timeoutAfter: 0) {data in}
-
+        
         XCTAssertEqual(socket.currentAck, 1)
     }
     
@@ -43,6 +43,18 @@ class SocketSideEffectTest: XCTestCase {
         }
         
         socket.parseSocketMessage("30[\"hello world\"]")
+        waitForExpectationsWithTimeout(3, handler: nil)
+    }
+    
+    func testHandleAck2() {
+        let expectation = expectationWithDescription("handled ack2")
+        socket.emitWithAck("test")(timeoutAfter: 0) {data in
+            XCTAssertTrue(data.count == 2, "Wrong number of ack items")
+            expectation.fulfill()
+        }
+        
+        socket.parseSocketMessage("61-0[{\"_placeholder\":true,\"num\":0},{\"test\":true}]")
+        socket.parseBinaryData(NSData())
         waitForExpectationsWithTimeout(3, handler: nil)
     }
     

@@ -41,7 +41,7 @@ class SocketParser {
     private static func handlePacket(pack: SocketPacket, withSocket socket: SocketIOClient) {
         switch pack.type {
         case .Event where isCorrectNamespace(pack.nsp, socket):
-            socket.handleEvent(pack.event, data: pack.args ?? [],
+            socket.handleEvent(pack.event, data: pack.args,
                 isInternalMessage: false, withAck: pack.id)
         case .Ack where isCorrectNamespace(pack.nsp, socket):
             socket.handleAck(pack.id, data: pack.data)

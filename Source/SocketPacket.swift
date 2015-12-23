@@ -39,18 +39,11 @@ struct SocketPacket {
         case Connect, Disconnect, Event, Ack, Error, BinaryEvent, BinaryAck
     }
     
-    var args: [AnyObject]? {
-        var arr = data
-        
-        if data.count == 0 {
-            return nil
+    var args: [AnyObject] {
+        if type == .Event || type == .BinaryEvent && data.count != 0 {
+            return Array(data.dropFirst())
         } else {
-            if type == .Event || type == .BinaryEvent {
-                arr.removeAtIndex(0)
-                return arr
-            } else {
-                return arr
-            }
+            return data
         }
     }
     
