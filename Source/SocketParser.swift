@@ -166,8 +166,7 @@ class SocketParser {
             return
         }
         
-        var packet = socket.waitingData.removeLast()
-        packet.fillInPlaceholders()
+        let packet = socket.waitingData.removeLast()
         
         if packet.type != .BinaryAck {
             socket.handleEvent(packet.event, data: packet.args ?? [],

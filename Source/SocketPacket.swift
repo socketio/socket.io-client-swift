@@ -78,10 +78,10 @@ struct SocketPacket {
         }
         
         binary.append(data)
-        currentPlace++
+        currentPlace += 1
         
         if placeholders == currentPlace {
-            currentPlace = 0
+            fillInPlaceholders()
             return true
         } else {
             return false
@@ -192,15 +192,8 @@ struct SocketPacket {
         return str
     }
     
-    mutating func fillInPlaceholders() {
-        for i in 0..<data.count {
-            if let str = data[i] as? String, num = str["~~(\\d)"].groups() {
-                // Fill in binary placeholder with data
-                data[i] = binary[Int(num[1])!]
-            } else if data[i] is NSDictionary || data[i] is NSArray {
-                data[i] = _fillInPlaceholders(data[i])
-            }
-        }
+    private mutating func fillInPlaceholders() {
+        data = data.map({_fillInPlaceholders($0)})
     }
     
     private mutating func _fillInPlaceholders(data: AnyObject) -> AnyObject {
