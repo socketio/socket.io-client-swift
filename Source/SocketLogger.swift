@@ -37,7 +37,7 @@ public protocol SocketLogger: class {
 
 public extension SocketLogger {
     func log(message: String, type: String, args: AnyObject...) {
-        abstractLog("Log", message: message, type: type, args: args)
+        abstractLog("LOG", message: message, type: type, args: args)
     }
     
     func error(message: String, type: String, args: AnyObject...) {
@@ -47,7 +47,7 @@ public extension SocketLogger {
     private func abstractLog(logType: String, message: String, type: String, args: [AnyObject]) {
         guard log else { return }
         
-        let newArgs = args.map {arg -> CVarArgType in String(arg)}
+        let newArgs = args.map({arg -> CVarArgType in String(arg)})
         let replaced = String(format: message, arguments: newArgs)
         
         NSLog("%@ %@: %@", logType, type, replaced)

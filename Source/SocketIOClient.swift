@@ -112,13 +112,12 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         engine?.close()
     }
     
-    private func addEngine() -> SocketEngine {
+    private func addEngine() -> SocketEngineSpec {
         DefaultSocketLogger.Logger.log("Adding engine", type: logType)
         
-        let newEngine = SocketEngine(client: self, url: socketURL, options: options ?? [])
+        engine = SocketEngine(client: self, url: socketURL, options: options)
         
-        engine = newEngine
-        return newEngine
+        return engine!
     }
     
     private func clearReconnectTimer() {

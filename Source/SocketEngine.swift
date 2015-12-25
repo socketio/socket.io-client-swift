@@ -171,9 +171,9 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
         connected = false
 
         if websocket {
-            sendWebSocketMessage("", withType: .Close)
+            sendWebSocketMessage("", withType: .Close, withData: [])
         } else {
-            sendPollMessage("", withType: .Close)
+            sendPollMessage("", withType: .Close, withData: [])
         }
         
         ws?.disconnect()
@@ -270,7 +270,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
                 "we'll probably disconnect soon. You should report this.", type: logType)
         }
 
-        sendWebSocketMessage("", withType: .Upgrade, datas: nil)
+        sendWebSocketMessage("", withType: .Upgrade, withData: [])
         websocket = true
         polling = false
         fastUpgrade = false
@@ -455,7 +455,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
 
     private func probeWebSocket() {
         if websocketConnected {
-            sendWebSocketMessage("probe", withType: .Ping)
+            sendWebSocketMessage("probe", withType: .Ping, withData: [])
         }
     }
     
@@ -516,7 +516,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
             DefaultSocketLogger.Logger.log("Upgrading transport to WebSockets", type: logType)
 
             fastUpgrade = true
-            sendPollMessage("", withType: .Noop)
+            sendPollMessage("", withType: .Noop, withData: [])
             // After this point, we should not send anymore polling messages
         }
     }
@@ -530,11 +530,11 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
                 if self.websocket {
                     DefaultSocketLogger.Logger.log("Writing ws: %@ has data: %@",
                         type: self.logType, args: msg, data.count != 0)
-                    self.sendWebSocketMessage(msg, withType: type, datas: data)
+                    self.sendWebSocketMessage(msg, withType: type, withData: data)
                 } else {
                     DefaultSocketLogger.Logger.log("Writing poll: %@ has data: %@",
                         type: self.logType, args: msg, data.count != 0)
-                    self.sendPollMessage(msg, withType: type, datas: data)
+                    self.sendPollMessage(msg, withType: type, withData: data)
                 }
             }
         }
@@ -710,14 +710,14 @@ extension SocketEngine {
     /// Send polling message.
     /// Only call on emitQueue
     private func sendPollMessage(message: String, withType type: SocketEnginePacketType,
-        datas:[NSData]? = nil) {
+        withData datas: [NSData]) {
             DefaultSocketLogger.Logger.log("Sending poll: %@ as type: %@", type: logType, args: message, type.rawValue)
             let fixedMessage = doubleEncodeUTF8(message)
             let strMsg = "\(type.rawValue)\(fixedMessage)"
             
             postWait.append(strMsg)
             
-            for data in datas ?? [] {
+            for data in datas {
                 if case let .Right(bin) = createBinaryDataForSend(data) {
                     postWait.append(bin)
                 }
@@ -739,12 +739,12 @@ extension SocketEngine {
     /// Send message on WebSockets
     /// Only call on emitQueue
     private func sendWebSocketMessage(str: String, withType type: SocketEnginePacketType,
-        datas:[NSData]? = nil) {
+        withData datas: [NSData]) {
             DefaultSocketLogger.Logger.log("Sending ws: %@ as type: %@", type: logType, args: str, type.rawValue)
             
             ws?.writeString("\(type.rawValue)\(str)")
             
-            for data in datas ?? [] {
+            for data in datas {
                 if case let .Left(bin) = createBinaryDataForSend(data) {
                     ws?.writeData(bin)
                 }

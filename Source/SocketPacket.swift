@@ -55,7 +55,7 @@ struct SocketPacket {
     }
     
     var event: String {
-        return data[0] as? String ?? String(data[0])
+        return String(data[0])
     }
     
     var packetString: String {
@@ -100,9 +100,9 @@ struct SocketPacket {
                 do {
                     let jsonSend = try NSJSONSerialization.dataWithJSONObject(arg,
                         options: NSJSONWritingOptions(rawValue: 0))
-                    let jsonString = NSString(data: jsonSend, encoding: NSUTF8StringEncoding)
+                    let jsonString = String(data: jsonSend, encoding: NSUTF8StringEncoding)
                     
-                    restOfMessage += jsonString! as String + ","
+                    restOfMessage += jsonString! + ","
                 } catch {
                     DefaultSocketLogger.Logger.error("Error creating JSON object in SocketPacket.completeMessage",
                         type: SocketPacket.logType)
@@ -124,30 +124,30 @@ struct SocketPacket {
     }
     
     private func createAck() -> String {
-        let msg: String
+        let message: String
         
-        if type == PacketType.Ack {
+        if type == .Ack {
             if nsp == "/" {
-                msg = "3\(id)["
+                message = "3\(id)["
             } else {
-                msg = "3\(nsp),\(id)["
+                message = "3\(nsp),\(id)["
             }
         } else {
             if nsp == "/" {
-                msg = "6\(binary.count)-\(id)["
+                message = "6\(binary.count)-\(id)["
             } else {
-                msg = "6\(binary.count)-\(nsp),\(id)["
+                message = "6\(binary.count)-\(nsp),\(id)["
             }
         }
         
-        return completeMessage(msg, ack: true)
+        return completeMessage(message, ack: true)
     }
 
     
     private func createMessageForEvent() -> String {
         let message: String
         
-        if type == PacketType.Event {
+        if type == .Event {
             if nsp == "/" {
                 if id == -1 {
                     message = "2["
