@@ -27,7 +27,6 @@ import Foundation
 
 struct SocketPacket {
     private let placeholders: Int
-    private var currentPlace = 0
     
     private static let logType = "SocketPacket"
 
@@ -73,14 +72,13 @@ struct SocketPacket {
     }
     
     mutating func addData(data: NSData) -> Bool {
-        if placeholders == currentPlace {
+        if placeholders == binary.count {
             return true
         }
         
         binary.append(data)
-        currentPlace += 1
         
-        if placeholders == currentPlace {
+        if placeholders == binary.count {
             fillInPlaceholders()
             return true
         } else {
