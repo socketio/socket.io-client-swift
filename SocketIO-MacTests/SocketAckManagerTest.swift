@@ -7,6 +7,7 @@
 //
 
 import XCTest
+@testable import SocketIO
 
 class SocketAckManagerTest: XCTestCase {
     var ackManager = SocketAckManager()

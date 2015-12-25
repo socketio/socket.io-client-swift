@@ -7,6 +7,7 @@
 //
 
 import XCTest
+@testable import SocketIO
 
 class SocketParserTest: XCTestCase {
     
