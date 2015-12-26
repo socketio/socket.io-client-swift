@@ -195,24 +195,19 @@ struct SocketPacket {
     }
     
     private mutating func _fillInPlaceholders(data: AnyObject) -> AnyObject {
-        if let str = data as? String {
-            if let num = str["~~(\\d)"].groups() {
-                return binary[Int(num[1])!]
-            } else {
-                return str
-            }
-        } else if let dict = data as? NSDictionary {
-            let newDict = NSMutableDictionary(dictionary: dict)
-            
-            for (key, value) in dict {
-                newDict[key as! NSCopying] = _fillInPlaceholders(value)
-            }
-            
-            return newDict
-        } else if let arr = data as? [AnyObject] {
+        switch data {
+        case let string as String where string["~~(\\d)"].groups() != nil:
+            return binary[Int(string["~~(\\d)"].groups()![1])!]
+        case let dict as NSDictionary:
+            return dict.reduce(NSMutableDictionary(), combine: {cur, keyValue in
+                cur[keyValue.0 as! NSCopying] = _fillInPlaceholders(keyValue.1)
+                return cur
+            })
+        case let arr as [AnyObject]:
             return arr.map({_fillInPlaceholders($0)})
-        } else {
+        default:
             return data
+            
         }
     }
 }
