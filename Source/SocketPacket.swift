@@ -239,23 +239,20 @@ extension SocketPacket {
 
 private extension SocketPacket {
     static func shred(data: AnyObject, inout binary: [NSData]) -> AnyObject {
-        if let bin = data as? NSData {
-            let placeholder = ["_placeholder": true, "num": binary.count]
-            
+        let placeholder = ["_placeholder": true, "num": binary.count]
+        
+        switch data {
+        case let bin as NSData:
             binary.append(bin)
-            
             return placeholder
-        } else if let arr = data as? [AnyObject] {
+        case let arr as [AnyObject]:
             return arr.map({shred($0, binary: &binary)})
-        } else if let dict = data as? NSDictionary {
-            let mutDict = NSMutableDictionary(dictionary: dict)
-            
-            for (key, value) in dict {
-                mutDict[key as! NSCopying] = shred(value, binary: &binary)
-            }
-            
-            return mutDict
-        } else {
+        case let dict as NSDictionary:
+            return dict.reduce(NSMutableDictionary(), combine: {cur, keyValue in
+                cur[keyValue.0 as! NSCopying] = shred(keyValue.1, binary: &binary)
+                return cur
+            })
+        default:
             return data
         }
     }
