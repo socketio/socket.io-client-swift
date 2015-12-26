@@ -190,12 +190,19 @@ struct SocketPacket {
         return str
     }
     
+    // Called when we have all the binary data for a packet
+    // calls _fillInPlaceholders, which replaces placeholders with the
+    // corresponding binary
     private mutating func fillInPlaceholders() {
         data = data.map({_fillInPlaceholders($0)})
     }
     
-    private mutating func _fillInPlaceholders(data: AnyObject) -> AnyObject {
-        switch data {
+    // Helper method that looks for placeholder strings
+    // If object is a collection it will recurse
+    // Returns the object if it is not a placeholder string or the corresponding
+    // binary data
+    private func _fillInPlaceholders(object: AnyObject) -> AnyObject {
+        switch object {
         case let string as String where string["~~(\\d)"].groups() != nil:
             return binary[Int(string["~~(\\d)"].groups()![1])!]
         case let dict as NSDictionary:
@@ -206,8 +213,7 @@ struct SocketPacket {
         case let arr as [AnyObject]:
             return arr.map({_fillInPlaceholders($0)})
         default:
-            return data
-            
+            return object
         }
     }
 }
@@ -216,15 +222,15 @@ extension SocketPacket {
     private static func findType(binCount: Int, ack: Bool) -> PacketType {
         switch binCount {
         case 0 where !ack:
-            return PacketType.Event
+            return .Event
         case 0 where ack:
-            return PacketType.Ack
+            return .Ack
         case _ where !ack:
-            return PacketType.BinaryEvent
+            return .BinaryEvent
         case _ where ack:
-            return PacketType.BinaryAck
+            return .BinaryAck
         default:
-            return PacketType.Error
+            return .Error
         }
     }
     
@@ -238,6 +244,7 @@ extension SocketPacket {
 }
 
 private extension SocketPacket {
+    // Recursive function that looks for NSData in collections
     static func shred(data: AnyObject, inout binary: [NSData]) -> AnyObject {
         let placeholder = ["_placeholder": true, "num": binary.count]
         
@@ -257,6 +264,8 @@ private extension SocketPacket {
         }
     }
     
+    // Removes binary data from emit data
+    // Returns a type containing the de-binaryed data and the binary
     static func deconstructData(data: [AnyObject]) -> ([AnyObject], [NSData]) {
         var binary = [NSData]()
         
