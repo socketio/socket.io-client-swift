@@ -194,7 +194,7 @@ struct SocketPacket {
     // calls _fillInPlaceholders, which replaces placeholders with the
     // corresponding binary
     private mutating func fillInPlaceholders() {
-        data = data.map({_fillInPlaceholders($0)})
+        data = data.map(_fillInPlaceholders)
     }
     
     // Helper method that looks for placeholder strings
@@ -211,7 +211,7 @@ struct SocketPacket {
                 return cur
             })
         case let arr as [AnyObject]:
-            return arr.map({_fillInPlaceholders($0)})
+            return arr.map(_fillInPlaceholders)
         default:
             return object
         }
