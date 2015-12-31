@@ -68,7 +68,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         
         self.socketURL = socketURL["https?://"] ~= ""
         
-        for option in options ?? [] {
+        for option in options {
             switch option {
             case .ConnectParams(let params):
                 connectParams = params

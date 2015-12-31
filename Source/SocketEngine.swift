@@ -523,19 +523,19 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
 
     /**
     Write a message, independent of transport.
-    */
+     */
     public func write(msg: String, withType type: SocketEnginePacketType, withData data: [NSData]) {
         dispatch_async(emitQueue) {
-            if self.connected {
-                if self.websocket {
-                    DefaultSocketLogger.Logger.log("Writing ws: %@ has data: %@",
-                        type: self.logType, args: msg, data.count != 0)
-                    self.sendWebSocketMessage(msg, withType: type, withData: data)
-                } else {
-                    DefaultSocketLogger.Logger.log("Writing poll: %@ has data: %@",
-                        type: self.logType, args: msg, data.count != 0)
-                    self.sendPollMessage(msg, withType: type, withData: data)
-                }
+            guard self.connected else { return }
+            
+            if self.websocket {
+                DefaultSocketLogger.Logger.log("Writing ws: %@ has data: %@",
+                    type: self.logType, args: msg, data.count != 0)
+                self.sendWebSocketMessage(msg, withType: type, withData: data)
+            } else {
+                DefaultSocketLogger.Logger.log("Writing poll: %@ has data: %@",
+                    type: self.logType, args: msg, data.count != 0)
+                self.sendPollMessage(msg, withType: type, withData: data)
             }
         }
     }
