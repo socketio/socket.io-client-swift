@@ -358,22 +358,15 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     }
     
     /**
-     Joins nsp if it is not /
-     */
-    public func joinNamespace() {
-        DefaultSocketLogger.Logger.log("Joining namespace", type: logType)
-        
-        if nsp != "/" {
-            engine?.send("0\(nsp)", withData: [])
-        }
-    }
-    
-    /**
-     Joins namespace /
+     Joins namespace
      */
     public func joinNamespace(namespace: String) {
-        self.nsp = namespace
-        joinNamespace()
+        nsp = namespace
+        
+        if nsp != "/" {
+            DefaultSocketLogger.Logger.log("Joining namespace", type: logType)
+            engine?.send("0\(nsp)", withData: [])
+        }
     }
     
     /**

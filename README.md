@@ -178,7 +178,7 @@ Methods
 9. `connect(timeoutAfter timeoutAfter: Int, withTimeoutHandler handler: (() -> Void)?)` - Connect to the server. If it isn't connected after timeoutAfter seconds, the handler is called.
 10. `close()` - Closes the socket. Once a socket is closed it should not be reopened.
 11. `reconnect()` - Causes the client to reconnect to the server.
-12. `joinNamespace()` - Causes the client to join nsp. Shouldn't need to be called unless you change nsp manually.
+12. `joinNamespace(namespace: String)` - Causes the client to join namespace. Shouldn't need to be called unless you change namespaces manually.
 13. `leaveNamespace()` - Causes the client to leave the nsp and go back to /
 14. `off(event: String)` - Removes all event handlers for event.
 15. `off(id id: NSUUID)` - Removes the event that corresponds to id.
