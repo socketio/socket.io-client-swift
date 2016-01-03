@@ -104,7 +104,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
      */
     public convenience init(socketURL: String, options: NSDictionary?) {
         self.init(socketURL: socketURL,
-            options: Set<SocketIOClientOption>.NSDictionaryToSocketOptionsSet(options ?? [:]))
+            options: options?.toSocketOptionsSet() ?? [])
     }
     
     deinit {

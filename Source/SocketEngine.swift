@@ -109,7 +109,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
     
     public convenience init(client: SocketEngineClient, url: String, options: NSDictionary?) {
         self.init(client: client, url: url,
-            options: Set<SocketIOClientOption>.NSDictionaryToSocketOptionsSet(options ?? [:]))
+            options: options?.toSocketOptionsSet() ?? [])
     }
 
     deinit {
