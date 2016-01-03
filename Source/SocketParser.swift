@@ -111,7 +111,7 @@ class SocketParser {
         let noPlaceholders = d["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] ~= "\"~~$2\""
         
         switch parseData(noPlaceholders) {
-        case .Left(let err):
+        case let .Left(err):
             // If first you don't succeed, try again
             if case let .Right(data) = parseData("\([noPlaceholders as AnyObject])") {
                 return .Right(SocketPacket(type: type, data: data, id: Int(idString) ?? -1,
@@ -119,7 +119,7 @@ class SocketParser {
             } else {
                 return .Left(err)
             }
-        case .Right(let data):
+        case let .Right(data):
             return .Right(SocketPacket(type: type, data: data, id: Int(idString) ?? -1,
                 nsp: namespace ?? "/", placeholders: placeholders))
         }
@@ -147,9 +147,9 @@ class SocketParser {
         DefaultSocketLogger.Logger.log("Parsing %@", type: "SocketParser", args: message)
         
         switch parseString(message) {
-        case .Left(let err):
+        case let .Left(err):
             DefaultSocketLogger.Logger.error("\(err): %@", type: "SocketParser", args: message)
-        case .Right(let pack):
+        case let .Right(pack):
             DefaultSocketLogger.Logger.log("Decoded packet as: %@", type: "SocketParser", args: pack.description)
             handlePacket(pack, withSocket: socket)
         }

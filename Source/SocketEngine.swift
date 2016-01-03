@@ -83,23 +83,23 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
 
         for option in options {
             switch option {
-            case .SessionDelegate(let delegate):
+            case let .SessionDelegate(delegate):
                 sessionDelegate = delegate
-            case .ForcePolling(let force):
+            case let .ForcePolling(force):
                 forcePolling = force
-            case .ForceWebsockets(let force):
+            case let .ForceWebsockets(force):
                 forceWebsockets = force
-            case .Cookies(let cookies):
+            case let .Cookies(cookies):
                 self.cookies = cookies
-            case .Path(let path):
+            case let .Path(path):
                 socketPath = path
-            case .ExtraHeaders(let headers):
+            case let .ExtraHeaders(headers):
                 extraHeaders = headers
-            case .VoipEnabled(let enable):
+            case let .VoipEnabled(enable):
                 voipEnabled = enable
-            case .Secure(let secure):
+            case let .Secure(secure):
                 self.secure = secure
-            case .SelfSigned(let selfSigned):
+            case let .SelfSigned(selfSigned):
                 self.selfSigned = selfSigned
             default:
                 continue

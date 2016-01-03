@@ -70,23 +70,23 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         
         for option in options {
             switch option {
-            case .ConnectParams(let params):
+            case let .ConnectParams(params):
                 connectParams = params
-            case .Reconnects(let reconnects):
+            case let .Reconnects(reconnects):
                 self.reconnects = reconnects
-            case .ReconnectAttempts(let attempts):
+            case let .ReconnectAttempts(attempts):
                 reconnectAttempts = attempts
-            case .ReconnectWait(let wait):
+            case let .ReconnectWait(wait):
                 reconnectWait = abs(wait)
-            case .Nsp(let nsp):
+            case let .Nsp(nsp):
                 self.nsp = nsp
-            case .Log(let log):
+            case let .Log(log):
                 DefaultSocketLogger.Logger.log = log
-            case .Logger(let logger):
+            case let .Logger(logger):
                 DefaultSocketLogger.Logger = logger
-            case .HandleQueue(let queue):
+            case let .HandleQueue(queue):
                 handleQueue = queue
-            case .ForceNew(let force):
+            case let .ForceNew(force):
                 forceNew = force
             default:
                 continue
