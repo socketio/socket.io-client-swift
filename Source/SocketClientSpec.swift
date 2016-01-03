@@ -1,8 +1,8 @@
 //
-//  SocketEngineClient.swift
+//  SocketClientSpec.swift
 //  Socket.IO-Client-Swift
 //
-//  Created by Erik Little on 3/19/15.
+//  Created by Erik Little on 1/3/16.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -21,13 +21,17 @@
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
-//
 
 import Foundation
 
-@objc public protocol SocketEngineClient {
+protocol SocketClientSpec: class {
+    var nsp: String { get set }
+    var waitingData: [SocketPacket] { get set }
+    
+    func didConnect()
+    func didDisconnect(reason: String)
     func didError(reason: AnyObject)
-    func engineDidClose(reason: String)
-    func parseEngineMessage(msg: String)
-    func parseEngineBinaryData(data: NSData)
+    func handleAck(ack: Int, data: [AnyObject])
+    func handleEvent(event: String, data: [AnyObject], isInternalMessage: Bool, withAck ack: Int)
+    func joinNamespace(namespace: String)
 }

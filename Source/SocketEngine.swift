@@ -154,7 +154,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
 
             if let data = NSData(base64EncodedString: noPrefix,
                 options: .IgnoreUnknownCharacters) {
-                    client?.parseBinaryData(data)
+                    client?.parseEngineBinaryData(data)
             }
             
             return true
@@ -299,7 +299,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
     }
 
     private func handleMessage(message: String) {
-        client?.parseSocketMessage(message)
+        client?.parseEngineMessage(message)
     }
 
     private func handleNOOP() {
@@ -414,7 +414,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
 
     private func parseEngineData(data: NSData) {
         DefaultSocketLogger.Logger.log("Got binary data: %@", type: "SocketEngine", args: data)
-        client?.parseBinaryData(data.subdataWithRange(NSMakeRange(1, data.length - 1)))
+        client?.parseEngineBinaryData(data.subdataWithRange(NSMakeRange(1, data.length - 1)))
     }
 
     private func parseEngineMessage(message: String, fromPolling: Bool) {

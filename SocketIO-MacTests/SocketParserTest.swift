@@ -10,6 +10,7 @@ import XCTest
 @testable import SocketIO
 
 class SocketParserTest: XCTestCase {
+    let testSocket = SocketIOClient(socketURL: "")
     
     //Format key: message; namespace-data-binary-id
     static let packetTypes: Dictionary<String, (String, [AnyObject], [NSData], Int)> = [
@@ -93,7 +94,7 @@ class SocketParserTest: XCTestCase {
     
     func testInvalidInput() {
         let message = "8"
-        switch SocketParser.parseString(message) {
+        switch testSocket.parseString(message) {
         case .Left(_):
             return
         case .Right(_):
@@ -111,7 +112,7 @@ class SocketParserTest: XCTestCase {
     
     func validateParseResult(message: String) {
         let validValues = SocketParserTest.packetTypes[message]!
-        let packet = SocketParser.parseString(message)
+        let packet = testSocket.parseString(message)
         let type = message.substringWithRange(Range<String.Index>(start: message.startIndex, end: message.startIndex.advancedBy(1)))
         if case let .Right(packet) = packet {
             XCTAssertEqual(packet.type, SocketPacket.PacketType(rawValue: Int(type) ?? -1)!)
@@ -128,7 +129,7 @@ class SocketParserTest: XCTestCase {
         let keys = Array(SocketParserTest.packetTypes.keys)
         measureBlock({
             for item in keys.enumerate() {
-                SocketParser.parseString(item.element)
+                self.testSocket.parseString(item.element)
             }
         })
     }

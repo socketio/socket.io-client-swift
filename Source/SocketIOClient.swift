@@ -24,7 +24,7 @@
 
 import Foundation
 
-public final class SocketIOClient: NSObject, SocketEngineClient {
+public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable {
     public let socketURL: String
     
     public private(set) var engine: SocketEngineSpec?
@@ -319,13 +319,12 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     }
     
     // Called when the socket gets an ack for something it sent
-    func handleAck(ack: Int, data: AnyObject?) {
+    func handleAck(ack: Int, data: [AnyObject]) {
         guard status == .Connected else {return}
         
         DefaultSocketLogger.Logger.log("Handling ack: %@ with data: %@", type: logType, args: ack, data ?? "")
         
-        ackHandlers.executeAck(ack,
-            items: (data as? [AnyObject]) ?? (data != nil ? [data!] : []))
+        ackHandlers.executeAck(ack, items: data)
     }
     
     /**
@@ -436,15 +435,16 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
         connect()
     }
     
-    public func parseSocketMessage(msg: String) {
+    public func parseEngineMessage(msg: String) {
+        DefaultSocketLogger.Logger.log("Should parse message", type: "SocketIOClient")
         dispatch_async(parseQueue) {
-            SocketParser.parseSocketMessage(msg, socket: self)
+            self.parseSocketMessage(msg)
         }
     }
     
-    public func parseBinaryData(data: NSData) {
+    public func parseEngineBinaryData(data: NSData) {
         dispatch_async(parseQueue) {
-            SocketParser.parseBinaryData(data, socket: self)
+            self.parseBinaryData(data)
         }
     }
     
