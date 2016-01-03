@@ -494,7 +494,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
             return
         }
 
-        ++pongsMissed
+        pongsMissed += 1
         write("", withType: .Ping, withData: [])
     }
 
