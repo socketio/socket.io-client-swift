@@ -568,7 +568,7 @@ extension SocketEngine {
         doLongPoll(req)
     }
     
-    private func doRequest(req: NSMutableURLRequest,
+    private func doRequest(req: NSURLRequest,
         withCallback callback: (NSData?, NSURLResponse?, NSError?) -> Void) {
             if !polling || closed || invalidated {
                 DefaultSocketLogger.Logger.error("Tried to do polling request when not supposed to", type: logType)
@@ -580,7 +580,7 @@ extension SocketEngine {
             session?.dataTaskWithRequest(req, completionHandler: callback).resume()
     }
     
-    private func doLongPoll(req: NSMutableURLRequest) {
+    private func doLongPoll(req: NSURLRequest) {
         doRequest(req) {[weak self] data, res, err in
             guard let this = self else {return}
             
