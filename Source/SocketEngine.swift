@@ -577,7 +577,6 @@ extension SocketEngine {
             
             DefaultSocketLogger.Logger.log("Doing polling request", type: logType)
             
-            req.cachePolicy = .ReloadIgnoringLocalAndRemoteCacheData
             session?.dataTaskWithRequest(req, completionHandler: callback).resume()
     }
     
