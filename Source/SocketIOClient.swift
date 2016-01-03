@@ -30,6 +30,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     public private(set) var engine: SocketEngineSpec?
     public private(set) var status = SocketIOClientStatus.NotConnected
     
+    public var connectParams: [String: AnyObject]?
     public var forceNew = false
     public var nsp = "/"
     public var options: Set<SocketIOClientOption>
@@ -46,7 +47,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient {
     private var anyHandler: ((SocketAnyEvent) -> Void)?
     private var currentReconnectAttempt = 0
     private var handlers = [SocketEventHandler]()
-    private var connectParams: [String: AnyObject]?
     private var reconnectTimer: NSTimer?
     private var ackHandlers = SocketAckManager()
     
