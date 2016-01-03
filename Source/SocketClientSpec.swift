@@ -22,8 +22,6 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-import Foundation
-
 protocol SocketClientSpec: class {
     var nsp: String { get set }
     var waitingData: [SocketPacket] { get set }
