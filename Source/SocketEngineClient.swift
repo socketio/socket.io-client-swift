@@ -30,4 +30,5 @@ import Foundation
     func engineDidClose(reason: String)
     func parseEngineMessage(msg: String)
     func parseEngineBinaryData(data: NSData)
+    optional func engineDidOpen(reason: String)
 }

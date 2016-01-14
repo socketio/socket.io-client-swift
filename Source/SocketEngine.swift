@@ -762,6 +762,7 @@ extension SocketEngine {
             connected = true
             probing = false
             polling = false
+            client?.engineDidOpen!("Connect")
         }
     }
     
