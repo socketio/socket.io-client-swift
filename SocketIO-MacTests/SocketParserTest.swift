@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import SocketIO
+@testable import SocketIOClientSwift
 
 class SocketParserTest: XCTestCase {
     let testSocket = SocketIOClient(socketURL: "")

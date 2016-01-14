@@ -147,36 +147,35 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
     /**
      Connect to the server. If we aren't connected after timeoutAfter, call handler
      */
-    public func connect(timeoutAfter timeoutAfter: Int,
-        withTimeoutHandler handler: (() -> Void)?) {
-            assert(timeoutAfter >= 0, "Invalid timeout: \(timeoutAfter)")
-            
-            guard status != .Connected else {
-                DefaultSocketLogger.Logger.log("Tried connecting on an already connected socket",
-                    type: logType)
-                return
+    public func connect(timeoutAfter timeoutAfter: Int, withTimeoutHandler handler: (() -> Void)?) {
+        assert(timeoutAfter >= 0, "Invalid timeout: \(timeoutAfter)")
+        
+        guard status != .Connected else {
+            DefaultSocketLogger.Logger.log("Tried connecting on an already connected socket",
+                type: logType)
+            return
+        }
+        
+        status = .Connecting
+        
+        if engine == nil || forceNew {
+            addEngine().open(connectParams)
+        } else {
+            engine?.open(connectParams)
+        }
+        
+        guard timeoutAfter != 0 else { return }
+        
+        let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeoutAfter) * Int64(NSEC_PER_SEC))
+        
+        dispatch_after(time, handleQueue) {[weak self] in
+            if let this = self where this.status != .Connected {
+                this.status = .Closed
+                this.engine?.close()
+                
+                handler?()
             }
-            
-            status = .Connecting
-            
-            if engine == nil || forceNew {
-                addEngine().open(connectParams)
-            } else {
-                engine?.open(connectParams)
-            }
-            
-            guard timeoutAfter != 0 else { return }
-            
-            let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeoutAfter) * Int64(NSEC_PER_SEC))
-            
-            dispatch_after(time, handleQueue) {[weak self] in
-                if let this = self where this.status != .Connected {
-                    this.status = .Closed
-                    this.engine?.close()
-                    
-                    handler?()
-                }
-            }
+        }
     }
     
     private func createOnAck(items: [AnyObject]) -> OnAckCallback {
@@ -330,22 +329,20 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
     /**
      Causes an event to be handled. Only use if you know what you're doing.
      */
-    public func handleEvent(event: String, data: [AnyObject], isInternalMessage: Bool,
-        withAck ack: Int = -1) {
-            guard status == .Connected || isInternalMessage else {
-                return
+    public func handleEvent(event: String, data: [AnyObject], isInternalMessage: Bool, withAck ack: Int = -1) {
+        guard status == .Connected || isInternalMessage else {
+            return
+        }
+        
+        DefaultSocketLogger.Logger.log("Handling event: %@ with data: %@", type: logType, args: event, data ?? "")
+        
+        dispatch_async(handleQueue) {
+            self.anyHandler?(SocketAnyEvent(event: event, items: data))
+            
+            for handler in self.handlers where handler.event == event {
+                handler.executeCallback(data, withAck: ack, withSocket: self)
             }
-            
-            DefaultSocketLogger.Logger.log("Handling event: %@ with data: %@", type: logType, args: event, data ?? "")
-            
-            dispatch_async(handleQueue) {
-                self.anyHandler?(SocketAnyEvent(event: event, items: data))
-                
-                for handler in self.handlers where handler.event == event {
-                    handler.executeCallback(data, withAck: ack, withSocket: self)
-                }
-            }
-            
+        }
     }
     
     /**
@@ -436,7 +433,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
     }
     
     public func parseEngineMessage(msg: String) {
-        DefaultSocketLogger.Logger.log("Should parse message", type: "SocketIOClient")
+        DefaultSocketLogger.Logger.log("Should parse message: %@", type: "SocketIOClient", args: msg)
+        
         dispatch_async(parseQueue) {
             self.parseSocketMessage(msg)
         }

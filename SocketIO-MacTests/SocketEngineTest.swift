@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import SocketIO
+@testable import SocketIOClientSwift
 
 class SocketEngineTest: XCTestCase {
     var client: SocketIOClient!
