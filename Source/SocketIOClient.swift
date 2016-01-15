@@ -318,10 +318,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         }
     }
     
-    public func engineDidOpen(reason: String) {
-        didConnect()
-    }
-    
     // Called when the socket gets an ack for something it sent
     func handleAck(ack: Int, data: [AnyObject]) {
         guard status == .Connected else {return}

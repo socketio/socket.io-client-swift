@@ -332,7 +332,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
                     createWebsocketAndConnect(true)
                 }
                 
-                client?.engineDidOpen("Connect")
+                client?.engineDidOpen?("Connect")
             }
         } catch {
             DefaultSocketLogger.Logger.error("Error parsing open packet", type: logType)
