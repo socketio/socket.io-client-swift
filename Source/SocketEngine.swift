@@ -331,6 +331,8 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
                 if !forcePolling && !forceWebsockets && upgradeWs {
                     createWebsocketAndConnect(true)
                 }
+                
+                client?.engineDidOpen("Connect")
             }
         } catch {
             DefaultSocketLogger.Logger.error("Error parsing open packet", type: logType)
