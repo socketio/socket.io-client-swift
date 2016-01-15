@@ -26,7 +26,7 @@ import Foundation
 
 public protocol SocketEnginePollable: SocketEngineSpec {
     var invalidated: Bool { get }
-    var postWait: [String] { get set } // Would like to change to get only
+    var postWait: [String] { get set }
     var session: NSURLSession? { get }
     var waitingForPoll: Bool { get set }
     var waitingForPost: Bool { get set }
