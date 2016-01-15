@@ -318,7 +318,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, WebSocketDelegate {
                 connected = true
 
                 if let upgrades = json?["upgrades"] as? [String] {
-                    upgradeWs = upgrades.filter {$0 == "websocket"}.count != 0
+                    upgradeWs = upgrades.contains("websocket")
                 } else {
                     upgradeWs = false
                 }
