@@ -26,6 +26,7 @@ import Foundation
 
 public protocol SocketEnginePollable: SocketEngineSpec {
     var invalidated: Bool { get }
+    var postWait: [String] { get set } // Would like to change to get only
     var session: NSURLSession? { get }
     var waitingForPoll: Bool { get set }
     var waitingForPost: Bool { get set }
@@ -191,8 +192,7 @@ extension SocketEnginePollable {
     
     /// Send polling message.
     /// Only call on emitQueue
-    public func sendPollMessage(message: String, withType type: SocketEnginePacketType,
-        withData datas: [NSData]) {
+    public func sendPollMessage(message: String, withType type: SocketEnginePacketType, withData datas: [NSData]) {
             DefaultSocketLogger.Logger.log("Sending poll: %@ as type: %@", type: "SocketEngine", args: message, type.rawValue)
             let fixedMessage = doubleEncodeUTF8(message)
             let strMsg = "\(type.rawValue)\(fixedMessage)"

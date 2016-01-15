@@ -37,8 +37,7 @@ import Foundation
     var parseQueue: dispatch_queue_t! { get }
     var pingTimer: NSTimer? { get }
     var polling: Bool { get }
-    var postWait: [String] { get set } // Would like to change to get only
-    var probing: Bool { get } // Would like to change to get only
+    var probing: Bool { get }
     var emitQueue: dispatch_queue_t! { get }
     var handleQueue: dispatch_queue_t! { get }
     var sid: String { get }
