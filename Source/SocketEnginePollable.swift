@@ -25,7 +25,7 @@
 import Foundation
 
 public protocol SocketEnginePollable: SocketEngineSpec {
-    var invalidated: Bool { get set }
+    var invalidated: Bool { get }
     var session: NSURLSession? { get }
     var waitingForPoll: Bool { get set }
     var waitingForPost: Bool { get set }
@@ -211,7 +211,6 @@ extension SocketEnginePollable {
     }
     
     public func stopPolling() {
-        invalidated = true
         session?.finishTasksAndInvalidate()
     }
 }

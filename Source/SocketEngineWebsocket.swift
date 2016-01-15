@@ -26,7 +26,6 @@
 import Foundation
 
 public protocol SocketEngineWebsocket: SocketEngineSpec, WebSocketDelegate {
-    var websocketConnected: Bool { get set }
     var ws: WebSocket? { get }
 
     func sendWebSocketMessage(str: String, withType type: SocketEnginePacketType, withData datas: [NSData])
@@ -35,7 +34,7 @@ public protocol SocketEngineWebsocket: SocketEngineSpec, WebSocketDelegate {
 // WebSocket methods
 extension SocketEngineWebsocket {
     func probeWebSocket() {
-        if websocketConnected {
+        if ws?.isConnected ?? false {
             sendWebSocketMessage("probe", withType: .Ping, withData: [])
         }
     }

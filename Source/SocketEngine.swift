@@ -24,17 +24,14 @@
 
 import Foundation
 
-public final class SocketEngine: NSObject, SocketEngineSpec, SocketEnginePollable, SocketEngineWebsocket {
+public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWebsocket {
     public let emitQueue = dispatch_queue_create("com.socketio.engineEmitQueue", DISPATCH_QUEUE_SERIAL)
     public let handleQueue = dispatch_queue_create("com.socketio.engineHandleQueue", DISPATCH_QUEUE_SERIAL)
     public let parseQueue = dispatch_queue_create("com.socketio.engineParseQueue", DISPATCH_QUEUE_SERIAL)
 
-    public var invalidated = false
     public var postWait = [String]()
-    public var probing = false
     public var waitingForPoll = false
     public var waitingForPost = false
-    public var websocketConnected = false
     
     public private(set) var closed = false
     public private(set) var connected = false
@@ -43,8 +40,10 @@ public final class SocketEngine: NSObject, SocketEngineSpec, SocketEnginePollabl
     public private(set) var fastUpgrade = false
     public private(set) var forcePolling = false
     public private(set) var forceWebsockets = false
+    public private(set) var invalidated = false
     public private(set) var pingTimer: NSTimer?
     public private(set) var polling = true
+    public private(set) var probing = false
     public private(set) var session: NSURLSession?
     public private(set) var sid = ""
     public private(set) var socketPath = "/engine.io"
@@ -171,6 +170,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, SocketEnginePollabl
 
         pingTimer?.invalidate()
         closed = true
+        invalidated = true
         connected = false
 
         if websocket {
@@ -468,7 +468,6 @@ public final class SocketEngine: NSObject, SocketEngineSpec, SocketEnginePollabl
         waitingForPoll = false
         waitingForPost = false
         websocket = false
-        websocketConnected = false
     }
     
     /// Send an engine message (4)
@@ -506,7 +505,7 @@ public final class SocketEngine: NSObject, SocketEngineSpec, SocketEnginePollabl
     }
 
     private func upgradeTransport() {
-        if websocketConnected {
+        if ws?.isConnected ?? false {
             DefaultSocketLogger.Logger.log("Upgrading transport to WebSockets", type: logType)
 
             fastUpgrade = true
@@ -536,8 +535,6 @@ public final class SocketEngine: NSObject, SocketEngineSpec, SocketEnginePollabl
     
     // Delagate methods
     public func websocketDidConnect(socket: WebSocket) {
-        websocketConnected = true
-        
         if !forceWebsockets {
             probing = true
             probeWebSocket()
@@ -549,7 +546,6 @@ public final class SocketEngine: NSObject, SocketEngineSpec, SocketEnginePollabl
     }
     
     public func websocketDidDisconnect(socket: WebSocket, error: NSError?) {
-        websocketConnected = false
         probing = false
         
         if closed {
