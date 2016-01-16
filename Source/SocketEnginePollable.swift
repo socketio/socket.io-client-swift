@@ -39,7 +39,6 @@ public protocol SocketEnginePollable: SocketEngineSpec {
     var waitingForPost: Bool { get set }
     
     func doPoll()
-    func handlePollingFailed(reason: String)
     func sendPollMessage(message: String, withType type: SocketEnginePacketType, withData datas: [NSData])
     func stopPolling()
 }
@@ -91,7 +90,7 @@ extension SocketEnginePollable {
                 DefaultSocketLogger.Logger.error(err?.localizedDescription ?? "Error", type: "SocketEngine")
                 
                 if this.polling {
-                    this.handlePollingFailed(err?.localizedDescription ?? "Error")
+                    this.didError(err?.localizedDescription ?? "Error")
                 }
                 
                 return
@@ -157,7 +156,7 @@ extension SocketEnginePollable {
                 DefaultSocketLogger.Logger.error(err?.localizedDescription ?? "Error", type: "SocketEngine")
                 
                 if this.polling {
-                    this.handlePollingFailed(err?.localizedDescription ?? "Error")
+                    this.didError(err?.localizedDescription ?? "Error")
                 }
                 
                 return
@@ -218,6 +217,8 @@ extension SocketEnginePollable {
     }
     
     public func stopPolling() {
+        waitingForPoll = false
+        waitingForPost = false
         session?.finishTasksAndInvalidate()
     }
 }

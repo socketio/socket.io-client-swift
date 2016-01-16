@@ -49,6 +49,7 @@ import Foundation
     init(client: SocketEngineClient, url: String, options: NSDictionary?)
     
     func close()
+    func didError(error: String)
     func doFastUpgrade()
     func flushWaitingForPostToWebSocket()
     func open(opts: [String: AnyObject]?)

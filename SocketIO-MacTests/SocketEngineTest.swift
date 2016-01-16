@@ -50,4 +50,28 @@ class SocketEngineTest: XCTestCase {
         engine.parsePollingMessage("15:42[\"blankTest\"]24:42[\"stringTest\",\"hello\"]")
         waitForExpectationsWithTimeout(3, handler: nil)
     }
+    
+    func testEngineDoesErrorOnUnknownTransport() {
+        let finalExpectation = expectationWithDescription("Unknown Transport")
+        
+        client.on("error") {data, ack in
+            if let error = data[0] as? String where error == "Unknown transport" {
+                finalExpectation.fulfill()
+            }
+        }
+        
+        engine.parseEngineMessage("{\"code\": 0, \"message\": \"Unknown transport\"}", fromPolling: false)
+        waitForExpectationsWithTimeout(3, handler: nil)
+    }
+    
+    func testEngineDoesErrorOnUnknownMessage() {
+        let finalExpectation = expectationWithDescription("Engine Errors")
+        
+        client.on("error") {data, ack in
+            finalExpectation.fulfill()
+        }
+        
+        engine.parseEngineMessage("afafafda", fromPolling: false)
+        waitForExpectationsWithTimeout(3, handler: nil)
+    }
 }

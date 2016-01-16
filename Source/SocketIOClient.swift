@@ -227,14 +227,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         handleEvent("disconnect", data: [reason], isInternalMessage: true)
     }
     
-    /// error
-    public func didError(reason: AnyObject) {
-        DefaultSocketLogger.Logger.error("%@", type: logType, args: reason)
-        
-        handleEvent("error", data: reason as? [AnyObject] ?? [reason],
-            isInternalMessage: true)
-    }
-    
     /**
      Same as close
      */
@@ -318,6 +310,14 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         }
     }
     
+    /// error
+    public func engineDidError(reason: AnyObject) {
+        DefaultSocketLogger.Logger.error("%@", type: logType, args: reason)
+        
+        handleEvent("error", data: reason as? [AnyObject] ?? [reason],
+            isInternalMessage: true)
+    }
+    
     // Called when the socket gets an ack for something it sent
     func handleAck(ack: Int, data: [AnyObject]) {
         guard status == .Connected else {return}
@@ -330,22 +330,20 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
     /**
      Causes an event to be handled. Only use if you know what you're doing.
      */
-    public func handleEvent(event: String, data: [AnyObject], isInternalMessage: Bool,
-        withAck ack: Int = -1) {
-            guard status == .Connected || isInternalMessage else {
-                return
+    public func handleEvent(event: String, data: [AnyObject], isInternalMessage: Bool, withAck ack: Int = -1) {
+        guard status == .Connected || isInternalMessage else {
+            return
+        }
+        
+        DefaultSocketLogger.Logger.log("Handling event: %@ with data: %@", type: logType, args: event, data ?? "")
+        
+        dispatch_async(handleQueue) {
+            self.anyHandler?(SocketAnyEvent(event: event, items: data))
+            
+            for handler in self.handlers where handler.event == event {
+                handler.executeCallback(data, withAck: ack, withSocket: self)
             }
-            
-            DefaultSocketLogger.Logger.log("Handling event: %@ with data: %@", type: logType, args: event, data ?? "")
-            
-            dispatch_async(handleQueue) {
-                self.anyHandler?(SocketAnyEvent(event: event, items: data))
-                
-                for handler in self.handlers where handler.event == event {
-                    handler.executeCallback(data, withAck: ack, withSocket: self)
-                }
-            }
-            
+        }
     }
     
     /**

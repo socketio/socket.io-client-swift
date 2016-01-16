@@ -60,10 +60,8 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
     private typealias ProbeWaitQueue = [Probe]
 
     private let allowedCharacterSet = NSCharacterSet(charactersInString: "!*'();:@&=+$,/?%#[]\" {}").invertedSet
-
     private let logType = "SocketEngine"
     private let url: String
-    private let workQueue = NSOperationQueue()
     
     private var connectParams: [String: AnyObject]?
     private var pingInterval: Double?
@@ -132,20 +130,20 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
                     
                     switch code {
                     case 0: // Unknown transport
-                        logAndError(error)
+                        didError(error)
                     case 1: // Unknown sid. clear and retry connect
                         sid = ""
                         open(connectParams)
                     case 2: // Bad handshake request
-                        logAndError(error)
+                        didError(error)
                     case 3: // Bad request
-                        logAndError(error)
+                        didError(error)
                     default:
-                        logAndError(error)
+                        didError(error)
                     }
             }
         } catch {
-            logAndError("Got unknown error from server")
+            didError("Got unknown error from server \(msg)")
         }
     }
 
@@ -250,6 +248,17 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
             ws?.connect()
         }
     }
+    
+    public func didError(error: String) {
+        connected = false
+        ws?.disconnect()
+        stopPolling()
+        pingTimer?.invalidate()
+        
+        DefaultSocketLogger.Logger.error(error, type: logType)
+        client?.engineDidError(error)
+        client?.engineDidClose(error)
+    }
 
     public func doFastUpgrade() {
         if waitingForPoll {
@@ -331,17 +340,18 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
                     createWebsocketAndConnect(true)
                 }
                 
+                
+                startPingTimer()
+                
+                if !forceWebsockets {
+                    doPoll()
+                }
+                
                 client?.engineDidOpen?("Connect")
             }
         } catch {
-            DefaultSocketLogger.Logger.error("Error parsing open packet", type: logType)
+            didError("Error parsing open packet")
             return
-        }
-
-        startPingTimer()
-
-        if !forceWebsockets {
-            doPoll()
         }
     }
 
@@ -354,31 +364,12 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
         }
     }
 
-    // A poll failed, tell the client about it
-    public func handlePollingFailed(reason: String) {
-        connected = false
-        ws?.disconnect()
-        pingTimer?.invalidate()
-        waitingForPoll = false
-        waitingForPost = false
-
-        if !closed {
-            client?.didError(reason)
-            client?.engineDidClose(reason)
-        }
-    }
-    
-    private func logAndError(error: String) {
-        DefaultSocketLogger.Logger.error(error, type: logType)
-        client?.didError(error)
-    }
-
     public func open(opts: [String: AnyObject]? = nil) {
         connectParams = opts
         
         if connected {
             DefaultSocketLogger.Logger.error("Tried to open while connected", type: logType)
-            client?.didError("Tried to open engine while connected")
+            didError("Tried to open engine while connected")
 
             return
         }
@@ -463,7 +454,7 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
         invalidated = false
         session = NSURLSession(configuration: .defaultSessionConfiguration(),
             delegate: sessionDelegate,
-            delegateQueue: workQueue)
+            delegateQueue: NSOperationQueue())
         sid = ""
         waitingForPoll = false
         waitingForPost = false
@@ -533,7 +524,7 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
         }
     }
     
-    // Delagate methods
+    // Delegate methods
     public func websocketDidConnect(socket: WebSocket) {
         if !forceWebsockets {
             probing = true
@@ -561,7 +552,7 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
             let reason = error?.localizedDescription ?? "Socket Disconnected"
             
             if error != nil {
-                client?.didError(reason)
+                didError(reason)
             }
             
             client?.engineDidClose(reason)
