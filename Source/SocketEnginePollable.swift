@@ -67,6 +67,8 @@ extension SocketEnginePollable {
             postStr += "\(len):\(packet)"
         }
         
+        DefaultSocketLogger.Logger.log("Created POST string: %@", type: "SocketEnginePolling", args: postStr)
+        
         postWait.removeAll(keepCapacity: false)
         
         let req = NSMutableURLRequest(URL: NSURL(string: urlPolling + "&sid=\(sid)")!)
@@ -103,7 +105,7 @@ extension SocketEnginePollable {
                 return
             }
             
-            DefaultSocketLogger.Logger.log("Doing polling request", type: "SocketEngine")
+            DefaultSocketLogger.Logger.log("Doing polling request", type: "SocketEnginePolling")
             
             session?.dataTaskWithRequest(req, completionHandler: callback).resume()
     }
@@ -152,7 +154,7 @@ extension SocketEnginePollable {
         
         waitingForPost = true
         
-        DefaultSocketLogger.Logger.log("POSTing: %@", type: "SocketEngine", args: postWait)
+        DefaultSocketLogger.Logger.log("POSTing", type: "SocketEnginePolling")
         
         doRequest(req) {[weak self] data, res, err in
             guard let this = self else { return }
