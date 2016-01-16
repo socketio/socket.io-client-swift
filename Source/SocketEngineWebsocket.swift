@@ -25,6 +25,7 @@
 
 import Foundation
 
+/// Protocol that is used to implement socket.io WebSocket support
 public protocol SocketEngineWebsocket: SocketEngineSpec, WebSocketDelegate {
     var ws: WebSocket? { get }
 

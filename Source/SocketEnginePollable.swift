@@ -24,11 +24,18 @@
 
 import Foundation
 
+/// Protocol that is used to implement socket.io polling support
 public protocol SocketEnginePollable: SocketEngineSpec {
     var invalidated: Bool { get }
+    /// Holds strings waiting to be sent over polling. 
+    /// You shouldn't need to mess with this.
     var postWait: [String] { get set }
     var session: NSURLSession? { get }
+    /// Because socket.io doesn't let you send two polling request at the same time
+    /// we have to keep track if there's an outstanding poll
     var waitingForPoll: Bool { get set }
+    /// Because socket.io doesn't let you send two post request at the same time
+    /// we have to keep track if there's an outstanding post
     var waitingForPost: Bool { get set }
     
     func doPoll()
