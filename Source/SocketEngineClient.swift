@@ -26,7 +26,7 @@
 import Foundation
 
 @objc public protocol SocketEngineClient {    
-    func engineDidError(reason: AnyObject)
+    func engineDidError(reason: String)
     func engineDidClose(reason: String)
     optional func engineDidOpen(reason: String)
     func parseEngineMessage(msg: String)

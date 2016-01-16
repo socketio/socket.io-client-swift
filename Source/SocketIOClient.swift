@@ -311,11 +311,10 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
     }
     
     /// error
-    public func engineDidError(reason: AnyObject) {
+    public func engineDidError(reason: String) {
         DefaultSocketLogger.Logger.error("%@", type: logType, args: reason)
         
-        handleEvent("error", data: reason as? [AnyObject] ?? [reason],
-            isInternalMessage: true)
+        handleEvent("error", data: [reason], isInternalMessage: true)
     }
     
     // Called when the socket gets an ack for something it sent
