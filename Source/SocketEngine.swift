@@ -163,7 +163,7 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
         }
     }
 
-    public func close() {
+    public func close(reason: String) {
         DefaultSocketLogger.Logger.log("Engine is being closed.", type: logType)
 
         pingTimer?.invalidate()
@@ -179,7 +179,7 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
         
         ws?.disconnect()
         stopPolling()
-        client?.engineDidClose("Disconnect")
+        client?.engineDidClose(reason)
     }
 
     private func createURLs(params: [String: AnyObject]?) -> (String, String) {
