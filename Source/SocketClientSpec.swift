@@ -28,17 +28,16 @@ protocol SocketClientSpec: class {
     
     func didConnect()
     func didDisconnect(reason: String)
-    func didError(reason: AnyObject)
+    func didError(reason: String)
     func handleAck(ack: Int, data: [AnyObject])
     func handleEvent(event: String, data: [AnyObject], isInternalMessage: Bool, withAck ack: Int)
     func joinNamespace(namespace: String)
 }
 
 extension SocketClientSpec {
-    func didError(reason: AnyObject) {
+    func didError(reason: String) {
         DefaultSocketLogger.Logger.error("%@", type: "SocketIOClient", args: reason)
         
-        handleEvent("error", data: reason as? [AnyObject] ?? [reason],
-            isInternalMessage: true, withAck: -1)
+        handleEvent("error", data: [reason], isInternalMessage: true, withAck: -1)
     }
 }

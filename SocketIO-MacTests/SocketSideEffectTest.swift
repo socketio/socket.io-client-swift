@@ -100,6 +100,18 @@ class SocketSideEffectTest: XCTestCase {
         XCTAssertEqual(socket.testHandlers.count, 1)
     }
     
+    func testHandlesErrorPacket() {
+        let expectation = expectationWithDescription("Handled error")
+        socket.on("error") {data, ack in
+            if let error = data[0] as? String where error == "test error" {
+                expectation.fulfill()
+            }
+        }
+        
+        socket.parseSocketMessage("4\"test error\"")
+        waitForExpectationsWithTimeout(3, handler: nil)
+    }
+    
     func testHandleBinaryEvent() {
         let expectation = expectationWithDescription("handled binary event")
         socket.on("test") {data, ack in
