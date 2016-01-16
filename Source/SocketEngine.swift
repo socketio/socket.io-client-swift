@@ -132,8 +132,7 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
                     case 0: // Unknown transport
                         didError(error)
                     case 1: // Unknown sid. clear and retry connect
-                        sid = ""
-                        open(connectParams)
+                        didError(error)
                     case 2: // Bad handshake request
                         didError(error)
                     case 3: // Bad request
@@ -164,22 +163,29 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
     }
 
     public func close(reason: String) {
-        DefaultSocketLogger.Logger.log("Engine is being closed.", type: logType)
-
-        pingTimer?.invalidate()
-        closed = true
-        invalidated = true
-        connected = false
-
-        if websocket {
-            sendWebSocketMessage("", withType: .Close, withData: [])
-        } else {
-            sendPollMessage("", withType: .Close, withData: [])
+        func postSendClose(data: NSData?, _ res: NSURLResponse?, _ err: NSError?) {
+            sid = ""
+            closed = true
+            invalidated = true
+            connected = false
+            
+            pingTimer?.invalidate()
+            ws?.disconnect()
+            stopPolling()
+            client?.engineDidClose(reason)
         }
         
-        ws?.disconnect()
-        stopPolling()
-        client?.engineDidClose(reason)
+        DefaultSocketLogger.Logger.log("Engine is being closed.", type: logType)
+        
+        if websocket {
+            sendWebSocketMessage("", withType: .Close, withData: [])
+            postSendClose(nil, nil, nil)
+        } else {
+            // We need to take special care when we're polling that we send it ASAP
+            postWait.append("1")
+            let req = createRequestForPostWithPostWait()
+            doRequest(req, withCallback: postSendClose)
+        }
     }
 
     private func createURLs(params: [String: AnyObject]?) -> (String, String) {
@@ -250,14 +256,9 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
     }
     
     public func didError(error: String) {
-        connected = false
-        ws?.disconnect()
-        stopPolling()
-        pingTimer?.invalidate()
-        
         DefaultSocketLogger.Logger.error(error, type: logType)
         client?.engineDidError(error)
-        client?.engineDidClose(error)
+        close(error)
     }
 
     public func doFastUpgrade() {
@@ -364,15 +365,14 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
         }
     }
 
-    public func open(opts: [String: AnyObject]? = nil) {
-        connectParams = opts
-        
+    public func open(opts: [String: AnyObject]?) {
         if connected {
-            DefaultSocketLogger.Logger.error("Tried to open while connected", type: logType)
-            didError("Tried to open engine while connected")
-
+            DefaultSocketLogger.Logger.error("Engine tried opening while connected. This is probably a programming error. "
+                + "Abandoning open attempt", type: logType)
             return
         }
+        
+        connectParams = opts
 
         DefaultSocketLogger.Logger.log("Starting engine", type: logType)
         DefaultSocketLogger.Logger.log("Handshaking", type: logType)
