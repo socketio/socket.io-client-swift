@@ -26,17 +26,53 @@
 import Foundation
 
 @objc public protocol SocketEngineSpec {
-    weak var client: SocketEngineClient? {get set}
-    var cookies: [NSHTTPCookie]? {get}
-    var sid: String {get}
-    var socketPath: String {get}
-    var urlPolling: String {get}
-    var urlWebSocket: String {get}
+    weak var client: SocketEngineClient? { get set }
+    var closed: Bool { get }
+    var connected: Bool { get }
+    var cookies: [NSHTTPCookie]? { get }
+    var extraHeaders: [String: String]? { get }
+    var fastUpgrade: Bool { get }
+    var forcePolling: Bool { get }
+    var forceWebsockets: Bool { get }
+    var parseQueue: dispatch_queue_t! { get }
+    var pingTimer: NSTimer? { get }
+    var polling: Bool { get }
+    var probing: Bool { get }
+    var emitQueue: dispatch_queue_t! { get }
+    var handleQueue: dispatch_queue_t! { get }
+    var sid: String { get }
+    var socketPath: String { get }
+    var urlPolling: String { get }
+    var urlWebSocket: String { get }
+    var websocket: Bool { get }
     
     init(client: SocketEngineClient, url: String, options: NSDictionary?)
     
-    func close()
+    func close(reason: String)
+    func didError(error: String)
+    func doFastUpgrade()
+    func flushWaitingForPostToWebSocket()
     func open(opts: [String: AnyObject]?)
+    func parseEngineData(data: NSData)
+    func parseEngineMessage(message: String, fromPolling: Bool)
     func send(msg: String, withData datas: [NSData])
     func write(msg: String, withType type: SocketEnginePacketType, withData data: [NSData])
+}
+
+extension SocketEngineSpec {
+    func createBinaryDataForSend(data: NSData) -> Either<NSData, String> {
+        if websocket {
+            var byteArray = [UInt8](count: 1, repeatedValue: 0x0)
+            byteArray[0] = 4
+            let mutData = NSMutableData(bytes: &byteArray, length: 1)
+            
+            mutData.appendData(data)
+            
+            return .Left(mutData)
+        } else {
+            let str = "b4" + data.base64EncodedStringWithOptions(.Encoding64CharacterLineLength)
+            
+            return .Right(str)
+        }
+    }
 }

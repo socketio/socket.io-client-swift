@@ -58,7 +58,7 @@ extension SocketParsable {
         case .Disconnect:
             didDisconnect("Got Disconnect")
         case .Error:
-            didError(pack.data)
+            handleEvent("error", data: pack.data, isInternalMessage: false, withAck: pack.id)
         default:
             DefaultSocketLogger.Logger.log("Got invalid packet: %@", type: "SocketParser", args: pack.description)
         }
