@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import SocketIO
+@testable import SocketIOClientSwift
 
 class SocketSideEffectTest: XCTestCase {
     let data = "test".dataUsingEncoding(NSUTF8StringEncoding)!

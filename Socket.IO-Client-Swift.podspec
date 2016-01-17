@@ -1,11 +1,12 @@
 Pod::Spec.new do |s|
   s.name         = "Socket.IO-Client-Swift"
+  s.module_name  = "SocketIOClientSwift"
   s.version      = "5.1.0"
   s.summary      = "Socket.IO-client for iOS and OS X"
   s.description  = <<-DESC
                    Socket.IO-client for iOS and OS X.
                    Supports ws/wss/polling connections and binary.
-                   For socket.io 1.0+ and Swift 1.2.
+                   For socket.io 1.0+ and Swift.
                    DESC
   s.homepage     = "https://github.com/socketio/socket.io-client-swift"
   s.license      = { :type => 'MIT' }

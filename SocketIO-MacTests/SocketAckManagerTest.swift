@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import SocketIO
+@testable import SocketIOClientSwift
 
 class SocketAckManagerTest: XCTestCase {
     var ackManager = SocketAckManager()
