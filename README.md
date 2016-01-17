@@ -118,7 +118,7 @@ import SocketIOClientSwift
 Objective-C:
 
 ```Objective-C
-#import <Socket_IO_Client_Swift/SocketIOClientSwift-Swift.h>
+#import <SocketIOClientSwift/SocketIOClientSwift-Swift.h>
 ```
 
 CocoaSeeds
