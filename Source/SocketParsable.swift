@@ -112,7 +112,7 @@ extension SocketParsable {
         }
         
         let d = message[parser.currentIndex.advancedBy(1)..<message.endIndex]
-        let noPlaceholders = d["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] ~= "\"~~$2\""
+        let noPlaceholders = d["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] <~ "\"~~$2\""
         
         switch parseData(noPlaceholders) {
         case let .Left(err):

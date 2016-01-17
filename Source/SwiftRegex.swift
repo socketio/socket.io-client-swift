@@ -13,9 +13,11 @@
 
 import Foundation
 
+infix operator <~ { associativity none precedence 130 }
+
 private var swiftRegexCache = [String: NSRegularExpression]()
 
-internal class SwiftRegex: NSObject, BooleanType {
+internal final class SwiftRegex: NSObject, BooleanType {
     var target:String
     var regex: NSRegularExpression
     
@@ -41,11 +43,11 @@ internal class SwiftRegex: NSObject, BooleanType {
         fatalError("SwiftRegex: \(message)")
     }
 
-    private final var targetRange: NSRange {
+    private var targetRange: NSRange {
         return NSRange(location: 0,length: target.utf16.count)
     }
     
-    private final func substring(range: NSRange) -> String? {
+    private func substring(range: NSRange) -> String? {
         if range.location != NSNotFound {
             return (target as NSString).substringWithRange(range)
         } else {
@@ -168,36 +170,9 @@ extension String {
     }
 }
 
-func ~= (left: SwiftRegex, right: String) -> String {
+func <~ (left: SwiftRegex, right: String) -> String {
     return left.substituteMatches({match, stop in
         return left.regex.replacementStringForResult( match,
             inString: left.target as String, offset: 0, template: right )
-        }, options: [])
-}
-
-func ~= (left: SwiftRegex, right: [String]) -> String {
-    var matchNumber = 0
-    return left.substituteMatches({match, stop -> String in
-        
-        if ++matchNumber == right.count {
-            stop.memory = true
-        }
-        
-        return left.regex.replacementStringForResult( match,
-            inString: left.target as String, offset: 0, template: right[matchNumber-1] )
-        }, options: [])
-}
-
-func ~= (left: SwiftRegex, right: (String) -> String) -> String {
-    // return right(left.substring(match.range))
-    return left.substituteMatches(
-        {match, stop -> String in
-            right(left.substring(match.range)!)
-        }, options: [])
-}
-
-func ~= (left: SwiftRegex, right: ([String]?) -> String) -> String {
-    return left.substituteMatches({match, stop -> String in
-        return right(left.groupsForMatch(match))
         }, options: [])
 }

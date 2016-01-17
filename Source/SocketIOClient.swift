@@ -66,7 +66,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
             self.options.insertIgnore(.Secure(true))
         }
 
-        self.socketURL = socketURL["https?://"] ~= ""
+        self.socketURL = socketURL["https?://"] <~ ""
 
         for option in options {
             switch option {
