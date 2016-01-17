@@ -424,6 +424,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
     /**
      Same as connect
      */
+    @available(*, deprecated=6.0)
     public func open() {
         connect()
     }
