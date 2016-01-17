@@ -215,19 +215,19 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         reconnects = false
 
         // Make sure the engine is actually dead.
-        engine?.close("Client closed")
+        engine?.close(reason)
         handleEvent("disconnect", data: [reason], isInternalMessage: true)
     }
 
     /**
-     Closes the socket. Only reopen the same socket if you know what you're doing.
+     Disconnects the socket. Only reconnect the same socket if you know what you're doing.
      Will turn off automatic reconnects.
      */
     public func disconnect() {
         DefaultSocketLogger.Logger.log("Closing socket", type: logType)
 
         reconnects = false
-        didDisconnect("Closed")
+        didDisconnect("Disconnect")
     }
 
     /**
