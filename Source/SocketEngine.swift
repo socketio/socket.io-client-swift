@@ -227,7 +227,7 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
         return (urlPolling, urlWebSocket)
     }
 
-    private func createWebsocketAndConnect(connect: Bool) {
+    private func createWebsocketAndConnect() {
         let wsUrl = urlWebSocket + (sid == "" ? "" : "&sid=\(sid)")
 
         ws = WebSocket(url: NSURL(string: wsUrl)!)
@@ -250,9 +250,7 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
         ws?.delegate = self
         ws?.selfSignedSSL = selfSigned
 
-        if connect {
-            ws?.connect()
-        }
+        ws?.connect()
     }
     
     public func didError(error: String) {
@@ -338,7 +336,7 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
                 }
 
                 if !forcePolling && !forceWebsockets && upgradeWs {
-                    createWebsocketAndConnect(true)
+                    createWebsocketAndConnect()
                 }
                 
                 
@@ -384,7 +382,7 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
         if forceWebsockets {
             polling = false
             websocket = true
-            createWebsocketAndConnect(true)
+            createWebsocketAndConnect()
             return
         }
 
