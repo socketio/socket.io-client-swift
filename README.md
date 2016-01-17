@@ -112,13 +112,13 @@ Import the module:
 
 Swift:
 ```swift
-import Socket_IO_Client_Swift
+import SocketIOClientSwift
 ```
 
 Objective-C:
 
 ```Objective-C
-#import <Socket_IO_Client_Swift/Socket_IO_Client_Swift-Swift.h>
+#import <Socket_IO_Client_Swift/SocketIOClientSwift-Swift.h>
 ```
 
 CocoaSeeds
