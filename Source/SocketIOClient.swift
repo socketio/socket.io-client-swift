@@ -125,16 +125,9 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         reconnectTimer = nil
     }
     
-    /**
-     Closes the socket. Only reopen the same socket if you know what you're doing.
-     Will turn off automatic reconnects.
-     Pass true to fast if you're closing from a background task
-     */
+    @available(*, deprecated=6.0)
     public func close() {
-        DefaultSocketLogger.Logger.log("Closing socket", type: logType)
-        
-        reconnects = false
-        didDisconnect("Closed")
+        disconnect()
     }
     
     /**
@@ -228,10 +221,14 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
     }
     
     /**
-     Same as close
+     Closes the socket. Only reopen the same socket if you know what you're doing.
+     Will turn off automatic reconnects.
      */
     public func disconnect() {
-        close()
+        DefaultSocketLogger.Logger.log("Closing socket", type: logType)
+        
+        reconnects = false
+        didDisconnect("Closed")
     }
     
     /**
