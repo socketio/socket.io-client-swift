@@ -61,9 +61,8 @@ import Foundation
 
 extension SocketEngineSpec {
     func createBinaryDataForSend(data: NSData) -> Either<NSData, String> {
-        if websocket {
-            var byteArray = [UInt8](count: 1, repeatedValue: 0x0)
-            byteArray[0] = 4
+        if websocket {        
+            var byteArray = [UInt8](count: 1, repeatedValue: 0x4)
             let mutData = NSMutableData(bytes: &byteArray, length: 1)
             
             mutData.appendData(data)
