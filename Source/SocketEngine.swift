@@ -113,7 +113,7 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
     }
 
     deinit {
-        DefaultSocketLogger.Logger.log("Engine is being deinit", type: logType)
+        DefaultSocketLogger.Logger.log("Engine is being released", type: logType)
         closed = true
         stopPolling()
     }

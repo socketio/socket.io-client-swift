@@ -108,7 +108,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
     }
 
     deinit {
-        DefaultSocketLogger.Logger.log("Client is being deinit", type: logType)
+        DefaultSocketLogger.Logger.log("Client is being released", type: logType)
         engine?.close("Client Deinit")
     }
 
