@@ -55,7 +55,6 @@ import Foundation
     func open(opts: [String: AnyObject]?)
     func parseEngineData(data: NSData)
     func parseEngineMessage(message: String, fromPolling: Bool)
-    func send(msg: String, withData datas: [NSData])
     func write(msg: String, withType type: SocketEnginePacketType, withData data: [NSData])
 }
 
@@ -73,5 +72,10 @@ extension SocketEngineSpec {
             
             return .Right(str)
         }
+    }
+    
+    /// Send an engine message (4)
+    func send(msg: String, withData datas: [NSData]) {
+        write(msg, withType: .Message, withData: datas)
     }
 }

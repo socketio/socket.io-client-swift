@@ -458,15 +458,6 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
         waitingForPost = false
         websocket = false
     }
-    
-    /// Send an engine message (4)
-    public func send(msg: String, withData datas: [NSData]) {
-        if probing {
-            probeWait.append((msg, .Message, datas))
-        } else {
-            write(msg, withType: .Message, withData: datas)
-        }
-    }
 
     @objc private func sendPing() {
         //Server is not responding
@@ -514,10 +505,12 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
                 DefaultSocketLogger.Logger.log("Writing ws: %@ has data: %@",
                     type: self.logType, args: msg, data.count != 0)
                 self.sendWebSocketMessage(msg, withType: type, withData: data)
-            } else {
+            } else if !self.probing {
                 DefaultSocketLogger.Logger.log("Writing poll: %@ has data: %@",
                     type: self.logType, args: msg, data.count != 0)
                 self.sendPollMessage(msg, withType: type, withData: data)
+            } else {
+                self.probeWait.append((msg, type, data))
             }
         }
     }
