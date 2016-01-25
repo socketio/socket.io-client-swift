@@ -47,8 +47,8 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
     public private(set) var session: NSURLSession?
     public private(set) var sid = ""
     public private(set) var socketPath = "/engine.io/"
-    public private(set) var urlPolling = NSURL()
-    public private(set) var urlWebSocket = NSURL()
+    public private(set) var urlPolling = NSURL(string: "http://localhost?default=")!
+    public private(set) var urlWebSocket = NSURL(string: "http://localhost?default=")!
     public private(set) var websocket = false
     public private(set) var ws: WebSocket?
 
