@@ -46,7 +46,7 @@ import Foundation
     var urlWebSocket: String { get }
     var websocket: Bool { get }
     
-    init(client: SocketEngineClient, url: String, options: NSDictionary?)
+    init(client: SocketEngineClient, url: NSURL, options: NSDictionary?)
     
     func close(reason: String)
     func didError(error: String)

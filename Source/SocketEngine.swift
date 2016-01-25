@@ -61,7 +61,7 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
 
     private let allowedCharacterSet = NSCharacterSet(charactersInString: "!*'();:@&=+$,/?%#[]\" {}").invertedSet
     private let logType = "SocketEngine"
-    private let url: String
+    private let url: NSURL
     
     private var connectParams: [String: AnyObject]?
     private var pingInterval: Double?
@@ -76,11 +76,11 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
     private var secure = false
     private var selfSigned = false
     private var voipEnabled = false
-    
-    public init(client: SocketEngineClient, url: String, options: Set<SocketIOClientOption>) {
+
+    public init(client: SocketEngineClient, url: NSURL, options: Set<SocketIOClientOption>) {
         self.client = client
         self.url = url
-
+        
         for option in options {
             switch option {
             case let .SessionDelegate(delegate):
@@ -107,9 +107,20 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
         }
     }
     
-    public convenience init(client: SocketEngineClient, url: String, options: NSDictionary?) {
-        self.init(client: client, url: url,
-            options: options?.toSocketOptionsSet() ?? [])
+    public convenience init(client: SocketEngineClient, url: NSURL, options: NSDictionary?) {
+        self.init(client: client, url: url, options: options?.toSocketOptionsSet() ?? [])
+    }
+    
+    @available(*, deprecated=5.3)
+    public convenience init(client: SocketEngineClient, urlString: String, options: Set<SocketIOClientOption>) {
+        guard let url = NSURL(string: urlString) else { fatalError("Incorrect url") }
+        self.init(client: client, url: url, options: options)
+    }
+    
+    @available(*, deprecated=5.3)
+    public convenience init(client: SocketEngineClient, urlString: String, options: NSDictionary?) {
+        guard let url = NSURL(string: urlString) else { fatalError("Incorrect url") }
+        self.init(client: client, url: url, options: options?.toSocketOptionsSet() ?? [])
     }
 
     deinit {
@@ -193,7 +204,16 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
             return ("", "")
         }
 
-        let socketURL = "\(url)\(socketPath)/?transport="
+        let absURL = url.absoluteString["https?://"] <~ ""
+        let baseURL: String
+        
+        if absURL.hasSuffix("/") {
+            baseURL = String(absURL.characters.dropLast())
+        } else {
+            baseURL = absURL
+        }
+        
+        let socketURL = "\(baseURL)\(socketPath)/?transport="
         var urlPolling: String
         var urlWebSocket: String
 

@@ -16,7 +16,7 @@ class SocketSideEffectTest: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        socket = SocketIOClient(socketURL: "")
+        socket = SocketIOClient(socketURL: NSURL())
         socket.setTestable()
     }
     
