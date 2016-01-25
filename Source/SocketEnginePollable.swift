@@ -71,7 +71,7 @@ extension SocketEnginePollable {
         
         postWait.removeAll(keepCapacity: false)
         
-        let req = NSMutableURLRequest(URL: NSURL(string: urlPolling + "&sid=\(sid)")!)
+        let req = NSMutableURLRequest(URL: urlPollingWithSid)
         
         addHeaders(req)
         
@@ -93,7 +93,7 @@ extension SocketEnginePollable {
         }
         
         waitingForPoll = true
-        let req = NSMutableURLRequest(URL: NSURL(string: urlPolling + "&sid=\(sid)&b64=1")!)
+        let req = NSMutableURLRequest(URL: urlPollingWithSid)
         
         addHeaders(req)
         doLongPoll(req)

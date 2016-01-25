@@ -42,7 +42,7 @@ import Foundation
     var handleQueue: dispatch_queue_t! { get }
     var sid: String { get }
     var socketPath: String { get }
-    var urlPolling: String { get }
+    var urlPolling: NSURL { get }
     var urlWebSocket: NSURL { get }
     var websocket: Bool { get }
     
@@ -59,6 +59,13 @@ import Foundation
 }
 
 extension SocketEngineSpec {
+    var urlPollingWithSid: NSURL {
+        let com = NSURLComponents(URL: urlPolling, resolvingAgainstBaseURL: false)!
+        com.query = com.query! + "&sid=\(sid)"
+        
+        return com.URL!
+    }
+    
     func createBinaryDataForSend(data: NSData) -> Either<NSData, String> {
         if websocket {
             var byteArray = [UInt8](count: 1, repeatedValue: 0x4)
