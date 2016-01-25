@@ -43,7 +43,7 @@ import Foundation
     var sid: String { get }
     var socketPath: String { get }
     var urlPolling: String { get }
-    var urlWebSocket: String { get }
+    var urlWebSocket: NSURL { get }
     var websocket: Bool { get }
     
     init(client: SocketEngineClient, url: NSURL, options: NSDictionary?)

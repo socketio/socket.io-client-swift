@@ -46,9 +46,9 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
     public private(set) var probing = false
     public private(set) var session: NSURLSession?
     public private(set) var sid = ""
-    public private(set) var socketPath = "/engine.io"
+    public private(set) var socketPath = "/engine.io/"
     public private(set) var urlPolling = ""
-    public private(set) var urlWebSocket = ""
+    public private(set) var urlWebSocket = NSURL()
     public private(set) var websocket = false
     public private(set) var ws: WebSocket?
 
@@ -199,9 +199,9 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
         }
     }
 
-    private func createURLs(params: [String: AnyObject]?) -> (String, String) {
+    private func createURLs(params: [String: AnyObject]?) -> (String, NSURL) {
         if client == nil {
-            return ("", "")
+            return ("", NSURL())
         }
 
         let absURL = url.absoluteString["https?://"] <~ ""
@@ -215,14 +215,17 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
         
         let socketURL = "\(baseURL)\(socketPath)/?transport="
         var urlPolling: String
-        var urlWebSocket: String
+        var queryString = "transport=websocket"
+        let urlWebSocket = NSURLComponents(string: url.absoluteString)!
+        
+        urlWebSocket.path = socketPath
 
         if secure {
             urlPolling = "https://" + socketURL + "polling"
-            urlWebSocket = "wss://" + socketURL + "websocket"
+            urlWebSocket.scheme = "wss"
         } else {
             urlPolling = "http://" + socketURL + "polling"
-            urlWebSocket = "ws://" + socketURL + "websocket"
+            urlWebSocket.scheme = "ws"
         }
 
         if params != nil {
@@ -230,27 +233,29 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
                 let keyEsc = key.stringByAddingPercentEncodingWithAllowedCharacters(
                     allowedCharacterSet)!
                 urlPolling += "&\(keyEsc)="
-                urlWebSocket += "&\(keyEsc)="
+                queryString += "&\(keyEsc)="
 
                 if value is String {
                     let valueEsc = (value as! String).stringByAddingPercentEncodingWithAllowedCharacters(
                         allowedCharacterSet)!
-                    urlPolling += "\(valueEsc)"
-                    urlWebSocket += "\(valueEsc)"
+                    urlPolling += String(valueEsc)
+                    queryString += String(value)
                 } else {
-                    urlPolling += "\(value)"
-                    urlWebSocket += "\(value)"
+                    urlPolling += String(value)
+                    queryString += String(value)
                 }
             }
         }
 
-        return (urlPolling, urlWebSocket)
+        urlWebSocket.query = queryString
+        return (urlPolling, urlWebSocket.URL!)
     }
 
     private func createWebsocketAndConnect() {
-        let wsUrl = urlWebSocket + (sid == "" ? "" : "&sid=\(sid)")
-
-        ws = WebSocket(url: NSURL(string: wsUrl)!)
+        let component = NSURLComponents(URL: urlWebSocket, resolvingAgainstBaseURL: false)!
+        component.query = component.query! + (sid == "" ? "" : "&sid=\(sid)")
+        
+        ws = WebSocket(url: component.URL!)
         
         if cookies != nil {
             let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies!)
