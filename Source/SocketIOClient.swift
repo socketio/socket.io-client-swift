@@ -62,11 +62,17 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
     public init(socketURL: String, options: Set<SocketIOClientOption> = []) {
         self.options = options
 
-        if socketURL["https://"].matches().count != 0 {
+        if socketURL.hasPrefix("https://") {
             self.options.insertIgnore(.Secure(true))
         }
+        
+        var cleanedURL = socketURL["https?://"] <~ ""
+        
+        if cleanedURL.hasSuffix("/") {
+            cleanedURL = String(cleanedURL.characters.dropLast())
+        }
 
-        self.socketURL = socketURL["https?://"] <~ ""
+        self.socketURL = cleanedURL
 
         for option in options {
             switch option {
