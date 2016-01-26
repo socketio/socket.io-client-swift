@@ -64,7 +64,6 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
     private typealias Probe = (msg: String, type: SocketEnginePacketType, data: [NSData])
     private typealias ProbeWaitQueue = [Probe]
 
-    private let allowedCharacterSet = NSCharacterSet(charactersInString: "!*'();:@&=+$,/?%#[]\" {}").invertedSet
     private let logType = "SocketEngine"
     private let url: NSURL
     
