@@ -158,7 +158,7 @@ case Cookies([NSHTTPCookie]) // An array of NSHTTPCookies. Passed during the han
 case Log(Bool) // If `true` socket will log debug messages. Default is false.
 case Logger(SocketLogger) // Custom logger that conforms to SocketLogger. Will use the default logging otherwise.
 case SessionDelegate(NSURLSessionDelegate) // Sets an NSURLSessionDelegate for the underlying engine. Useful if you need to handle self-signed certs. Default is nil.
-case Path(String) // If the server uses a custom path. ex: `"/swift"`. Default is `""`
+case Path(String) // If the server uses a custom path. ex: `"/swift/"`. Default is `""`
 case ExtraHeaders([String: String]) // Adds custom headers to the initial request. Default is nil.
 case HandleQueue(dispatch_queue_t) // The dispatch queue that handlers are run on. Default is the main queue.
 case VoipEnabled(Bool) // Only use this option if you're using the client with VoIP services. Changes the way the WebSocket is created. Default is false
