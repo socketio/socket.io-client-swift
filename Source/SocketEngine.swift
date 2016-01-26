@@ -29,7 +29,11 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
     public let handleQueue = dispatch_queue_create("com.socketio.engineHandleQueue", DISPATCH_QUEUE_SERIAL)
     public let parseQueue = dispatch_queue_create("com.socketio.engineParseQueue", DISPATCH_QUEUE_SERIAL)
 
-    public var connectParams: [String: AnyObject]?
+    public var connectParams: [String: AnyObject]? {
+        didSet {
+            (urlPolling, urlWebSocket) = createURLs()
+        }
+    }
     public var postWait = [String]()
     public var waitingForPoll = false
     public var waitingForPost = false
