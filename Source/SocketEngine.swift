@@ -152,7 +152,7 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
                     switch code {
                     case 0: // Unknown transport
                         didError(error)
-                    case 1: // Unknown sid. clear and retry connect
+                    case 1: // Unknown sid.
                         didError(error)
                     case 2: // Bad handshake request
                         didError(error)

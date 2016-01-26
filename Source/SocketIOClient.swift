@@ -96,7 +96,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
     
     /**
      Not so type safe way to create a SocketIOClient, meant for Objective-C compatiblity.
-     If using Swift it's recommended to use `init(var socketURL: NSURL, options: Set<SocketIOClientOption>)`
+     If using Swift it's recommended to use `init(socketURL: NSURL, options: Set<SocketIOClientOption>)`
      */
     public convenience init(socketURL: NSURL, options: NSDictionary?) {
         self.init(socketURL: socketURL, options: options?.toSocketOptionsSet() ?? [])
