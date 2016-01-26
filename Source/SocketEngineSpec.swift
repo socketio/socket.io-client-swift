@@ -29,6 +29,7 @@ import Foundation
     weak var client: SocketEngineClient? { get set }
     var closed: Bool { get }
     var connected: Bool { get }
+    var connectParams: [String: AnyObject]? { get set }
     var cookies: [NSHTTPCookie]? { get }
     var extraHeaders: [String: String]? { get }
     var fastUpgrade: Bool { get }
@@ -52,7 +53,7 @@ import Foundation
     func didError(error: String)
     func doFastUpgrade()
     func flushWaitingForPostToWebSocket()
-    func open(opts: [String: AnyObject]?)
+    func open()
     func parseEngineData(data: NSData)
     func parseEngineMessage(message: String, fromPolling: Bool)
     func write(msg: String, withType type: SocketEnginePacketType, withData data: [NSData])

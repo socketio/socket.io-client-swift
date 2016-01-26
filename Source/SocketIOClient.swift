@@ -30,7 +30,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
     public private(set) var engine: SocketEngineSpec?
     public private(set) var status = SocketIOClientStatus.NotConnected
 
-    public var connectParams: [String: AnyObject]?
     public var forceNew = false
     public var nsp = "/"
     public var options: Set<SocketIOClientOption>
@@ -69,8 +68,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         
         for option in options {
             switch option {
-            case let .ConnectParams(params):
-                connectParams = params
             case let .Reconnects(reconnects):
                 self.reconnects = reconnects
             case let .ReconnectAttempts(attempts):
@@ -164,9 +161,9 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         status = .Connecting
 
         if engine == nil || forceNew {
-            addEngine().open(connectParams)
+            addEngine().open()
         } else {
-            engine?.open(connectParams)
+            engine?.open()
         }
 
         guard timeoutAfter != 0 else { return }
