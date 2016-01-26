@@ -10,7 +10,7 @@ import XCTest
 @testable import SocketIOClientSwift
 
 class SocketParserTest: XCTestCase {
-    let testSocket = SocketIOClient(socketURL: "")
+    let testSocket = SocketIOClient(socketURL: NSURL())
     
     //Format key: message; namespace-data-binary-id
     static let packetTypes: Dictionary<String, (String, [AnyObject], [NSData], Int)> = [

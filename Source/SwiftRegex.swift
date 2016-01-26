@@ -15,6 +15,7 @@ import Foundation
 
 infix operator <~ { associativity none precedence 130 }
 
+private let lock = dispatch_semaphore_create(1)
 private var swiftRegexCache = [String: NSRegularExpression]()
 
 internal final class SwiftRegex: NSObject, BooleanType {
@@ -22,6 +23,10 @@ internal final class SwiftRegex: NSObject, BooleanType {
     var regex: NSRegularExpression
     
     init(target:String, pattern:String, options:NSRegularExpressionOptions?) {
+        if dispatch_semaphore_wait(lock, dispatch_time(DISPATCH_TIME_NOW, Int64(10 * NSEC_PER_MSEC))) != 0 {
+            fatalError("This should never happen")
+        }
+        
         self.target = target
         if let regex = swiftRegexCache[pattern] {
             self.regex = regex
@@ -36,6 +41,7 @@ internal final class SwiftRegex: NSObject, BooleanType {
                 self.regex = NSRegularExpression()
             }
         }
+        dispatch_semaphore_signal(lock)
         super.init()
     }
 

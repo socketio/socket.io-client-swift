@@ -29,6 +29,7 @@ import Foundation
     weak var client: SocketEngineClient? { get set }
     var closed: Bool { get }
     var connected: Bool { get }
+    var connectParams: [String: AnyObject]? { get set }
     var cookies: [NSHTTPCookie]? { get }
     var extraHeaders: [String: String]? { get }
     var fastUpgrade: Bool { get }
@@ -42,23 +43,30 @@ import Foundation
     var handleQueue: dispatch_queue_t! { get }
     var sid: String { get }
     var socketPath: String { get }
-    var urlPolling: String { get }
-    var urlWebSocket: String { get }
+    var urlPolling: NSURL { get }
+    var urlWebSocket: NSURL { get }
     var websocket: Bool { get }
     
-    init(client: SocketEngineClient, url: String, options: NSDictionary?)
+    init(client: SocketEngineClient, url: NSURL, options: NSDictionary?)
     
     func close(reason: String)
     func didError(error: String)
     func doFastUpgrade()
     func flushWaitingForPostToWebSocket()
-    func open(opts: [String: AnyObject]?)
+    func open()
     func parseEngineData(data: NSData)
     func parseEngineMessage(message: String, fromPolling: Bool)
     func write(msg: String, withType type: SocketEnginePacketType, withData data: [NSData])
 }
 
 extension SocketEngineSpec {
+    var urlPollingWithSid: NSURL {
+        let com = NSURLComponents(URL: urlPolling, resolvingAgainstBaseURL: false)!
+        com.query = com.query! + "&sid=\(sid)"
+        
+        return com.URL!
+    }
+    
     func createBinaryDataForSend(data: NSData) -> Either<NSData, String> {
         if websocket {
             var byteArray = [UInt8](count: 1, repeatedValue: 0x4)

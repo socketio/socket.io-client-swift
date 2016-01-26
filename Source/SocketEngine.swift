@@ -29,6 +29,11 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
     public let handleQueue = dispatch_queue_create("com.socketio.engineHandleQueue", DISPATCH_QUEUE_SERIAL)
     public let parseQueue = dispatch_queue_create("com.socketio.engineParseQueue", DISPATCH_QUEUE_SERIAL)
 
+    public var connectParams: [String: AnyObject]? {
+        didSet {
+            (urlPolling, urlWebSocket) = createURLs()
+        }
+    }
     public var postWait = [String]()
     public var waitingForPoll = false
     public var waitingForPost = false
@@ -46,9 +51,9 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
     public private(set) var probing = false
     public private(set) var session: NSURLSession?
     public private(set) var sid = ""
-    public private(set) var socketPath = "/engine.io"
-    public private(set) var urlPolling = ""
-    public private(set) var urlWebSocket = ""
+    public private(set) var socketPath = "/engine.io/"
+    public private(set) var urlPolling = NSURL()
+    public private(set) var urlWebSocket = NSURL()
     public private(set) var websocket = false
     public private(set) var ws: WebSocket?
 
@@ -59,11 +64,9 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
     private typealias Probe = (msg: String, type: SocketEnginePacketType, data: [NSData])
     private typealias ProbeWaitQueue = [Probe]
 
-    private let allowedCharacterSet = NSCharacterSet(charactersInString: "!*'();:@&=+$,/?%#[]\" {}").invertedSet
     private let logType = "SocketEngine"
-    private let url: String
+    private let url: NSURL
     
-    private var connectParams: [String: AnyObject]?
     private var pingInterval: Double?
     private var pingTimeout = 0.0 {
         didSet {
@@ -76,13 +79,15 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
     private var secure = false
     private var selfSigned = false
     private var voipEnabled = false
-    
-    public init(client: SocketEngineClient, url: String, options: Set<SocketIOClientOption>) {
+
+    public init(client: SocketEngineClient, url: NSURL, options: Set<SocketIOClientOption>) {
         self.client = client
         self.url = url
-
+        
         for option in options {
             switch option {
+            case let .ConnectParams(params):
+                connectParams = params
             case let .SessionDelegate(delegate):
                 sessionDelegate = delegate
             case let .ForcePolling(force):
@@ -105,11 +110,26 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
                 continue
             }
         }
+        
+        super.init()
+        
+        (urlPolling, urlWebSocket) = createURLs()
     }
     
-    public convenience init(client: SocketEngineClient, url: String, options: NSDictionary?) {
-        self.init(client: client, url: url,
-            options: options?.toSocketOptionsSet() ?? [])
+    public convenience init(client: SocketEngineClient, url: NSURL, options: NSDictionary?) {
+        self.init(client: client, url: url, options: options?.toSocketOptionsSet() ?? [])
+    }
+    
+    @available(*, deprecated=5.3)
+    public convenience init(client: SocketEngineClient, urlString: String, options: Set<SocketIOClientOption>) {
+        guard let url = NSURL(string: urlString) else { fatalError("Incorrect url") }
+        self.init(client: client, url: url, options: options)
+    }
+    
+    @available(*, deprecated=5.3)
+    public convenience init(client: SocketEngineClient, urlString: String, options: NSDictionary?) {
+        guard let url = NSURL(string: urlString) else { fatalError("Incorrect url") }
+        self.init(client: client, url: url, options: options?.toSocketOptionsSet() ?? [])
     }
 
     deinit {
@@ -131,7 +151,7 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
                     switch code {
                     case 0: // Unknown transport
                         didError(error)
-                    case 1: // Unknown sid. clear and retry connect
+                    case 1: // Unknown sid.
                         didError(error)
                     case 2: // Bad handshake request
                         didError(error)
@@ -188,49 +208,45 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
         }
     }
 
-    private func createURLs(params: [String: AnyObject]?) -> (String, String) {
+    private func createURLs() -> (NSURL, NSURL) {
         if client == nil {
-            return ("", "")
+            return (NSURL(), NSURL())
         }
 
-        let socketURL = "\(url)\(socketPath)/?transport="
-        var urlPolling: String
-        var urlWebSocket: String
+        let urlPolling = NSURLComponents(string: url.absoluteString)!
+        let urlWebSocket = NSURLComponents(string: url.absoluteString)!
+        var queryString = ""
+        
+        urlWebSocket.path = socketPath
+        urlPolling.path = socketPath
+        urlWebSocket.query = "transport=websocket"
+        urlPolling.query = "transport=polling&b64=1"
 
         if secure {
-            urlPolling = "https://" + socketURL + "polling"
-            urlWebSocket = "wss://" + socketURL + "websocket"
+            urlPolling.scheme = "https"
+            urlWebSocket.scheme = "wss"
         } else {
-            urlPolling = "http://" + socketURL + "polling"
-            urlWebSocket = "ws://" + socketURL + "websocket"
+            urlPolling.scheme = "http"
+            urlWebSocket.scheme = "ws"
         }
 
-        if params != nil {
-            for (key, value) in params! {
-                let keyEsc = key.stringByAddingPercentEncodingWithAllowedCharacters(
-                    allowedCharacterSet)!
-                urlPolling += "&\(keyEsc)="
-                urlWebSocket += "&\(keyEsc)="
-
-                if value is String {
-                    let valueEsc = (value as! String).stringByAddingPercentEncodingWithAllowedCharacters(
-                        allowedCharacterSet)!
-                    urlPolling += "\(valueEsc)"
-                    urlWebSocket += "\(valueEsc)"
-                } else {
-                    urlPolling += "\(value)"
-                    urlWebSocket += "\(value)"
-                }
+        if connectParams != nil {
+            for (key, value) in connectParams! {
+                queryString += "&\(key)=\(value)"
             }
         }
 
-        return (urlPolling, urlWebSocket)
+        urlWebSocket.query = urlWebSocket.query! + queryString
+        urlPolling.query = urlPolling.query! + queryString
+        
+        return (urlPolling.URL!, urlWebSocket.URL!)
     }
 
     private func createWebsocketAndConnect() {
-        let wsUrl = urlWebSocket + (sid == "" ? "" : "&sid=\(sid)")
-
-        ws = WebSocket(url: NSURL(string: wsUrl)!)
+        let component = NSURLComponents(URL: urlWebSocket, resolvingAgainstBaseURL: false)!
+        component.query = component.query! + (sid == "" ? "" : "&sid=\(sid)")
+        
+        ws = WebSocket(url: component.URL!)
         
         if cookies != nil {
             let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies!)
@@ -363,21 +379,17 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
         }
     }
 
-    public func open(opts: [String: AnyObject]?) {
+    public func open() {
         if connected {
             DefaultSocketLogger.Logger.error("Engine tried opening while connected. This is probably a programming error. "
                 + "Abandoning open attempt", type: logType)
             return
         }
         
-        connectParams = opts
-
         DefaultSocketLogger.Logger.log("Starting engine", type: logType)
         DefaultSocketLogger.Logger.log("Handshaking", type: logType)
 
         resetEngine()
-
-        (urlPolling, urlWebSocket) = createURLs(opts)
 
         if forceWebsockets {
             polling = false
@@ -386,7 +398,7 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
             return
         }
 
-        let reqPolling = NSMutableURLRequest(URL: NSURL(string: urlPolling + "&b64=1")!)
+        let reqPolling = NSMutableURLRequest(URL: urlPolling)
 
         if cookies != nil {
             let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies!)
