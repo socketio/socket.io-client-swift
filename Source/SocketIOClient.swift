@@ -413,7 +413,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         let id = NSUUID()
 
         let handler = SocketEventHandler(event: event, id: id) {[weak self] data, ack in
-            guard let this = self else {return}
+            guard let this = self else { return }
             this.off(id: id)
             callback(data, ack)
         }

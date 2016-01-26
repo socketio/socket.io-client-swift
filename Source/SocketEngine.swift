@@ -243,10 +243,7 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
     }
 
     private func createWebsocketAndConnect() {
-        let component = NSURLComponents(URL: urlWebSocket, resolvingAgainstBaseURL: false)!
-        component.query = component.query! + (sid == "" ? "" : "&sid=\(sid)")
-        
-        ws = WebSocket(url: component.URL!)
+        ws = WebSocket(url: urlWebSocketWithSid)
         
         if cookies != nil {
             let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies!)

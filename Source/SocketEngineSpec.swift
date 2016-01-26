@@ -67,6 +67,13 @@ extension SocketEngineSpec {
         return com.URL!
     }
     
+    var urlWebSocketWithSid: NSURL {
+        let com = NSURLComponents(URL: urlWebSocket, resolvingAgainstBaseURL: false)!
+        com.query = com.query! + (sid == "" ? "" : "&sid=\(sid)")
+        
+        return com.URL!
+    }
+    
     func createBinaryDataForSend(data: NSData) -> Either<NSData, String> {
         if websocket {
             var byteArray = [UInt8](count: 1, repeatedValue: 0x4)
