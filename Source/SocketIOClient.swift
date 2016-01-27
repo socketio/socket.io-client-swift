@@ -134,7 +134,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         reconnectTimer = nil
     }
 
-    @available(*, deprecated=6.0)
+    @available(*, deprecated=5.3)
     public func close() {
         disconnect()
     }
@@ -433,7 +433,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
     /**
      Same as connect
      */
-    @available(*, deprecated=6.0)
+    @available(*, deprecated=5.3)
     public func open() {
         connect()
     }

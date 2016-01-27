@@ -24,8 +24,8 @@
 
 import Foundation
 
-@objc public final class SocketAnyEvent: NSObject {
-    public let event: String!
+public final class SocketAnyEvent: NSObject {
+    public let event: String
     public let items: NSArray?
     override public var description: String {
         return "SocketAnyEvent: Event: \(event) items: \(items ?? nil)"
