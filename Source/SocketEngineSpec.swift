@@ -83,7 +83,7 @@ extension SocketEngineSpec {
             
             return .Left(mutData)
         } else {
-            let str = "b4" + data.base64EncodedStringWithOptions(.Encoding64CharacterLineLength)
+            let str = "b4" + data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions(rawValue: 0))
             
             return .Right(str)
         }
