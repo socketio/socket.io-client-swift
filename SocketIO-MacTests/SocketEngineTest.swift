@@ -79,10 +79,8 @@ class SocketEngineTest: XCTestCase {
         let expectation = expectationWithDescription("Engine Decodes utf8")
         
         client.on("stringTest") {data, ack in
-            if let str = data[0] as? String {
-                assert(str == "lïne one\nlīne \rtwo", "Failed string test")
-                expectation.fulfill()
-            }
+            XCTAssertEqual(data[0] as? String, "lïne one\nlīne \rtwo", "Failed string test")
+            expectation.fulfill()
         }
 
         engine.parsePollingMessage("41:42[\"stringTest\",\"lÃ¯ne one\\nlÄ«ne \\rtwo\"]")
