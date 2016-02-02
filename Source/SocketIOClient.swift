@@ -309,9 +309,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         if status == .Closed || !reconnects {
             didDisconnect(reason)
         } else if status != .Reconnecting {
-            status = .Reconnecting
-            handleEvent("reconnect", data: [reason], isInternalMessage: true)
-            tryReconnect()
+            tryReconnectWithReason(reason)
         }
     }
 
@@ -456,7 +454,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
      Tries to reconnect to the server.
      */
     public func reconnect() {
-        tryReconnect()
+        tryReconnectWithReason("manual reconnect")
     }
 
     /**
@@ -467,9 +465,10 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         handlers.removeAll(keepCapacity: false)
     }
 
-    private func tryReconnect() {
+    private func tryReconnectWithReason(reason: String) {
         if reconnectTimer == nil {
             DefaultSocketLogger.Logger.log("Starting reconnect", type: logType)
+            handleEvent("reconnect", data: [reason], isInternalMessage: true)
 
             status = .Reconnecting
 

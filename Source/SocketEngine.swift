@@ -378,9 +378,8 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
 
     public func open() {
         if connected {
-            DefaultSocketLogger.Logger.error("Engine tried opening while connected. This is probably a programming error. "
-                + "Abandoning open attempt", type: logType)
-            return
+            DefaultSocketLogger.Logger.error("Engine tried opening while connected. Assuming this was a reconnect", type: logType)
+            close("reconnect")
         }
         
         DefaultSocketLogger.Logger.log("Starting engine", type: logType)
