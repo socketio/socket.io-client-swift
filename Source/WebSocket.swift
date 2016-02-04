@@ -308,13 +308,14 @@ public class WebSocket : NSObject, NSStreamDelegate {
         
         let bytes = UnsafePointer<UInt8>(data.bytes)
         var timeout = 5000000 //wait 5 seconds before giving up
-        writeQueue.addOperationWithBlock { [unowned self] in
+        writeQueue.addOperationWithBlock { [weak self] in
+            guard let this = self else { return }
             while !outStream.hasSpaceAvailable {
                 usleep(100) //wait until the socket is ready
                 timeout -= 100
                 if timeout < 0 {
-                    self.cleanupStream()
-                    self.doDisconnect(self.errorWithDetail("write wait timed out", code: 2))
+                    this.cleanupStream()
+                    this.doDisconnect(this.errorWithDetail("write wait timed out", code: 2))
                     return
                 } else if outStream.streamError != nil {
                     return //disconnectStream will be called.
