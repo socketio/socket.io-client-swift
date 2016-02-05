@@ -23,11 +23,22 @@ internal final class SwiftRegex: NSObject, BooleanType {
     var regex: NSRegularExpression
     
     init(target:String, pattern:String, options:NSRegularExpressionOptions?) {
+        self.target = target
+        
         if dispatch_semaphore_wait(lock, dispatch_time(DISPATCH_TIME_NOW, Int64(10 * NSEC_PER_MSEC))) != 0 {
-            fatalError("This should never happen")
+            do {
+                let regex = try NSRegularExpression(pattern: pattern, options:
+                    NSRegularExpressionOptions.DotMatchesLineSeparators)
+                self.regex = regex
+            } catch let error as NSError {
+                SwiftRegex.failure("Error in pattern: \(pattern) - \(error)")
+                self.regex = NSRegularExpression()
+            }
+            
+            super.init()
+            return
         }
         
-        self.target = target
         if let regex = swiftRegexCache[pattern] {
             self.regex = regex
         } else {
