@@ -202,9 +202,12 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
             postSendClose(nil, nil, nil)
         } else {
             // We need to take special care when we're polling that we send it ASAP
-            postWait.append(String(SocketEnginePacketType.Close.rawValue))
-            let req = createRequestForPostWithPostWait()
-            doRequest(req, withCallback: postSendClose)
+            // Also make sure we're on the emitQueue since we're touching postWait
+            dispatch_sync(emitQueue) {
+                self.postWait.append(String(SocketEnginePacketType.Close.rawValue))
+                let req = self.createRequestForPostWithPostWait()
+                self.doRequest(req, withCallback: postSendClose)
+            }
         }
     }
 

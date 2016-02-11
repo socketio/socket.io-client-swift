@@ -214,9 +214,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
     }
 
     func didDisconnect(reason: String) {
-        guard status != .Closed else {
-            return
-        }
+        guard status != .Closed else { return }
 
         DefaultSocketLogger.Logger.log("Disconnected: %@", type: logType, args: reason)
 
