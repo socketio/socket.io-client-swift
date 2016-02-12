@@ -437,7 +437,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
         var totalSize = 0
         for i in 0..<bufferLen {
             if buffer[i] == CRLFBytes[k] {
-                k++
+                k += 1
                 if k == 3 {
                     totalSize = i + 1
                     break
@@ -660,7 +660,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
             }
             if let response = response {
                 response.bytesLeft -= Int(len)
-                response.frameCount++
+                response.frameCount += 1
                 response.isFin = isFin > 0 ? true : false
                 if isNew {
                     readStack.append(response)
@@ -958,7 +958,7 @@ private class SSLSecurity {
                 for serverCert in serverCerts {
                     for cert in certs {
                         if cert == serverCert {
-                            trustedCount++
+                            trustedCount += 1
                             break
                         }
                     }
