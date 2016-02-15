@@ -171,7 +171,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeoutAfter) * Int64(NSEC_PER_SEC))
 
         dispatch_after(time, handleQueue) {[weak self] in
-            if let this = self where this.status != .Connected {
+            if let this = self where this.status != .Connected || this.status != .Closed {
                 this.status = .Closed
                 this.engine?.close("Connect timeout")
 
