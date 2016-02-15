@@ -30,6 +30,7 @@ import Foundation
     var closed: Bool { get }
     var connected: Bool { get }
     var connectParams: [String: AnyObject]? { get set }
+    var doubleEncodeUTF8: Bool { get }
     var cookies: [NSHTTPCookie]? { get }
     var extraHeaders: [String: String]? { get }
     var fastUpgrade: Bool { get }
@@ -86,6 +87,24 @@ extension SocketEngineSpec {
             let str = "b4" + data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions(rawValue: 0))
             
             return .Right(str)
+        }
+    }
+    
+    func doubleEncodeUTF8(string: String) -> String {
+        if let latin1 = string.dataUsingEncoding(NSUTF8StringEncoding),
+            utf8 = NSString(data: latin1, encoding: NSISOLatin1StringEncoding) {
+                return utf8 as String
+        } else {
+            return string
+        }
+    }
+    
+    func fixDoubleUTF8(string: String) -> String {
+        if let utf8 = string.dataUsingEncoding(NSISOLatin1StringEncoding),
+            latin1 = NSString(data: utf8, encoding: NSUTF8StringEncoding) {
+                return latin1 as String
+        } else {
+            return string
         }
     }
     

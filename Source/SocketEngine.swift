@@ -41,6 +41,7 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
     public private(set) var closed = false
     public private(set) var connected = false
     public private(set) var cookies: [NSHTTPCookie]?
+    public private(set) var doubleEncodeUTF8 = true
     public private(set) var extraHeaders: [String: String]?
     public private(set) var fastUpgrade = false
     public private(set) var forcePolling = false
@@ -88,18 +89,20 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
             switch option {
             case let .ConnectParams(params):
                 connectParams = params
+            case let .Cookies(cookies):
+                self.cookies = cookies
+            case let .DoubleEncodeUTF8(encode):
+                doubleEncodeUTF8 = encode
+            case let .ExtraHeaders(headers):
+                extraHeaders = headers
             case let .SessionDelegate(delegate):
                 sessionDelegate = delegate
             case let .ForcePolling(force):
                 forcePolling = force
             case let .ForceWebsockets(force):
                 forceWebsockets = force
-            case let .Cookies(cookies):
-                self.cookies = cookies
             case let .Path(path):
                 socketPath = path
-            case let .ExtraHeaders(headers):
-                extraHeaders = headers
             case let .VoipEnabled(enable):
                 voipEnabled = enable
             case let .Secure(secure):
@@ -432,7 +435,7 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
             return
         }
 
-        if fromPolling && type != .Noop {
+        if fromPolling && type != .Noop && doubleEncodeUTF8 {
             fixedString = fixDoubleUTF8(message)
         } else {
             fixedString = message

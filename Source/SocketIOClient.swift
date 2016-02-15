@@ -165,7 +165,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         } else {
             engine?.open()
         }
-
+        
         guard timeoutAfter != 0 else { return }
 
         let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeoutAfter) * Int64(NSEC_PER_SEC))

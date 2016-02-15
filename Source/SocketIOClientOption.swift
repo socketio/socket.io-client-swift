@@ -31,6 +31,7 @@ protocol ClientOption: CustomStringConvertible, Hashable {
 public enum SocketIOClientOption: ClientOption {
     case ConnectParams([String: AnyObject])
     case Cookies([NSHTTPCookie])
+    case DoubleEncodeUTF8(Bool)
     case ExtraHeaders([String: String])
     case ForceNew(Bool)
     case ForcePolling(Bool)
@@ -56,6 +57,8 @@ public enum SocketIOClientOption: ClientOption {
             description = "connectParams"
         case .Cookies:
             description = "cookies"
+        case .DoubleEncodeUTF8:
+            description = "doubleEncodeUTF8"
         case .ExtraHeaders:
             description = "extraHeaders"
         case .ForceNew:
@@ -105,6 +108,8 @@ public enum SocketIOClientOption: ClientOption {
             value = params
         case let .Cookies(cookies):
             value = cookies
+        case let .DoubleEncodeUTF8(encode):
+            value = encode
         case let .ExtraHeaders(headers):
             value = headers
         case let .ForceNew(force):
@@ -160,40 +165,42 @@ extension NSDictionary {
         switch (key, value) {
         case let ("connectParams", params as [String: AnyObject]):
             return .ConnectParams(params)
-        case let ("reconnects", reconnects as Bool):
-            return .Reconnects(reconnects)
-        case let ("reconnectAttempts", attempts as Int):
-            return .ReconnectAttempts(attempts)
-        case let ("reconnectWait", wait as Int):
-            return .ReconnectWait(wait)
+        case let ("cookies", cookies as [NSHTTPCookie]):
+            return .Cookies(cookies)
+        case let ("doubleEncodeUTF8", encode as Bool):
+            return .DoubleEncodeUTF8(encode)
+        case let ("extraHeaders", headers as [String: String]):
+            return .ExtraHeaders(headers)
         case let ("forceNew", force as Bool):
             return .ForceNew(force)
         case let ("forcePolling", force as Bool):
             return .ForcePolling(force)
         case let ("forceWebsockets", force as Bool):
             return .ForceWebsockets(force)
-        case let ("nsp", nsp as String):
-            return .Nsp(nsp)
-        case let ("cookies", cookies as [NSHTTPCookie]):
-            return .Cookies(cookies)
+        case let ("handleQueue", queue as dispatch_queue_t):
+            return .HandleQueue(queue)
         case let ("log", log as Bool):
             return .Log(log)
         case let ("logger", logger as SocketLogger):
             return .Logger(logger)
-        case let ("sessionDelegate", delegate as NSURLSessionDelegate):
-            return .SessionDelegate(delegate)
+        case let ("nsp", nsp as String):
+            return .Nsp(nsp)
         case let ("path", path as String):
             return .Path(path)
-        case let ("extraHeaders", headers as [String: String]):
-            return .ExtraHeaders(headers)
-        case let ("handleQueue", queue as dispatch_queue_t):
-            return .HandleQueue(queue)
-        case let ("voipEnabled", enable as Bool):
-            return .VoipEnabled(enable)
+        case let ("reconnects", reconnects as Bool):
+            return .Reconnects(reconnects)
+        case let ("reconnectAttempts", attempts as Int):
+            return .ReconnectAttempts(attempts)
+        case let ("reconnectWait", wait as Int):
+            return .ReconnectWait(wait)
         case let ("secure", secure as Bool):
             return .Secure(secure)
         case let ("selfSigned", selfSigned as Bool):
             return .SelfSigned(selfSigned)
+        case let ("sessionDelegate", delegate as NSURLSessionDelegate):
+            return .SessionDelegate(delegate)
+        case let ("voipEnabled", enable as Bool):
+            return .VoipEnabled(enable)
         default:
             return nil
         }

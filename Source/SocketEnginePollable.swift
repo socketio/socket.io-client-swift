@@ -206,21 +206,28 @@ extension SocketEnginePollable {
     /// Send polling message.
     /// Only call on emitQueue
     public func sendPollMessage(message: String, withType type: SocketEnginePacketType, withData datas: [NSData]) {
-            DefaultSocketLogger.Logger.log("Sending poll: %@ as type: %@", type: "SocketEnginePolling", args: message, type.rawValue)
-            let fixedMessage = doubleEncodeUTF8(message)
-            let strMsg = "\(type.rawValue)\(fixedMessage)"
-            
-            postWait.append(strMsg)
-            
-            for data in datas {
-                if case let .Right(bin) = createBinaryDataForSend(data) {
-                    postWait.append(bin)
-                }
+        DefaultSocketLogger.Logger.log("Sending poll: %@ as type: %@", type: "SocketEnginePolling", args: message, type.rawValue)
+        let fixedMessage: String
+        
+        if doubleEncodeUTF8 {
+           fixedMessage = doubleEncodeUTF8(message)
+        } else {
+            fixedMessage = message
+        }
+        
+        let strMsg = "\(type.rawValue)\(fixedMessage)"
+        
+        postWait.append(strMsg)
+        
+        for data in datas {
+            if case let .Right(bin) = createBinaryDataForSend(data) {
+                postWait.append(bin)
             }
-            
-            if !waitingForPost {
-                flushWaitingForPost()
-            }
+        }
+        
+        if !waitingForPost {
+            flushWaitingForPost()
+        }
     }
     
     public func stopPolling() {
