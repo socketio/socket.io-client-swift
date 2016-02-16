@@ -38,8 +38,8 @@ class SocketBasicPacketTest: XCTestCase {
     }
     
     func testStringEmitWithQuotes() {
-        let expectedSendString = "2[\"test\",\"\\\"hello world\\\"\"]"
-        let sendData = ["test", "\"hello world\""]
+        let expectedSendString = "2[\"test\",\"\\\"he\\\"llo world\\\"\"]"
+        let sendData = ["test", "\"he\"llo world\""]
         let packet = SocketPacket.packetFromEmit(sendData, id: -1, nsp: "/", ack: false)
         
         XCTAssertEqual(packet.packetString, expectedSendString)
