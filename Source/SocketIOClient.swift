@@ -53,7 +53,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
     private(set) var handleQueue = dispatch_get_main_queue()
     private(set) var reconnectAttempts = -1
 
-    var waitingData = [SocketPacket]()
+    var waitingPackets = [SocketPacket]()
     
     /**
      Type safe way to create a new SocketIOClient. opts can be omitted
@@ -302,7 +302,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
     }
 
     public func engineDidClose(reason: String) {
-        waitingData.removeAll()
+        waitingPackets.removeAll()
 
         if status == .Closed || !reconnects {
             didDisconnect(reason)

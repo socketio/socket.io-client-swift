@@ -50,9 +50,9 @@ extension SocketParsable {
         case .Ack where isCorrectNamespace(pack.nsp):
             handleAck(pack.id, data: pack.data)
         case .BinaryEvent where isCorrectNamespace(pack.nsp):
-            waitingData.append(pack)
+            waitingPackets.append(pack)
         case .BinaryAck where isCorrectNamespace(pack.nsp):
-            waitingData.append(pack)
+            waitingPackets.append(pack)
         case .Connect:
             handleConnect(pack)
         case .Disconnect:
@@ -160,17 +160,17 @@ extension SocketParsable {
     }
     
     func parseBinaryData(data: NSData) {
-        guard !waitingData.isEmpty else {
+        guard !waitingPackets.isEmpty else {
             DefaultSocketLogger.Logger.error("Got data when not remaking packet", type: "SocketParser")
             return
         }
         
         // Should execute event?
-        guard waitingData[waitingData.count - 1].addData(data) else {
+        guard waitingPackets[waitingPackets.count - 1].addData(data) else {
             return
         }
         
-        let packet = waitingData.removeLast()
+        let packet = waitingPackets.removeLast()
         
         if packet.type != .BinaryAck {
             handleEvent(packet.event, data: packet.args ?? [],

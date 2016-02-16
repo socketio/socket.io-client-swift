@@ -24,7 +24,7 @@
 
 protocol SocketClientSpec: class {
     var nsp: String { get set }
-    var waitingData: [SocketPacket] { get set }
+    var waitingPackets: [SocketPacket] { get set }
     
     func didConnect()
     func didDisconnect(reason: String)
