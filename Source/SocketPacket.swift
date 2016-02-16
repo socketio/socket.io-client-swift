@@ -106,7 +106,7 @@ struct SocketPacket {
                         type: SocketPacket.logType)
                 }
             } else if let str = arg as? String {
-                restOfMessage += "\"" + ((str["\n"] <~ "\\\\n")["\r"] <~ "\\\\r") + "\","
+                restOfMessage += "\"" + (((str["\n"] <~ "\\\\n")["\r"] <~ "\\\\r")["\""] <~ "\\\\\"") + "\","
             } else if arg is NSNull {
                 restOfMessage += "null,"
             } else {

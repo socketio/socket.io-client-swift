@@ -19,7 +19,7 @@ private let lock = dispatch_semaphore_create(1)
 private var swiftRegexCache = [String: NSRegularExpression]()
 
 internal final class SwiftRegex: NSObject, BooleanType {
-    var target:String
+    var target: String
     var regex: NSRegularExpression
     
     init(target:String, pattern:String, options:NSRegularExpressionOptions?) {
