@@ -37,6 +37,14 @@ class SocketBasicPacketTest: XCTestCase {
         XCTAssertEqual(packet.packetString, expectedSendString)
     }
     
+    func testStringEmitWithQuotes() {
+        let expectedSendString = "2[\"test\",\"\\\"hello world\\\"\"]"
+        let sendData = ["test", "\"hello world\""]
+        let packet = SocketPacket.packetFromEmit(sendData, id: -1, nsp: "/", ack: false)
+        
+        XCTAssertEqual(packet.packetString, expectedSendString)
+    }
+    
     func testJSONEmit() {
         let expectedSendString = "2[\"test\",{\"test\":\"hello\",\"hello\":1,\"foobar\":true,\"null\":null}]"
         let sendData = ["test", ["foobar": true, "hello": 1, "test": "hello", "null": NSNull()]]

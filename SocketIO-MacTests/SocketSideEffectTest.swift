@@ -70,6 +70,17 @@ class SocketSideEffectTest: XCTestCase {
         waitForExpectationsWithTimeout(3, handler: nil)
     }
     
+    func testHandleStringEventWithQuotes() {
+        let expectation = expectationWithDescription("handled event")
+        socket.on("test") {data, ack in
+            XCTAssertEqual(data[0] as? String, "\"hello world\"")
+            expectation.fulfill()
+        }
+        
+        socket.parseSocketMessage("2[\"test\",\"\\\"hello world\\\"\"]")
+        waitForExpectationsWithTimeout(3, handler: nil)
+    }
+    
     func testHandleOnceEvent() {
         let expectation = expectationWithDescription("handled event")
         socket.once("test") {data, ack in
