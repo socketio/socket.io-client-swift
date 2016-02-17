@@ -252,9 +252,9 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
             handleEvent("error", data: ["Tried emitting \(event) when not connected"], isInternalMessage: true)
             return
         }
-
-        dispatch_async(emitQueue) {
-            self._emit([event] + items)
+        
+        dispatch_async(emitQueue) {[emitData = [event] + items] in
+            self._emit(emitData)
         }
     }
 
@@ -278,10 +278,10 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
             handleEvent("error", data: ["Tried emitting when not connected"], isInternalMessage: true)
             return
         }
-
+        
         let packet = SocketPacket.packetFromEmit(data, id: ack ?? -1, nsp: nsp, ack: false)
         let str = packet.packetString
-
+        
         DefaultSocketLogger.Logger.log("Emitting: %@", type: logType, args: str)
 
         engine?.send(str, withData: packet.binary)

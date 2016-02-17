@@ -87,38 +87,28 @@ struct SocketPacket {
     }
     
     private func completeMessage(message: String, ack: Bool) -> String {
-        var restOfMessage = ""
+        let restOfMessage: String
         
         if data.count == 0 {
-            return message + "]"
+            return message + "[]"
         }
         
-        for arg in data {
-            if arg is NSDictionary || arg is [AnyObject] {
-                do {
-                    let jsonSend = try NSJSONSerialization.dataWithJSONObject(arg,
-                        options: NSJSONWritingOptions(rawValue: 0))
-                    let jsonString = String(data: jsonSend, encoding: NSUTF8StringEncoding)
-                    
-                    restOfMessage += jsonString! + ","
-                } catch {
-                    DefaultSocketLogger.Logger.error("Error creating JSON object in SocketPacket.completeMessage",
-                        type: SocketPacket.logType)
-                }
-            } else if let str = arg as? String {
-                restOfMessage += "\"" + (((str["\n"] <~ "\\\\n")["\r"] <~ "\\\\r")["\""] <~ "\\\\\"") + "\","
-            } else if arg is NSNull {
-                restOfMessage += "null,"
-            } else {
-                restOfMessage += "\(arg),"
+        do {
+            let jsonSend = try NSJSONSerialization.dataWithJSONObject(data,
+                options: NSJSONWritingOptions(rawValue: 0))
+            guard let jsonString = String(data: jsonSend, encoding: NSUTF8StringEncoding) else {
+                return "[]"
             }
+            
+            restOfMessage = jsonString
+        } catch {
+            DefaultSocketLogger.Logger.error("Error creating JSON object in SocketPacket.completeMessage",
+                type: SocketPacket.logType)
+            
+            restOfMessage = "[]"
         }
         
-        if restOfMessage != "" {
-            restOfMessage.removeAtIndex(restOfMessage.endIndex.predecessor())
-        }
-        
-        return message + restOfMessage + "]"
+        return message + restOfMessage
     }
     
     private func createAck() -> String {
@@ -126,15 +116,15 @@ struct SocketPacket {
         
         if type == .Ack {
             if nsp == "/" {
-                message = "3\(id)["
+                message = "3\(id)"
             } else {
-                message = "3\(nsp),\(id)["
+                message = "3\(nsp),\(id)"
             }
         } else {
             if nsp == "/" {
-                message = "6\(binary.count)-\(id)["
+                message = "6\(binary.count)-\(id)"
             } else {
-                message = "6\(binary.count)-\(nsp),\(id)["
+                message = "6\(binary.count)-\(nsp),\(id)"
             }
         }
         
@@ -148,29 +138,29 @@ struct SocketPacket {
         if type == .Event {
             if nsp == "/" {
                 if id == -1 {
-                    message = "2["
+                    message = "2"
                 } else {
-                    message = "2\(id)["
+                    message = "2\(id)"
                 }
             } else {
                 if id == -1 {
-                    message = "2\(nsp),["
+                    message = "2\(nsp),"
                 } else {
-                    message = "2\(nsp),\(id)["
+                    message = "2\(nsp),\(id)"
                 }
             }
         } else {
             if nsp == "/" {
                 if id == -1 {
-                    message = "5\(binary.count)-["
+                    message = "5\(binary.count)-"
                 } else {
-                    message = "5\(binary.count)-\(id)["
+                    message = "5\(binary.count)-\(id)"
                 }
             } else {
                 if id == -1 {
-                    message = "5\(binary.count)-\(nsp),["
+                    message = "5\(binary.count)-\(nsp),"
                 } else {
-                    message = "5\(binary.count)-\(nsp),\(id)["
+                    message = "5\(binary.count)-\(nsp),\(id)"
                 }
             }
         }

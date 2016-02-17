@@ -161,7 +161,7 @@ extension Set where Element: ClientOption {
 }
 
 extension NSDictionary {
-    static func keyValueToSocketIOClientOption(key: String, value: AnyObject) -> SocketIOClientOption? {
+    private static func keyValueToSocketIOClientOption(key: String, value: AnyObject) -> SocketIOClientOption? {
         switch (key, value) {
         case let ("connectParams", params as [String: AnyObject]):
             return .ConnectParams(params)
