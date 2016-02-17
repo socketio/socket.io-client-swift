@@ -86,7 +86,7 @@ struct SocketPacket {
         }
     }
     
-    private func completeMessage(message: String, ack: Bool) -> String {
+    private func completeMessage(message: String) -> String {
         let restOfMessage: String
         
         if data.count == 0 {
@@ -128,7 +128,7 @@ struct SocketPacket {
             }
         }
         
-        return completeMessage(message, ack: true)
+        return completeMessage(message)
     }
 
     
@@ -165,7 +165,7 @@ struct SocketPacket {
             }
         }
         
-        return completeMessage(message, ack: false)
+        return completeMessage(message)
     }
     
     private func createPacketString() -> String {
