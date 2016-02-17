@@ -123,13 +123,13 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
         self.init(client: client, url: url, options: options?.toSocketOptionsSet() ?? [])
     }
     
-    @available(*, deprecated=5.3)
+    @available(*, deprecated=5.3, message="Please use the NSURL based init")
     public convenience init(client: SocketEngineClient, urlString: String, options: Set<SocketIOClientOption>) {
         guard let url = NSURL(string: urlString) else { fatalError("Incorrect url") }
         self.init(client: client, url: url, options: options)
     }
     
-    @available(*, deprecated=5.3)
+    @available(*, deprecated=5.3, message="Please use the NSURL based init")
     public convenience init(client: SocketEngineClient, urlString: String, options: NSDictionary?) {
         guard let url = NSURL(string: urlString) else { fatalError("Incorrect url") }
         self.init(client: client, url: url, options: options?.toSocketOptionsSet() ?? [])

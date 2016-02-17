@@ -102,15 +102,13 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         self.init(socketURL: socketURL, options: options?.toSocketOptionsSet() ?? [])
     }
 
-    /// Please use the NSURL based init
-    @available(*, deprecated=5.3)
+    @available(*, deprecated=5.3, message="Please use the NSURL based init")
     public convenience init(socketURLString: String, options: Set<SocketIOClientOption> = []) {
         guard let url = NSURL(string: socketURLString) else { fatalError("Incorrect url") }
         self.init(socketURL: url, options: options)
     }
     
-    /// Please use the NSURL based init
-    @available(*, deprecated=5.3)
+    @available(*, deprecated=5.3, message="Please use the NSURL based init")
     public convenience init(socketURLString: String, options: NSDictionary?) {
         guard let url = NSURL(string: socketURLString) else { fatalError("Incorrect url") }
         self.init(socketURL: url, options: options?.toSocketOptionsSet() ?? [])
@@ -134,7 +132,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         reconnectTimer = nil
     }
 
-    @available(*, deprecated=5.3)
+    @available(*, deprecated=5.3, message="Please use disconnect()")
     public func close() {
         disconnect()
     }
@@ -426,10 +424,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         anyHandler = handler
     }
 
-    /**
-     Same as connect
-     */
-    @available(*, deprecated=5.3)
+    @available(*, deprecated=5.3, message="Please use one of the connect methods)")
     public func open() {
         connect()
     }
