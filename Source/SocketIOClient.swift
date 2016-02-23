@@ -116,7 +116,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
 
     deinit {
         DefaultSocketLogger.Logger.log("Client is being released", type: logType)
-        engine?.close("Client Deinit")
+        engine?.disconnect("Client Deinit")
     }
 
     private func addEngine() -> SocketEngineSpec {
@@ -159,9 +159,9 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         status = .Connecting
 
         if engine == nil || forceNew {
-            addEngine().open()
+            addEngine().connect()
         } else {
-            engine?.open()
+            engine?.connect()
         }
         
         guard timeoutAfter != 0 else { return }
@@ -171,7 +171,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         dispatch_after(time, handleQueue) {[weak self] in
             if let this = self where this.status != .Connected || this.status != .Closed {
                 this.status = .Closed
-                this.engine?.close("Connect timeout")
+                this.engine?.disconnect("Connect timeout")
 
                 handler?()
             }
@@ -220,7 +220,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         reconnects = false
 
         // Make sure the engine is actually dead.
-        engine?.close(reason)
+        engine?.disconnect(reason)
         handleEvent("disconnect", data: [reason], isInternalMessage: true)
     }
 
