@@ -100,7 +100,7 @@ extension SocketEnginePollable {
     }
     
     func doRequest(req: NSURLRequest, withCallback callback: (NSData?, NSURLResponse?, NSError?) -> Void) {
-            if !polling || closed || invalidated {
+            if !polling || closed || invalidated || fastUpgrade {
                 DefaultSocketLogger.Logger.error("Tried to do polling request when not supposed to", type: "SocketEnginePolling")
                 return
             }
