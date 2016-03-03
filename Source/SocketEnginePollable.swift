@@ -100,14 +100,14 @@ extension SocketEnginePollable {
     }
     
     func doRequest(req: NSURLRequest, withCallback callback: (NSData?, NSURLResponse?, NSError?) -> Void) {
-            if !polling || closed || invalidated || fastUpgrade {
-                DefaultSocketLogger.Logger.error("Tried to do polling request when not supposed to", type: "SocketEnginePolling")
-                return
-            }
-            
-            DefaultSocketLogger.Logger.log("Doing polling request", type: "SocketEnginePolling")
-            
-            session?.dataTaskWithRequest(req, completionHandler: callback).resume()
+        if !polling || closed || invalidated || fastUpgrade {
+            DefaultSocketLogger.Logger.error("Tried to do polling request when not supposed to", type: "SocketEnginePolling")
+            return
+        }
+        
+        DefaultSocketLogger.Logger.log("Doing polling request", type: "SocketEnginePolling")
+        
+        session?.dataTaskWithRequest(req, completionHandler: callback).resume()
     }
     
     func doLongPoll(req: NSURLRequest) {
