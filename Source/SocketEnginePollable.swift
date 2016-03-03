@@ -112,7 +112,7 @@ extension SocketEnginePollable {
     
     func doLongPoll(req: NSURLRequest) {
         doRequest(req) {[weak self] data, res, err in
-            guard let this = self else { return }
+            guard let this = self where this.polling else { return }
             
             if err != nil || data == nil {
                 DefaultSocketLogger.Logger.error(err?.localizedDescription ?? "Error", type: "SocketEnginePolling")
@@ -123,7 +123,7 @@ extension SocketEnginePollable {
                 
                 return
             }
-            
+
             DefaultSocketLogger.Logger.log("Got polling response", type: "SocketEnginePolling")
             
             if let str = String(data: data!, encoding: NSUTF8StringEncoding) {
