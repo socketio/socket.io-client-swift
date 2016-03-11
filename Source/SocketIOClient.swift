@@ -423,7 +423,9 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
 
     /// Tries to reconnect to the server.
     public func reconnect() {
-        tryReconnectWithReason("manual reconnect")
+        guard !reconnecting else { return }
+        
+        engine?.disconnect("manual reconnect")
     }
 
     /// Removes all handlers.
