@@ -301,11 +301,11 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
             client?.engineDidClose(reason)
         }
         
+        DefaultSocketLogger.Logger.log("Engine is being closed.", type: logType)
+        
         if closed {
             return postSendClose(nil, nil, nil)
         }
-        
-        DefaultSocketLogger.Logger.log("Engine is being closed.", type: logType)
         
         if websocket {
             sendWebSocketMessage("", withType: .Close, withData: [])
