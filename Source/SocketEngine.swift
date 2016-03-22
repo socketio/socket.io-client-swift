@@ -506,7 +506,7 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
             
             dispatch_async(dispatch_get_main_queue()) {
                 self.pingTimer = NSTimer.scheduledTimerWithTimeInterval(pingInterval, target: self,
-                    selector: Selector("sendPing"), userInfo: nil, repeats: true)
+                    selector: #selector(SocketEngine.sendPing), userInfo: nil, repeats: true)
             }
         }
     }
