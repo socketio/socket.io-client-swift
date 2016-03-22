@@ -443,7 +443,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         }
     }
 
-    @objc private func _tryReconnect() {
+    private func _tryReconnect() {
         if !reconnecting {
             return
         }
