@@ -303,6 +303,10 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
         
         DefaultSocketLogger.Logger.log("Engine is being closed.", type: logType)
         
+        if closed {
+            return postSendClose(nil, nil, nil)
+        }
+        
         if websocket {
             sendWebSocketMessage("", withType: .Close, withData: [])
             postSendClose(nil, nil, nil)
@@ -502,7 +506,7 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
             
             dispatch_async(dispatch_get_main_queue()) {
                 self.pingTimer = NSTimer.scheduledTimerWithTimeInterval(pingInterval, target: self,
-                    selector: Selector("sendPing"), userInfo: nil, repeats: true)
+                    selector: #selector(SocketEngine.sendPing), userInfo: nil, repeats: true)
             }
         }
     }

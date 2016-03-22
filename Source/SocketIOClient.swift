@@ -28,7 +28,17 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
     public let socketURL: NSURL
 
     public private(set) var engine: SocketEngineSpec?
-    public private(set) var status = SocketIOClientStatus.NotConnected
+    public private(set) var status = SocketIOClientStatus.NotConnected {
+        didSet {
+            switch status {
+            case .Connected:
+                reconnecting = false
+                currentReconnectAttempt = 0
+            default:
+                break
+            }
+        }
+    }
 
     public var forceNew = false
     public var nsp = "/"
@@ -46,8 +56,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
     private var anyHandler: ((SocketAnyEvent) -> Void)?
     private var currentReconnectAttempt = 0
     private var handlers = [SocketEventHandler]()
-    private var reconnectTimer: NSTimer?
     private var ackHandlers = SocketAckManager()
+    private var reconnecting = false
 
     private(set) var currentAck = -1
     private(set) var handleQueue = dispatch_get_main_queue()
@@ -55,9 +65,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
 
     var waitingPackets = [SocketPacket]()
     
-    /**
-     Type safe way to create a new SocketIOClient. opts can be omitted
-     */
+    /// Type safe way to create a new SocketIOClient. opts can be omitted
     public init(socketURL: NSURL, options: Set<SocketIOClientOption> = []) {
         self.options = options
         self.socketURL = socketURL
@@ -94,10 +102,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         super.init()
     }
     
-    /**
-     Not so type safe way to create a SocketIOClient, meant for Objective-C compatiblity.
-     If using Swift it's recommended to use `init(socketURL: NSURL, options: Set<SocketIOClientOption>)`
-     */
+    /// Not so type safe way to create a SocketIOClient, meant for Objective-C compatiblity.
+    /// If using Swift it's recommended to use `init(socketURL: NSURL, options: Set<SocketIOClientOption>)`
     public convenience init(socketURL: NSURL, options: NSDictionary?) {
         self.init(socketURL: socketURL, options: options?.toSocketOptionsSet() ?? [])
     }
@@ -127,26 +133,17 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         return engine!
     }
 
-    private func clearReconnectTimer() {
-        reconnectTimer?.invalidate()
-        reconnectTimer = nil
-    }
-
     @available(*, deprecated=5.3, message="Please use disconnect()")
     public func close() {
         disconnect()
     }
 
-    /**
-     Connect to the server.
-     */
+    /// Connect to the server.
     public func connect() {
         connect(timeoutAfter: 0, withTimeoutHandler: nil)
     }
 
-    /**
-     Connect to the server. If we aren't connected after timeoutAfter, call handler
-     */
+    /// Connect to the server. If we aren't connected after timeoutAfter, call handler
     public func connect(timeoutAfter timeoutAfter: Int, withTimeoutHandler handler: (() -> Void)?) {
         assert(timeoutAfter >= 0, "Invalid timeout: \(timeoutAfter)")
 
@@ -203,8 +200,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
     func didConnect() {
         DefaultSocketLogger.Logger.log("Socket connected", type: logType)
         status = .Connected
-        currentReconnectAttempt = 0
-        clearReconnectTimer()
 
         // Don't handle as internal because something crazy could happen where
         // we disconnect before it's handled
@@ -224,10 +219,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         handleEvent("disconnect", data: [reason], isInternalMessage: true)
     }
 
-    /**
-     Disconnects the socket. Only reconnect the same socket if you know what you're doing.
-     Will turn off automatic reconnects.
-     */
+    /// Disconnects the socket. Only reconnect the same socket if you know what you're doing.
+    /// Will turn off automatic reconnects.
     public func disconnect() {
         DefaultSocketLogger.Logger.log("Closing socket", type: logType)
 
@@ -235,16 +228,12 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         didDisconnect("Disconnect")
     }
 
-    /**
-     Send a message to the server
-     */
+    /// Send a message to the server
     public func emit(event: String, _ items: AnyObject...) {
         emit(event, withItems: items)
     }
 
-    /**
-     Same as emit, but meant for Objective-C
-     */
+    /// Same as emit, but meant for Objective-C
     public func emit(event: String, withItems items: [AnyObject]) {
         guard status == .Connected else {
             handleEvent("error", data: ["Tried emitting \(event) when not connected"], isInternalMessage: true)
@@ -301,10 +290,15 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
 
     public func engineDidClose(reason: String) {
         waitingPackets.removeAll()
+        
+        if status != .Closed {
+            status = .NotConnected
+        }
 
         if status == .Closed || !reconnects {
             didDisconnect(reason)
-        } else if status != .Reconnecting {
+        } else if !reconnecting {
+            reconnecting = true
             tryReconnectWithReason(reason)
         }
     }
@@ -325,9 +319,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         ackHandlers.executeAck(ack, items: data)
     }
 
-    /**
-     Causes an event to be handled. Only use if you know what you're doing.
-     */
+    /// Causes an event to be handled. Only use if you know what you're doing.
     public func handleEvent(event: String, data: [AnyObject], isInternalMessage: Bool, withAck ack: Int = -1) {
         guard status == .Connected || isInternalMessage else {
             return
@@ -344,9 +336,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         }
     }
 
-    /**
-     Leaves nsp and goes back to /
-     */
+    /// Leaves nsp and goes back to /
     public func leaveNamespace() {
         if nsp != "/" {
             engine?.send("1\(nsp)", withData: [])
@@ -354,9 +344,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         }
     }
 
-    /**
-     Joins namespace
-     */
+    /// Joins namespace
     public func joinNamespace(namespace: String) {
         nsp = namespace
 
@@ -366,28 +354,22 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         }
     }
 
-    /**
-     Removes handler(s)
-     */
+    /// Removes handler(s) based on name
     public func off(event: String) {
         DefaultSocketLogger.Logger.log("Removing handler for event: %@", type: logType, args: event)
 
         handlers = handlers.filter { $0.event != event }
     }
 
-    /**
-    Removes a handler with the specified UUID gotten from an `on` or `once`
-    */
+    /// Removes a handler with the specified UUID gotten from an `on` or `once`
     public func off(id id: NSUUID) {
         DefaultSocketLogger.Logger.log("Removing handler with id: %@", type: logType, args: id)
 
         handlers = handlers.filter { $0.id != id }
     }
 
-    /**
-     Adds a handler for an event.
-     Returns: A unique id for the handler
-     */
+    /// Adds a handler for an event.
+    /// Returns: A unique id for the handler
     public func on(event: String, callback: NormalCallback) -> NSUUID {
         DefaultSocketLogger.Logger.log("Adding handler for event: %@", type: logType, args: event)
 
@@ -397,10 +379,8 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         return handler.id
     }
 
-    /**
-     Adds a single-use handler for an event.
-     Returns: A unique id for the handler
-     */
+    /// Adds a single-use handler for an event.
+    /// Returns: A unique id for the handler
     public func once(event: String, callback: NormalCallback) -> NSUUID {
         DefaultSocketLogger.Logger.log("Adding once handler for event: %@", type: logType, args: event)
 
@@ -417,9 +397,7 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         return handler.id
     }
 
-    /**
-     Adds a handler that will be called on every event.
-     */
+    /// Adds a handler that will be called on every event.
     public func onAny(handler: (SocketAnyEvent) -> Void) {
         anyHandler = handler
     }
@@ -443,44 +421,34 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         }
     }
 
-    /**
-     Tries to reconnect to the server.
-     */
+    /// Tries to reconnect to the server.
     public func reconnect() {
-        tryReconnectWithReason("manual reconnect")
+        guard !reconnecting else { return }
+        
+        engine?.disconnect("manual reconnect")
     }
 
-    /**
-     Removes all handlers.
-     Can be used after disconnecting to break any potential remaining retain cycles.
-     */
+    /// Removes all handlers.
+    /// Can be used after disconnecting to break any potential remaining retain cycles.
     public func removeAllHandlers() {
         handlers.removeAll(keepCapacity: false)
     }
 
     private func tryReconnectWithReason(reason: String) {
-        if reconnectTimer == nil {
+        if reconnecting {
             DefaultSocketLogger.Logger.log("Starting reconnect", type: logType)
             handleEvent("reconnect", data: [reason], isInternalMessage: true)
-
-            status = .Reconnecting
-
-            dispatch_async(dispatch_get_main_queue()) {
-                self.reconnectTimer = NSTimer.scheduledTimerWithTimeInterval(Double(self.reconnectWait),
-                    target: self, selector: "_tryReconnect", userInfo: nil, repeats: true)
-            }
+            
+            _tryReconnect()
         }
     }
 
     @objc private func _tryReconnect() {
-        if status == .Connected {
-            clearReconnectTimer()
-
+        if !reconnecting {
             return
         }
 
         if reconnectAttempts != -1 && currentReconnectAttempt + 1 > reconnectAttempts || !reconnects {
-            clearReconnectTimer()
             didDisconnect("Reconnect Failed")
 
             return
@@ -492,6 +460,10 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
 
         currentReconnectAttempt += 1
         connect()
+        
+        let dispatchAfter = dispatch_time(DISPATCH_TIME_NOW, Int64(UInt64(reconnectWait) * NSEC_PER_SEC))
+        
+        dispatch_after(dispatchAfter, dispatch_get_main_queue(), _tryReconnect)
     }
 }
 

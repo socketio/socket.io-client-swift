@@ -55,7 +55,9 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url options:@
 - Can be used from Objective-C
 
 ##Installation
-Requires Swift 2/Xcode 7
+Requires Swift 2.2/Xcode 7.3
+
+If you need Swift 2.1/Xcode 7.2 use v5.5.0 (Pre-Swift 2.2 support is no longer maintained)
 
 If you need Swift 1.2/Xcode 6.3/4 use v2.4.5 (Pre-Swift 2 support is no longer maintained)
 
@@ -86,7 +88,7 @@ Carthage
 -----------------
 Add this line to your `Cartfile`:
 ```
-github "socketio/socket.io-client-swift" ~> 5.5.0 # Or latest version
+github "socketio/socket.io-client-swift" ~> 6.0.0 # Or latest version
 ```
 
 Run `carthage update --platform ios,macosx`.
@@ -100,7 +102,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 platform :ios, '8.0'
 use_frameworks!
 
-pod 'Socket.IO-Client-Swift', '~> 5.5.0' # Or latest version
+pod 'Socket.IO-Client-Swift', '~> 6.0.0' # Or latest version
 ```
 
 Install pods:
@@ -128,7 +130,7 @@ CocoaSeeds
 Add this line to your `Seedfile`:
 
 ```
-github "socketio/socket.io-client-swift", "v5.5.0", :files => "Source/*.swift" # Or latest version
+github "socketio/socket.io-client-swift", "v6.0.0", :files => "Source/*.swift" # Or latest version
 ```
 
 Run `seed install`.
