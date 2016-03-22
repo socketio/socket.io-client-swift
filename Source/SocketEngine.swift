@@ -47,7 +47,6 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
     public private(set) var forcePolling = false
     public private(set) var forceWebsockets = false
     public private(set) var invalidated = false
-    public private(set) var pingTimer: NSTimer?
     public private(set) var polling = true
     public private(set) var probing = false
     public private(set) var session: NSURLSession?
@@ -295,7 +294,6 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
             invalidated = true
             connected = false
             
-            pingTimer?.invalidate()
             ws?.disconnect()
             stopPolling()
             client?.engineDidClose(reason)
@@ -401,8 +399,7 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
                     createWebsocketAndConnect()
                 }
                 
-                
-                startPingTimer()
+                sendPing()
                 
                 if !forceWebsockets {
                     doPoll()
@@ -487,30 +484,28 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
         websocket = false
     }
 
-    @objc private func sendPing() {
+    private func sendPing() {
+        if !connected {
+            return
+        }
+        
         //Server is not responding
         if pongsMissed > pongsMissedMax {
-            pingTimer?.invalidate()
             client?.engineDidClose("Ping timeout")
             return
         }
-
-        pongsMissed += 1
-        write("", withType: .Ping, withData: [])
-    }
-
-    private func startPingTimer() {
+        
         if let pingInterval = pingInterval {
-            pingTimer?.invalidate()
-            pingTimer = nil
+            pongsMissed += 1
+            write("", withType: .Ping, withData: [])
             
-            dispatch_async(dispatch_get_main_queue()) {
-                self.pingTimer = NSTimer.scheduledTimerWithTimeInterval(pingInterval, target: self,
-                    selector: #selector(SocketEngine.sendPing), userInfo: nil, repeats: true)
+            let time = dispatch_time(DISPATCH_TIME_NOW, Int64(pingInterval * Double(NSEC_PER_SEC)))
+            dispatch_after(time, dispatch_get_main_queue()) {[weak self] in
+                self?.sendPing()
             }
         }
     }
-
+    
     // Moves from long-polling to websockets
     private func upgradeTransport() {
         if ws?.isConnected ?? false {
@@ -562,7 +557,6 @@ public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWeb
         }
         
         if websocket {
-            pingTimer?.invalidate()
             connected = false
             websocket = false
             
