@@ -108,18 +108,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         self.init(socketURL: socketURL, options: options?.toSocketOptionsSet() ?? [])
     }
 
-    @available(*, deprecated=5.3, message="Please use the NSURL based init")
-    public convenience init(socketURLString: String, options: Set<SocketIOClientOption> = []) {
-        guard let url = NSURL(string: socketURLString) else { fatalError("Incorrect url") }
-        self.init(socketURL: url, options: options)
-    }
-    
-    @available(*, deprecated=5.3, message="Please use the NSURL based init")
-    public convenience init(socketURLString: String, options: NSDictionary?) {
-        guard let url = NSURL(string: socketURLString) else { fatalError("Incorrect url") }
-        self.init(socketURL: url, options: options?.toSocketOptionsSet() ?? [])
-    }
-
     deinit {
         DefaultSocketLogger.Logger.log("Client is being released", type: logType)
         engine?.disconnect("Client Deinit")
@@ -131,11 +119,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
         engine = SocketEngine(client: self, url: socketURL, options: options)
 
         return engine!
-    }
-
-    @available(*, deprecated=5.3, message="Please use disconnect()")
-    public func close() {
-        disconnect()
     }
 
     /// Connect to the server.
@@ -400,11 +383,6 @@ public final class SocketIOClient: NSObject, SocketEngineClient, SocketParsable 
     /// Adds a handler that will be called on every event.
     public func onAny(handler: (SocketAnyEvent) -> Void) {
         anyHandler = handler
-    }
-
-    @available(*, deprecated=5.3, message="Please use one of the connect methods)")
-    public func open() {
-        connect()
     }
 
     public func parseEngineMessage(msg: String) {

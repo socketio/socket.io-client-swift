@@ -49,13 +49,11 @@ import Foundation
     
     init(client: SocketEngineClient, url: NSURL, options: NSDictionary?)
     
-    @available(*, deprecated=5.5, message="Please use disconnect") func close(reason: String)
     func connect()
     func didError(error: String)
     func disconnect(reason: String)
     func doFastUpgrade()
     func flushWaitingForPostToWebSocket()
-    @available(*, deprecated=5.5, message="Please use connect") func open()
     func parseEngineData(data: NSData)
     func parseEngineMessage(message: String, fromPolling: Bool)
     func write(msg: String, withType type: SocketEnginePacketType, withData data: [NSData])
