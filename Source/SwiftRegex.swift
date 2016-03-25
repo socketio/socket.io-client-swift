@@ -18,7 +18,7 @@ infix operator <~ { associativity none precedence 130 }
 private let lock = dispatch_semaphore_create(1)
 private var swiftRegexCache = [String: NSRegularExpression]()
 
-internal final class SwiftRegex: NSObject, BooleanType {
+internal final class SwiftRegex : NSObject, BooleanType {
     var target: String
     var regex: NSRegularExpression
     

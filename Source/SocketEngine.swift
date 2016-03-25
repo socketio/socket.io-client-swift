@@ -24,7 +24,7 @@
 
 import Foundation
 
-public final class SocketEngine: NSObject, SocketEnginePollable, SocketEngineWebsocket {
+public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWebsocket {
     public let emitQueue = dispatch_queue_create("com.socketio.engineEmitQueue", DISPATCH_QUEUE_SERIAL)
     public let handleQueue = dispatch_queue_create("com.socketio.engineHandleQueue", DISPATCH_QUEUE_SERIAL)
     public let parseQueue = dispatch_queue_create("com.socketio.engineParseQueue", DISPATCH_QUEUE_SERIAL)

@@ -25,7 +25,7 @@
 import Foundation
 
 /// Protocol that is used to implement socket.io polling support
-public protocol SocketEnginePollable: SocketEngineSpec {
+public protocol SocketEnginePollable : SocketEngineSpec {
     var invalidated: Bool { get }
     /// Holds strings waiting to be sent over polling. 
     /// You shouldn't need to mess with this.

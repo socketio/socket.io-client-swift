@@ -24,11 +24,11 @@
 
 import Foundation
 
-protocol ClientOption: CustomStringConvertible, Hashable {
+protocol ClientOption : CustomStringConvertible, Hashable {
     func getSocketIOOptionValue() -> AnyObject
 }
 
-public enum SocketIOClientOption: ClientOption {
+public enum SocketIOClientOption : ClientOption {
     case ConnectParams([String: AnyObject])
     case Cookies([NSHTTPCookie])
     case DoubleEncodeUTF8(Bool)
@@ -152,7 +152,7 @@ public func ==(lhs: SocketIOClientOption, rhs: SocketIOClientOption) -> Bool {
     return lhs.description == rhs.description
 }
 
-extension Set where Element: ClientOption {
+extension Set where Element : ClientOption {
     mutating func insertIgnore(element: Element) {
         if !contains(element) {
             insert(element)
