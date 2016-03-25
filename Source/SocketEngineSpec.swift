@@ -61,36 +61,36 @@ import Foundation
 
 extension SocketEngineSpec {
     var urlPollingWithSid: NSURL {
-        let com = NSURLComponents(URL: urlPolling, resolvingAgainstBaseURL: false)!
+        let com = NSURLComponents(url: urlPolling, resolvingAgainstBaseURL: false)!
         com.query = com.query! + "&sid=\(sid)"
         
-        return com.URL!
+        return com.url!
     }
     
     var urlWebSocketWithSid: NSURL {
-        let com = NSURLComponents(URL: urlWebSocket, resolvingAgainstBaseURL: false)!
+        let com = NSURLComponents(url: urlWebSocket, resolvingAgainstBaseURL: false)!
         com.query = com.query! + (sid == "" ? "" : "&sid=\(sid)")
         
-        return com.URL!
+        return com.url!
     }
     
     func createBinaryDataForSend(data: NSData) -> Either<NSData, String> {
         if websocket {
-            var byteArray = [UInt8](count: 1, repeatedValue: 0x4)
+            var byteArray = [UInt8](repeating: 0x4, count: 1)
             let mutData = NSMutableData(bytes: &byteArray, length: 1)
             
-            mutData.appendData(data)
+            mutData.append(data)
             
             return .Left(mutData)
         } else {
-            let str = "b4" + data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions(rawValue: 0))
+            let str = "b4" + data.base64EncodedString(NSDataBase64EncodingOptions(rawValue: 0))
             
             return .Right(str)
         }
     }
     
     func doubleEncodeUTF8(string: String) -> String {
-        if let latin1 = string.dataUsingEncoding(NSUTF8StringEncoding),
+        if let latin1 = string.data(usingEncoding: NSUTF8StringEncoding),
             utf8 = NSString(data: latin1, encoding: NSISOLatin1StringEncoding) {
                 return utf8 as String
         } else {
@@ -99,7 +99,7 @@ extension SocketEngineSpec {
     }
     
     func fixDoubleUTF8(string: String) -> String {
-        if let utf8 = string.dataUsingEncoding(NSISOLatin1StringEncoding),
+        if let utf8 = string.data(usingEncoding: NSISOLatin1StringEncoding),
             latin1 = NSString(data: utf8, encoding: NSUTF8StringEncoding) {
                 return latin1 as String
         } else {

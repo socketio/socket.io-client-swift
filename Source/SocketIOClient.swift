@@ -71,33 +71,33 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         self.socketURL = socketURL
         
         if socketURL.absoluteString.hasPrefix("https://") {
-            self.options.insertIgnore(.Secure(true))
+            self.options.insertIgnore(.secure(true))
         }
         
         for option in options {
             switch option {
-            case let .Reconnects(reconnects):
+            case let .reconnects(reconnects):
                 self.reconnects = reconnects
-            case let .ReconnectAttempts(attempts):
+            case let .reconnectAttempts(attempts):
                 reconnectAttempts = attempts
-            case let .ReconnectWait(wait):
+            case let .reconnectWait(wait):
                 reconnectWait = abs(wait)
-            case let .Nsp(nsp):
+            case let .nsp(nsp):
                 self.nsp = nsp
-            case let .Log(log):
+            case let .log(log):
                 DefaultSocketLogger.Logger.log = log
-            case let .Logger(logger):
+            case let .logger(logger):
                 DefaultSocketLogger.Logger = logger
-            case let .HandleQueue(queue):
+            case let .handleQueue(queue):
                 handleQueue = queue
-            case let .ForceNew(force):
+            case let .forceNew(force):
                 forceNew = force
             default:
                 continue
             }
         }
         
-        self.options.insertIgnore(.Path("/socket.io/"))
+        self.options.insertIgnore(.path("/socket.io/"))
         
         super.init()
     }
@@ -409,7 +409,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     /// Removes all handlers.
     /// Can be used after disconnecting to break any potential remaining retain cycles.
     public func removeAllHandlers() {
-        handlers.removeAll(keepCapacity: false)
+        handlers.removeAll(keepingCapacity: false)
     }
 
     private func tryReconnectWithReason(reason: String) {

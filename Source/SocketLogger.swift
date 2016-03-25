@@ -47,7 +47,7 @@ public extension SocketLogger {
     private func abstractLog(logType: String, message: String, type: String, args: [AnyObject]) {
         guard log else { return }
         
-        let newArgs = args.map({arg -> CVarArgType in String(arg)})
+        let newArgs = args.map({arg -> CVarArg in String(arg)})
         let replaced = String(format: message, arguments: newArgs)
         
         NSLog("%@ %@: %@", logType, type, replaced)

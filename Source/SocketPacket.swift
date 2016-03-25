@@ -94,7 +94,7 @@ struct SocketPacket {
         }
         
         do {
-            let jsonSend = try NSJSONSerialization.dataWithJSONObject(data,
+            let jsonSend = try NSJSONSerialization.data(withJSONObject: data,
                 options: NSJSONWritingOptions(rawValue: 0))
             guard let jsonString = String(data: jsonSend, encoding: NSUTF8StringEncoding) else {
                 return "[]"
@@ -235,7 +235,7 @@ extension SocketPacket {
 
 private extension SocketPacket {
     // Recursive function that looks for NSData in collections
-    static func shred(data: AnyObject, inout binary: [NSData]) -> AnyObject {
+    static func shred(data: AnyObject, binary: inout [NSData]) -> AnyObject {
         let placeholder = ["_placeholder": true, "num": binary.count]
         
         switch data {

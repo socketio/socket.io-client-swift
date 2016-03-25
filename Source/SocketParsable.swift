@@ -111,7 +111,7 @@ extension SocketParsable {
             }
         }
         
-        let d = message[parser.currentIndex.advancedBy(1)..<message.endIndex]
+        let d = message[parser.currentIndex.advanced(by: 1)..<message.endIndex]
         let noPlaceholders = d["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] <~ "\"~~$2\""
         
         switch parseData(noPlaceholders) {
@@ -131,10 +131,10 @@ extension SocketParsable {
     
     // Parses data for events
     private func parseData(data: String) -> Either<String, [AnyObject]> {
-        let stringData = data.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)
+        let stringData = data.data(usingEncoding: NSUTF8StringEncoding, allowLossyConversion: false)
         do {
-            if let arr = try NSJSONSerialization.JSONObjectWithData(stringData!,
-                options: NSJSONReadingOptions.MutableContainers) as? [AnyObject] {
+            if let arr = try NSJSONSerialization.jsonObject(with: stringData!,
+                options: NSJSONReadingOptions.mutableContainers) as? [AnyObject] {
                     return .Right(arr)
             } else {
                 return .Left("Expected data array")

@@ -86,27 +86,27 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         
         for option in options {
             switch option {
-            case let .ConnectParams(params):
+            case let .connectParams(params):
                 connectParams = params
-            case let .Cookies(cookies):
+            case let .cookies(cookies):
                 self.cookies = cookies
-            case let .DoubleEncodeUTF8(encode):
+            case let .doubleEncodeUTF8(encode):
                 doubleEncodeUTF8 = encode
-            case let .ExtraHeaders(headers):
+            case let .extraHeaders(headers):
                 extraHeaders = headers
-            case let .SessionDelegate(delegate):
+            case let .sessionDelegate(delegate):
                 sessionDelegate = delegate
-            case let .ForcePolling(force):
+            case let .forcePolling(force):
                 forcePolling = force
-            case let .ForceWebsockets(force):
+            case let .forceWebsockets(force):
                 forceWebsockets = force
-            case let .Path(path):
+            case let .path(path):
                 socketPath = path
-            case let .VoipEnabled(enable):
+            case let .voipEnabled(enable):
                 voipEnabled = enable
-            case let .Secure(secure):
+            case let .secure(secure):
                 self.secure = secure
-            case let .SelfSigned(selfSigned):
+            case let .selfSigned(selfSigned):
                 self.selfSigned = selfSigned
             default:
                 continue
@@ -129,12 +129,12 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     }
     
     private func checkAndHandleEngineError(msg: String) {
-        guard let stringData = msg.dataUsingEncoding(NSUTF8StringEncoding,
+        guard let stringData = msg.data(usingEncoding: NSUTF8StringEncoding,
             allowLossyConversion: false) else { return }
         
         do {
-            if let dict = try NSJSONSerialization.JSONObjectWithData(stringData,
-                options: NSJSONReadingOptions.MutableContainers) as? NSDictionary {
+            if let dict = try NSJSONSerialization.jsonObject(with: stringData,
+                options: NSJSONReadingOptions.mutableContainers) as? NSDictionary {
                     guard let code = dict["code"] as? Int else { return }
                     guard let error = dict["message"] as? String else { return }
                     
@@ -159,10 +159,10 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     private func checkIfMessageIsBase64Binary(message: String) -> Bool {
         if message.hasPrefix("b4") {
             // binary in base64 string
-            let noPrefix = message[message.startIndex.advancedBy(2)..<message.endIndex]
+            let noPrefix = message[message.startIndex.advanced(by: 2)..<message.endIndex]
 
             if let data = NSData(base64EncodedString: noPrefix,
-                options: .IgnoreUnknownCharacters) {
+                options: .ignoreUnknownCharacters) {
                     client?.parseEngineBinaryData(data)
             }
             
@@ -191,10 +191,10 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             return
         }
         
-        let reqPolling = NSMutableURLRequest(URL: urlPolling)
+        let reqPolling = NSMutableURLRequest(url: urlPolling)
         
         if cookies != nil {
-            let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies!)
+            let headers = NSHTTPCookie.requestHeaderFields(with: cookies!)
             reqPolling.allHTTPHeaderFields = headers
         }
         
@@ -238,14 +238,14 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         urlWebSocket.query = urlWebSocket.query! + queryString
         urlPolling.query = urlPolling.query! + queryString
         
-        return (urlPolling.URL!, urlWebSocket.URL!)
+        return (urlPolling.url!, urlWebSocket.url!)
     }
 
     private func createWebsocketAndConnect() {
         ws = WebSocket(url: urlWebSocketWithSid)
         
         if cookies != nil {
-            let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies!)
+            let headers = NSHTTPCookie.requestHeaderFields(with: cookies!)
             for (key, value) in headers {
                 ws?.headers[key] = value
             }
@@ -325,7 +325,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
                 self.write(waiter.msg, withType: waiter.type, withData: waiter.data)
             }
             
-            self.probeWait.removeAll(keepCapacity: false)
+            self.probeWait.removeAll(keepingCapacity: false)
             
             if self.postWait.count != 0 {
                 self.flushWaitingForPostToWebSocket()
@@ -342,7 +342,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             ws.writeString(fixDoubleUTF8(msg))
         }
         
-        postWait.removeAll(keepCapacity: true)
+        postWait.removeAll(keepingCapacity: true)
     }
 
     private func handleClose(reason: String) {
@@ -358,10 +358,10 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     }
 
     private func handleOpen(openData: String) {
-        let mesData = openData.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!
+        let mesData = openData.data(usingEncoding: NSUTF8StringEncoding, allowLossyConversion: false)!
         do {
-            let json = try NSJSONSerialization.JSONObjectWithData(mesData,
-                options: NSJSONReadingOptions.AllowFragments) as? NSDictionary
+            let json = try NSJSONSerialization.jsonObject(with: mesData,
+                options: NSJSONReadingOptions.allowFragments) as? NSDictionary
             if let sid = json?["sid"] as? String {
                 let upgradeWs: Bool
 
@@ -408,7 +408,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     
     public func parseEngineData(data: NSData) {
         DefaultSocketLogger.Logger.log("Got binary data: %@", type: "SocketEngine", args: data)
-        client?.parseEngineBinaryData(data.subdataWithRange(NSMakeRange(1, data.length - 1)))
+        client?.parseEngineBinaryData(data.subdata(with: NSMakeRange(1, data.length - 1)))
     }
 
     public func parseEngineMessage(message: String, fromPolling: Bool) {

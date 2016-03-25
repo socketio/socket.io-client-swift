@@ -47,7 +47,7 @@ public protocol SocketEnginePollable : SocketEngineSpec {
 extension SocketEnginePollable {
     private func addHeaders(req: NSMutableURLRequest) {
         if cookies != nil {
-            let headers = NSHTTPCookie.requestHeaderFieldsWithCookies(cookies!)
+            let headers = NSHTTPCookie.requestHeaderFields(with: cookies!)
             req.allHTTPHeaderFields = headers
         }
         
@@ -69,19 +69,19 @@ extension SocketEnginePollable {
         
         DefaultSocketLogger.Logger.log("Created POST string: %@", type: "SocketEnginePolling", args: postStr)
         
-        postWait.removeAll(keepCapacity: false)
+        postWait.removeAll(keepingCapacity: false)
         
-        let req = NSMutableURLRequest(URL: urlPollingWithSid)
+        let req = NSMutableURLRequest(url: urlPollingWithSid)
         
         addHeaders(req)
         
-        req.HTTPMethod = "POST"
+        req.httpMethod = "POST"
         req.setValue("text/plain; charset=UTF-8", forHTTPHeaderField: "Content-Type")
         
-        let postData = postStr.dataUsingEncoding(NSUTF8StringEncoding,
+        let postData = postStr.data(usingEncoding: NSUTF8StringEncoding,
             allowLossyConversion: false)!
         
-        req.HTTPBody = postData
+        req.httpBody = postData
         req.setValue(String(postData.length), forHTTPHeaderField: "Content-Length")
         
         return req
@@ -93,7 +93,7 @@ extension SocketEnginePollable {
         }
         
         waitingForPoll = true
-        let req = NSMutableURLRequest(URL: urlPollingWithSid)
+        let req = NSMutableURLRequest(url: urlPollingWithSid)
         
         addHeaders(req)
         doLongPoll(req)
@@ -107,7 +107,7 @@ extension SocketEnginePollable {
         
         DefaultSocketLogger.Logger.log("Doing polling request", type: "SocketEnginePolling")
         
-        session?.dataTaskWithRequest(req, completionHandler: callback).resume()
+        session?.dataTask(with: req, completionHandler: callback).resume()
     }
     
     func doLongPoll(req: NSURLRequest) {
