@@ -109,6 +109,6 @@ extension SocketEngineSpec {
     
     /// Send an engine message (4)
     func send(msg: String, withData datas: [NSData]) {
-        write(msg, withType: .Message, withData: datas)
+        write(msg, withType: .message, withData: datas)
     }
 }

@@ -36,7 +36,7 @@ public protocol SocketEngineWebsocket : SocketEngineSpec, WebSocketDelegate {
 extension SocketEngineWebsocket {
     func probeWebSocket() {
         if ws?.isConnected ?? false {
-            sendWebSocketMessage("probe", withType: .Ping, withData: [])
+            sendWebSocketMessage("probe", withType: .ping, withData: [])
         }
     }
     

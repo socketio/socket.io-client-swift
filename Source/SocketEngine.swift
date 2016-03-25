@@ -290,15 +290,15 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         }
         
         if websocket {
-            sendWebSocketMessage("", withType: .Close, withData: [])
+            sendWebSocketMessage("", withType: .close, withData: [])
             postSendClose(nil, nil, nil)
         } else {
             // We need to take special care when we're polling that we send it ASAP
             // Also make sure we're on the emitQueue since we're touching postWait
             dispatch_sync(emitQueue) {
-                self.postWait.append(String(SocketEnginePacketType.Close.rawValue))
+                self.postWait.append(String(SocketEnginePacketType.close.rawValue))
                 let req = self.createRequestForPostWithPostWait()
-                self.doRequest(req, withCallback: postSendClose)
+                self.doRequest(req, callbackWith: postSendClose)
             }
         }
     }
@@ -309,7 +309,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
                 "we'll probably disconnect soon. You should report this.", type: logType)
         }
 
-        sendWebSocketMessage("", withType: .Upgrade, withData: [])
+        sendWebSocketMessage("", withType: .upgrade, withData: [])
         websocket = true
         polling = false
         fastUpgrade = false
@@ -425,22 +425,22 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             return
         }
 
-        if fromPolling && type != .Noop && doubleEncodeUTF8 {
+        if fromPolling && type != .noop && doubleEncodeUTF8 {
             fixedString = fixDoubleUTF8(message)
         } else {
             fixedString = message
         }
 
         switch type {
-        case .Message:
+        case .message:
             handleMessage(fixedString[fixedString.startIndex.successor()..<fixedString.endIndex])
-        case .Noop:
+        case .noop:
             handleNOOP()
-        case .Pong:
+        case .pong:
             handlePong(fixedString)
-        case .Open:
+        case .open:
             handleOpen(fixedString[fixedString.startIndex.successor()..<fixedString.endIndex])
-        case .Close:
+        case .close:
             handleClose(fixedString)
         default:
             DefaultSocketLogger.Logger.log("Got unknown packet type", type: logType)
@@ -477,7 +477,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         
         if let pingInterval = pingInterval {
             pongsMissed += 1
-            write("", withType: .Ping, withData: [])
+            write("", withType: .ping, withData: [])
             
             let time = dispatch_time(DISPATCH_TIME_NOW, Int64(pingInterval * Double(NSEC_PER_SEC)))
             dispatch_after(time, dispatch_get_main_queue()) {[weak self] in
@@ -492,7 +492,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             DefaultSocketLogger.Logger.log("Upgrading transport to WebSockets", type: logType)
 
             fastUpgrade = true
-            sendPollMessage("", withType: .Noop, withData: [])
+            sendPollMessage("", withType: .noop, withData: [])
             // After this point, we should not send anymore polling messages
         }
     }
