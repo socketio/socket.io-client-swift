@@ -76,7 +76,7 @@ extension SocketParsable {
             return .Right(SocketPacket(type: type, nsp: "/"))
         }
         
-        var namespace: String?
+        var namespace = "/"
         var placeholders = -1
         
         if type == .BinaryEvent || type == .BinaryAck {
@@ -119,23 +119,24 @@ extension SocketParsable {
             // If first you don't succeed, try again
             if case let .Right(data) = parseData("\([noPlaceholders as AnyObject])") {
                 return .Right(SocketPacket(type: type, data: data, id: Int(idString) ?? -1,
-                    nsp: namespace ?? "/", placeholders: placeholders))
+                    nsp: namespace, placeholders: placeholders))
             } else {
                 return .Left(err)
             }
         case let .Right(data):
             return .Right(SocketPacket(type: type, data: data, id: Int(idString) ?? -1,
-                nsp: namespace ?? "/", placeholders: placeholders))
+                nsp: namespace, placeholders: placeholders))
         }
     }
     
     // Parses data for events
     private func parseData(data: String) -> Either<String, [AnyObject]> {
         let stringData = data.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)
+        
         do {
             if let arr = try NSJSONSerialization.JSONObjectWithData(stringData!,
-                options: NSJSONReadingOptions.MutableContainers) as? [AnyObject] {
-                    return .Right(arr)
+                    options: NSJSONReadingOptions.MutableContainers) as? [AnyObject] {
+                return .Right(arr)
             } else {
                 return .Left("Expected data array")
             }
