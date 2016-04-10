@@ -76,7 +76,7 @@ extension SocketParsable {
             return .Right(SocketPacket(type: type, nsp: "/"))
         }
         
-        var namespace: String?
+        var namespace = "/"
         var placeholders = -1
         
         if type == .BinaryEvent || type == .BinaryAck {
@@ -116,16 +116,16 @@ extension SocketParsable {
         
         switch parseData(noPlaceholders) {
         case let .Left(err):
-            // If first you don't succeed, try again
+            // Errors aren't always enclosed in an array
             if case let .Right(data) = parseData("\([noPlaceholders as AnyObject])") {
                 return .Right(SocketPacket(type: type, data: data, id: Int(idString) ?? -1,
-                    nsp: namespace ?? "/", placeholders: placeholders))
+                    nsp: namespace, placeholders: placeholders))
             } else {
                 return .Left(err)
             }
         case let .Right(data):
             return .Right(SocketPacket(type: type, data: data, id: Int(idString) ?? -1,
-                nsp: namespace ?? "/", placeholders: placeholders))
+                nsp: namespace, placeholders: placeholders))
         }
     }
     

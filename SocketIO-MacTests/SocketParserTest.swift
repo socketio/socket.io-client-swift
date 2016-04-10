@@ -25,6 +25,7 @@ class SocketParserTest: XCTestCase {
         "0/swift": ("/swift", [], [], -1),
         "1/swift": ("/swift", [], [], -1),
         "4\"ERROR\"": ("/", ["ERROR"], [], -1),
+        "4{\"test\":2}": ("/", [["test": 2]], [], -1),
         "41": ("/", [1], [], -1)]
     
     func testDisconnect() {
@@ -87,6 +88,11 @@ class SocketParserTest: XCTestCase {
         validateParseResult(message)
     }
     
+    func testErrorTypeDictionary() {
+        let message = "4{\"test\":2}"
+        validateParseResult(message)
+    }
+    
     func testErrorTypeInt() {
         let message = "41"
         validateParseResult(message)
@@ -113,12 +119,12 @@ class SocketParserTest: XCTestCase {
     func validateParseResult(message: String) {
         let validValues = SocketParserTest.packetTypes[message]!
         let packet = testSocket.parseString(message)
-        let type = message.substringWithRange(Range<String.Index>(message.startIndex..<message.startIndex.advancedBy(1)))
+        let type = message.substring(with: Range<String.Index>(message.startIndex..<message.startIndex.advanced(by: 1)))
         if case let .Right(packet) = packet {
             XCTAssertEqual(packet.type, SocketPacket.PacketType(rawValue: Int(type) ?? -1)!)
             XCTAssertEqual(packet.nsp, validValues.0)
-            XCTAssertTrue((packet.data as NSArray).isEqualToArray(validValues.1))
-            XCTAssertTrue((packet.binary as NSArray).isEqualToArray(validValues.2))
+            XCTAssertTrue((packet.data as NSArray).isEqual(to: validValues.1))
+            XCTAssertTrue((packet.binary as NSArray).isEqual(to: validValues.2))
             XCTAssertEqual(packet.id, validValues.3)
         } else {
             XCTFail()
@@ -127,10 +133,10 @@ class SocketParserTest: XCTestCase {
     
     func testParsePerformance() {
         let keys = Array(SocketParserTest.packetTypes.keys)
-        measureBlock({
-            for item in keys.enumerate() {
+        measure {
+            for item in keys.enumerated() {
                 self.testSocket.parseString(item.element)
             }
-        })
+        }
     }
 }

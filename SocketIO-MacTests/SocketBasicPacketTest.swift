@@ -10,8 +10,8 @@ import XCTest
 @testable import SocketIOClientSwift
 
 class SocketBasicPacketTest: XCTestCase {
-    let data = "test".dataUsingEncoding(NSUTF8StringEncoding)!
-    let data2 = "test2".dataUsingEncoding(NSUTF8StringEncoding)!
+    let data = "test".data(usingEncoding: NSUTF8StringEncoding)!
+    let data2 = "test2".data(usingEncoding: NSUTF8StringEncoding)!
     
     func testEmpyEmit() {
         let expectedSendString = "2[\"test\"]"

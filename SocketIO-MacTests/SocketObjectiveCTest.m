@@ -31,11 +31,11 @@
 }
 
 - (void)testEmitSyntax {
-    [self.socket emit:@"testEmit" withItems:@[@YES]];
+    [self.socket emit:@"testEmit" with:@[@YES]];
 }
 
 - (void)testEmitWithAckSyntax {
-    [self.socket emitWithAck:@"testAckEmit" withItems:@[@YES]];
+    [self.socket emitWithAck:@"testAckEmit" with:@[@YES]];
 }
 
 - (void)testOffSyntax {

@@ -22,17 +22,17 @@ class SocketEngineTest: XCTestCase {
     }
     
     func testBasicPollingMessage() {
-        let expectation = expectationWithDescription("Basic polling test")
+        let expect = expectation(withDescription: "Basic polling test")
         client.on("blankTest") {data, ack in
-            expectation.fulfill()
+            expect.fulfill()
         }
         
         engine.parsePollingMessage("15:42[\"blankTest\"]")
-        waitForExpectationsWithTimeout(3, handler: nil)
+        waitForExpectations(withTimeout: 3, handler: nil)
     }
     
     func testTwoPacketsInOnePollTest() {
-        let finalExpectation = expectationWithDescription("Final packet in poll test")
+        let finalExpectation = expectation(withDescription: "Final packet in poll test")
         var gotBlank = false
         
         client.on("blankTest") {data, ack in
@@ -48,11 +48,11 @@ class SocketEngineTest: XCTestCase {
         }
         
         engine.parsePollingMessage("15:42[\"blankTest\"]24:42[\"stringTest\",\"hello\"]")
-        waitForExpectationsWithTimeout(3, handler: nil)
+        waitForExpectations(withTimeout: 3, handler: nil)
     }
     
     func testEngineDoesErrorOnUnknownTransport() {
-        let finalExpectation = expectationWithDescription("Unknown Transport")
+        let finalExpectation = expectation(withDescription: "Unknown Transport")
         
         client.on("error") {data, ack in
             if let error = data[0] as? String where error == "Unknown transport" {
@@ -61,29 +61,29 @@ class SocketEngineTest: XCTestCase {
         }
         
         engine.parseEngineMessage("{\"code\": 0, \"message\": \"Unknown transport\"}", fromPolling: false)
-        waitForExpectationsWithTimeout(3, handler: nil)
+        waitForExpectations(withTimeout: 3, handler: nil)
     }
     
     func testEngineDoesErrorOnUnknownMessage() {
-        let finalExpectation = expectationWithDescription("Engine Errors")
+        let finalExpectation = expectation(withDescription: "Engine Errors")
         
         client.on("error") {data, ack in
             finalExpectation.fulfill()
         }
         
         engine.parseEngineMessage("afafafda", fromPolling: false)
-        waitForExpectationsWithTimeout(3, handler: nil)
+        waitForExpectations(withTimeout: 3, handler: nil)
     }
     
     func testEngineDecodesUTF8Properly() {
-        let expectation = expectationWithDescription("Engine Decodes utf8")
+        let expect = expectation(withDescription: "Engine Decodes utf8")
         
         client.on("stringTest") {data, ack in
             XCTAssertEqual(data[0] as? String, "lïne one\nlīne \rtwo", "Failed string test")
-            expectation.fulfill()
+            expect.fulfill()
         }
 
         engine.parsePollingMessage("41:42[\"stringTest\",\"lÃ¯ne one\\nlÄ«ne \\rtwo\"]")
-        waitForExpectationsWithTimeout(3, handler: nil)
+        waitForExpectations(withTimeout: 3, handler: nil)
     }
 }

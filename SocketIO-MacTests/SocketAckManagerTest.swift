@@ -13,14 +13,14 @@ class SocketAckManagerTest: XCTestCase {
     var ackManager = SocketAckManager()
     
     func testAddAcks() {
-        let callbackExpection = self.expectationWithDescription("callbackExpection")
+        let callbackExpection = self.expectation(withDescription: "callbackExpection")
         let itemsArray = ["Hi", "ho"]
         func callback(items: [AnyObject]) {
             callbackExpection.fulfill()
         }
         ackManager.addAck(1, callback: callback)
         ackManager.executeAck(1, items: itemsArray)
-        waitForExpectationsWithTimeout(3.0, handler: nil)
+        waitForExpectations(withTimeout: 3.0, handler: nil)
         
     }
 }
