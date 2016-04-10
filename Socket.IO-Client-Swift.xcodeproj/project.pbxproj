@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3064D9B71CB8308000F0B34E /* Socket.IO-Client-Swift-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = 3064D9B31CB8308000F0B34E /* Socket.IO-Client-Swift-Bridging-Header.h */; };
+		3064D9C41CBAB42600F0B34E /* DeflateHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 3064D9C21CBAB42600F0B34E /* DeflateHelper.h */; };
+		3064D9C51CBAB42600F0B34E /* DeflateHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 3064D9C31CBAB42600F0B34E /* DeflateHelper.m */; };
 		572EF21F1B51F16C00EEBB58 /* SocketIO-iOS.h in Headers */ = {isa = PBXBuildFile; fileRef = 572EF21E1B51F16C00EEBB58 /* SocketIO-iOS.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		572EF2251B51F16C00EEBB58 /* SocketIOClientSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 572EF2191B51F16C00EEBB58 /* SocketIOClientSwift.framework */; };
 		572EF23D1B51F18A00EEBB58 /* SocketIO-Mac.h in Headers */ = {isa = PBXBuildFile; fileRef = 572EF23C1B51F18A00EEBB58 /* SocketIO-Mac.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -154,6 +157,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3064D9B31CB8308000F0B34E /* Socket.IO-Client-Swift-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Socket.IO-Client-Swift-Bridging-Header.h"; path = "Source/Socket.IO-Client-Swift-Bridging-Header.h"; sourceTree = "<group>"; };
+		3064D9C21CBAB42600F0B34E /* DeflateHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DeflateHelper.h; path = Source/DeflateHelper.h; sourceTree = "<group>"; };
+		3064D9C31CBAB42600F0B34E /* DeflateHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DeflateHelper.m; path = Source/DeflateHelper.m; sourceTree = "<group>"; };
 		572EF2191B51F16C00EEBB58 /* SocketIOClientSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SocketIOClientSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		572EF21D1B51F16C00EEBB58 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		572EF21E1B51F16C00EEBB58 /* SocketIO-iOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SocketIO-iOS.h"; sourceTree = "<group>"; };
@@ -344,6 +350,7 @@
 		5764DF7B1B51F24A004FF46E /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				3064D9B31CB8308000F0B34E /* Socket.IO-Client-Swift-Bridging-Header.h */,
 				74171E501C10CD240062D398 /* SocketAckEmitter.swift */,
 				74171E511C10CD240062D398 /* SocketAckManager.swift */,
 				74171E521C10CD240062D398 /* SocketAnyEvent.swift */,
@@ -365,6 +372,8 @@
 				74171E601C10CD240062D398 /* SocketTypes.swift */,
 				74171E611C10CD240062D398 /* SwiftRegex.swift */,
 				74171E621C10CD240062D398 /* WebSocket.swift */,
+				3064D9C21CBAB42600F0B34E /* DeflateHelper.h */,
+				3064D9C31CBAB42600F0B34E /* DeflateHelper.m */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -376,7 +385,9 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3064D9B71CB8308000F0B34E /* Socket.IO-Client-Swift-Bridging-Header.h in Headers */,
 				572EF21F1B51F16C00EEBB58 /* SocketIO-iOS.h in Headers */,
+				3064D9C41CBAB42600F0B34E /* DeflateHelper.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -607,6 +618,7 @@
 				74171E751C10CD240062D398 /* SocketEngine.swift in Sources */,
 				74171E691C10CD240062D398 /* SocketAckManager.swift in Sources */,
 				7420CB791C49629E00956AA4 /* SocketEnginePollable.swift in Sources */,
+				3064D9C51CBAB42600F0B34E /* DeflateHelper.m in Sources */,
 				74ABF7771C3991C10078C657 /* SocketClientSpec.swift in Sources */,
 				74171E871C10CD240062D398 /* SocketEngineSpec.swift in Sources */,
 				74171E631C10CD240062D398 /* SocketAckEmitter.swift in Sources */,
@@ -857,6 +869,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.socket.SocketIOClientSwift;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Source/Socket.IO-Client-Swift-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -907,6 +920,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.socket.SocketIOClientSwift;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Source/Socket.IO-Client-Swift-Bridging-Header.h";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
