@@ -652,7 +652,6 @@ public class WebSocket : NSObject, NSStreamDelegate {
             }
                         
             if ( shouldHandleCompression ) {
-                var datastring = NSString(data: data, encoding: NSUTF8StringEncoding)
                 if let inflatedData = inflateFrame(data) {
                     data = inflatedData
                     dataLength = (UInt64)(inflatedData.length)
