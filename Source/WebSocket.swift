@@ -23,6 +23,7 @@ import Foundation
 import CoreFoundation
 import Security
 
+
 public protocol WebSocketDelegate: class {
     func websocketDidConnect(socket: WebSocket)
     func websocketDidDisconnect(socket: WebSocket, error: NSError?)
@@ -83,10 +84,12 @@ public class WebSocket : NSObject, NSStreamDelegate {
     let headerWSKeyName         = "Sec-WebSocket-Key"
     let headerOriginName        = "Origin"
     let headerWSAcceptName      = "Sec-WebSocket-Accept"
+    let headerWSExtensions      = "Sec-WebSocket-Extensions"
     let BUFFER_MAX              = 4096
     let FinMask: UInt8          = 0x80
     let OpCodeMask: UInt8       = 0x0F
     let RSVMask: UInt8          = 0x70
+    let RSV1Mask: UInt8          = 0x40
     let MaskMask: UInt8         = 0x80
     let PayloadLenMask: UInt8   = 0x7F
     let MaxFrameSize: Int       = 32
@@ -121,6 +124,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
     private var outputStream: NSOutputStream?
     private var connected = false
     private var isCreated = false
+    private var compression = true      // TODO: default?
     private var writeQueue = NSOperationQueue()
     private var readStack = [WSResponse]()
     private var inputQueue = [NSData]()
@@ -215,6 +219,12 @@ public class WebSocket : NSObject, NSStreamDelegate {
         }
         addHeader(urlRequest, key: headerWSUpgradeName, val: headerWSUpgradeValue)
         addHeader(urlRequest, key: headerWSConnectionName, val: headerWSConnectionValue)
+        
+        if ( compression ) {
+            print("Adding extension header...")
+            addHeader(urlRequest, key: headerWSExtensions, val: "permessage-deflate")
+        }
+        
         if let protocols = optionalProtocols {
             addHeader(urlRequest, key: headerWSProtocolName, val: protocols.joinWithSeparator(","))
         }
@@ -474,6 +484,19 @@ public class WebSocket : NSObject, NSStreamDelegate {
         }
         if let cfHeaders = CFHTTPMessageCopyAllHeaderFields(response) {
             let headers = cfHeaders.takeRetainedValue() as NSDictionary
+            print("Headers are \(headers)")
+            
+            if let extensions = headers[headerWSExtensions] as? NSString {
+                print("Extensions are \(extensions)")
+                if ( extensions != "permessage-deflate" ) {
+                    print("Unsupported extension or extension parameters: \(extensions)")
+                    // TODO: be more robust, especially if options are sent with permessage-deflate such as `server_max_window_bits`
+                    // see https://www.igvita.com/2013/11/27/configuring-and-optimizing-websocket-compression/
+                    return -1
+                }
+            }
+            
+            
             if let acceptKey = headers[headerWSAcceptName] as? NSString {
                 if acceptKey.length > 0 {
                     return 0
@@ -533,13 +556,30 @@ public class WebSocket : NSObject, NSStreamDelegate {
             }
             return
         } else {
+            
             let isFin = (FinMask & buffer[0])
             let receivedOpcode = OpCode(rawValue: (OpCodeMask & buffer[0]))
             let isMasked = (MaskMask & buffer[1])
             let payloadLen = (PayloadLenMask & buffer[1])
             var offset = 2
-            if (isMasked > 0 || (RSVMask & buffer[0]) > 0) && receivedOpcode != .Pong {
+            
+            let rsv = (RSVMask & buffer[0])
+            let rsv1 = (RSV1Mask & buffer[0])
+            var rsvIsOk = true
+            var shouldHandleCompression = false
+            
+            if ( rsv > 0 ) {
+                if ( rsv1 > 0 && compression ) {
+                    print("Message is compressed!")
+                    shouldHandleCompression = true
+                } else {
+                    rsvIsOk = false
+                }
+            }
+            
+            if (isMasked > 0 || !rsvIsOk) && receivedOpcode != .Pong {
                 let errCode = CloseCode.ProtocolError.rawValue
+                
                 doDisconnect(errorWithDetail("masked and rsv data is not currently supported", code: errCode))
                 writeError(errCode)
                 return
@@ -610,6 +650,20 @@ public class WebSocket : NSObject, NSStreamDelegate {
             } else {
                 data = NSData(bytes: UnsafePointer<UInt8>((buffer+offset)), length: Int(len))
             }
+                        
+            if ( shouldHandleCompression ) {
+                var datastring = NSString(data: data, encoding: NSUTF8StringEncoding)
+                if let inflatedData = inflateFrame(data) {
+                    data = inflatedData
+                    dataLength = (UInt64)(inflatedData.length)
+                } else {
+                    doDisconnect(errorWithDetail("failed to inflate a compressed frame", code: CloseCode.Encoding.rawValue))
+                    writeError(CloseCode.Encoding.rawValue) // todo: did i pick a good code?
+                    return
+                }
+                
+            }
+            
             if receivedOpcode == .Pong {
                 if canDispatch {
                     dispatch_async(queue) { [weak self] in
@@ -621,6 +675,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
                 let step = Int(offset+numericCast(len))
                 let extra = bufferLen-step
                 if extra > 0 {
+                    // TODO: Is `buffer+step` the right code when compression is enabled? I think so...but let's discuss.
                     processRawMessage((buffer+step), bufferLen: extra)
                 }
                 return
@@ -662,7 +717,11 @@ public class WebSocket : NSObject, NSStreamDelegate {
                 response!.buffer!.appendData(data)
             }
             if let response = response {
-                response.bytesLeft -= Int(len)
+                response.bytesLeft -= Int(dataLength)   // TODO: verify that this is correct
+                if ( response.bytesLeft > 0 ) {
+                    print("Should be 0?")
+                    response.bytesLeft = 0
+                }
                 response.frameCount += 1
                 response.isFin = isFin > 0 ? true : false
                 if isNew {
@@ -674,10 +733,19 @@ public class WebSocket : NSObject, NSStreamDelegate {
             let step = Int(offset+numericCast(len))
             let extra = bufferLen-step
             if extra > 0 {
+                // TODO: ok to reference `buffer` here?
                 processExtra((buffer+step), bufferLen: extra)
             }
         }
         
+    }
+    
+    private func inflateFrame(buffer: NSData) -> NSData? {
+        let helper = DeflateHelper.init()
+        if let result = helper.inflate(buffer) {
+            return result
+        }
+        return nil
     }
     
     ///process the extra of a buffer
