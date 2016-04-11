@@ -24,7 +24,7 @@
 
 import Foundation
 
-public protocol SocketLogger: class {
+public protocol SocketLogger : class {
     /// Whether to log or not
     var log: Bool {get set}
     
@@ -54,7 +54,7 @@ public extension SocketLogger {
     }
 }
 
-class DefaultSocketLogger: SocketLogger {
+class DefaultSocketLogger : SocketLogger {
     static var Logger: SocketLogger = DefaultSocketLogger()
 
     var log = false

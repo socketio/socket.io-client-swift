@@ -25,6 +25,7 @@ class SocketParserTest: XCTestCase {
         "0/swift": ("/swift", [], [], -1),
         "1/swift": ("/swift", [], [], -1),
         "4\"ERROR\"": ("/", ["ERROR"], [], -1),
+        "4{\"test\":2}": ("/", [["test": 2]], [], -1),
         "41": ("/", [1], [], -1)]
     
     func testDisconnect() {
@@ -84,6 +85,11 @@ class SocketParserTest: XCTestCase {
     
     func testErrorTypeString() {
         let message = "4\"ERROR\""
+        validateParseResult(message)
+    }
+    
+    func testErrorTypeDictionary() {
+        let message = "4{\"test\":2}"
         validateParseResult(message)
     }
     

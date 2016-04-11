@@ -24,7 +24,7 @@
 
 import Foundation
 
-private struct SocketAck: Hashable, Equatable {
+private struct SocketAck : Hashable, Equatable {
     let ack: Int
     var callback: AckCallback!
     var hashValue: Int {

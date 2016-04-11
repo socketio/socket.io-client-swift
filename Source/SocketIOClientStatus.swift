@@ -24,7 +24,7 @@
 
 import Foundation
 
-@objc public enum SocketIOClientStatus: Int, CustomStringConvertible {
+@objc public enum SocketIOClientStatus : Int, CustomStringConvertible {
     case NotConnected, Closed, Connecting, Connected
 
     public var description: String {
