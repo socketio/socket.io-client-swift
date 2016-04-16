@@ -1,5 +1,5 @@
 //
-//  SocketClientSpec.swift
+//  SocketIOClientSpec.swift
 //  Socket.IO-Client-Swift
 //
 //  Created by Erik Little on 1/3/16.
@@ -22,7 +22,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-protocol SocketClientSpec : class {
+protocol SocketIOClientSpec : class {
     var nsp: String { get set }
     var waitingPackets: [SocketPacket] { get set }
     
@@ -34,7 +34,7 @@ protocol SocketClientSpec : class {
     func joinNamespace(namespace: String)
 }
 
-extension SocketClientSpec {
+extension SocketIOClientSpec {
     func didError(reason: String) {
         DefaultSocketLogger.Logger.error("%@", type: "SocketIOClient", args: reason)
         

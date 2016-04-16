@@ -46,7 +46,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     public var reconnects = true
     public var reconnectWait = 10
     public var sid: String? {
-        return engine?.sid
+        return nsp + "#" + (engine?.sid ?? "")
     }
 
     private let emitQueue = dispatch_queue_create("com.socketio.emitQueue", DISPATCH_QUEUE_SERIAL)

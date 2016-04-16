@@ -181,9 +181,7 @@ extension SocketEnginePollable {
     }
     
     func parsePollingMessage(str: String) {
-        guard str.characters.count != 1 else {
-            return
-        }
+        guard str.characters.count != 1 else { return }
         
         var reader = SocketStringReader(message: str)
         
@@ -210,7 +208,7 @@ extension SocketEnginePollable {
         let fixedMessage: String
         
         if doubleEncodeUTF8 {
-           fixedMessage = doubleEncodeUTF8(message)
+            fixedMessage = doubleEncodeUTF8(message)
         } else {
             fixedMessage = message
         }

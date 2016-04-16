@@ -22,7 +22,7 @@
 
 import Foundation
 
-protocol SocketParsable : SocketClientSpec {
+protocol SocketParsable : SocketIOClientSpec {
     func parseBinaryData(data: NSData)
     func parseSocketMessage(message: String)
 }
@@ -45,8 +45,7 @@ extension SocketParsable {
     private func handlePacket(pack: SocketPacket) {
         switch pack.type {
         case .Event where isCorrectNamespace(pack.nsp):
-            handleEvent(pack.event, data: pack.args,
-                isInternalMessage: false, withAck: pack.id)
+            handleEvent(pack.event, data: pack.args, isInternalMessage: false, withAck: pack.id)
         case .Ack where isCorrectNamespace(pack.nsp):
             handleAck(pack.id, data: pack.data)
         case .BinaryEvent where isCorrectNamespace(pack.nsp):
