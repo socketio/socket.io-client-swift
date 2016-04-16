@@ -29,7 +29,7 @@ import Foundation
 public protocol SocketEngineWebsocket : SocketEngineSpec, WebSocketDelegate {
     var ws: WebSocket? { get }
 
-    func sendWebSocketMessage(str: String, withType type: SocketEnginePacketType, withData datas: [NSData])
+    func sendWebSocketMessage(_ str: String, withType type: SocketEnginePacketType, withData datas: [NSData])
 }
 
 // WebSocket methods
@@ -42,14 +42,14 @@ extension SocketEngineWebsocket {
     
     /// Send message on WebSockets
     /// Only call on emitQueue
-    public func sendWebSocketMessage(str: String, withType type: SocketEnginePacketType, withData datas: [NSData]) {
+    public func sendWebSocketMessage(_ str: String, withType type: SocketEnginePacketType, withData datas: [NSData]) {
             DefaultSocketLogger.Logger.log("Sending ws: %@ as type: %@", type: "SocketEngine", args: str, type.rawValue)
             
-            ws?.writeString("\(type.rawValue)\(str)")
+            ws?.writeString(str: "\(type.rawValue)\(str)")
             
             for data in datas {
-                if case let .Left(bin) = createBinaryDataForSend(data) {
-                    ws?.writeData(bin)
+                if case let .Left(bin) = createBinaryDataForSend(using: data) {
+                    ws?.writeData(data: bin)
                 }
             }
     }

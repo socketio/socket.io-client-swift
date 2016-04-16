@@ -39,7 +39,7 @@
 }
 
 - (void)testOffSyntax {
-    [self.socket off:@"test"];
+    [self.socket offWithEvent:@"test"];
 }
 
 @end

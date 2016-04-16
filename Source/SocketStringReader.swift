@@ -38,18 +38,18 @@ struct SocketStringReader {
         currentIndex = message.startIndex
     }
     
-    mutating func advanceIndexBy(n: Int) {
-        currentIndex = currentIndex.advanced(by: n)
+    mutating func advance(by: Int) {
+        currentIndex = currentIndex.advanced(by: by)
     }
     
-    mutating func read(readLength: Int) -> String {
-        let readString = message[currentIndex..<currentIndex.advanced(by: readLength)]
-        advanceIndexBy(readLength)
+    mutating func read(length: Int) -> String {
+        let readString = message[currentIndex..<currentIndex.advanced(by: length)]
+        advance(by: length)
         
         return readString
     }
     
-    mutating func readUntilStringOccurence(string: String) -> String {
+    mutating func readUntilStringOccurence(_ string: String) -> String {
         let substring = message[currentIndex..<message.endIndex]
         guard let foundRange = substring.range(of: string) else {
             currentIndex = message.endIndex
@@ -57,12 +57,12 @@ struct SocketStringReader {
             return substring
         }
         
-        advanceIndexBy(message.startIndex.distance(to: foundRange.startIndex) + 1)
+        advance(by: message.startIndex.distance(to: foundRange.startIndex) + 1)
         
         return substring.substring(to: foundRange.startIndex)
     }
     
     mutating func readUntilEnd() -> String {
-        return read(currentIndex.distance(to: message.endIndex))
+        return read(length: currentIndex.distance(to: message.endIndex))
     }
 }

@@ -31,7 +31,7 @@ internal final class SwiftRegex : NSObject, Boolean {
                     NSRegularExpressionOptions.dotMatchesLineSeparators)
                 self.regex = regex
             } catch let error as NSError {
-                SwiftRegex.failure("Error in pattern: \(pattern) - \(error)")
+                SwiftRegex.failure(message: "Error in pattern: \(pattern) - \(error)")
                 self.regex = NSRegularExpression()
             }
             
@@ -48,7 +48,7 @@ internal final class SwiftRegex : NSObject, Boolean {
                 swiftRegexCache[pattern] = regex
                 self.regex = regex
             } catch let error as NSError {
-                SwiftRegex.failure("Error in pattern: \(pattern) - \(error)")
+                SwiftRegex.failure(message: "Error in pattern: \(pattern) - \(error)")
                 self.regex = NSRegularExpression()
             }
         }
@@ -73,7 +73,7 @@ internal final class SwiftRegex : NSObject, Boolean {
     }
     
     func doesMatch(options: NSMatchingOptions!) -> Bool {
-        return range(options).location != NSNotFound
+        return range(options: options).location != NSNotFound
     }
     
     func range(options: NSMatchingOptions) -> NSRange {
@@ -81,11 +81,11 @@ internal final class SwiftRegex : NSObject, Boolean {
     }
     
     func match(options: NSMatchingOptions) -> String? {
-        return substring(range(options))
+        return substring(range: range(options: options))
     }
     
     func groups() -> [String]? {
-        return groupsForMatch(regex.firstMatch(in: target as String, options:
+        return groupsForMatch(match: regex.firstMatch(in: target as String, options:
             NSMatchingOptions.withoutAnchoringBounds, range: targetRange))
     }
     
@@ -95,7 +95,7 @@ internal final class SwiftRegex : NSObject, Boolean {
         }
         var groups = [String]()
         for groupno in 0...regex.numberOfCaptureGroups {
-            if let group = substring(match.range(at: groupno)) {
+            if let group = substring(range: match.range(at: groupno)) {
                 groups += [group]
             } else {
                 groups += ["_"] // avoids bridging problems
@@ -138,17 +138,17 @@ internal final class SwiftRegex : NSObject, Boolean {
     }
     
     func matches() -> [String] {
-        return matchResults().map( { self.substring($0.range)!})
+        return matchResults().map( { self.substring(range: $0.range)!})
     }
     
     func allGroups() -> [[String]?] {
-        return matchResults().map { self.groupsForMatch($0) }
+        return matchResults().map { self.groupsForMatch(match: $0) }
     }
     
     func dictionary(options: NSMatchingOptions!) -> Dictionary<String,String> {
         var out = Dictionary<String,String>()
         for match in matchResults() {
-            out[substring(match.range(at: 1))!] = substring(match.range(at: 2))!
+            out[substring(range: match.range(at: 1))!] = substring(range: match.range(at: 2))!
         }
         return out
     }
@@ -160,18 +160,18 @@ internal final class SwiftRegex : NSObject, Boolean {
             
         regex.enumerateMatches(in: target as String, options: options, range: targetRange ) {match, flags, stop in
                 let matchRange = match!.range
-                out.append( self.substring(NSRange(location:pos, length:matchRange.location-pos))!)
+                out.append( self.substring(range: NSRange(location:pos, length:matchRange.location-pos))!)
                 out.append( substitution(match!, stop) )
                 pos = matchRange.location + matchRange.length
             }
             
-            out.append(substring(NSRange(location:pos, length:targetRange.length-pos))!)
+            out.append(substring(range: NSRange(location:pos, length:targetRange.length-pos))!)
             
             return out as String
     }
     
     var boolValue: Bool {
-        return doesMatch(nil)
+        return doesMatch(options: nil)
     }
 }
 
@@ -188,7 +188,7 @@ extension String {
 }
 
 func <~ (left: SwiftRegex, right: String) -> String {
-    return left.substituteMatches({match, stop in
+    return left.substituteMatches(substitution: {match, stop in
         return left.regex.replacementString(for: match, in: left.target as String, offset: 0, template: right )
         }, options: [])
 }

@@ -30,72 +30,72 @@ class SocketParserTest: XCTestCase {
     
     func testDisconnect() {
         let message = "1"
-        validateParseResult(message)
+        validateParseResult(message: message)
     }
 
     func testConnect() {
         let message = "0"
-        validateParseResult(message)
+        validateParseResult(message: message)
     }
     
     func testDisconnectNameSpace() {
         let message = "1/swift"
-        validateParseResult(message)
+        validateParseResult(message: message)
     }
     
     func testConnecttNameSpace() {
         let message = "0/swift"
-        validateParseResult(message)
+        validateParseResult(message: message)
     }
     
     func testIdEvent() {
         let message = "25[\"test\"]"
-        validateParseResult(message)
+        validateParseResult(message: message)
     }
     
     func testBinaryPlaceholderAsString() {
         let message = "2[\"test\",\"~~0\"]"
-        validateParseResult(message)
+        validateParseResult(message: message)
     }
     
     func testNameSpaceArrayParse() {
         let message = "2/swift,[\"testArrayEmitReturn\",[\"test3\",\"test4\"]]"
-        validateParseResult(message)
+        validateParseResult(message: message)
     }
     
     func testNameSpaceArrayAckParse() {
         let message = "3/swift,0[[\"test3\",\"test4\"]]"
-        validateParseResult(message)
+        validateParseResult(message: message)
     }
     
     func testNameSpaceBinaryEventParse() {
         let message = "51-/swift,[\"testMultipleItemsWithBufferEmitReturn\",[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]"
-        validateParseResult(message)
+        validateParseResult(message: message)
     }
     
     func testNameSpaceBinaryAckParse() {
         let message = "61-/swift,19[[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]"
-        validateParseResult(message)
+        validateParseResult(message: message)
     }
     
     func testNamespaceErrorParse() {
         let message = "4/swift,"
-        validateParseResult(message)
+        validateParseResult(message: message)
     }
     
     func testErrorTypeString() {
         let message = "4\"ERROR\""
-        validateParseResult(message)
+        validateParseResult(message: message)
     }
     
     func testErrorTypeDictionary() {
         let message = "4{\"test\":2}"
-        validateParseResult(message)
+        validateParseResult(message: message)
     }
     
     func testErrorTypeInt() {
         let message = "41"
-        validateParseResult(message)
+        validateParseResult(message: message)
     }
     
     func testInvalidInput() {
@@ -110,7 +110,7 @@ class SocketParserTest: XCTestCase {
     
     func testGenericParser() {
         var parser = SocketStringReader(message: "61-/swift,")
-        XCTAssertEqual(parser.read(1), "6")
+        XCTAssertEqual(parser.read(length: 1), "6")
         XCTAssertEqual(parser.currentCharacter, "1")
         XCTAssertEqual(parser.readUntilStringOccurence("-"), "1")
         XCTAssertEqual(parser.currentCharacter, "/")

@@ -10,8 +10,8 @@ import XCTest
 @testable import SocketIOClientSwift
 
 class SocketSideEffectTest: XCTestCase {
-    let data = "test".data(usingEncoding: NSUTF8StringEncoding)!
-    let data2 = "test2".data(usingEncoding: NSUTF8StringEncoding)!
+    let data = "test".data(using: NSUTF8StringEncoding)!
+    let data2 = "test2".data(using: NSUTF8StringEncoding)!
     private var socket: SocketIOClient!
     
     override func setUp() {
@@ -83,7 +83,7 @@ class SocketSideEffectTest: XCTestCase {
     
     func testHandleOnceEvent() {
         let expect = expectation(withDescription: "handled event")
-        socket.once("test") {data, ack in
+        socket.once(event: "test") {data, ack in
             XCTAssertEqual(data[0] as? String, "hello world")
             XCTAssertEqual(self.socket.testHandlers.count, 0)
             expect.fulfill()
@@ -98,7 +98,7 @@ class SocketSideEffectTest: XCTestCase {
         XCTAssertEqual(socket.testHandlers.count, 1)
         socket.on("test") {data, ack in }
         XCTAssertEqual(socket.testHandlers.count, 2)
-        socket.off("test")
+        socket.off(event: "test")
         XCTAssertEqual(socket.testHandlers.count, 0)
     }
     

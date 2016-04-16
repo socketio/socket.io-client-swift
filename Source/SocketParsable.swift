@@ -23,16 +23,16 @@
 import Foundation
 
 protocol SocketParsable : SocketIOClientSpec {
-    func parseBinaryData(data: NSData)
-    func parseSocketMessage(message: String)
+    func parseBinaryData(_ data: NSData)
+    func parseSocketMessage(_ message: String)
 }
 
 extension SocketParsable {
-    private func isCorrectNamespace(nsp: String) -> Bool {
+    private func isCorrectNamespace(_ nsp: String) -> Bool {
         return nsp == self.nsp
     }
     
-    private func handleConnect(p: SocketPacket) {
+    private func handleConnect(_ p: SocketPacket) {
         if p.nsp == "/" && nsp != "/" {
             joinNamespace(nsp)
         } else if p.nsp != "/" && nsp == "/" {
@@ -42,7 +42,7 @@ extension SocketParsable {
         }
     }
     
-    private func handlePacket(pack: SocketPacket) {
+    private func handlePacket(_ pack: SocketPacket) {
         switch pack.type {
         case .Event where isCorrectNamespace(pack.nsp):
             handleEvent(pack.event, data: pack.args, isInternalMessage: false, withAck: pack.id)
@@ -55,7 +55,7 @@ extension SocketParsable {
         case .Connect:
             handleConnect(pack)
         case .Disconnect:
-            didDisconnect("Got Disconnect")
+            didDisconnect(reason: "Got Disconnect")
         case .Error:
             handleEvent("error", data: pack.data, isInternalMessage: true, withAck: pack.id)
         default:
@@ -64,10 +64,10 @@ extension SocketParsable {
     }
     
     /// Parses a messsage from the engine. Returning either a string error or a complete SocketPacket
-    func parseString(message: String) -> Either<String, SocketPacket> {
+    func parseString(_ message: String) -> Either<String, SocketPacket> {
         var parser = SocketStringReader(message: message)
         
-        guard let type = SocketPacket.PacketType(rawValue: Int(parser.read(1)) ?? -1) else {
+        guard let type = SocketPacket.PacketType(rawValue: Int(parser.read(length: 1)) ?? -1) else {
             return .Left("Invalid packet type")
         }
         
@@ -98,14 +98,14 @@ extension SocketParsable {
         var idString = ""
         
         if type == .Error {
-            parser.advanceIndexBy(-1)
+            parser.advance(by: -1)
         }
         
         while parser.hasNext && type != .Error {
-            if let int = Int(parser.read(1)) {
+            if let int = Int(parser.read(length: 1)) {
                 idString += String(int)
             } else {
-                parser.advanceIndexBy(-2)
+                parser.advance(by: -2)
                 break
             }
         }
@@ -129,8 +129,8 @@ extension SocketParsable {
     }
     
     // Parses data for events
-    private func parseData(data: String) -> Either<String, [AnyObject]> {
-        let stringData = data.data(usingEncoding: NSUTF8StringEncoding, allowLossyConversion: false)
+    private func parseData(_ data: String) -> Either<String, [AnyObject]> {
+        let stringData = data.data(using: NSUTF8StringEncoding, allowLossyConversion: false)
         do {
             if let arr = try NSJSONSerialization.jsonObject(with: stringData!,
                 options: NSJSONReadingOptions.mutableContainers) as? [AnyObject] {
@@ -144,7 +144,7 @@ extension SocketParsable {
     }
     
     // Parses messages recieved
-    func parseSocketMessage(message: String) {
+    func parseSocketMessage(_ message: String) {
         guard !message.isEmpty else { return }
         
         DefaultSocketLogger.Logger.log("Parsing %@", type: "SocketParser", args: message)
@@ -158,7 +158,7 @@ extension SocketParsable {
         }
     }
     
-    func parseBinaryData(data: NSData) {
+    func parseBinaryData(_ data: NSData) {
         guard !waitingPackets.isEmpty else {
             DefaultSocketLogger.Logger.error("Got data when not remaking packet", type: "SocketParser")
             return

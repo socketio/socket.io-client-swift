@@ -210,8 +210,8 @@ extension NSDictionary {
         var options = Set<SocketIOClientOption>()
         
         for (rawKey, value) in self {
-            if let key = rawKey as? String, opt = NSDictionary.keyValueToSocketIOClientOption(key, value: value) {
-                options.insertIgnore(opt)
+            if let key = rawKey as? String, opt = NSDictionary.keyValueToSocketIOClientOption(key: key, value: value) {
+                options.insertIgnore(element: opt)
             }
         }
         

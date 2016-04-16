@@ -128,8 +128,8 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         stopPolling()
     }
     
-    private func checkAndHandleEngineError(msg: String) {
-        guard let stringData = msg.data(usingEncoding: NSUTF8StringEncoding,
+    private func checkAndHandleEngineError(_ msg: String) {
+        guard let stringData = msg.data(using: NSUTF8StringEncoding,
             allowLossyConversion: false) else { return }
         
         do {
@@ -140,28 +140,28 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
                     
                     switch code {
                     case 0: // Unknown transport
-                        didError(error)
+                        didError(error: error)
                     case 1: // Unknown sid.
-                        didError(error)
+                        didError(error: error)
                     case 2: // Bad handshake request
-                        didError(error)
+                        didError(error: error)
                     case 3: // Bad request
-                        didError(error)
+                        didError(error: error)
                     default:
-                        didError(error)
+                        didError(error: error)
                     }
             }
         } catch {
-            didError("Got unknown error from server \(msg)")
+            didError(error: "Got unknown error from server \(msg)")
         }
     }
 
-    private func checkIfMessageIsBase64Binary(message: String) -> Bool {
+    private func checkIfMessageIsBase64Binary(_ message: String) -> Bool {
         if message.hasPrefix("b4") {
             // binary in base64 string
             let noPrefix = message[message.startIndex.advanced(by: 2)..<message.endIndex]
-
-            if let data = NSData(base64EncodedString: noPrefix,
+    
+            if let data = NSData(base64Encoded: noPrefix,
                 options: .ignoreUnknownCharacters) {
                     client?.parseEngineBinaryData(data)
             }
@@ -176,7 +176,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     public func connect() {
         if connected {
             DefaultSocketLogger.Logger.error("Engine tried opening while connected. Assuming this was a reconnect", type: logType)
-            disconnect("reconnect")
+            disconnect(reason: "reconnect")
         }
         
         DefaultSocketLogger.Logger.log("Starting engine", type: logType)
@@ -204,7 +204,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             }
         }
         
-        doLongPoll(reqPolling)
+        doLongPoll(for: reqPolling)
     }
 
     private func createURLs() -> (NSURL, NSURL) {
@@ -267,12 +267,12 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     
     public func didError(error: String) {
         DefaultSocketLogger.Logger.error(error, type: logType)
-        client?.engineDidError(error)
-        disconnect(error)
+        client?.engineDidError(reason: error)
+        disconnect(reason: error)
     }
     
     public func disconnect(reason: String) {
-        func postSendClose(data: NSData?, _ res: NSURLResponse?, _ err: NSError?) {
+        func postSendClose(_ data: NSData?, _ res: NSURLResponse?, _ err: NSError?) {
             sid = ""
             closed = true
             invalidated = true
@@ -280,7 +280,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             
             ws?.disconnect()
             stopPolling()
-            client?.engineDidClose(reason)
+            client?.engineDidClose(reason: reason)
         }
         
         DefaultSocketLogger.Logger.log("Engine is being closed.", type: logType)
@@ -298,7 +298,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             dispatch_sync(emitQueue) {
                 self.postWait.append(String(SocketEnginePacketType.close.rawValue))
                 let req = self.createRequestForPostWithPostWait()
-                self.doRequest(req, callbackWith: postSendClose)
+                self.doRequest(for: req, callbackWith: postSendClose)
             }
         }
     }
@@ -339,17 +339,17 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         guard let ws = self.ws else { return }
         
         for msg in postWait {
-            ws.writeString(fixDoubleUTF8(msg))
+            ws.writeString(str: fixDoubleUTF8(string: msg))
         }
         
         postWait.removeAll(keepingCapacity: true)
     }
 
     private func handleClose(reason: String) {
-        client?.engineDidClose(reason)
+        client?.engineDidClose(reason: reason)
     }
 
-    private func handleMessage(message: String) {
+    private func handleMessage(_ message: String) {
         client?.parseEngineMessage(message)
     }
 
@@ -357,8 +357,8 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         doPoll()
     }
 
-    private func handleOpen(openData: String) {
-        let mesData = openData.data(usingEncoding: NSUTF8StringEncoding, allowLossyConversion: false)!
+    private func handleOpen(openMessage: String) {
+        let mesData = openMessage.data(using: NSUTF8StringEncoding, allowLossyConversion: false)!
         do {
             let json = try NSJSONSerialization.jsonObject(with: mesData,
                 options: NSJSONReadingOptions.allowFragments) as? NSDictionary
@@ -389,10 +389,10 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
                     doPoll()
                 }
                 
-                client?.engineDidOpen?("Connect")
+                client?.engineDidOpen?(reason: "Connect")
             }
         } catch {
-            didError("Error parsing open packet")
+            didError(error: "Error parsing open packet")
             return
         }
     }
@@ -406,12 +406,12 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         }
     }
     
-    public func parseEngineData(data: NSData) {
+    public func parseEngineData(_ data: NSData) {
         DefaultSocketLogger.Logger.log("Got binary data: %@", type: "SocketEngine", args: data)
         client?.parseEngineBinaryData(data.subdata(with: NSMakeRange(1, data.length - 1)))
     }
 
-    public func parseEngineMessage(message: String, fromPolling: Bool) {
+    public func parseEngineMessage(_ message: String, fromPolling: Bool) {
         DefaultSocketLogger.Logger.log("Got message: %@", type: logType, args: message)
         
         let reader = SocketStringReader(message: message)
@@ -426,7 +426,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         }
 
         if fromPolling && type != .noop && doubleEncodeUTF8 {
-            fixedString = fixDoubleUTF8(message)
+            fixedString = fixDoubleUTF8(string: message)
         } else {
             fixedString = message
         }
@@ -437,11 +437,11 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         case .noop:
             handleNOOP()
         case .pong:
-            handlePong(fixedString)
+            handlePong(pongMessage: fixedString)
         case .open:
-            handleOpen(fixedString[fixedString.startIndex.successor()..<fixedString.endIndex])
+            handleOpen(openMessage: fixedString[fixedString.startIndex.successor()..<fixedString.endIndex])
         case .close:
-            handleClose(fixedString)
+            handleClose(reason: fixedString)
         default:
             DefaultSocketLogger.Logger.log("Got unknown packet type", type: logType)
         }
@@ -471,7 +471,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         
         //Server is not responding
         if pongsMissed > pongsMissedMax {
-            client?.engineDidClose("Ping timeout")
+            client?.engineDidClose(reason: "Ping timeout")
             return
         }
         
@@ -498,7 +498,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     }
 
     /// Write a message, independent of transport.
-    public func write(msg: String, withType type: SocketEnginePacketType, withData data: [NSData]) {
+    public func write(_ msg: String, withType type: SocketEnginePacketType, withData data: [NSData]) {
         dispatch_async(emitQueue) {
             guard self.connected else { return }
             
@@ -532,7 +532,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         probing = false
         
         if closed {
-            client?.engineDidClose("Disconnect")
+            client?.engineDidClose(reason: "Disconnect")
             return
         }
         
@@ -543,10 +543,10 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             let reason = error?.localizedDescription ?? "Socket Disconnected"
             
             if error != nil {
-                didError(reason)
+                didError(error: reason)
             }
             
-            client?.engineDidClose(reason)
+            client?.engineDidClose(reason: reason)
         } else {
             flushProbeWait()
         }

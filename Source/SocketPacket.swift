@@ -71,7 +71,7 @@ struct SocketPacket {
         self.binary = binary
     }
     
-    mutating func addData(data: NSData) -> Bool {
+    mutating func addData(_ data: NSData) -> Bool {
         if placeholders == binary.count {
             return true
         }
@@ -86,7 +86,7 @@ struct SocketPacket {
         }
     }
     
-    private func completeMessage(message: String) -> String {
+    private func completeMessage(_ message: String) -> String {
         let restOfMessage: String
         
         if data.count == 0 {
@@ -191,7 +191,7 @@ struct SocketPacket {
     // If object is a collection it will recurse
     // Returns the object if it is not a placeholder string or the corresponding
     // binary data
-    private func _fillInPlaceholders(object: AnyObject) -> AnyObject {
+    private func _fillInPlaceholders(_ object: AnyObject) -> AnyObject {
         switch object {
         case let string as String where string["~~(\\d)"].groups() != nil:
             return binary[Int(string["~~(\\d)"].groups()![1])!]
@@ -226,7 +226,7 @@ extension SocketPacket {
     
     static func packetFromEmit(items: [AnyObject], id: Int, nsp: String, ack: Bool) -> SocketPacket {
         let (parsedData, binary) = deconstructData(items)
-        let packet = SocketPacket(type: findType(binary.count, ack: ack), data: parsedData,
+        let packet = SocketPacket(type: findType(binCount: binary.count, ack: ack), data: parsedData,
             id: id, nsp: nsp, placeholders: -1, binary: binary)
         
         return packet
@@ -235,7 +235,7 @@ extension SocketPacket {
 
 private extension SocketPacket {
     // Recursive function that looks for NSData in collections
-    static func shred(data: AnyObject, binary: inout [NSData]) -> AnyObject {
+    static func shred(_ data: AnyObject, binary: inout [NSData]) -> AnyObject {
         let placeholder = ["_placeholder": true, "num": binary.count]
         
         switch data {
@@ -256,7 +256,7 @@ private extension SocketPacket {
     
     // Removes binary data from emit data
     // Returns a type containing the de-binaryed data and the binary
-    static func deconstructData(data: [AnyObject]) -> ([AnyObject], [NSData]) {
+    static func deconstructData(_ data: [AnyObject]) -> ([AnyObject], [NSData]) {
         var binary = [NSData]()
         
         return (data.map({shred($0, binary: &binary)}), binary)

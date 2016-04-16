@@ -55,9 +55,9 @@ import Foundation
     func disconnect(reason: String)
     func doFastUpgrade()
     func flushWaitingForPostToWebSocket()
-    func parseEngineData(data: NSData)
-    func parseEngineMessage(message: String, fromPolling: Bool)
-    func write(msg: String, withType type: SocketEnginePacketType, withData data: [NSData])
+    func parseEngineData(_ data: NSData)
+    func parseEngineMessage(_ message: String, fromPolling: Bool)
+    func write(_ msg: String, withType type: SocketEnginePacketType, withData data: [NSData])
 }
 
 extension SocketEngineSpec {
@@ -75,7 +75,7 @@ extension SocketEngineSpec {
         return com.url!
     }
     
-    func createBinaryDataForSend(data: NSData) -> Either<NSData, String> {
+    func createBinaryDataForSend(using data: NSData) -> Either<NSData, String> {
         if websocket {
             var byteArray = [UInt8](repeating: 0x4, count: 1)
             let mutData = NSMutableData(bytes: &byteArray, length: 1)
@@ -91,7 +91,7 @@ extension SocketEngineSpec {
     }
     
     func doubleEncodeUTF8(string: String) -> String {
-        if let latin1 = string.data(usingEncoding: NSUTF8StringEncoding),
+        if let latin1 = string.data(using: NSUTF8StringEncoding),
             utf8 = NSString(data: latin1, encoding: NSISOLatin1StringEncoding) {
                 return utf8 as String
         } else {
@@ -100,7 +100,7 @@ extension SocketEngineSpec {
     }
     
     func fixDoubleUTF8(string: String) -> String {
-        if let utf8 = string.data(usingEncoding: NSISOLatin1StringEncoding),
+        if let utf8 = string.data(using: NSISOLatin1StringEncoding),
             latin1 = NSString(data: utf8, encoding: NSUTF8StringEncoding) {
                 return latin1 as String
         } else {
@@ -109,7 +109,7 @@ extension SocketEngineSpec {
     }
     
     /// Send an engine message (4)
-    func send(msg: String, withData datas: [NSData]) {
+    func send(_ msg: String, withData datas: [NSData]) {
         write(msg, withType: .message, withData: datas)
     }
 }
