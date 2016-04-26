@@ -46,7 +46,7 @@ import Foundation
     var urlPolling: NSURL { get }
     var urlWebSocket: NSURL { get }
     var websocket: Bool { get }
-    optional var ws: WebSocket? { get }
+    var ws: WebSocket? { get }
     
     init(client: SocketEngineClient, url: NSURL, options: NSDictionary?)
     

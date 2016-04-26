@@ -34,6 +34,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             (urlPolling, urlWebSocket) = createURLs()
         }
     }
+    
     public var postWait = [String]()
     public var waitingForPoll = false
     public var waitingForPost = false
@@ -133,23 +134,16 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             allowLossyConversion: false) else { return }
         
         do {
-            if let dict = try NSJSONSerialization.JSONObjectWithData(stringData,
-                options: NSJSONReadingOptions.MutableContainers) as? NSDictionary {
-                    guard let code = dict["code"] as? Int else { return }
-                    guard let error = dict["message"] as? String else { return }
-                    
-                    switch code {
-                    case 0: // Unknown transport
-                        didError(error)
-                    case 1: // Unknown sid.
-                        didError(error)
-                    case 2: // Bad handshake request
-                        didError(error)
-                    case 3: // Bad request
-                        didError(error)
-                    default:
-                        didError(error)
-                    }
+            if let dict = try NSJSONSerialization.JSONObjectWithData(stringData, options: .MutableContainers) as? NSDictionary {
+                guard let error = dict["message"] as? String else { return }
+                
+                /*
+                 0: Unknown transport
+                 1: Unknown sid
+                 2: Bad handshake request
+                 3: Bad request
+                 */
+                didError(error)
             }
         } catch {
             didError("Got unknown error from server \(msg)")
@@ -393,7 +387,6 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             }
         } catch {
             didError("Error parsing open packet")
-            return
         }
     }
 
