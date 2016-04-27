@@ -198,7 +198,9 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             }
         }
         
-        doLongPoll(reqPolling)
+        dispatch_async(emitQueue) {
+            self.doLongPoll(reqPolling)
+        }
     }
 
     private func createURLs() -> (NSURL, NSURL) {
@@ -280,7 +282,8 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         DefaultSocketLogger.Logger.log("Engine is being closed.", type: logType)
         
         if closed {
-            return postSendClose(nil, nil, nil)
+            client?.engineDidClose(reason)
+            return
         }
         
         if websocket {

@@ -105,6 +105,7 @@ extension SocketEnginePollable {
             return
         }
         
+        
         DefaultSocketLogger.Logger.log("Doing polling request", type: "SocketEnginePolling")
         
         session?.dataTaskWithRequest(req, completionHandler: callback).resume()
