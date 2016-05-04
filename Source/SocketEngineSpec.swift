@@ -63,14 +63,14 @@ import Foundation
 extension SocketEngineSpec {
     var urlPollingWithSid: NSURL {
         let com = NSURLComponents(URL: urlPolling, resolvingAgainstBaseURL: false)!
-        com.query = com.query! + "&sid=\(sid)"
+        com.percentEncodedQuery = com.percentEncodedQuery! + "&sid=\(sid.urlEncode()!)"
         
         return com.URL!
     }
     
     var urlWebSocketWithSid: NSURL {
         let com = NSURLComponents(URL: urlWebSocket, resolvingAgainstBaseURL: false)!
-        com.query = com.query! + (sid == "" ? "" : "&sid=\(sid)")
+        com.percentEncodedQuery = com.percentEncodedQuery! + (sid == "" ? "" : "&sid=\(sid.urlEncode()!)")
         
         return com.URL!
     }
