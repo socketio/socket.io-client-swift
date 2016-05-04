@@ -26,6 +26,6 @@ import Foundation
 
 extension String {
   func urlEncode() -> String? {
-    return self.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.allowedURLCharacterSet)
+    return stringByAddingPercentEncodingWithAllowedCharacters(.allowedURLCharacterSet)
   }
 }
