@@ -24,8 +24,9 @@
 
 import Foundation
 
+/// **NotConnected**: initial state
+///
+/// **Disconnected**: connected before
 @objc public enum SocketIOClientStatus : Int {
-    // NotConnected: initial state
-    // Disconnected: connected before
     case NotConnected, Disconnected, Connecting, Connected
 }
