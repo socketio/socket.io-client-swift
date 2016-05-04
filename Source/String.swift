@@ -2,7 +2,7 @@
 //  String.swift
 //  Socket.IO-Client-Swift
 //
-//  Created by Erik Little on 9/16/15.
+//  Created by Yannick Loriot on 5/4/16.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
