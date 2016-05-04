@@ -214,8 +214,8 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         
         urlWebSocket.path = socketPath
         urlPolling.path = socketPath
-        urlWebSocket.query = "transport=websocket"
-        urlPolling.query = "transport=polling&b64=1"
+        urlWebSocket.percentEncodedQuery = "transport=websocket"
+        urlPolling.percentEncodedQuery = "transport=polling&b64=1"
 
         if secure {
             urlPolling.scheme = "https"
@@ -227,12 +227,15 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
 
         if connectParams != nil {
             for (key, value) in connectParams! {
-                queryString += "&\(key)=\(value)"
+                let keyEsc   = key.urlEncode()!
+                let valueEsc = "\(value)".urlEncode()!
+
+                queryString += "&\(keyEsc)=\(valueEsc)"
             }
         }
 
-        urlWebSocket.query = urlWebSocket.query! + queryString
-        urlPolling.query = urlPolling.query! + queryString
+        urlWebSocket.percentEncodedQuery = urlWebSocket.percentEncodedQuery! + queryString
+        urlPolling.percentEncodedQuery = urlPolling.percentEncodedQuery! + queryString
         
         return (urlPolling.URL!, urlWebSocket.URL!)
     }
