@@ -214,8 +214,6 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         
         urlWebSocket.path = socketPath
         urlPolling.path = socketPath
-        urlWebSocket.percentEncodedQuery = "transport=websocket"
-        urlPolling.percentEncodedQuery = "transport=polling&b64=1"
 
         if secure {
             urlPolling.scheme = "https"
@@ -234,8 +232,8 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             }
         }
 
-        urlWebSocket.percentEncodedQuery = urlWebSocket.percentEncodedQuery! + queryString
-        urlPolling.percentEncodedQuery = urlPolling.percentEncodedQuery! + queryString
+        urlWebSocket.percentEncodedQuery = "transport=websocket" + queryString
+        urlPolling.percentEncodedQuery = "transport=polling&b64=1" + queryString
         
         return (urlPolling.URL!, urlWebSocket.URL!)
     }
