@@ -145,4 +145,20 @@ class SocketBasicPacketTest: XCTestCase {
         XCTAssertEqual(packet.packetString, expectedSendString)
         XCTAssertEqual(packet.binary, [data2, data])
     }
+    
+    func testBinaryStringPlaceholderInMessage() {
+        let engineString = "52-[\"test\",\"~~0\",{\"num\":0,\"_placeholder\":true},{\"num\":1,\"_placeholder\":true}]"
+        let socket = SocketIOClient(socketURL: NSURL())
+        socket.setTestable()
+        
+        if case let .Right(packet) = socket.parseString(engineString) {
+            var packet = packet
+            XCTAssertEqual(packet.event, "test")
+            packet.addData(data)
+            packet.addData(data2)
+            XCTAssertEqual(packet.args[0] as? String, "~~0")
+        } else {
+            XCTFail()
+        }
+    }
 }

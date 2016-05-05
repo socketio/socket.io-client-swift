@@ -111,12 +111,11 @@ extension SocketParsable {
         }
         
         let d = message[parser.currentIndex.advancedBy(1)..<message.endIndex]
-        let noPlaceholders = d["(\\{\"_placeholder\":true,\"num\":(\\d*)\\})"] <~ "\"~~$2\""
         
-        switch parseData(noPlaceholders) {
+        switch parseData(d) {
         case let .Left(err):
             // Errors aren't always enclosed in an array
-            if case let .Right(data) = parseData("\([noPlaceholders as AnyObject])") {
+            if case let .Right(data) = parseData("\([d as AnyObject])") {
                 return .Right(SocketPacket(type: type, data: data, id: Int(idString) ?? -1,
                     nsp: namespace, placeholders: placeholders))
             } else {
