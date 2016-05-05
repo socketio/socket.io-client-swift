@@ -35,7 +35,9 @@
 }
 
 - (void)testEmitWithAckSyntax {
-    [self.socket emitWithAck:@"testAckEmit" with:@[@YES]];
+    [self.socket emitWithAck:@"testAckEmit" with:@[@YES]](0, ^(NSArray* data) {
+        
+    });
 }
 
 - (void)testOffSyntax {

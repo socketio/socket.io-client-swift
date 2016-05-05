@@ -131,8 +131,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         assert(timeoutAfter >= 0, "Invalid timeout: \(timeoutAfter)")
 
         guard status != .connected else {
-            DefaultSocketLogger.Logger.log("Tried connecting on an already connected socket",
-                type: logType)
+            DefaultSocketLogger.Logger.log("Tried connecting on an already connected socket", type: logType)
             return
         }
 
@@ -149,8 +148,8 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeoutAfter) * Int64(NSEC_PER_SEC))
 
         dispatch_after(time, handleQueue) {[weak self] in
-            if let this = self where this.status != .connected && this.status != .closed {
-                this.status = .closed
+            if let this = self where this.status != .connected && this.status != .disconnected {
+                this.status = .disconnected
                 this.engine?.disconnect(reason: "Connect timeout")
 
                 handler?()
@@ -187,11 +186,11 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     }
 
     func didDisconnect(reason: String) {
-        guard status != .closed else { return }
+        guard status != .disconnected else { return }
 
         DefaultSocketLogger.Logger.log("Disconnected: %@", type: logType, args: reason)
 
-        status = .closed
+        status = .disconnected
         reconnects = false
 
         // Make sure the engine is actually dead.
@@ -202,6 +201,8 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     /// Disconnects the socket. Only reconnect the same socket if you know what you're doing.
     /// Will turn off automatic reconnects.
     public func disconnect() {
+        assert(status != .notConnected, "Tried closing a NotConnected client")
+        
         DefaultSocketLogger.Logger.log("Closing socket", type: logType)
 
         reconnects = false
@@ -267,11 +268,11 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     public func engineDidClose(reason: String) {
         waitingPackets.removeAll()
         
-        if status != .closed {
+        if status != .disconnected {
             status = .notConnected
         }
 
-        if status == .closed || !reconnects {
+        if status == .disconnected || !reconnects {
             didDisconnect(reason: reason)
         } else if !reconnecting {
             reconnecting = true

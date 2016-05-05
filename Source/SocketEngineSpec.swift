@@ -46,7 +46,7 @@ import Foundation
     var urlPolling: NSURL { get }
     var urlWebSocket: NSURL { get }
     var websocket: Bool { get }
-    optional var ws: WebSocket? { get }
+    var ws: WebSocket? { get }
     
     init(client: SocketEngineClient, url: NSURL, options: NSDictionary?)
     
@@ -63,14 +63,14 @@ import Foundation
 extension SocketEngineSpec {
     var urlPollingWithSid: NSURL {
         let com = NSURLComponents(url: urlPolling, resolvingAgainstBaseURL: false)!
-        com.query = com.query! + "&sid=\(sid)"
+        com.percentEncodedQuery = com.percentEncodedQuery! + "&sid=\(sid.urlEncode()!)"
         
         return com.url!
     }
     
     var urlWebSocketWithSid: NSURL {
         let com = NSURLComponents(url: urlWebSocket, resolvingAgainstBaseURL: false)!
-        com.query = com.query! + (sid == "" ? "" : "&sid=\(sid)")
+        com.percentEncodedQuery = com.percentEncodedQuery! + (sid == "" ? "" : "&sid=\(sid.urlEncode()!)")
         
         return com.url!
     }
