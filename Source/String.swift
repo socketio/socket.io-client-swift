@@ -1,8 +1,8 @@
 //
-//  SocketClientSpec.swift
+//  String.swift
 //  Socket.IO-Client-Swift
 //
-//  Created by Erik Little on 1/3/16.
+//  Created by Yannick Loriot on 5/4/16.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -22,22 +22,10 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-protocol SocketClientSpec : class {
-    var nsp: String { get set }
-    var waitingPackets: [SocketPacket] { get set }
-    
-    func didConnect()
-    func didDisconnect(reason: String)
-    func didError(reason: String)
-    func handleAck(ack: Int, data: [AnyObject])
-    func handleEvent(event: String, data: [AnyObject], isInternalMessage: Bool, withAck ack: Int)
-    func joinNamespace(namespace: String)
-}
+import Foundation
 
-extension SocketClientSpec {
-    func didError(reason: String) {
-        DefaultSocketLogger.Logger.error("%@", type: "SocketIOClient", args: reason)
-        
-        handleEvent("error", data: [reason], isInternalMessage: true, withAck: -1)
-    }
+extension String {
+  func urlEncode() -> String? {
+    return stringByAddingPercentEncodingWithAllowedCharacters(.allowedURLCharacterSet)
+  }
 }
