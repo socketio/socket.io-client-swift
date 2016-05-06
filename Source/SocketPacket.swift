@@ -61,7 +61,7 @@ struct SocketPacket {
         return createPacketString()
     }
     
-    init(type: SocketPacket.PacketType, data: [AnyObject] = [AnyObject](), id: Int = -1,
+    init(type: PacketType, data: [AnyObject] = [AnyObject](), id: Int = -1,
         nsp: String, placeholders: Int = 0, binary: [NSData] = [NSData]()) {
         self.data = data
         self.id = id
