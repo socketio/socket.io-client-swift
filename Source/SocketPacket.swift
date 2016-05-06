@@ -189,7 +189,7 @@ struct SocketPacket {
     
     // Helper method that looks for placeholders
     // If object is a collection it will recurse
-    // Returns the object if it is not a placeholder string or the corresponding
+    // Returns the object if it is not a placeholder or the corresponding
     // binary data
     private func _fillInPlaceholders(object: AnyObject) -> AnyObject {
         switch object {

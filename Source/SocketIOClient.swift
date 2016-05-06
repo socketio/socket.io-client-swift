@@ -191,7 +191,6 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         DefaultSocketLogger.Logger.log("Disconnected: %@", type: logType, args: reason)
 
         status = .Disconnected
-        reconnects = false
 
         // Make sure the engine is actually dead.
         engine?.disconnect(reason)
@@ -205,7 +204,6 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         
         DefaultSocketLogger.Logger.log("Closing socket", type: logType)
 
-        reconnects = false
         didDisconnect("Disconnect")
     }
 
