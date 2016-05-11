@@ -97,7 +97,7 @@ struct SocketPacket {
             let jsonSend = try NSJSONSerialization.dataWithJSONObject(data,
                 options: NSJSONWritingOptions(rawValue: 0))
             guard let jsonString = String(data: jsonSend, encoding: NSUTF8StringEncoding) else {
-                return "[]"
+                return message + "[]"
             }
             
             restOfMessage = jsonString
@@ -229,7 +229,7 @@ extension SocketPacket {
     static func packetFromEmit(items: [AnyObject], id: Int, nsp: String, ack: Bool) -> SocketPacket {
         let (parsedData, binary) = deconstructData(items)
         let packet = SocketPacket(type: findType(binary.count, ack: ack), data: parsedData,
-            id: id, nsp: nsp, placeholders: -1, binary: binary)
+            id: id, nsp: nsp, binary: binary)
         
         return packet
     }

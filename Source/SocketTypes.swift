@@ -28,6 +28,9 @@ public typealias AckCallback = ([AnyObject]) -> Void
 public typealias NormalCallback = ([AnyObject], SocketAckEmitter) -> Void
 public typealias OnAckCallback = (timeoutAfter: UInt64, callback: AckCallback) -> Void
 
+typealias Probe = (msg: String, type: SocketEnginePacketType, data: [NSData])
+typealias ProbeWaitQueue = [Probe]
+
 enum Either<E, V> {
     case Left(E)
     case Right(V)
