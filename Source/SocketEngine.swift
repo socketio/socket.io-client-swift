@@ -385,7 +385,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
                     doPoll()
                 }
                 
-                client?.engineDidOpen?("Connect")
+                client?.engineDidOpen("Connect")
             }
         } catch {
             didError("Error parsing open packet")
