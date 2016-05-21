@@ -36,11 +36,11 @@ import Foundation
     var fastUpgrade: Bool { get }
     var forcePolling: Bool { get }
     var forceWebsockets: Bool { get }
-    var parseQueue: dispatch_queue_t! { get }
+    var parseQueue: dispatch_queue_t { get }
     var polling: Bool { get }
     var probing: Bool { get }
-    var emitQueue: dispatch_queue_t! { get }
-    var handleQueue: dispatch_queue_t! { get }
+    var emitQueue: dispatch_queue_t { get }
+    var handleQueue: dispatch_queue_t { get }
     var sid: String { get }
     var socketPath: String { get }
     var urlPolling: NSURL { get }
