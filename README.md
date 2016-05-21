@@ -13,8 +13,8 @@ socket.on("connect") {data, ack in
 
 socket.on("currentAmount") {data, ack in
     if let cur = data[0] as? Double {
-        socket.emitWithAck("canUpdate", cur)(timeoutAfter: 0) {data in
-            socket.emit("update", ["amount": cur + 2.50])
+        socket.emitWithAck("canUpdate", cur as AnyObject)(timeoutAfter: 0) {data in
+            socket.emit("update", ["amount": cur + 2.50] as AnyObject)
         }
 
         ack.with("Got your currentAmount", "dude")
