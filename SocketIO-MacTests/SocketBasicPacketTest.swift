@@ -62,7 +62,7 @@ class SocketBasicPacketTest: XCTestCase {
     }
     
     func testBinaryEmit() {
-        let expectedSendString = "51-[\"test\",{\"num\":0,\"_placeholder\":true}]"
+        let expectedSendString = "51-[\"test\",{\"_placeholder\":true,\"num\":0}]"
         let sendData = ["test", data]
         let packet = SocketPacket.packetFromEmit(items: sendData, id: -1, nsp: "/", ack: false)
         
@@ -71,7 +71,7 @@ class SocketBasicPacketTest: XCTestCase {
     }
     
     func testMultipleBinaryEmit() {
-        let expectedSendString = "52-[\"test\",{\"data1\":{\"num\":0,\"_placeholder\":true},\"data2\":{\"num\":1,\"_placeholder\":true}}]"
+        let expectedSendString = "52-[\"test\",{\"data1\":{\"_placeholder\":true,\"num\":0},\"data2\":{\"_placeholder\":true,\"num\":1}}]"
         let sendData = ["test", ["data1": data, "data2": data2]]
         let packet = SocketPacket.packetFromEmit(items: sendData, id: -1, nsp: "/", ack: false)
         
@@ -88,7 +88,7 @@ class SocketBasicPacketTest: XCTestCase {
     }
     
     func testEmitDataWithAck() {
-        let expectedSendString = "51-0[\"test\",{\"num\":0,\"_placeholder\":true}]"
+        let expectedSendString = "51-0[\"test\",{\"_placeholder\":true,\"num\":0}]"
         let sendData = ["test", data]
         let packet = SocketPacket.packetFromEmit(items: sendData, id: 0, nsp: "/", ack: false)
 
@@ -129,7 +129,7 @@ class SocketBasicPacketTest: XCTestCase {
     }
     
     func testBinaryAck() {
-        let expectedSendString = "61-0[{\"num\":0,\"_placeholder\":true}]"
+        let expectedSendString = "61-0[{\"_placeholder\":true,\"num\":0}]"
         let sendData = [data]
         let packet = SocketPacket.packetFromEmit(items: sendData, id: 0, nsp: "/", ack: true)
         
@@ -138,7 +138,7 @@ class SocketBasicPacketTest: XCTestCase {
     }
     
     func testMultipleBinaryAck() {
-        let expectedSendString = "62-0[{\"data2\":{\"num\":0,\"_placeholder\":true},\"data1\":{\"num\":1,\"_placeholder\":true}}]"
+        let expectedSendString = "62-0[{\"data2\":{\"_placeholder\":true,\"num\":0},\"data1\":{\"_placeholder\":true,\"num\":1}}]"
         let sendData = [["data1": data, "data2": data2]]
         let packet = SocketPacket.packetFromEmit(items: sendData, id: 0, nsp: "/", ack: true)
         
@@ -147,7 +147,7 @@ class SocketBasicPacketTest: XCTestCase {
     }
     
     func testBinaryStringPlaceholderInMessage() {
-        let engineString = "52-[\"test\",\"~~0\",{\"num\":0,\"_placeholder\":true},{\"num\":1,\"_placeholder\":true}]"
+        let engineString = "52-[\"test\",\"~~0\",{\"num\":0,\"_placeholder\":true},{\"_placeholder\":true,\"num\":1}]"
         let socket = SocketIOClient(socketURL: NSURL())
         socket.setTestable()
         

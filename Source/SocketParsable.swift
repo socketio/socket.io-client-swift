@@ -35,8 +35,6 @@ extension SocketParsable {
     private func handleConnect(_ p: SocketPacket) {
         if p.nsp == "/" && nsp != "/" {
             joinNamespace(nsp)
-        } else if p.nsp != "/" && nsp == "/" {
-            didConnect()
         } else {
             didConnect()
         }
@@ -91,8 +89,7 @@ extension SocketParsable {
         }
         
         if !parser.hasNext {
-            return .Right(SocketPacket(type: type, id: -1,
-                nsp: namespace ?? "/", placeholders: placeholders))
+            return .Right(SocketPacket(type: type, nsp: namespace, placeholders: placeholders))
         }
         
         var idString = ""
@@ -110,7 +107,7 @@ extension SocketParsable {
             }
         }
         
-        let d = message[parser.currentIndex.advanced(by: 1)..<message.endIndex]
+        let d = message[parser.advance(by: 1)..<message.endIndex]
         
         switch parseData(d) {
         case let .Left(err):

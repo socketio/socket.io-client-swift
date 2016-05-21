@@ -105,43 +105,43 @@ public enum SocketIOClientOption : ClientOption {
         
         switch self {
         case let .connectParams(params):
-            value = params
+            value = params as AnyObject
         case let .cookies(cookies):
-            value = cookies
+            value = cookies as AnyObject
         case let .doubleEncodeUTF8(encode):
-            value = encode
+            value = encode as AnyObject
         case let .extraHeaders(headers):
-            value = headers
+            value = headers as AnyObject
         case let .forceNew(force):
-            value = force
+            value = force as AnyObject
         case let .forcePolling(force):
-            value = force
+            value = force as AnyObject
         case let .forceWebsockets(force):
-            value = force
+            value = force as AnyObject
         case let .handleQueue(queue):
-            value = queue
+            value = queue as AnyObject
         case let .log(log):
-            value = log
+            value = log as AnyObject
         case let .logger(logger):
-            value = logger
+            value = logger as AnyObject
         case let .nsp(nsp):
-            value = nsp
+            value = nsp as AnyObject
         case let .path(path):
-            value = path
+            value = path as AnyObject
         case let .reconnects(reconnects):
-            value = reconnects
+            value = reconnects as AnyObject
         case let .reconnectAttempts(attempts):
-            value = attempts
+            value = attempts as AnyObject
         case let .reconnectWait(wait):
-            value = wait
+            value = wait as AnyObject
         case let .secure(secure):
-            value = secure
+            value = secure as AnyObject
         case let .selfSigned(signed):
-            value = signed
+            value = signed as AnyObject
         case let .sessionDelegate(delegate):
-            value = delegate
+            value = delegate as AnyObject
         case let .voipEnabled(enabled):
-            value = enabled
+            value = enabled as AnyObject
         }
         
         return value

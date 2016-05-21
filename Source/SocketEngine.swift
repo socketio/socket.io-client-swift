@@ -25,9 +25,9 @@
 import Foundation
 
 public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWebsocket {
-    public let emitQueue = dispatch_queue_create("com.socketio.engineEmitQueue", DISPATCH_QUEUE_SERIAL)
-    public let handleQueue = dispatch_queue_create("com.socketio.engineHandleQueue", DISPATCH_QUEUE_SERIAL)
-    public let parseQueue = dispatch_queue_create("com.socketio.engineParseQueue", DISPATCH_QUEUE_SERIAL)
+    public let emitQueue = dispatch_queue_create("com.socketio.engineEmitQueue", DISPATCH_QUEUE_SERIAL)!
+    public let handleQueue = dispatch_queue_create("com.socketio.engineHandleQueue", DISPATCH_QUEUE_SERIAL)!
+    public let parseQueue = dispatch_queue_create("com.socketio.engineParseQueue", DISPATCH_QUEUE_SERIAL)!
 
     public var connectParams: [String: AnyObject]? {
         didSet {
@@ -62,9 +62,6 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     
     private weak var sessionDelegate: NSURLSessionDelegate?
 
-    private typealias Probe = (msg: String, type: SocketEnginePacketType, data: [NSData])
-    private typealias ProbeWaitQueue = [Probe]
-
     private let logType = "SocketEngine"
     private let url: NSURL
     
@@ -74,6 +71,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             pongsMissedMax = Int(pingTimeout / (pingInterval ?? 25))
         }
     }
+    
     private var pongsMissed = 0
     private var pongsMissedMax = 0
     private var probeWait = ProbeWaitQueue()
@@ -153,7 +151,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     private func checkIfMessageIsBase64Binary(_ message: String) -> Bool {
         if message.hasPrefix("b4") {
             // binary in base64 string
-            let noPrefix = message[message.startIndex.advanced(by: 2)..<message.endIndex]
+            let noPrefix = message[message.characters.index(message.startIndex, offsetBy: 2)..<message.endIndex]
     
             if let data = NSData(base64Encoded: noPrefix,
                 options: .ignoreUnknownCharacters) {
@@ -387,7 +385,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
                     doPoll()
                 }
                 
-                client?.engineDidOpen?(reason: "Connect")
+                client?.engineDidOpen(reason: "Connect")
             }
         } catch {
             didError(error: "Error parsing open packet")
@@ -430,13 +428,15 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
 
         switch type {
         case .message:
-            handleMessage(fixedString[fixedString.startIndex.successor()..<fixedString.endIndex])
+            handleMessage(
+                fixedString[fixedString.characters.index(after: fixedString.characters.startIndex)..<fixedString.endIndex])
         case .noop:
             handleNOOP()
         case .pong:
             handlePong(pongMessage: fixedString)
         case .open:
-            handleOpen(openMessage: fixedString[fixedString.startIndex.successor()..<fixedString.endIndex])
+            handleOpen(openMessage:
+                fixedString[fixedString.characters.index(after: fixedString.characters.startIndex)..<fixedString.endIndex])
         case .close:
             handleClose(reason: fixedString)
         default:
@@ -452,7 +452,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         polling = true
         probing = false
         invalidated = false
-        session = NSURLSession(configuration: .defaultSessionConfiguration(),
+        session = NSURLSession(configuration: .default(),
             delegate: sessionDelegate,
             delegateQueue: NSOperationQueue())
         sid = ""

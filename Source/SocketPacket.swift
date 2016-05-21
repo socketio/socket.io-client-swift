@@ -61,7 +61,7 @@ struct SocketPacket {
         return createPacketString()
     }
     
-    init(type: SocketPacket.PacketType, data: [AnyObject] = [AnyObject](), id: Int = -1,
+    init(type: PacketType, data: [AnyObject] = [AnyObject](), id: Int = -1,
         nsp: String, placeholders: Int = 0, binary: [NSData] = [NSData]()) {
         self.data = data
         self.id = id
@@ -94,10 +94,10 @@ struct SocketPacket {
         }
         
         do {
-            let jsonSend = try NSJSONSerialization.data(withJSONObject: data,
+            let jsonSend = try NSJSONSerialization.data(withJSONObject: data as AnyObject,
                 options: NSJSONWritingOptions(rawValue: 0))
             guard let jsonString = String(data: jsonSend, encoding: NSUTF8StringEncoding) else {
-                return "[]"
+                return message + "[]"
             }
             
             restOfMessage = jsonString
@@ -189,7 +189,7 @@ struct SocketPacket {
     
     // Helper method that looks for placeholders
     // If object is a collection it will recurse
-    // Returns the object if it is not a placeholder string or the corresponding
+    // Returns the object if it is not a placeholder or the corresponding
     // binary data
     private func _fillInPlaceholders(_ object: AnyObject) -> AnyObject {
         switch object {
@@ -203,7 +203,7 @@ struct SocketPacket {
                 })
             }
         case let arr as [AnyObject]:
-            return arr.map(_fillInPlaceholders)
+            return arr.map(_fillInPlaceholders) as AnyObject
         default:
             return object
         }
@@ -211,7 +211,7 @@ struct SocketPacket {
 }
 
 extension SocketPacket {
-    private static func findType(binCount: Int, ack: Bool) -> PacketType {
+    private static func findType(_ binCount: Int, ack: Bool) -> PacketType {
         switch binCount {
         case 0 where !ack:
             return .Event
@@ -228,8 +228,8 @@ extension SocketPacket {
     
     static func packetFromEmit(items: [AnyObject], id: Int, nsp: String, ack: Bool) -> SocketPacket {
         let (parsedData, binary) = deconstructData(items)
-        let packet = SocketPacket(type: findType(binCount: binary.count, ack: ack), data: parsedData,
-            id: id, nsp: nsp, placeholders: -1, binary: binary)
+        let packet = SocketPacket(type: findType(binary.count, ack: ack), data: parsedData,
+            id: id, nsp: nsp, binary: binary)
         
         return packet
     }
@@ -238,14 +238,14 @@ extension SocketPacket {
 private extension SocketPacket {
     // Recursive function that looks for NSData in collections
     static func shred(_ data: AnyObject, binary: inout [NSData]) -> AnyObject {
-        let placeholder = ["_placeholder": true, "num": binary.count]
+        let placeholder = ["_placeholder": true, "num": binary.count as AnyObject]
         
         switch data {
         case let bin as NSData:
             binary.append(bin)
-            return placeholder
+            return placeholder as AnyObject
         case let arr as [AnyObject]:
-            return arr.map({shred($0, binary: &binary)})
+            return arr.map({shred($0, binary: &binary)}) as AnyObject
         case let dict as NSDictionary:
             return dict.reduce(NSMutableDictionary(), combine: {cur, keyValue in
                 cur[keyValue.0 as! NSCopying] = shred(keyValue.1, binary: &binary)
