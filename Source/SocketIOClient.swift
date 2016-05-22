@@ -208,8 +208,8 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     }
 
     /// Send a message to the server
-    public func emit(_ event: String, _ items: AnyObject...) {
-        emit(event, with: items)
+    public func emit(_ event: String, _ items: SocketData...) {
+        emit(event, with: socketDataToAnyObject(data: items))
     }
 
     /// Same as emit, but meant for Objective-C
@@ -224,8 +224,8 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
     /// Sends a message to the server, requesting an ack. Use the onAck method of SocketAckHandler to add
     /// an ack.
-    public func emitWithAck(_ event: String, _ items: AnyObject...) -> OnAckCallback {
-        return emitWithAck(event, with: items)
+    public func emitWithAck(_ event: String, _ items: SocketData...) -> OnAckCallback {
+        return emitWithAck(event, with: socketDataToAnyObject(data: items))
     }
 
     /// Same as emitWithAck, but for Objective-C

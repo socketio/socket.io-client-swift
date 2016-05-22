@@ -24,6 +24,20 @@
 
 import Foundation
 
+public protocol SocketData {}
+
+extension Array : SocketData {}
+extension Bool : SocketData {}
+extension Dictionary : SocketData {}
+extension Double : SocketData {}
+extension Int : SocketData {}
+extension NSArray : SocketData {}
+extension NSData : SocketData {}
+extension NSDictionary : SocketData {}
+extension NSString : SocketData {}
+extension NSNull : SocketData {}
+extension String : SocketData {}
+
 public typealias AckCallback = ([AnyObject]) -> Void
 public typealias NormalCallback = ([AnyObject], SocketAckEmitter) -> Void
 public typealias OnAckCallback = (timeoutAfter: UInt64, callback: AckCallback) -> Void
