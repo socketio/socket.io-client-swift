@@ -40,8 +40,4 @@ extension SocketIOClientSpec {
         
         handleEvent("error", data: [reason as AnyObject], isInternalMessage: true, withAck: -1)
     }
-    
-    func socketDataToAnyObject(data: [SocketData]) -> [AnyObject] {
-        return data.flatMap({$0 as? AnyObject})
-    }
 }

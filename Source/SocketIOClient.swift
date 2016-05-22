@@ -405,6 +405,10 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     public func removeAllHandlers() {
         handlers.removeAll(keepingCapacity: false)
     }
+    
+    func socketDataToAnyObject(data: [SocketData]) -> [AnyObject] {
+        return data.flatMap({$0 as? AnyObject})
+    }
 
     private func tryReconnect(reason: String) {
         if reconnecting {
