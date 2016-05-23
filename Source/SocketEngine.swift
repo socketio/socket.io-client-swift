@@ -263,7 +263,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     }
     
     public func didError(error: String) {
-        DefaultSocketLogger.Logger.error(error, type: logType)
+        DefaultSocketLogger.Logger.error("%@", type: logType, args: error)
         client?.engineDidError(error)
         disconnect(error)
     }
