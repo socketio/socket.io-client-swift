@@ -191,7 +191,6 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         DefaultSocketLogger.Logger.log("Disconnected: %@", type: logType, args: reason)
 
         status = .Disconnected
-        reconnects = false
 
         // Make sure the engine is actually dead.
         engine?.disconnect(reason)
@@ -205,7 +204,6 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         
         DefaultSocketLogger.Logger.log("Closing socket", type: logType)
 
-        reconnects = false
         didDisconnect("Disconnect")
     }
 
@@ -286,6 +284,10 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
         handleEvent("error", data: [reason], isInternalMessage: true)
     }
+    
+    public func engineDidOpen(reason: String) {
+        DefaultSocketLogger.Logger.log(reason, type: "SocketEngineClient")
+    }
 
     // Called when the socket gets an ack for something it sent
     func handleAck(ack: Int, data: [AnyObject]) {
@@ -298,9 +300,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
     /// Causes an event to be handled. Only use if you know what you're doing.
     public func handleEvent(event: String, data: [AnyObject], isInternalMessage: Bool, withAck ack: Int = -1) {
-        guard status == .Connected || isInternalMessage else {
-            return
-        }
+        guard status == .Connected || isInternalMessage else { return }
 
         DefaultSocketLogger.Logger.log("Handling event: %@ with data: %@", type: logType, args: event, data ?? "")
 
@@ -335,14 +335,14 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     public func off(event: String) {
         DefaultSocketLogger.Logger.log("Removing handler for event: %@", type: logType, args: event)
 
-        handlers = handlers.filter { $0.event != event }
+        handlers = handlers.filter({ $0.event != event })
     }
 
     /// Removes a handler with the specified UUID gotten from an `on` or `once`
     public func off(id id: NSUUID) {
         DefaultSocketLogger.Logger.log("Removing handler with id: %@", type: logType, args: id)
 
-        handlers = handlers.filter { $0.id != id }
+        handlers = handlers.filter({ $0.id != id })
     }
 
     /// Adds a handler for an event.

@@ -62,9 +62,6 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     
     private weak var sessionDelegate: NSURLSessionDelegate?
 
-    private typealias Probe = (msg: String, type: SocketEnginePacketType, data: [NSData])
-    private typealias ProbeWaitQueue = [Probe]
-
     private let logType = "SocketEngine"
     private let url: NSURL
     
@@ -74,6 +71,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             pongsMissedMax = Int(pingTimeout / (pingInterval ?? 25))
         }
     }
+    
     private var pongsMissed = 0
     private var pongsMissedMax = 0
     private var probeWait = ProbeWaitQueue()
@@ -387,7 +385,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
                     doPoll()
                 }
                 
-                client?.engineDidOpen?("Connect")
+                client?.engineDidOpen("Connect")
             }
         } catch {
             didError("Error parsing open packet")
