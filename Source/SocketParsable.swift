@@ -96,14 +96,14 @@ extension SocketParsable {
         
         if type == .Error {
             parser.advanceIndexBy(-1)
-        }
-        
-        while parser.hasNext && type != .Error {
-            if let int = Int(parser.read(1)) {
-                idString += String(int)
-            } else {
-                parser.advanceIndexBy(-2)
-                break
+        } else {
+            while parser.hasNext {
+                if let int = Int(parser.read(1)) {
+                    idString += String(int)
+                } else {
+                    parser.advanceIndexBy(-2)
+                    break
+                }
             }
         }
         
