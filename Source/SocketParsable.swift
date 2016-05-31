@@ -162,9 +162,7 @@ extension SocketParsable {
         }
         
         // Should execute event?
-        guard waitingPackets[waitingPackets.count - 1].addData(data) else {
-            return
-        }
+        guard waitingPackets[waitingPackets.count - 1].addData(data) else { return }
         
         let packet = waitingPackets.removeLast()
         

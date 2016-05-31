@@ -153,9 +153,8 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             // binary in base64 string
             let noPrefix = message[message.startIndex.advancedBy(2)..<message.endIndex]
 
-            if let data = NSData(base64EncodedString: noPrefix,
-                options: .IgnoreUnknownCharacters) {
-                    client?.parseEngineBinaryData(data)
+            if let data = NSData(base64EncodedString: noPrefix, options: .IgnoreUnknownCharacters) {
+                client?.parseEngineBinaryData(data)
             }
             
             return true
@@ -535,13 +534,11 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             connected = false
             websocket = false
             
-            let reason = error?.localizedDescription ?? "Socket Disconnected"
-            
-            if error != nil {
+            if let reason = error?.localizedDescription {
                 didError(reason)
+            } else {
+                client?.engineDidClose("Socket Disconnected")
             }
-            
-            client?.engineDidClose(reason)
         } else {
             flushProbeWait()
         }
