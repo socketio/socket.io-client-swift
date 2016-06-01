@@ -213,9 +213,7 @@ extension SocketEnginePollable {
             fixedMessage = message
         }
         
-        let strMsg = "\(type.rawValue)\(fixedMessage)"
-        
-        postWait.append(strMsg)
+        postWait.append(String(type.rawValue) + fixedMessage)
         
         for data in datas {
             if case let .Right(bin) = createBinaryDataForSend(using: data) {

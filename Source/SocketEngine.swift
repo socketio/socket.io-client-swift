@@ -153,9 +153,8 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             // binary in base64 string
             let noPrefix = message[message.characters.index(message.startIndex, offsetBy: 2)..<message.endIndex]
     
-            if let data = NSData(base64Encoded: noPrefix,
-                options: .ignoreUnknownCharacters) {
-                    client?.parseEngineBinaryData(data)
+            if let data = NSData(base64Encoded: noPrefix, options: .ignoreUnknownCharacters) {
+                client?.parseEngineBinaryData(data)
             }
             
             return true
@@ -261,7 +260,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     }
     
     public func didError(error: String) {
-        DefaultSocketLogger.Logger.error(error, type: logType)
+        DefaultSocketLogger.Logger.error("%@", type: logType, args: error)
         client?.engineDidError(reason: error)
         disconnect(reason: error)
     }
@@ -537,13 +536,11 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             connected = false
             websocket = false
             
-            let reason = error?.localizedDescription ?? "Socket Disconnected"
-            
-            if error != nil {
+            if let reason = error?.localizedDescription {
                 didError(error: reason)
+            } else {
+                client?.engineDidClose(reason: "Socket Disconnected")
             }
-            
-            client?.engineDidClose(reason: reason)
         } else {
             flushProbeWait()
         }
