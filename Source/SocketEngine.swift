@@ -279,8 +279,8 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         
         DefaultSocketLogger.Logger.log("Engine is being closed.", type: logType)
         
-        if closed {
-            client?.engineDidClose(reason)
+        if closed || !connected {
+            postSendClose(nil, nil, nil)
             return
         }
         
@@ -334,7 +334,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         guard let ws = self.ws else { return }
         
         for msg in postWait {
-            ws.writeString(fixDoubleUTF8(msg))
+            ws.writeString(msg)
         }
         
         postWait.removeAll(keepCapacity: true)
