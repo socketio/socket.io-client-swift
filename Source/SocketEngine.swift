@@ -274,13 +274,15 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             
             ws?.disconnect()
             stopPolling()
-            client?.engineDidClose(reason)
         }
+        
+        guard connected else { return postSendClose(nil, nil, nil) }
         
         DefaultSocketLogger.Logger.log("Engine is being closed.", type: logType)
         
-        if closed || !connected {
+        if closed {
             postSendClose(nil, nil, nil)
+            client?.engineDidClose(reason)
             return
         }
         
