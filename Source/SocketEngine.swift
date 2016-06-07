@@ -163,7 +163,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         }
     }
     
-    private func closeOutSocket() {
+    private func closeOutEngine() {
         sid = ""
         closed = true
         invalidated = true
@@ -276,19 +276,19 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     }
     
     public func disconnect(reason: String) {
-        guard connected else { return closeOutSocket() }
+        guard connected else { return closeOutEngine() }
         
         DefaultSocketLogger.Logger.log("Engine is being closed.", type: logType)
         
         if closed {
-            closeOutSocket()
+            closeOutEngine()
             client?.engineDidClose(reason)
             return
         }
         
         if websocket {
             sendWebSocketMessage("", withType: .Close, withData: [])
-            closeOutSocket()
+            closeOutEngine()
         } else {
             disconnectPolling()
         }
@@ -301,7 +301,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             self.postWait.append(String(SocketEnginePacketType.Close.rawValue))
             let req = self.createRequestForPostWithPostWait()
             self.doRequest(req) {_, _, _ in }
-            self.closeOutSocket()
+            self.closeOutEngine()
         }
     }
 
