@@ -163,6 +163,16 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         }
     }
     
+    private func closeOutSocket() {
+        sid = ""
+        closed = true
+        invalidated = true
+        connected = false
+        
+        ws?.disconnect()
+        stopPolling()
+    }
+    
     /// Starts the connection to the server
     public func connect() {
         if connected {
@@ -266,37 +276,32 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     }
     
     public func disconnect(reason: String) {
-        func postSendClose(data: NSData?, _ res: NSURLResponse?, _ err: NSError?) {
-            sid = ""
-            closed = true
-            invalidated = true
-            connected = false
-            
-            ws?.disconnect()
-            stopPolling()
-        }
-        
-        guard connected else { return postSendClose(nil, nil, nil) }
+        guard connected else { return closeOutSocket() }
         
         DefaultSocketLogger.Logger.log("Engine is being closed.", type: logType)
         
         if closed {
-            postSendClose(nil, nil, nil)
+            closeOutSocket()
             client?.engineDidClose(reason)
             return
         }
         
         if websocket {
             sendWebSocketMessage("", withType: .Close, withData: [])
-            postSendClose(nil, nil, nil)
+            closeOutSocket()
         } else {
-            // We need to take special care when we're polling that we send it ASAP
-            // Also make sure we're on the emitQueue since we're touching postWait
-            dispatch_sync(emitQueue) {
-                self.postWait.append(String(SocketEnginePacketType.Close.rawValue))
-                let req = self.createRequestForPostWithPostWait()
-                self.doRequest(req, withCallback: postSendClose)
-            }
+            disconnectPolling()
+        }
+    }
+    
+    // We need to take special care when we're polling that we send it ASAP
+    // Also make sure we're on the emitQueue since we're touching postWait
+    private func disconnectPolling() {
+        dispatch_sync(emitQueue) {
+            self.postWait.append(String(SocketEnginePacketType.Close.rawValue))
+            let req = self.createRequestForPostWithPostWait()
+            self.doRequest(req) {_, _, _ in }
+            self.closeOutSocket()
         }
     }
 
