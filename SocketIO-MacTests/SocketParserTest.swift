@@ -13,7 +13,7 @@ class SocketParserTest: XCTestCase {
     let testSocket = SocketIOClient(socketURL: NSURL())
     
     //Format key: message; namespace-data-binary-id
-    static let packetTypes: Dictionary<String, (String, [AnyObject], [NSData], Int)> = [
+    static let packetTypes: [String: (String, [AnyObject], [NSData], Int)] = [
         "0": ("/", [], [], -1), "1": ("/", [], [], -1),
         "25[\"test\"]": ("/", ["test"], [], 5),
         "2[\"test\",\"~~0\"]": ("/", ["test", "~~0"], [], -1),

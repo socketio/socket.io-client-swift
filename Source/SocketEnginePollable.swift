@@ -123,7 +123,7 @@ extension SocketEnginePollable {
                 
                 return
             }
-
+            
             DefaultSocketLogger.Logger.log("Got polling response", type: "SocketEnginePolling")
             
             if let str = String(data: data!, encoding: NSUTF8StringEncoding) {
