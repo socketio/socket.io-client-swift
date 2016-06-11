@@ -274,7 +274,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         } else if !reconnecting {
             reconnecting = true
             tryReconnectWithReason(reason)
-        }
+        }        
     }
 
     /// error
