@@ -76,6 +76,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     private var pongsMissedMax = 0
     private var probeWait = ProbeWaitQueue()
     private var secure = false
+    private var security: SSLSecurity?
     private var selfSigned = false
     private var voipEnabled = false
 
@@ -105,6 +106,8 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
                 voipEnabled = enable
             case let .Secure(secure):
                 self.secure = secure
+            case let .Security(security):
+                self.security = security
             case let .SelfSigned(selfSigned):
                 self.selfSigned = selfSigned
             default:
@@ -265,6 +268,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         ws?.voipEnabled = voipEnabled
         ws?.delegate = self
         ws?.selfSignedSSL = selfSigned
+        ws?.security = security
 
         ws?.connect()
     }
