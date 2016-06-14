@@ -47,7 +47,7 @@
 - (void)testSocketManager {
     SocketClientManager* manager = [SocketClientManager sharedManager];
     [manager addSocket:self.socket labeledAs:@"test"];
-    [manager removeSocketWithLabel:@"test"];
+    [manager removeSocketWithLabel:@"test"];    
 }
 
 @end
