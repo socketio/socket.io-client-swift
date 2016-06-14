@@ -159,4 +159,16 @@ class SocketSideEffectTest: XCTestCase {
         socket.parseBinaryData(data2)
         waitForExpectations(withTimeout: 3, handler: nil)
     }
+    
+    func testSocketManager() {
+        let manager = SocketClientManager.sharedManager
+        manager["test"] = socket
+        
+        XCTAssert(manager["test"] === socket, "failed to get socket")
+        
+        manager["test"] = nil
+        
+        XCTAssert(manager["test"] == nil, "socket not removed")
+
+    }
 }

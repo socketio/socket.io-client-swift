@@ -76,6 +76,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     private var pongsMissedMax = 0
     private var probeWait = ProbeWaitQueue()
     private var secure = false
+    private var security: SSLSecurity?
     private var selfSigned = false
     private var voipEnabled = false
 
@@ -107,6 +108,8 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
                 self.secure = secure
             case let .selfSigned(selfSigned):
                 self.selfSigned = selfSigned
+            case let .security(security):
+                self.security = security
             default:
                 continue
             }
@@ -180,7 +183,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             disconnect(reason: "reconnect")
         }
         
-        DefaultSocketLogger.Logger.log("Starting engine", type: logType)
+        DefaultSocketLogger.Logger.log("Starting engine. Server: %@", type: logType, args: url)
         DefaultSocketLogger.Logger.log("Handshaking", type: logType)
         
         resetEngine()
@@ -265,6 +268,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         ws?.voipEnabled = voipEnabled
         ws?.delegate = self
         ws?.selfSignedSSL = selfSigned
+        ws?.security = security
 
         ws?.connect()
     }

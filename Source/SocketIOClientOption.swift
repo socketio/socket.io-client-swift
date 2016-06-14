@@ -45,6 +45,7 @@ public enum SocketIOClientOption : ClientOption {
     case reconnectAttempts(Int)
     case reconnectWait(Int)
     case secure(Bool)
+    case security(SSLSecurity)
     case selfSigned(Bool)
     case sessionDelegate(NSURLSessionDelegate)
     case voipEnabled(Bool)
@@ -87,6 +88,8 @@ public enum SocketIOClientOption : ClientOption {
             description = "secure"
         case .selfSigned:
             description = "selfSigned"
+        case .security:
+            description = "security"
         case .sessionDelegate:
             description = "sessionDelegate"
         case .voipEnabled:
@@ -136,6 +139,8 @@ public enum SocketIOClientOption : ClientOption {
             value = wait as AnyObject
         case let .secure(secure):
             value = secure as AnyObject
+        case let .security(security):
+            value = security
         case let .selfSigned(signed):
             value = signed as AnyObject
         case let .sessionDelegate(delegate):
@@ -195,6 +200,8 @@ extension NSDictionary {
             return .reconnectWait(wait)
         case let ("secure", secure as Bool):
             return .secure(secure)
+        case let ("security", security as SSLSecurity):
+            return .security(security)
         case let ("selfSigned", selfSigned as Bool):
             return .selfSigned(selfSigned)
         case let ("sessionDelegate", delegate as NSURLSessionDelegate):
