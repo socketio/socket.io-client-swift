@@ -180,7 +180,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             disconnect("reconnect")
         }
         
-        DefaultSocketLogger.Logger.log("Starting engine", type: logType)
+        DefaultSocketLogger.Logger.log("Starting engine. Server: %@", type: logType, args: url)
         DefaultSocketLogger.Logger.log("Handshaking", type: logType)
         
         resetEngine()
