@@ -70,7 +70,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         self.options = options
         self.socketURL = socketURL
         
-        if socketURL.absoluteString.hasPrefix("https://") {
+        if socketURL.absoluteString!.hasPrefix("https://") {
             self.options.insertIgnore(.Secure(true))
         }
         
