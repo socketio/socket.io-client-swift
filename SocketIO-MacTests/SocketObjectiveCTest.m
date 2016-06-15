@@ -41,7 +41,7 @@
 }
 
 - (void)testOffSyntax {
-    [self.socket offWithEvent:@"test"];
+    [self.socket off:@"test"];
 }
 
 - (void)testSocketManager {

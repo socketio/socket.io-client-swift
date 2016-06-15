@@ -118,7 +118,7 @@ extension SocketEnginePollable {
                 DefaultSocketLogger.Logger.error(err?.localizedDescription ?? "Error", type: "SocketEnginePolling")
                 
                 if this.polling {
-                    this.didError(err?.localizedDescription ?? "Error")
+                    this.didError(reason: err?.localizedDescription ?? "Error")
                 }
                 
                 return
@@ -163,7 +163,7 @@ extension SocketEnginePollable {
                 DefaultSocketLogger.Logger.error(err?.localizedDescription ?? "Error", type: "SocketEnginePolling")
                 
                 if this.polling {
-                    this.didError(err?.localizedDescription ?? "Error")
+                    this.didError(reason: err?.localizedDescription ?? "Error")
                 }
                 
                 return
@@ -186,16 +186,12 @@ extension SocketEnginePollable {
         var reader = SocketStringReader(message: str)
         
         while reader.hasNext {
-            if let n = Int(reader.readUntilStringOccurence(":")) {
-                let str = reader.read(n)
+            if let n = Int(reader.readUntilOccurence(of: ":")) {
+                let str = reader.read(count: n)
                 
-                (handleQueue).async {
-                    self.parseEngineMessage(str, fromPolling: true)
-                }
+                handleQueue.async { self.parseEngineMessage(str, fromPolling: true) }
             } else {
-                handleQueue.async {
-                    self.parseEngineMessage(str, fromPolling: true)
-                }
+                handleQueue.async { self.parseEngineMessage(str, fromPolling: true) }
                 break
             }
         }

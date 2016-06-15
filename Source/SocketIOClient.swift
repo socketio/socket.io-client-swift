@@ -110,7 +110,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
     deinit {
         DefaultSocketLogger.Logger.log("Client is being released", type: logType)
-        engine?.disconnect("Client Deinit")
+        engine?.disconnect(reason: "Client Deinit")
     }
 
     private func addEngine() -> SocketEngineSpec {
@@ -150,7 +150,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         handleQueue.after(when: time) {[weak self] in
             if let this = self where this.status != .connected && this.status != .disconnected {
                 this.status = .disconnected
-                this.engine?.disconnect("Connect timeout")
+                this.engine?.disconnect(reason: "Connect timeout")
 
                 handler?()
             }
@@ -185,7 +185,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         handleEvent("connect", data: [], isInternalMessage: false)
     }
 
-    func didDisconnect(_ reason: String) {
+    func didDisconnect(reason: String) {
         guard status != .disconnected else { return }
 
         DefaultSocketLogger.Logger.log("Disconnected: %@", type: logType, args: reason)
@@ -193,7 +193,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         status = .disconnected
 
         // Make sure the engine is actually dead.
-        engine?.disconnect(reason)
+        engine?.disconnect(reason: reason)
         handleEvent("disconnect", data: [reason as AnyObject], isInternalMessage: true)
     }
 
@@ -203,7 +203,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         
         DefaultSocketLogger.Logger.log("Closing socket", type: logType)
 
-        didDisconnect("Disconnect")
+        didDisconnect(reason: "Disconnect")
     }
 
     /// Send a message to the server
@@ -262,7 +262,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         }
     }
 
-    public func engineDidClose(_ reason: String) {
+    public func engineDidClose(reason: String) {
         waitingPackets.removeAll()
         
         if status != .disconnected {
@@ -270,7 +270,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         }
 
         if status == .disconnected || !reconnects {
-            didDisconnect(reason)
+            didDisconnect(reason: reason)
         } else if !reconnecting {
             reconnecting = true
             tryReconnect(reason)
@@ -278,13 +278,13 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     }
 
     /// error
-    public func engineDidError(_ reason: String) {
+    public func engineDidError(reason: String) {
         DefaultSocketLogger.Logger.error("%@", type: logType, args: reason)
 
         handleEvent("error", data: [reason as AnyObject], isInternalMessage: true)
     }
     
-    public func engineDidOpen(_ reason: String) {
+    public func engineDidOpen(reason: String) {
         DefaultSocketLogger.Logger.log(reason, type: "SocketEngineClient")
     }
 
@@ -383,22 +383,18 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     public func parseEngineMessage(_ msg: String) {
         DefaultSocketLogger.Logger.log("Should parse message: %@", type: "SocketIOClient", args: msg)
 
-        parseQueue.async {
-            self.parseSocketMessage(msg)
-        }
+        parseQueue.async { self.parseSocketMessage(msg) }
     }
 
     public func parseEngineBinaryData(_ data: Data) {
-        parseQueue.async {
-            self.parseBinaryData(data)
-        }
+        parseQueue.async { self.parseBinaryData(data) }
     }
 
     /// Tries to reconnect to the server.
     public func reconnect() {
         guard !reconnecting else { return }
         
-        engine?.disconnect("manual reconnect")
+        engine?.disconnect(reason: "manual reconnect")
     }
 
     /// Removes all handlers.
@@ -426,7 +422,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         }
 
         if reconnectAttempts != -1 && currentReconnectAttempt + 1 > reconnectAttempts || !reconnects {
-            return didDisconnect("Reconnect Failed")
+            return didDisconnect(reason: "Reconnect Failed")
         }
 
         DefaultSocketLogger.Logger.log("Trying to reconnect", type: logType)

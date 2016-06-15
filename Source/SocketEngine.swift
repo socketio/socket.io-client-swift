@@ -144,10 +144,10 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
                  2: Bad handshake request
                  3: Bad request
                  */
-                didError(error)
+                didError(reason: error)
             }
         } catch {
-            didError("Got unknown error from server \(msg)")
+            didError(reason: "Got unknown error from server \(msg)")
         }
     }
 
@@ -180,7 +180,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     public func connect() {
         if connected {
             DefaultSocketLogger.Logger.error("Engine tried opening while connected. Assuming this was a reconnect", type: logType)
-            disconnect("reconnect")
+            disconnect(reason: "reconnect")
         }
         
         DefaultSocketLogger.Logger.log("Starting engine. Server: %@", type: logType, args: url)
@@ -208,9 +208,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             }
         }
         
-        (emitQueue).async {
-            self.doLongPoll(for: reqPolling as URLRequest)
-        }
+        emitQueue.async { self.doLongPoll(for: reqPolling as URLRequest) }
     }
 
     private func createURLs() -> (URL, URL) {
@@ -273,20 +271,20 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         ws?.connect()
     }
     
-    public func didError(_ error: String) {
-        DefaultSocketLogger.Logger.error("%@", type: logType, args: error)
-        client?.engineDidError(error)
-        disconnect(error)
+    public func didError(reason: String) {
+        DefaultSocketLogger.Logger.error("%@", type: logType, args: reason)
+        client?.engineDidError(reason: reason)
+        disconnect(reason: reason)
     }
     
-    public func disconnect(_ reason: String) {
+    public func disconnect(reason: String) {
         guard connected else { return closeOutEngine() }
         
         DefaultSocketLogger.Logger.log("Engine is being closed.", type: logType)
         
         if closed {
             closeOutEngine()
-            client?.engineDidClose(reason)
+            client?.engineDidClose(reason: reason)
             return
         }
         
@@ -352,7 +350,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     }
 
     private func handleClose(_ reason: String) {
-        client?.engineDidClose(reason)
+        client?.engineDidClose(reason: reason)
     }
 
     private func handleMessage(_ message: String) {
@@ -395,10 +393,10 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
                     doPoll()
                 }
                 
-                client?.engineDidOpen("Connect")
+                client?.engineDidOpen(reason: "Connect")
             }
         } catch {
-            didError("Error parsing open packet")
+            didError(reason: "Error parsing open packet")
         }
     }
 
@@ -478,7 +476,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         
         //Server is not responding
         if pongsMissed > pongsMissedMax {
-            client?.engineDidClose("Ping timeout")
+            client?.engineDidClose(reason: "Ping timeout")
             return
         }
         
@@ -487,9 +485,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             write("", withType: .ping, withData: [])
             
             let time = DispatchTime.now() + Double(Int64(pingInterval * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
-            DispatchQueue.main.after(when: time) {[weak self] in
-                self?.sendPing()
-            }
+            DispatchQueue.main.after(when: time) {[weak self] in self?.sendPing() }
         }
     }
     
@@ -539,7 +535,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         probing = false
         
         if closed {
-            client?.engineDidClose("Disconnect")
+            client?.engineDidClose(reason: "Disconnect")
             return
         }
         
@@ -548,9 +544,9 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             websocket = false
             
             if let reason = error?.localizedDescription {
-                didError(reason)
+                didError(reason: reason)
             } else {
-                client?.engineDidClose("Socket Disconnected")
+                client?.engineDidClose(reason: "Socket Disconnected")
             }
         } else {
             flushProbeWait()

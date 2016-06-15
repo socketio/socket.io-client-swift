@@ -51,8 +51,8 @@ import Foundation
     init(client: SocketEngineClient, url: URL, options: NSDictionary?)
     
     func connect()
-    func didError(_ error: String)
-    func disconnect(_ reason: String)
+    func didError(reason: String)
+    func disconnect(reason: String)
     func doFastUpgrade()
     func flushWaitingForPostToWebSocket()
     func parseEngineData(_ data: Data)
