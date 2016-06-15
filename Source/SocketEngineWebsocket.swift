@@ -27,7 +27,7 @@ import Foundation
 
 /// Protocol that is used to implement socket.io WebSocket support
 public protocol SocketEngineWebsocket : SocketEngineSpec, WebSocketDelegate {
-    func sendWebSocketMessage(_ str: String, withType type: SocketEnginePacketType, withData datas: [NSData])
+    func sendWebSocketMessage(_ str: String, withType type: SocketEnginePacketType, withData datas: [Data])
 }
 
 // WebSocket methods
@@ -40,23 +40,23 @@ extension SocketEngineWebsocket {
     
     /// Send message on WebSockets
     /// Only call on emitQueue
-    public func sendWebSocketMessage(_ str: String, withType type: SocketEnginePacketType, withData datas: [NSData]) {
+    public func sendWebSocketMessage(_ str: String, withType type: SocketEnginePacketType, withData datas: [Data]) {
             DefaultSocketLogger.Logger.log("Sending ws: %@ as type: %@", type: "SocketEngine", args: str, type.rawValue)
             
-            ws?.writeString(str: "\(type.rawValue)\(str)")
+            ws?.writeString("\(type.rawValue)\(str)")
             
             for data in datas {
-                if case let .Left(bin) = createBinaryDataForSend(using: data) {
-                    ws?.writeData(data: bin)
+                if case let .left(bin) = createBinaryDataForSend(using: data) {
+                    ws?.writeData(bin)
                 }
             }
     }
     
-    public func websocketDidReceiveMessage(socket: WebSocket, text: String) {
+    public func websocketDidReceiveMessage(_ socket: WebSocket, text: String) {
         parseEngineMessage(text, fromPolling: false)
     }
     
-    public func websocketDidReceiveData(socket: WebSocket, data: NSData) {
+    public func websocketDidReceiveData(_ socket: WebSocket, data: Data) {
         parseEngineData(data)
     }
 }

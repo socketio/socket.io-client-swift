@@ -30,7 +30,7 @@ public protocol SocketEnginePollable : SocketEngineSpec {
     /// Holds strings waiting to be sent over polling. 
     /// You shouldn't need to mess with this.
     var postWait: [String] { get set }
-    var session: NSURLSession? { get }
+    var session: URLSession? { get }
     /// Because socket.io doesn't let you send two polling request at the same time
     /// we have to keep track if there's an outstanding poll
     var waitingForPoll: Bool { get set }
@@ -39,7 +39,7 @@ public protocol SocketEnginePollable : SocketEngineSpec {
     var waitingForPost: Bool { get set }
     
     func doPoll()
-    func sendPollMessage(_ message: String, withType type: SocketEnginePacketType, withData datas: [NSData])
+    func sendPollMessage(_ message: String, withType type: SocketEnginePacketType, withData datas: [Data])
     func stopPolling()
 }
 
@@ -47,7 +47,7 @@ public protocol SocketEnginePollable : SocketEngineSpec {
 extension SocketEnginePollable {
     private func addHeaders(for req: NSMutableURLRequest) {
         if cookies != nil {
-            let headers = NSHTTPCookie.requestHeaderFields(with: cookies!)
+            let headers = HTTPCookie.requestHeaderFields(with: cookies!)
             req.allHTTPHeaderFields = headers
         }
         
@@ -58,7 +58,7 @@ extension SocketEnginePollable {
         }
     }
     
-    func createRequestForPostWithPostWait() -> NSURLRequest {
+    func createRequestForPostWithPostWait() -> URLRequest {
         var postStr = ""
         
         for packet in postWait {
@@ -71,20 +71,20 @@ extension SocketEnginePollable {
         
         postWait.removeAll(keepingCapacity: false)
         
-        let req = NSMutableURLRequest(url: urlPollingWithSid)
+        let req = NSMutableURLRequest(url: urlPollingWithSid as URL)
         
         addHeaders(for: req)
         
         req.httpMethod = "POST"
         req.setValue("text/plain; charset=UTF-8", forHTTPHeaderField: "Content-Type")
         
-        let postData = postStr.data(using: NSUTF8StringEncoding,
+        let postData = postStr.data(using: String.Encoding.utf8,
             allowLossyConversion: false)!
         
         req.httpBody = postData
-        req.setValue(String(postData.length), forHTTPHeaderField: "Content-Length")
+        req.setValue(String(postData.count), forHTTPHeaderField: "Content-Length")
         
-        return req
+        return req as URLRequest
     }
     
     public func doPoll() {
@@ -93,13 +93,13 @@ extension SocketEnginePollable {
         }
         
         waitingForPoll = true
-        let req = NSMutableURLRequest(url: urlPollingWithSid)
+        let req = NSMutableURLRequest(url: urlPollingWithSid as URL)
         
         addHeaders(for: req)
-        doLongPoll(for: req)
+        doLongPoll(for: req as URLRequest)
     }
     
-    func doRequest(for req: NSURLRequest, callbackWith callback: (NSData?, NSURLResponse?, NSError?) -> Void) {
+    func doRequest(for req: URLRequest, callbackWith callback: (Data?, URLResponse?, NSError?) -> Void) {
         if !polling || closed || invalidated || fastUpgrade {
             DefaultSocketLogger.Logger.error("Tried to do polling request when not supposed to", type: "SocketEnginePolling")
             return
@@ -110,7 +110,7 @@ extension SocketEnginePollable {
         session?.dataTask(with: req, completionHandler: callback).resume()
     }
     
-    func doLongPoll(for req: NSURLRequest) {
+    func doLongPoll(for req: URLRequest) {
         doRequest(for: req) {[weak self] data, res, err in
             guard let this = self where this.polling else { return }
             
@@ -118,7 +118,7 @@ extension SocketEnginePollable {
                 DefaultSocketLogger.Logger.error(err?.localizedDescription ?? "Error", type: "SocketEnginePolling")
                 
                 if this.polling {
-                    this.didError(error: err?.localizedDescription ?? "Error")
+                    this.didError(err?.localizedDescription ?? "Error")
                 }
                 
                 return
@@ -126,8 +126,8 @@ extension SocketEnginePollable {
             
             DefaultSocketLogger.Logger.log("Got polling response", type: "SocketEnginePolling")
             
-            if let str = String(data: data!, encoding: NSUTF8StringEncoding) {
-                dispatch_async(this.parseQueue) {
+            if let str = String(data: data!, encoding: String.Encoding.utf8) {
+                this.parseQueue.async {
                     this.parsePollingMessage(str)
                 }
             }
@@ -163,7 +163,7 @@ extension SocketEnginePollable {
                 DefaultSocketLogger.Logger.error(err?.localizedDescription ?? "Error", type: "SocketEnginePolling")
                 
                 if this.polling {
-                    this.didError(error: err?.localizedDescription ?? "Error")
+                    this.didError(err?.localizedDescription ?? "Error")
                 }
                 
                 return
@@ -171,7 +171,7 @@ extension SocketEnginePollable {
             
             this.waitingForPost = false
             
-            dispatch_async(this.emitQueue) {
+            this.emitQueue.async {
                 if !this.fastUpgrade {
                     this.flushWaitingForPost()
                     this.doPoll()
@@ -187,13 +187,13 @@ extension SocketEnginePollable {
         
         while reader.hasNext {
             if let n = Int(reader.readUntilStringOccurence(":")) {
-                let str = reader.read(length: n)
+                let str = reader.read(n)
                 
-                dispatch_async(handleQueue) {
+                (handleQueue).async {
                     self.parseEngineMessage(str, fromPolling: true)
                 }
             } else {
-                dispatch_async(handleQueue) {
+                handleQueue.async {
                     self.parseEngineMessage(str, fromPolling: true)
                 }
                 break
@@ -203,12 +203,12 @@ extension SocketEnginePollable {
     
     /// Send polling message.
     /// Only call on emitQueue
-    public func sendPollMessage(_ message: String, withType type: SocketEnginePacketType, withData datas: [NSData]) {
+    public func sendPollMessage(_ message: String, withType type: SocketEnginePacketType, withData datas: [Data]) {
         DefaultSocketLogger.Logger.log("Sending poll: %@ as type: %@", type: "SocketEnginePolling", args: message, type.rawValue)
         let fixedMessage: String
         
         if doubleEncodeUTF8 {
-            fixedMessage = doubleEncodeUTF8(string: message)
+            fixedMessage = doubleEncodeUTF8(message)
         } else {
             fixedMessage = message
         }
@@ -216,7 +216,7 @@ extension SocketEnginePollable {
         postWait.append(String(type.rawValue) + fixedMessage)
         
         for data in datas {
-            if case let .Right(bin) = createBinaryDataForSend(using: data) {
+            if case let .right(bin) = createBinaryDataForSend(using: data) {
                 postWait.append(bin)
             }
         }

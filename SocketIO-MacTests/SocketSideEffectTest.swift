@@ -10,13 +10,13 @@ import XCTest
 @testable import SocketIOClientSwift
 
 class SocketSideEffectTest: XCTestCase {
-    let data = "test".data(using: NSUTF8StringEncoding)!
-    let data2 = "test2".data(using: NSUTF8StringEncoding)!
+    let data = "test".data(using: String.Encoding.utf8)!
+    let data2 = "test2".data(using: String.Encoding.utf8)!
     private var socket: SocketIOClient!
     
     override func setUp() {
         super.setUp()
-        socket = SocketIOClient(socketURL: NSURL())
+        socket = SocketIOClient(socketURL: URL(string: "http://localhost/")!)
         socket.setTestable()
     }
     
@@ -55,7 +55,7 @@ class SocketSideEffectTest: XCTestCase {
         }
         
         socket.parseSocketMessage("61-0[{\"_placeholder\":true,\"num\":0},{\"test\":true}]")
-        socket.parseBinaryData(NSData())
+        socket.parseBinaryData(Data())
         waitForExpectations(withTimeout: 3, handler: nil)
     }
     
@@ -83,7 +83,7 @@ class SocketSideEffectTest: XCTestCase {
     
     func testHandleOnceEvent() {
         let expect = expectation(withDescription: "handled event")
-        socket.once(event: "test") {data, ack in
+        socket.once("test") {data, ack in
             XCTAssertEqual(data[0] as? String, "hello world")
             XCTAssertEqual(self.socket.testHandlers.count, 0)
             expect.fulfill()
@@ -140,7 +140,7 @@ class SocketSideEffectTest: XCTestCase {
     func testSocketDataToAnyObject() {
         let data = ["test", 1, 2.2, ["Hello": 2, "bob": 2.2], true, [1, 2], [1.1, 2]] as [SocketData]
         
-        XCTAssertEqual(data.count, socket.socketDataToAnyObject(data: data).count)
+        XCTAssertEqual(data.count, socket.socketDataToAnyObject(data).count)
     }
     
     func testHandleMultipleBinaryEvent() {

@@ -15,7 +15,7 @@ class SocketAckManagerTest: XCTestCase {
     func testAddAcks() {
         let callbackExpection = self.expectation(withDescription: "callbackExpection")
         let itemsArray = ["Hi", "ho"]
-        func callback(items: [AnyObject]) {
+        func callback(_ items: [AnyObject]) {
             callbackExpection.fulfill()
         }
         ackManager.addAck(1, callback: callback)

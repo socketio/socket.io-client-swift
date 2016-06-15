@@ -32,7 +32,7 @@ extension Dictionary : SocketData {}
 extension Double : SocketData {}
 extension Int : SocketData {}
 extension NSArray : SocketData {}
-extension NSData : SocketData {}
+extension Data : SocketData {}
 extension NSDictionary : SocketData {}
 extension NSString : SocketData {}
 extension NSNull : SocketData {}
@@ -42,10 +42,10 @@ public typealias AckCallback = ([AnyObject]) -> Void
 public typealias NormalCallback = ([AnyObject], SocketAckEmitter) -> Void
 public typealias OnAckCallback = (timeoutAfter: UInt64, callback: AckCallback) -> Void
 
-typealias Probe = (msg: String, type: SocketEnginePacketType, data: [NSData])
+typealias Probe = (msg: String, type: SocketEnginePacketType, data: [Data])
 typealias ProbeWaitQueue = [Probe]
 
 enum Either<E, V> {
-    case Left(E)
-    case Right(V)
+    case left(E)
+    case right(V)
 }

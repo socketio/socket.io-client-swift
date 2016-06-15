@@ -36,7 +36,7 @@ public final class SocketAckEmitter : NSObject {
     public func with(_ items: SocketData...) {
         guard ackNum != -1 else { return }
         
-        socket.emitAck(ackNum, with: socket.socketDataToAnyObject(data: items))
+        socket.emitAck(ackNum, with: socket.socketDataToAnyObject(items))
     }
     
     public func with(_ items: [AnyObject]) {
