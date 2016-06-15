@@ -270,7 +270,7 @@ public class WebSocket : NSObject, StreamDelegate {
             key += "\(Character(uni))"
         }
         let data = key.data(using: String.Encoding.utf8)
-        let baseKey = data?.base64EncodedString(NSData.Base64EncodingOptions(rawValue: 0))
+        let baseKey = data?.base64EncodedString(Data.Base64EncodingOptions(rawValue: 0))
         return baseKey!
     }
     
@@ -420,9 +420,9 @@ public class WebSocket : NSObject, StreamDelegate {
             let data = inputQueue[0]
             var work = data
             if let fragBuffer = fragBuffer {
-                var combine = NSData(data: fragBuffer) as Data
+                let combine = NSMutableData(data: fragBuffer)
                 combine.append(data)
-                work = combine
+                work = combine as Data
                 self.fragBuffer = nil
             }
             let buffer = UnsafePointer<UInt8>((work as NSData).bytes)

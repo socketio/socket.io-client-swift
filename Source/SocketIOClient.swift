@@ -331,7 +331,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     }
 
     /// Removes handler(s) based on name
-    public func off(event: String) {
+    public func off(_ event: String) {
         DefaultSocketLogger.Logger.log("Removing handler for event: %@", type: logType, args: event)
 
         handlers = handlers.filter({ $0.event != event })

@@ -98,7 +98,7 @@ class SocketSideEffectTest: XCTestCase {
         XCTAssertEqual(socket.testHandlers.count, 1)
         socket.on("test") {data, ack in }
         XCTAssertEqual(socket.testHandlers.count, 2)
-        socket.off(event: "test")
+        socket.off("test")
         XCTAssertEqual(socket.testHandlers.count, 0)
     }
     

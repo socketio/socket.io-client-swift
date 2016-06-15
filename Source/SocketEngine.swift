@@ -156,7 +156,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             // binary in base64 string
             let noPrefix = message[message.characters.index(message.startIndex, offsetBy: 2)..<message.endIndex]
     
-            if let data = Data(base64Encoded: noPrefix, options: NSData.Base64EncodingOptions(rawValue: 0)) {
+            if let data = Data(base64Encoded: noPrefix, options: Data.Base64EncodingOptions(rawValue: 0)) {
                 client?.parseEngineBinaryData(data)
             }
             
