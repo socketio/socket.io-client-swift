@@ -206,8 +206,8 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             return (NSURL(), NSURL())
         }
 
-        let urlPolling = NSURLComponents(string: url.absoluteString)!
-        let urlWebSocket = NSURLComponents(string: url.absoluteString)!
+        let urlPolling = NSURLComponents(URL: url, resolvingAgainstBaseURL: true)!
+        let urlWebSocket = NSURLComponents(URL: url, resolvingAgainstBaseURL: true)!
         var queryString = ""
         
         urlWebSocket.path = socketPath

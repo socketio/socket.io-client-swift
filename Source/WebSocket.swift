@@ -220,7 +220,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
         
         var port = url.port
         if port == nil {
-            if ["wss", "https"].contains(url.scheme) {
+            if let scheme = url.scheme where ["wss", "https"].contains(scheme) {
                 port = 443
             } else {
                 port = 80
@@ -278,7 +278,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
         guard let inStream = inputStream, let outStream = outputStream else { return }
         inStream.delegate = self
         outStream.delegate = self
-        if ["wss", "https"].contains(url.scheme) {
+        if let scheme = url.scheme where ["wss", "https"].contains(scheme) {
             inStream.setProperty(NSStreamSocketSecurityLevelNegotiatedSSL, forKey: NSStreamSocketSecurityLevelKey)
             outStream.setProperty(NSStreamSocketSecurityLevelNegotiatedSSL, forKey: NSStreamSocketSecurityLevelKey)
         } else {
@@ -962,9 +962,11 @@ public class SSLSecurity {
         }
         var policy: SecPolicyRef
         if self.validatedDN {
-            policy = SecPolicyCreateSSL(true, domain)
-        } else {
-            policy = SecPolicyCreateBasicX509()
+			guard let aPolicy = SecPolicyCreateSSL(true, domain) else { return false }
+            policy = aPolicy
+		} else {
+			guard let aPolicy = SecPolicyCreateBasicX509() else { return false }
+            policy = aPolicy
         }
         SecTrustSetPolicies(trust,policy)
         if self.usePublicKeys {
@@ -985,10 +987,9 @@ public class SSLSecurity {
                 collect.append(SecCertificateCreateWithData(nil,cert)!)
             }
             SecTrustSetAnchorCertificates(trust,collect)
-            var result: SecTrustResultType = 0
+			var result = SecTrustResultType.Invalid
             SecTrustEvaluate(trust,&result)
-            let r = Int(result)
-            if r == kSecTrustResultUnspecified || r == kSecTrustResultProceed {
+            if result == .Unspecified || result == .Proceed {
                 var trustedCount = 0
                 for serverCert in serverCerts {
                     for cert in certs {
@@ -1015,8 +1016,9 @@ public class SSLSecurity {
      */
     func extractPublicKey(data: NSData) -> SecKeyRef? {
         guard let cert = SecCertificateCreateWithData(nil, data) else { return nil }
-        
-        return extractPublicKeyFromCert(cert, policy: SecPolicyCreateBasicX509())
+		guard let policy = SecPolicyCreateBasicX509() else { return nil }
+		
+        return extractPublicKeyFromCert(cert, policy: policy)
     }
     
     /**
@@ -1032,7 +1034,7 @@ public class SSLSecurity {
         
         guard let trust = possibleTrust else { return nil }
         
-        var result: SecTrustResultType = 0
+        var result: SecTrustResultType = .Invalid
         SecTrustEvaluate(trust, &result)
         return SecTrustCopyPublicKey(trust)
     }
@@ -1063,7 +1065,7 @@ public class SSLSecurity {
      - returns: the public keys from the certifcate chain for the trust
      */
     func publicKeyChainForTrust(trust: SecTrustRef) -> [SecKeyRef] {
-        let policy = SecPolicyCreateBasicX509()
+		guard let policy = SecPolicyCreateBasicX509() else { return [] }
         let keys = (0..<SecTrustGetCertificateCount(trust)).reduce([SecKeyRef]()) { (keys: [SecKeyRef], index: Int) -> [SecKeyRef] in
             var keys = keys
             let cert = SecTrustGetCertificateAtIndex(trust, index)
