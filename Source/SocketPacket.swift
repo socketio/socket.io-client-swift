@@ -111,73 +111,31 @@ struct SocketPacket {
         return message + restOfMessage
     }
     
-    private func createAck() -> String {
-        let message: String
-        
-        if type == .Ack {
-            if nsp == "/" {
-                message = "3\(id)"
-            } else {
-                message = "3\(nsp),\(id)"
-            }
-        } else {
-            if nsp == "/" {
-                message = "6\(binary.count)-\(id)"
-            } else {
-                message = "6\(binary.count)-\(nsp),\(id)"
-            }
-        }
-        
-        return completeMessage(message)
-    }
-
-    
-    private func createMessageForEvent() -> String {
-        let message: String
-        
-        if type == .Event {
-            if nsp == "/" {
-                if id == -1 {
-                    message = "2"
-                } else {
-                    message = "2\(id)"
-                }
-            } else {
-                if id == -1 {
-                    message = "2\(nsp),"
-                } else {
-                    message = "2\(nsp),\(id)"
-                }
-            }
-        } else {
-            if nsp == "/" {
-                if id == -1 {
-                    message = "5\(binary.count)-"
-                } else {
-                    message = "5\(binary.count)-\(id)"
-                }
-            } else {
-                if id == -1 {
-                    message = "5\(binary.count)-\(nsp),"
-                } else {
-                    message = "5\(binary.count)-\(nsp),\(id)"
-                }
-            }
-        }
-        
-        return completeMessage(message)
-    }
-    
     private func createPacketString() -> String {
-        let str: String
+        let typeString = String(type.rawValue)
+        let binaryCountString: String
+        let nspString: String
+        let idString: String
         
-        if type == .Event || type == .BinaryEvent {
-            str = createMessageForEvent()
+        if type == .BinaryEvent || type == .BinaryAck {
+            binaryCountString = typeString + String(binary.count) + "-"
         } else {
-            str = createAck()
+            binaryCountString = typeString
         }
         
-        return str
+        if nsp != "/" {
+            nspString = binaryCountString + nsp + ","
+        } else {
+            nspString = binaryCountString
+        }
+        
+        if id != -1 {
+            idString = nspString + String(id)
+        } else {
+            idString = nspString
+        }
+        
+        return completeMessage(idString)
     }
     
     // Called when we have all the binary data for a packet

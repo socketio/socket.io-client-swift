@@ -76,6 +76,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     private var pongsMissedMax = 0
     private var probeWait = ProbeWaitQueue()
     private var secure = false
+    private var security: SSLSecurity?
     private var selfSigned = false
     private var voipEnabled = false
 
@@ -105,6 +106,8 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
                 voipEnabled = enable
             case let .Secure(secure):
                 self.secure = secure
+            case let .Security(security):
+                self.security = security
             case let .SelfSigned(selfSigned):
                 self.selfSigned = selfSigned
             default:
@@ -153,15 +156,24 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             // binary in base64 string
             let noPrefix = message[message.startIndex.advancedBy(2)..<message.endIndex]
 
-            if let data = NSData(base64EncodedString: noPrefix,
-                options: .IgnoreUnknownCharacters) {
-                    client?.parseEngineBinaryData(data)
+            if let data = NSData(base64EncodedString: noPrefix, options: .IgnoreUnknownCharacters) {
+                client?.parseEngineBinaryData(data)
             }
             
             return true
         } else {
             return false
         }
+    }
+    
+    private func closeOutEngine() {
+        sid = ""
+        closed = true
+        invalidated = true
+        connected = false
+        
+        ws?.disconnect()
+        stopPolling()
     }
     
     /// Starts the connection to the server
@@ -171,7 +183,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             disconnect("reconnect")
         }
         
-        DefaultSocketLogger.Logger.log("Starting engine", type: logType)
+        DefaultSocketLogger.Logger.log("Starting engine. Server: %@", type: logType, args: url)
         DefaultSocketLogger.Logger.log("Handshaking", type: logType)
         
         resetEngine()
@@ -256,6 +268,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         ws?.voipEnabled = voipEnabled
         ws?.delegate = self
         ws?.selfSignedSSL = selfSigned
+        ws?.security = security
 
         ws?.connect()
     }
@@ -267,35 +280,32 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     }
     
     public func disconnect(reason: String) {
-        func postSendClose(data: NSData?, _ res: NSURLResponse?, _ err: NSError?) {
-            sid = ""
-            closed = true
-            invalidated = true
-            connected = false
-            
-            ws?.disconnect()
-            stopPolling()
-            client?.engineDidClose(reason)
-        }
+        guard connected else { return closeOutEngine() }
         
         DefaultSocketLogger.Logger.log("Engine is being closed.", type: logType)
         
         if closed {
+            closeOutEngine()
             client?.engineDidClose(reason)
             return
         }
         
         if websocket {
             sendWebSocketMessage("", withType: .Close, withData: [])
-            postSendClose(nil, nil, nil)
+            closeOutEngine()
         } else {
-            // We need to take special care when we're polling that we send it ASAP
-            // Also make sure we're on the emitQueue since we're touching postWait
-            dispatch_sync(emitQueue) {
-                self.postWait.append(String(SocketEnginePacketType.Close.rawValue))
-                let req = self.createRequestForPostWithPostWait()
-                self.doRequest(req, withCallback: postSendClose)
-            }
+            disconnectPolling()
+        }
+    }
+    
+    // We need to take special care when we're polling that we send it ASAP
+    // Also make sure we're on the emitQueue since we're touching postWait
+    private func disconnectPolling() {
+        dispatch_sync(emitQueue) {
+            self.postWait.append(String(SocketEnginePacketType.Close.rawValue))
+            let req = self.createRequestForPostWithPostWait()
+            self.doRequest(req) {_, _, _ in }
+            self.closeOutEngine()
         }
     }
 
@@ -335,7 +345,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         guard let ws = self.ws else { return }
         
         for msg in postWait {
-            ws.writeString(fixDoubleUTF8(msg))
+            ws.writeString(msg)
         }
         
         postWait.removeAll(keepCapacity: true)
@@ -535,13 +545,11 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             connected = false
             websocket = false
             
-            let reason = error?.localizedDescription ?? "Socket Disconnected"
-            
-            if error != nil {
+            if let reason = error?.localizedDescription {
                 didError(reason)
+            } else {
+                client?.engineDidClose("Socket Disconnected")
             }
-            
-            client?.engineDidClose(reason)
         } else {
             flushProbeWait()
         }

@@ -123,7 +123,7 @@ extension SocketEnginePollable {
                 
                 return
             }
-
+            
             DefaultSocketLogger.Logger.log("Got polling response", type: "SocketEnginePolling")
             
             if let str = String(data: data!, encoding: NSUTF8StringEncoding) {
@@ -213,9 +213,7 @@ extension SocketEnginePollable {
             fixedMessage = message
         }
         
-        let strMsg = "\(type.rawValue)\(fixedMessage)"
-        
-        postWait.append(strMsg)
+        postWait.append(String(type.rawValue) + fixedMessage)
         
         for data in datas {
             if case let .Right(bin) = createBinaryDataForSend(data) {
