@@ -197,8 +197,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         handleEvent("disconnect", data: [reason], isInternalMessage: true)
     }
 
-    /// Disconnects the socket. Only reconnect the same socket if you know what you're doing.
-    /// Will turn off automatic reconnects.
+    /// Disconnects the socket.
     public func disconnect() {
         assert(status != .NotConnected, "Tried closing a NotConnected client")
         
