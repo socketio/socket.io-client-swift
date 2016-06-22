@@ -49,9 +49,9 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         return nsp + "#" + (engine?.sid ?? "")
     }
 
-    private let emitQueue = DispatchQueue(label: "com.socketio.emitQueue", attributes: DispatchQueueAttributes.serial)
+    private let emitQueue = DispatchQueue(label: "com.socketio.emitQueue", attributes: .serial)
     private let logType = "SocketIOClient"
-    private let parseQueue = DispatchQueue(label: "com.socketio.parseQueue", attributes: DispatchQueueAttributes.serial)
+    private let parseQueue = DispatchQueue(label: "com.socketio.parseQueue", attributes: .serial)
 
     private var anyHandler: ((SocketAnyEvent) -> Void)?
     private var currentReconnectAttempt = 0
@@ -70,7 +70,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         self.options = options
         self.socketURL = socketURL
         
-        if ((socketURL.absoluteString?.hasPrefix("https://")) != nil) {
+        if socketURL.absoluteString?.hasPrefix("https://") ?? false {
             self.options.insertIgnore(.secure(true))
         }
         
@@ -353,7 +353,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         let handler = SocketEventHandler(event: event, id: UUID(), callback: callback)
         handlers.append(handler)
 
-        return handler.id as UUID
+        return handler.id
     }
 
     /// Adds a single-use handler for an event.
@@ -372,7 +372,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
         handlers.append(handler)
 
-        return handler.id as UUID
+        return handler.id
     }
 
     /// Adds a handler that will be called on every event.
