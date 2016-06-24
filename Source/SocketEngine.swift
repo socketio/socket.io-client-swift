@@ -147,7 +147,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
                 didError(error)
             }
         } catch {
-            didError("Got unknown error from server \(msg)")
+            client?.engineDidError("Got unknown error from server \(msg)")
         }
     }
 
@@ -166,7 +166,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         }
     }
     
-    private func closeOutEngine() {
+    private func closeOutEngine(reason: String) {
         sid = ""
         closed = true
         invalidated = true
@@ -174,6 +174,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         
         ws?.disconnect()
         stopPolling()
+        client?.engineDidClose(reason)
     }
     
     /// Starts the connection to the server
@@ -280,32 +281,30 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     }
     
     public func disconnect(reason: String) {
-        guard connected else { return closeOutEngine() }
+        guard connected else { return closeOutEngine(reason) }
         
         DefaultSocketLogger.Logger.log("Engine is being closed.", type: logType)
         
         if closed {
-            closeOutEngine()
-            client?.engineDidClose(reason)
-            return
+            return closeOutEngine(reason)
         }
         
         if websocket {
             sendWebSocketMessage("", withType: .Close, withData: [])
-            closeOutEngine()
+            closeOutEngine(reason)
         } else {
-            disconnectPolling()
+            disconnectPolling(reason)
         }
     }
     
     // We need to take special care when we're polling that we send it ASAP
     // Also make sure we're on the emitQueue since we're touching postWait
-    private func disconnectPolling() {
+    private func disconnectPolling(reason: String) {
         dispatch_sync(emitQueue) {
             self.postWait.append(String(SocketEnginePacketType.Close.rawValue))
             let req = self.createRequestForPostWithPostWait()
             self.doRequest(req) {_, _, _ in }
-            self.closeOutEngine()
+            self.closeOutEngine(reason)
         }
     }
 
