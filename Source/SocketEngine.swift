@@ -147,7 +147,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
                 didError(error)
             }
         } catch {
-            didError("Got unknown error from server \(msg)")
+            client?.engineDidError("Got unknown error from server \(msg)")
         }
     }
 
