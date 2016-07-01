@@ -126,15 +126,8 @@ extension SocketParsable {
     
     // Parses data for events
     private func parseData(data: String) -> Either<String, [AnyObject]> {
-        let stringData = data.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)
-        
         do {
-            if let arr = try NSJSONSerialization.JSONObjectWithData(stringData!,
-                    options: NSJSONReadingOptions.MutableContainers) as? [AnyObject] {
-                return .Right(arr)
-            } else {
-                return .Left("Expected data array")
-            }
+            return .Right(try data.toArray())
         } catch {
             return .Left("Error parsing data for packet")
         }
