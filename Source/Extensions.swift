@@ -44,7 +44,6 @@ extension NSCharacterSet {
 extension String {
     func toArray() throws -> [AnyObject] {
         guard let stringData = dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false) else { return [] }
-        
         guard let array = try NSJSONSerialization.JSONObjectWithData(stringData, options: .MutableContainers) as? [AnyObject] else {
              throw JSONError.notArray
         }
@@ -53,8 +52,7 @@ extension String {
     }
     
     func toNSDictionary() throws -> NSDictionary {
-        let binData = dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!
-        
+        guard let binData = dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false) else { return [:] }
         guard let json = try NSJSONSerialization.JSONObjectWithData(binData, options: .AllowFragments) as? NSDictionary else {
             throw JSONError.notNSDictionary
         }
