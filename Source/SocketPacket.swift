@@ -95,7 +95,6 @@ struct SocketPacket {
         
         do {
             let jsonSend = try data.toJSON()
-            
             guard let jsonString = String(data: jsonSend, encoding: NSUTF8StringEncoding) else { return message + "[]" }
             
             restOfMessage = jsonString

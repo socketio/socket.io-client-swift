@@ -1,5 +1,5 @@
 //
-//  Extensions.swift
+//  SocketExtensions.swift
 //  Socket.IO-Client-Swift
 //
 //  Created by Erik Little on 7/1/2016.
