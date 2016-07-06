@@ -66,7 +66,7 @@ public class SSLSecurity : NSObject {
      - returns: a representation security object to be used with
      */
     public convenience init(usePublicKeys: Bool = false) {
-        let paths = Bundle.main().pathsForResources(ofType: "cer", inDirectory: ".")
+        let paths = Bundle.main.pathsForResources(ofType: "cer", inDirectory: ".")
         
         let certs = paths.reduce([SSLCert]()) { (certs: [SSLCert], path: String) -> [SSLCert] in
             var certs = certs
@@ -141,9 +141,9 @@ public class SSLSecurity : NSObject {
         }
         var policy: SecPolicy
         if self.validatedDN {
-            policy = SecPolicyCreateSSL(true, domain)!
+            policy = SecPolicyCreateSSL(true, domain)
         } else {
-            policy = SecPolicyCreateBasicX509()!
+            policy = SecPolicyCreateBasicX509()
         }
         SecTrustSetPolicies(trust,policy)
         if self.usePublicKeys {
@@ -195,7 +195,7 @@ public class SSLSecurity : NSObject {
     func extractPublicKey(_ data: Data) -> SecKey? {
         guard let cert = SecCertificateCreateWithData(nil, data) else { return nil }
         
-        return extractPublicKeyFromCert(cert, policy: SecPolicyCreateBasicX509()!)
+        return extractPublicKeyFromCert(cert, policy: SecPolicyCreateBasicX509())
     }
     
     /**
@@ -246,7 +246,7 @@ public class SSLSecurity : NSObject {
         let keys = (0..<SecTrustGetCertificateCount(trust)).reduce([SecKey]()) { (keys: [SecKey], index: Int) -> [SecKey] in
             var keys = keys
             let cert = SecTrustGetCertificateAtIndex(trust, index)
-            if let key = extractPublicKeyFromCert(cert!, policy: policy!) {
+            if let key = extractPublicKeyFromCert(cert!, policy: policy) {
                 keys.append(key)
             }
             

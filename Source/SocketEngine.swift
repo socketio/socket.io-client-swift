@@ -131,21 +131,17 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     }
 
     private func checkAndHandleEngineError(_ msg: String) {
-        guard let stringData = msg.data(using: String.Encoding.utf8,
-            allowLossyConversion: false) else { return }
-
         do {
-            if let dict = try JSONSerialization.jsonObject(with: stringData, options: .mutableContainers) as? NSDictionary {
-                guard let error = dict["message"] as? String else { return }
-
-                /*
-                 0: Unknown transport
-                 1: Unknown sid
-                 2: Bad handshake request
-                 3: Bad request
-                 */
-                didError(reason: error)
-            }
+            let dict = try msg.toNSDictionary()
+            guard let error = dict["message"] as? String else { return }
+            
+            /*
+             0: Unknown transport
+             1: Unknown sid
+             2: Bad handshake request
+             3: Bad request
+             */
+            didError(reason: error)
         } catch {
             client?.engineDidError(reason: "Got unknown error from server \(msg)")
         }
@@ -360,24 +356,23 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         doPoll()
     }
 
-    private func handleOpen(_ openMessage: String) {
-        let mesData = openMessage.data(using: String.Encoding.utf8, allowLossyConversion: false)!
+    private func handleOpen(openData: String) {
         do {
-            let json = try JSONSerialization.jsonObject(with: mesData,
-                options: JSONSerialization.ReadingOptions.allowFragments) as? NSDictionary
-            if let sid = json?["sid"] as? String {
+            let json = try openData.toNSDictionary()
+            
+            if let sid = json["sid"] as? String {
                 let upgradeWs: Bool
 
                 self.sid = sid
                 connected = true
 
-                if let upgrades = json?["upgrades"] as? [String] {
+                if let upgrades = json["upgrades"] as? [String] {
                     upgradeWs = upgrades.contains("websocket")
                 } else {
                     upgradeWs = false
                 }
 
-                if let pingInterval = json?["pingInterval"] as? Double, pingTimeout = json?["pingTimeout"] as? Double {
+                if let pingInterval = json["pingInterval"] as? Double, pingTimeout = json["pingTimeout"] as? Double {
                     self.pingInterval = pingInterval / 1000.0
                     self.pingTimeout = pingTimeout / 1000.0
                 }
@@ -443,7 +438,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         case .pong:
             handlePong(fixedString)
         case .open:
-            handleOpen(fixedString[fixedString.characters.index(after: fixedString.characters.startIndex)..<fixedString.endIndex])
+            handleOpen(openData: fixedString[fixedString.characters.index(after: fixedString.characters.startIndex)..<fixedString.endIndex])
         case .close:
             handleClose(fixedString)
         default:
@@ -459,7 +454,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         polling = true
         probing = false
         invalidated = false
-        session = URLSession(configuration: .default(),
+        session = URLSession(configuration: .default,
             delegate: sessionDelegate,
             delegateQueue: OperationQueue())
         sid = ""

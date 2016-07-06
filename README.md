@@ -166,7 +166,7 @@ case ReconnectWait(Int) // Amount of time to wait between reconnects. Default is
 case SessionDelegate(NSURLSessionDelegate) // Sets an NSURLSessionDelegate for the underlying engine. Useful if you need to handle self-signed certs. Default is nil.
 case Secure(Bool) // If the connection should use TLS. Default is false.
 case Security(SSLSecurity) // Allows you to set which certs are valid. Useful for SSL pinning.
-case SelfSigned(Bool) // Sets WebSocket.selfSignedSSL (Don't do this, iOS will yell at you)
+case SelfSigned(Bool) // Sets WebSocket.selfSignedSSL. Use this if you're using self-signed certs.
 case VoipEnabled(Bool) // Only use this option if you're using the client with VoIP services. Changes the way the WebSocket is created. Default is false
 ```
 Methods

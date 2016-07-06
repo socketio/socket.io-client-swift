@@ -45,7 +45,9 @@ public protocol SocketEnginePollable : SocketEngineSpec {
 
 // Default polling methods
 extension SocketEnginePollable {
-    private func addHeaders(for req: NSMutableURLRequest) {
+    private func addHeaders(for req: URLRequest) -> URLRequest {
+        var req = req
+        
         if cookies != nil {
             let headers = HTTPCookie.requestHeaderFields(with: cookies!)
             req.allHTTPHeaderFields = headers
@@ -56,9 +58,13 @@ extension SocketEnginePollable {
                 req.setValue(value, forHTTPHeaderField: headerName)
             }
         }
+        
+        return req
     }
     
     func createRequestForPostWithPostWait() -> URLRequest {
+        defer { postWait.removeAll(keepingCapacity: true) }
+
         var postStr = ""
         
         for packet in postWait {
@@ -69,18 +75,14 @@ extension SocketEnginePollable {
         
         DefaultSocketLogger.Logger.log("Created POST string: %@", type: "SocketEnginePolling", args: postStr)
         
-        postWait.removeAll(keepingCapacity: false)
+        var req = URLRequest(url: urlPollingWithSid)
+        let postData = postStr.data(using: .utf8, allowLossyConversion: false)!
         
-        let req = NSMutableURLRequest(url: urlPollingWithSid as URL)
-        
-        addHeaders(for: req)
+        req = addHeaders(for: req)
         
         req.httpMethod = "POST"
         req.setValue("text/plain; charset=UTF-8", forHTTPHeaderField: "Content-Type")
-        
-        let postData = postStr.data(using: String.Encoding.utf8,
-            allowLossyConversion: false)!
-        
+
         req.httpBody = postData
         req.setValue(String(postData.count), forHTTPHeaderField: "Content-Length")
         
@@ -88,15 +90,14 @@ extension SocketEnginePollable {
     }
     
     public func doPoll() {
-        if websocket || waitingForPoll || !connected || closed {
-            return
-        }
+        if websocket || waitingForPoll || !connected || closed { return }
         
         waitingForPoll = true
-        let req = NSMutableURLRequest(url: urlPollingWithSid as URL)
         
-        addHeaders(for: req)
-        doLongPoll(for: req as URLRequest)
+        var req = URLRequest(url: urlPollingWithSid)
+        
+        req = addHeaders(for: req)
+        doLongPoll(for: req )
     }
     
     func doRequest(for req: URLRequest, callbackWith callback: (Data?, URLResponse?, NSError?) -> Void) {

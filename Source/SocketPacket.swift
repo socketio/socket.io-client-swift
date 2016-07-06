@@ -94,11 +94,8 @@ struct SocketPacket {
         }
         
         do {
-            let jsonSend = try JSONSerialization.data(withJSONObject: data as AnyObject,
-                options: JSONSerialization.WritingOptions(rawValue: 0))
-            guard let jsonString = String(data: jsonSend, encoding: String.Encoding.utf8) else {
-                return message + "[]"
-            }
+            let jsonSend = try data.toJSON()
+            guard let jsonString = String(data: jsonSend, encoding: .utf8) else { return message + "[]" }
             
             restOfMessage = jsonString
         } catch {
