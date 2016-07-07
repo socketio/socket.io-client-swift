@@ -38,7 +38,7 @@ public protocol WebSocketPongDelegate: class {
     func websocketDidReceivePong(socket: WebSocket)
 }
 
-public class WebSocket : NSObject, NSStreamDelegate {
+public class WebSocket : NSObject, StreamDelegate {
     
     enum OpCode : UInt8 {
         case ContinueFrame = 0x0
@@ -72,7 +72,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
     }
     
     //Where the callback is executed. It defaults to the main UI thread queue.
-    public var queue            = dispatch_get_main_queue()
+    public var queue            = DispatchQueue.main
     
     var optionalProtocols       : [String]?
     //Constant Values.
@@ -122,19 +122,19 @@ public class WebSocket : NSObject, NSStreamDelegate {
     }
     public var currentURL: NSURL {return url}
     private var url: NSURL
-    private var inputStream: NSInputStream?
+    private var inputStream: InputStream?
     private var outputStream: NSOutputStream?
     private var connected = false
     private var isCreated = false
-    private var writeQueue = NSOperationQueue()
+    private var writeQueue = OperationQueue()
     private var readStack = [WSResponse]()
     private var inputQueue = [NSData]()
     private var fragBuffer: NSData?
     private var certValidated = false
     private var didDisconnect = false
     private var readyToWrite = false
-    private let mutex = NSLock()
-    private let notificationCenter = NSNotificationCenter.defaultCenter()
+    private let mutex = Lock()
+    private let notificationCenter = NotificationCenter.default()
     private var canDispatch: Bool {
         mutex.lock()
         let canWork = readyToWrite
@@ -142,7 +142,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
         return canWork
     }
     //the shared processing queue used for all websocket
-    private static let sharedWorkQueue = dispatch_queue_create("com.vluxe.starscream.websocket", DISPATCH_QUEUE_SERIAL)
+    private static let sharedWorkQueue = DispatchQueue(label: "com.vluxe.starscream.websocket", attributes: DispatchQueueAttributes.serial, target: nil)
     
     //used for setting protocols.
     public init(url: NSURL, protocols: [String]? = nil) {
@@ -170,18 +170,24 @@ public class WebSocket : NSObject, NSStreamDelegate {
      
      - Parameter forceTimeout: Maximum time to wait for the server to close the socket.
      */
-    public func disconnect(forceTimeout forceTimeout: NSTimeInterval? = nil) {
+    public func disconnect(forceTimeout: TimeInterval? = nil) {
         switch forceTimeout {
-        case .Some(let seconds) where seconds > 0:
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(seconds * Double(NSEC_PER_SEC))), queue) { [weak self] in
-                self?.disconnectStream(nil)
-            }
+        case .some(let seconds) where seconds > 0:
+            
+            let dispatchTime: DispatchTime = DispatchTime.now() + Double(Int64(seconds * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
+            DispatchQueue.main.after(when: dispatchTime, execute: {
+
+                self.disconnectStream(error: nil)
+            })
+//            dispatch_time(dispatch_time_t(DISPATCH_TIME_NOW), Int64(seconds * Double(NSEC_PER_SEC))).after(DispatchTime.nowwhen: queue) { [weak self] in
+//                self?.disconnectStream(error: nil)
+//            } //Swift3
             fallthrough
-        case .None:
-            writeError(CloseCode.Normal.rawValue)
+        case .none:
+            writeError(code: CloseCode.Normal.rawValue)
             
         default:
-            self.disconnectStream(nil)
+            self.disconnectStream(error: nil)
             break
         }
     }
@@ -196,7 +202,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
      */
     public func writeString(str: String, completion: (() -> ())? = nil) {
         guard isConnected else { return }
-        dequeueWrite(str.dataUsingEncoding(NSUTF8StringEncoding)!, code: .TextFrame, writeCompletion: completion)
+        dequeueWrite(data: str.data(using: String.Encoding.utf8)!, code: .TextFrame, writeCompletion: completion)
     }
     
     /**
@@ -209,14 +215,14 @@ public class WebSocket : NSObject, NSStreamDelegate {
      */
     public func writeData(data: NSData, completion: (() -> ())? = nil) {
         guard isConnected else { return }
-        dequeueWrite(data, code: .BinaryFrame, writeCompletion: completion)
+        dequeueWrite(data: data, code: .BinaryFrame, writeCompletion: completion)
     }
     
     //write a   ping   to the websocket. This sends it as a  control frame.
     //yodel a   sound  to the planet.    This sends it as an astroid. http://youtu.be/Eu5ZJELRiJ8?t=42s
     public func writePing(data: NSData, completion: (() -> ())? = nil) {
         guard isConnected else { return }
-        dequeueWrite(data, code: .Ping, writeCompletion: completion)
+        dequeueWrite(data: data, code: .Ping, writeCompletion: completion)
     }
     
     //private method that starts the connection
@@ -227,29 +233,29 @@ public class WebSocket : NSObject, NSStreamDelegate {
         
         var port = url.port
         if port == nil {
-            if ["wss", "https"].contains(url.scheme) {
+            if ["wss", "https"].contains(url.scheme!) {
                 port = 443
             } else {
                 port = 80
             }
         }
-        addHeader(urlRequest, key: headerWSUpgradeName, val: headerWSUpgradeValue)
-        addHeader(urlRequest, key: headerWSConnectionName, val: headerWSConnectionValue)
+        addHeader(urlRequest: urlRequest, key: headerWSUpgradeName, val: headerWSUpgradeValue)
+        addHeader(urlRequest: urlRequest, key: headerWSConnectionName, val: headerWSConnectionValue)
         if let protocols = optionalProtocols {
-            addHeader(urlRequest, key: headerWSProtocolName, val: protocols.joinWithSeparator(","))
+            addHeader(urlRequest: urlRequest, key: headerWSProtocolName, val: protocols.joined(separator: ","))
         }
-        addHeader(urlRequest, key: headerWSVersionName, val: headerWSVersionValue)
-        addHeader(urlRequest, key: headerWSKeyName, val: generateWebSocketKey())
+        addHeader(urlRequest: urlRequest, key: headerWSVersionName, val: headerWSVersionValue)
+        addHeader(urlRequest: urlRequest, key: headerWSKeyName, val: generateWebSocketKey())
         if let origin = origin {
-            addHeader(urlRequest, key: headerOriginName, val: origin)
+            addHeader(urlRequest: urlRequest, key: headerOriginName, val: origin)
         }
-        addHeader(urlRequest, key: headerWSHostName, val: "\(url.host!):\(port!)")
+        addHeader(urlRequest: urlRequest, key: headerWSHostName, val: "\(url.host!):\(port!)")
         for (key,value) in headers {
-            addHeader(urlRequest, key: key, val: value)
+            addHeader(urlRequest: urlRequest, key: key, val: value)
         }
         if let cfHTTPMessage = CFHTTPMessageCopySerializedMessage(urlRequest) {
             let serializedRequest = cfHTTPMessage.takeRetainedValue()
-            initStreamsWithData(serializedRequest, Int(port!))
+            initStreamsWithData(data: serializedRequest, port: Int(port!))
         }
     }
     
@@ -261,18 +267,19 @@ public class WebSocket : NSObject, NSStreamDelegate {
     //generate a websocket key as needed in rfc
     private func generateWebSocketKey() -> String {
         var key = ""
+        var baseKey:String?
         let seed = 16
         for _ in 0..<seed {
             let uni = UnicodeScalar(UInt32(97 + arc4random_uniform(25)))
             key += "\(Character(uni))"
+            let data = key.data(using: String.Encoding.utf8)
+            baseKey = data?.base64EncodedString(.encoding76CharacterLineLength)
         }
-        let data = key.dataUsingEncoding(NSUTF8StringEncoding)
-        let baseKey = data?.base64EncodedStringWithOptions(NSDataBase64EncodingOptions(rawValue: 0))
         return baseKey!
     }
     
     //Start the stream connection and write the data to the output stream
-    private func initStreamsWithData(data: NSData, _ port: Int) {
+    private func initStreamsWithData(data: NSData, port: Int) {
         //higher level API we will cut over to at some point
         //NSStream.getStreamsToHostWithName(url.host, port: url.port.integerValue, inputStream: &inputStream, outputStream: &outputStream)
         
@@ -285,34 +292,34 @@ public class WebSocket : NSObject, NSStreamDelegate {
         guard let inStream = inputStream, let outStream = outputStream else { return }
         inStream.delegate = self
         outStream.delegate = self
-        if ["wss", "https"].contains(url.scheme) {
-            inStream.setProperty(NSStreamSocketSecurityLevelNegotiatedSSL, forKey: NSStreamSocketSecurityLevelKey)
-            outStream.setProperty(NSStreamSocketSecurityLevelNegotiatedSSL, forKey: NSStreamSocketSecurityLevelKey)
+        if ["wss", "https"].contains(url.scheme!) {
+            inStream.setProperty(StreamSocketSecurityLevel.negotiatedSSL, forKey: Stream.PropertyKey.socketSecurityLevelKey.rawValue)
+            outStream.setProperty(StreamSocketSecurityLevel.negotiatedSSL, forKey: Stream.PropertyKey.socketSecurityLevelKey.rawValue)
         } else {
             certValidated = true //not a https session, so no need to check SSL pinning
         }
         if voipEnabled {
-            inStream.setProperty(NSStreamNetworkServiceTypeVoIP, forKey: NSStreamNetworkServiceType)
-            outStream.setProperty(NSStreamNetworkServiceTypeVoIP, forKey: NSStreamNetworkServiceType)
+            inStream.setProperty(StreamNetworkServiceTypeValue.voip, forKey: Stream.PropertyKey.networkServiceType.rawValue)
+            outStream.setProperty(StreamNetworkServiceTypeValue.voip, forKey: Stream.PropertyKey.networkServiceType.rawValue)
         }
         if selfSignedSSL {
-            let settings: [NSObject: NSObject] = [kCFStreamSSLValidatesCertificateChain: NSNumber(bool:false), kCFStreamSSLPeerName: kCFNull]
+            let settings: [NSObject: NSObject] = [kCFStreamSSLValidatesCertificateChain: NSNumber(value:false), kCFStreamSSLPeerName: kCFNull]
             inStream.setProperty(settings, forKey: kCFStreamPropertySSLSettings as String)
             outStream.setProperty(settings, forKey: kCFStreamPropertySSLSettings as String)
         }
         if let cipherSuites = self.enabledSSLCipherSuites {
-            if let sslContextIn = CFReadStreamCopyProperty(inputStream, kCFStreamPropertySSLContext) as! SSLContextRef?,
-                sslContextOut = CFWriteStreamCopyProperty(outputStream, kCFStreamPropertySSLContext) as! SSLContextRef? {
+            if let sslContextIn = CFReadStreamCopyProperty(inputStream, CFStreamPropertyKey(rawValue:kCFStreamPropertySSLContext)) as! SSLContext?,
+                sslContextOut = CFWriteStreamCopyProperty(outputStream, CFStreamPropertyKey(rawValue:kCFStreamPropertySSLContext)) as! SSLContext? {
                 let resIn = SSLSetEnabledCiphers(sslContextIn, cipherSuites, cipherSuites.count)
                 let resOut = SSLSetEnabledCiphers(sslContextOut, cipherSuites, cipherSuites.count)
                 if resIn != errSecSuccess {
-                    let error = self.errorWithDetail("Error setting ingoing cypher suites", code: UInt16(resIn))
-                    disconnectStream(error)
+                    let error = self.errorWithDetail(detail: "Error setting ingoing cypher suites", code: UInt16(resIn))
+                    disconnectStream(error: error)
                     return
                 }
                 if resOut != errSecSuccess {
-                    let error = self.errorWithDetail("Error setting outgoing cypher suites", code: UInt16(resOut))
-                    disconnectStream(error)
+                    let error = self.errorWithDetail(detail: "Error setting outgoing cypher suites", code: UInt16(resOut))
+                    disconnectStream(error: error)
                     return
                 }
             }
@@ -328,13 +335,13 @@ public class WebSocket : NSObject, NSStreamDelegate {
         
         let bytes = UnsafePointer<UInt8>(data.bytes)
         var out = timeout * 1000000 //wait 5 seconds before giving up
-        writeQueue.addOperationWithBlock { [weak self] in
+        writeQueue.addOperation { [weak self] in
             while !outStream.hasSpaceAvailable {
                 usleep(100) //wait until the socket is ready
                 out -= 100
                 if out < 0 {
                     self?.cleanupStream()
-                    self?.doDisconnect(self?.errorWithDetail("write wait timed out", code: 2))
+                    self?.doDisconnect(error: self?.errorWithDetail(detail: "write wait timed out", code: 2))
                     return
                 } else if outStream.streamError != nil {
                     return //disconnectStream will be called.
@@ -343,32 +350,34 @@ public class WebSocket : NSObject, NSStreamDelegate {
             outStream.write(bytes, maxLength: data.length)
         }
     }
+    
     //delegate for the stream methods. Processes incoming bytes
-    public func stream(aStream: NSStream, handleEvent eventCode: NSStreamEvent) {
+    @nonobjc public func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
         
-        if let sec = security where !certValidated && [.HasBytesAvailable, .HasSpaceAvailable].contains(eventCode) {
-            let possibleTrust: AnyObject? = aStream.propertyForKey(kCFStreamPropertySSLPeerTrust as String)
+        if let sec = security where !certValidated && [.hasBytesAvailable, .hasSpaceAvailable].contains(eventCode) {
+            let possibleTrust: AnyObject? = aStream.property(forKey: kCFStreamPropertySSLPeerTrust as String)
             if let trust: AnyObject = possibleTrust {
-                let domain: AnyObject? = aStream.propertyForKey(kCFStreamSSLPeerName as String)
-                if sec.isValid(trust as! SecTrustRef, domain: domain as! String?) {
+                let domain: AnyObject? = aStream.property(forKey: kCFStreamSSLPeerName as String)
+                if sec.isValid(trust: trust as! SecTrust, domain: domain as! String?) {
                     certValidated = true
                 } else {
-                    let error = errorWithDetail("Invalid SSL certificate", code: 1)
-                    disconnectStream(error)
+                    let error = errorWithDetail(detail: "Invalid SSL certificate", code: 1)
+                    disconnectStream(error: error)
                     return
                 }
             }
         }
-        if eventCode == .HasBytesAvailable {
+        if eventCode == .hasBytesAvailable {
             if aStream == inputStream {
                 processInputStream()
             }
-        } else if eventCode == .ErrorOccurred {
-            disconnectStream(aStream.streamError)
-        } else if eventCode == .EndEncountered {
-            disconnectStream(nil)
+        } else if eventCode == .errorOccurred {
+            disconnectStream(error: aStream.streamError)
+        } else if eventCode == .endEncountered {
+            disconnectStream(error: nil)
         }
     }
+
     //disconnect the stream object
     private func disconnectStream(error: NSError?) {
         if error == nil {
@@ -377,7 +386,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
             writeQueue.cancelAllOperations()
         }
         cleanupStream()
-        doDisconnect(error)
+        doDisconnect(error: error)
     }
     
     private func cleanupStream() {
@@ -417,17 +426,17 @@ public class WebSocket : NSObject, NSStreamDelegate {
             let data = inputQueue[0]
             var work = data
             if let fragBuffer = fragBuffer {
-                let combine = NSMutableData(data: fragBuffer)
-                combine.appendData(data)
+                let combine = NSMutableData(data: fragBuffer as Data)
+                combine.append(data as Data)
                 work = combine
                 self.fragBuffer = nil
             }
             let buffer = UnsafePointer<UInt8>(work.bytes)
             let length = work.length
             if !connected {
-                processTCPHandshake(buffer, bufferLen: length)
+                processTCPHandshake(buffer: buffer, bufferLen: length)
             } else {
-                processRawMessagesInBuffer(buffer, bufferLen: length)
+                processRawMessagesInBuffer(pointer: buffer, bufferLen: length)
             }
             inputQueue = inputQueue.filter{$0 != data}
         }
@@ -435,22 +444,22 @@ public class WebSocket : NSObject, NSStreamDelegate {
     
     //handle checking the inital connection status
     private func processTCPHandshake(buffer: UnsafePointer<UInt8>, bufferLen: Int) {
-        let code = processHTTP(buffer, bufferLen: bufferLen)
+        let code = processHTTP(buffer: buffer, bufferLen: bufferLen)
         switch code {
         case 0:
             connected = true
             guard canDispatch else {return}
-            dispatch_async(queue) { [weak self] in
+            queue.async { [weak self] in
                 guard let s = self else { return }
                 s.onConnect?()
-                s.delegate?.websocketDidConnect(s)
-                s.notificationCenter.postNotificationName(WebsocketDidConnectNotification, object: self)
+                s.delegate?.websocketDidConnect(socket: s)
+                s.notificationCenter.post(name: NSNotification.Name(rawValue: WebsocketDidConnectNotification), object: self)
             }
         case -1:
             fragBuffer = NSData(bytes: buffer, length: bufferLen)
         break //do nothing, we are going to collect more data
         default:
-            doDisconnect(errorWithDetail("Invalid HTTP upgrade", code: UInt16(code)))
+            doDisconnect(error: errorWithDetail(detail: "Invalid HTTP upgrade", code: UInt16(code)))
         }
     }
     ///Finds the HTTP Packet in the TCP stream, by looking for the CRLF.
@@ -470,14 +479,14 @@ public class WebSocket : NSObject, NSStreamDelegate {
             }
         }
         if totalSize > 0 {
-            let code = validateResponse(buffer, bufferLen: totalSize)
+            let code = validateResponse(buffer: buffer, bufferLen: totalSize)
             if code != 0 {
                 return code
             }
             totalSize += 1 //skip the last \n
             let restSize = bufferLen - totalSize
             if restSize > 0 {
-                processRawMessagesInBuffer(buffer + totalSize, bufferLen: restSize)
+                processRawMessagesInBuffer(pointer: buffer + totalSize, bufferLen: restSize)
             }
             return 0 //success
         }
@@ -504,12 +513,12 @@ public class WebSocket : NSObject, NSStreamDelegate {
     }
     
     ///read a 16 bit big endian value from a buffer
-    private static func readUint16(buffer: UnsafePointer<UInt8>, offset: Int) -> UInt16 {
+    private func readUint16(buffer: UnsafePointer<UInt8>, offset: Int) -> UInt16 {
         return (UInt16(buffer[offset + 0]) << 8) | UInt16(buffer[offset + 1])
     }
     
     ///read a 64 bit big endian value from a buffer
-    private static func readUint64(buffer: UnsafePointer<UInt8>, offset: Int) -> UInt64 {
+    private func readUint64(buffer: UnsafePointer<UInt8>, offset: Int) -> UInt64 {
         var value = UInt64(0)
         for i in 0...7 {
             value = (value << 8) | UInt64(buffer[offset + i])
@@ -518,13 +527,13 @@ public class WebSocket : NSObject, NSStreamDelegate {
     }
     
     ///write a 16 bit big endian value to a buffer
-    private static func writeUint16(buffer: UnsafeMutablePointer<UInt8>, offset: Int, value: UInt16) {
+    private func writeUint16(buffer: UnsafeMutablePointer<UInt8>, offset: Int, value: UInt16) {
         buffer[offset + 0] = UInt8(value >> 8)
         buffer[offset + 1] = UInt8(value & 0xff)
     }
     
     ///write a 64 bit big endian value to a buffer
-    private static func writeUint64(buffer: UnsafeMutablePointer<UInt8>, offset: Int, value: UInt64) {
+    private func writeUint64(buffer: UnsafeMutablePointer<UInt8>, offset: Int, value: UInt64) {
         for i in 0...7 {
             buffer[offset + i] = UInt8((value >> (8*UInt64(7 - i))) & 0xff)
         }
@@ -548,33 +557,39 @@ public class WebSocket : NSObject, NSStreamDelegate {
                 extra = 0
             }
             response.bytesLeft -= len
-            response.buffer?.appendData(NSData(bytes: baseAddress, length: len))
-            processResponse(response)
-            return buffer.fromOffset(bufferLen - extra)
+            response.buffer?.append(NSData(bytes: baseAddress, length: len) as Data)
+            
+            if  processResponse(response: response){
+                
+                DefaultSocketLogger.Logger.error(message: "Failed to process the response", type: "Error")
+            }
+            
+
+            return buffer.fromOffset(offset: bufferLen - extra)
         } else {
-            let isFin = (FinMask & baseAddress[0])
-            let receivedOpcode = OpCode(rawValue: (OpCodeMask & baseAddress[0]))
-            let isMasked = (MaskMask & baseAddress[1])
-            let payloadLen = (PayloadLenMask & baseAddress[1])
+            let isFin = (FinMask & (baseAddress?[0])!)
+            let receivedOpcode = OpCode(rawValue: (OpCodeMask & (baseAddress?[0])!))
+            let isMasked = (MaskMask & (baseAddress?[1])!)
+            let payloadLen = (PayloadLenMask & (baseAddress?[1])!)
             var offset = 2
-            if (isMasked > 0 || (RSVMask & baseAddress[0]) > 0) && receivedOpcode != .Pong {
+            if (isMasked > 0 || (RSVMask & (baseAddress?[0])!) > 0) && receivedOpcode != .Pong {
                 let errCode = CloseCode.ProtocolError.rawValue
-                doDisconnect(errorWithDetail("masked and rsv data is not currently supported", code: errCode))
-                writeError(errCode)
+                doDisconnect(error: errorWithDetail(detail: "masked and rsv data is not currently supported", code: errCode))
+                writeError(code: errCode)
                 return emptyBuffer
             }
             let isControlFrame = (receivedOpcode == .ConnectionClose || receivedOpcode == .Ping)
             if !isControlFrame && (receivedOpcode != .BinaryFrame && receivedOpcode != .ContinueFrame &&
                 receivedOpcode != .TextFrame && receivedOpcode != .Pong) {
                 let errCode = CloseCode.ProtocolError.rawValue
-                doDisconnect(errorWithDetail("unknown opcode: \(receivedOpcode)", code: errCode))
-                writeError(errCode)
+                doDisconnect(error: errorWithDetail(detail: "unknown opcode: \(receivedOpcode)", code: errCode))
+                writeError(code: errCode)
                 return emptyBuffer
             }
             if isControlFrame && isFin == 0 {
                 let errCode = CloseCode.ProtocolError.rawValue
-                doDisconnect(errorWithDetail("control frames can't be fragmented", code: errCode))
-                writeError(errCode)
+                doDisconnect(error: errorWithDetail(detail: "control frames can't be fragmented", code: errCode))
+                writeError(code: errCode)
                 return emptyBuffer
             }
             if receivedOpcode == .ConnectionClose {
@@ -582,7 +597,7 @@ public class WebSocket : NSObject, NSStreamDelegate {
                 if payloadLen == 1 {
                     code = CloseCode.ProtocolError.rawValue
                 } else if payloadLen > 1 {
-                    code = WebSocket.readUint16(baseAddress, offset: offset)
+                    code = self.readUint16(buffer: baseAddress!, offset: offset)
                     if code < 1000 || (code > 1003 && code < 1007) || (code > 1011 && code < 3000) {
                         code = CloseCode.ProtocolError.rawValue
                     }
@@ -591,27 +606,27 @@ public class WebSocket : NSObject, NSStreamDelegate {
                 if payloadLen > 2 {
                     let len = Int(payloadLen-2)
                     if len > 0 {
-                        let bytes = baseAddress + offset
-                        let str: NSString? = NSString(data: NSData(bytes: bytes, length: len), encoding: NSUTF8StringEncoding)
+                        let bytes = baseAddress! + offset
+                        let str: NSString? = NSString(data: NSData(bytes: bytes, length: len) as Data, encoding: String.Encoding.utf8.rawValue)
                         if str == nil {
                             code = CloseCode.ProtocolError.rawValue
                         }
                     }
                 }
-                doDisconnect(errorWithDetail("connection closed by server", code: code))
-                writeError(code)
+                doDisconnect(error: errorWithDetail(detail: "connection closed by server", code: code))
+                writeError(code: code)
                 return emptyBuffer
             }
             if isControlFrame && payloadLen > 125 {
-                writeError(CloseCode.ProtocolError.rawValue)
+                writeError(code: CloseCode.ProtocolError.rawValue)
                 return emptyBuffer
             }
             var dataLength = UInt64(payloadLen)
             if dataLength == 127 {
-                dataLength = WebSocket.readUint64(baseAddress, offset: offset)
+                dataLength = self.readUint64(buffer: baseAddress!, offset: offset)
                 offset += sizeof(UInt64)
             } else if dataLength == 126 {
-                dataLength = UInt64(WebSocket.readUint16(baseAddress, offset: offset))
+                dataLength = UInt64(self.readUint16(buffer: baseAddress!, offset: offset))
                 offset += sizeof(UInt16)
             }
             if bufferLen < offset || UInt64(bufferLen - offset) < dataLength {
@@ -627,17 +642,17 @@ public class WebSocket : NSObject, NSStreamDelegate {
                 len = 0
                 data = NSData()
             } else {
-                data = NSData(bytes: baseAddress+offset, length: Int(len))
+                data = NSData(bytes: baseAddress!+offset, length: Int(len))
             }
             if receivedOpcode == .Pong {
                 if canDispatch {
-                    dispatch_async(queue) { [weak self] in
+                    queue.async { [weak self] in
                         guard let s = self else { return }
                         s.onPong?()
-                        s.pongDelegate?.websocketDidReceivePong(s)
+                        s.pongDelegate?.websocketDidReceivePong(socket: s)
                     }
                 }
-                return buffer.fromOffset(offset + Int(len))
+                return buffer.fromOffset(offset: offset + Int(len))
             }
             var response = readStack.last
             if isControlFrame {
@@ -645,35 +660,35 @@ public class WebSocket : NSObject, NSStreamDelegate {
             }
             if isFin == 0 && receivedOpcode == .ContinueFrame && response == nil {
                 let errCode = CloseCode.ProtocolError.rawValue
-                doDisconnect(errorWithDetail("continue frame before a binary or text frame", code: errCode))
-                writeError(errCode)
+                doDisconnect(error: errorWithDetail(detail: "continue frame before a binary or text frame", code: errCode))
+                writeError(code: errCode)
                 return emptyBuffer
             }
             var isNew = false
             if response == nil {
                 if receivedOpcode == .ContinueFrame  {
                     let errCode = CloseCode.ProtocolError.rawValue
-                    doDisconnect(errorWithDetail("first frame can't be a continue frame",
+                    doDisconnect(error: errorWithDetail(detail: "first frame can't be a continue frame",
                         code: errCode))
-                    writeError(errCode)
+                    writeError(code: errCode)
                     return emptyBuffer
                 }
                 isNew = true
                 response = WSResponse()
                 response!.code = receivedOpcode!
                 response!.bytesLeft = Int(dataLength)
-                response!.buffer = NSMutableData(data: data)
+                response!.buffer = NSMutableData(data: data as Data)
             } else {
                 if receivedOpcode == .ContinueFrame  {
                     response!.bytesLeft = Int(dataLength)
                 } else {
                     let errCode = CloseCode.ProtocolError.rawValue
-                    doDisconnect(errorWithDetail("second and beyond of fragment message must be a continue frame",
+                    doDisconnect(error: errorWithDetail(detail: "second and beyond of fragment message must be a continue frame",
                         code: errCode))
-                    writeError(errCode)
+                    writeError(code: errCode)
                     return emptyBuffer
                 }
-                response!.buffer!.appendData(data)
+                response!.buffer!.append(data as Data)
             }
             if let response = response {
                 response.bytesLeft -= Int(len)
@@ -682,11 +697,17 @@ public class WebSocket : NSObject, NSStreamDelegate {
                 if isNew {
                     readStack.append(response)
                 }
-                processResponse(response)
+                
+                if processResponse(response: response) == false{
+                    
+                    DefaultSocketLogger.Logger.error(message: "Failed to process the response", type: "Error")
+
+                }
+                
             }
             
             let step = Int(offset+numericCast(len))
-            return buffer.fromOffset(step)
+            return buffer.fromOffset(offset: step)
         }
     }
     
@@ -706,27 +727,27 @@ public class WebSocket : NSObject, NSStreamDelegate {
         if response.isFin && response.bytesLeft <= 0 {
             if response.code == .Ping {
                 let data = response.buffer! //local copy so it is perverse for writing
-                dequeueWrite(data, code: OpCode.Pong)
+                dequeueWrite(data: data, code: OpCode.Pong)
             } else if response.code == .TextFrame {
-                let str: NSString? = NSString(data: response.buffer!, encoding: NSUTF8StringEncoding)
+                let str: NSString? = NSString(data: response.buffer! as Data, encoding: String.Encoding.utf8.rawValue)
                 if str == nil {
-                    writeError(CloseCode.Encoding.rawValue)
+                    writeError(code: CloseCode.Encoding.rawValue)
                     return false
                 }
                 if canDispatch {
-                    dispatch_async(queue) { [weak self] in
+                    queue.async { [weak self] in
                         guard let s = self else { return }
                         s.onText?(str! as String)
-                        s.delegate?.websocketDidReceiveMessage(s, text: str! as String)
+                        s.delegate?.websocketDidReceiveMessage(socket: s, text: str! as String)
                     }
                 }
             } else if response.code == .BinaryFrame {
                 if canDispatch {
                     let data = response.buffer! //local copy so it is perverse for writing
-                    dispatch_async(queue) { [weak self] in
+                    queue.async { [weak self] in
                         guard let s = self else { return }
                         s.onData?(data)
-                        s.delegate?.websocketDidReceiveData(s, data: data)
+                        s.delegate?.websocketDidReceiveData(socket: s, data: data)
                     }
                 }
             }
@@ -747,12 +768,12 @@ public class WebSocket : NSObject, NSStreamDelegate {
     private func writeError(code: UInt16) {
         let buf = NSMutableData(capacity: sizeof(UInt16))
         let buffer = UnsafeMutablePointer<UInt8>(buf!.bytes)
-        WebSocket.writeUint16(buffer, offset: 0, value: code)
-        dequeueWrite(NSData(bytes: buffer, length: sizeof(UInt16)), code: .ConnectionClose)
+        self.writeUint16(buffer: buffer, offset: 0, value: code)
+        dequeueWrite(data: NSData(bytes: buffer, length: sizeof(UInt16)), code: .ConnectionClose)
     }
     ///used to write things to the stream
     private func dequeueWrite(data: NSData, code: OpCode, writeCompletion: (() -> ())? = nil) {
-        writeQueue.addOperationWithBlock { [weak self] in
+        writeQueue.addOperation { [weak self] in
             //stream isn't ready, let's wait
             guard let s = self else { return }
             var offset = 2
@@ -765,16 +786,21 @@ public class WebSocket : NSObject, NSStreamDelegate {
                 buffer[1] = CUnsignedChar(dataLength)
             } else if dataLength <= Int(UInt16.max) {
                 buffer[1] = 126
-                WebSocket.writeUint16(buffer, offset: offset, value: UInt16(dataLength))
+                self?.writeUint16(buffer: buffer, offset: offset, value: UInt16(dataLength))
                 offset += sizeof(UInt16)
             } else {
                 buffer[1] = 127
-                WebSocket.writeUint64(buffer, offset: offset, value: UInt64(dataLength))
+                self?.writeUint64(buffer: buffer, offset: offset, value: UInt64(dataLength))
                 offset += sizeof(UInt64)
             }
             buffer[1] |= s.MaskMask
             let maskKey = UnsafeMutablePointer<UInt8>(buffer + offset)
-            SecRandomCopyBytes(kSecRandomDefault, Int(sizeof(UInt32)), maskKey)
+            
+            if SecRandomCopyBytes(kSecRandomDefault, Int(sizeof(UInt32)), maskKey) != 0{
+                
+                DefaultSocketLogger.Logger.error(message: "Failed to copy", type: "Error")
+            }
+            
             offset += sizeof(UInt32)
             
             for i in 0..<dataLength {
@@ -792,18 +818,19 @@ public class WebSocket : NSObject, NSStreamDelegate {
                         error = streamError
                     } else {
                         let errCode = InternalErrorCode.OutputStreamWriteError.rawValue
-                        error = s.errorWithDetail("output stream error during write", code: errCode)
+                        error = s.errorWithDetail(detail: "output stream error during write", code: errCode)
                     }
-                    s.doDisconnect(error)
+                    s.doDisconnect(error: error)
                     break
                 } else {
                     total += len
                 }
                 if total >= offset {
                     if let queue = self?.queue, callback = writeCompletion {
-                        dispatch_async(queue) {
+                        
+                        queue.async(execute: {
                             callback()
-                        }
+                        })
                     }
                     
                     break
@@ -819,12 +846,14 @@ public class WebSocket : NSObject, NSStreamDelegate {
         didDisconnect = true
         connected = false
         guard canDispatch else {return}
-        dispatch_async(queue) { [weak self] in
-            guard let s = self else { return }
-            s.onDisconnect?(error)
-            s.delegate?.websocketDidDisconnect(s, error: error)
+        
+        queue.async {
+            
+            self.onDisconnect?(error)
+            self.delegate?.websocketDidDisconnect(socket: self, error: error)
             let userInfo = error.map({ [WebsocketDisconnectionErrorKeyName: $0] })
-            s.notificationCenter.postNotificationName(WebsocketDidDisconnectNotification, object: self, userInfo: userInfo)
+            self.notificationCenter.post(name: Notification.Name(rawValue:WebsocketDidDisconnectNotification), object: self, userInfo: userInfo)
+   
         }
     }
     
@@ -848,7 +877,8 @@ private extension NSData {
 private extension UnsafeBufferPointer {
     
     func fromOffset(offset: Int) -> UnsafeBufferPointer<Element> {
-        return UnsafeBufferPointer<Element>(start: baseAddress.advancedBy(offset), count: count - offset)
+        
+        return UnsafeBufferPointer<Element>(start: baseAddress!.advanced(by: offset), count: count - offset)
     }
     
 }

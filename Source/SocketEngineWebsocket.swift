@@ -34,29 +34,29 @@ public protocol SocketEngineWebsocket : SocketEngineSpec, WebSocketDelegate {
 extension SocketEngineWebsocket {
     func probeWebSocket() {
         if ws?.isConnected ?? false {
-            sendWebSocketMessage("probe", withType: .Ping, withData: [])
+            sendWebSocketMessage(str: "probe", withType: .Ping, withData: [])
         }
     }
     
     /// Send message on WebSockets
     /// Only call on emitQueue
     public func sendWebSocketMessage(str: String, withType type: SocketEnginePacketType, withData datas: [NSData]) {
-            DefaultSocketLogger.Logger.log("Sending ws: %@ as type: %@", type: "SocketEngine", args: str, type.rawValue)
+            DefaultSocketLogger.Logger.log(message: "Sending ws: %@ as type: %@", type: "SocketEngine", args: str, type.rawValue)
             
-            ws?.writeString("\(type.rawValue)\(str)")
+            ws?.writeString(str: "\(type.rawValue)\(str)")
             
             for data in datas {
-                if case let .Left(bin) = createBinaryDataForSend(data) {
-                    ws?.writeData(bin)
+                if case let .Left(bin) = createBinaryDataForSend(data: data) {
+                    ws?.writeData(data: bin)
                 }
             }
     }
     
     public func websocketDidReceiveMessage(socket: WebSocket, text: String) {
-        parseEngineMessage(text, fromPolling: false)
+        parseEngineMessage(message: text, fromPolling: false)
     }
     
     public func websocketDidReceiveData(socket: WebSocket, data: NSData) {
-        parseEngineData(data)
+        parseEngineData(data: data)
     }
 }

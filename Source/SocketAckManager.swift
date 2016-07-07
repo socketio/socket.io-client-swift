@@ -58,8 +58,8 @@ struct SocketAckManager {
     
     mutating func executeAck(ack: Int, items: [AnyObject]) {
         let callback = acks.remove(SocketAck(ack: ack))
-
-        dispatch_async(dispatch_get_main_queue()) {
+        
+        DispatchQueue.main.async {
             callback?.callback(items)
         }
     }
@@ -67,7 +67,8 @@ struct SocketAckManager {
     mutating func timeoutAck(ack: Int) {
         let callback = acks.remove(SocketAck(ack: ack))
         
-        dispatch_async(dispatch_get_main_queue()) {
+        DispatchQueue.main.async { 
+            
             callback?.callback(["NO ACK"])
         }
     }

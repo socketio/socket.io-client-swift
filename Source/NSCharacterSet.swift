@@ -26,6 +26,6 @@ import Foundation
 
 extension NSCharacterSet {
   class var allowedURLCharacterSet: NSCharacterSet {
-    return NSCharacterSet(charactersInString: "!*'();:@&=+$,/?%#[]\" {}").invertedSet
+    return NSCharacterSet(charactersIn: "!*'();:@&=+$,/?%#[]\" {}").inverted
   }
 }

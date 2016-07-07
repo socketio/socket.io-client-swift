@@ -94,15 +94,15 @@ struct SocketPacket {
         }
         
         do {
-            let jsonSend = try NSJSONSerialization.dataWithJSONObject(data,
-                options: NSJSONWritingOptions(rawValue: 0))
-            guard let jsonString = String(data: jsonSend, encoding: NSUTF8StringEncoding) else {
+            let jsonSend = try JSONSerialization.data(withJSONObject: data,
+                options: JSONSerialization.WritingOptions(rawValue: 0))
+            guard let jsonString = String(data: jsonSend, encoding: String.Encoding.utf8) else {
                 return message + "[]"
             }
             
             restOfMessage = jsonString
         } catch {
-            DefaultSocketLogger.Logger.error("Error creating JSON object in SocketPacket.completeMessage",
+            DefaultSocketLogger.Logger.error(message: "Error creating JSON object in SocketPacket.completeMessage",
                 type: SocketPacket.logType)
             
             restOfMessage = "[]"
@@ -135,7 +135,7 @@ struct SocketPacket {
             idString = nspString
         }
         
-        return completeMessage(idString)
+        return completeMessage(message: idString)
     }
     
     // Called when we have all the binary data for a packet
@@ -156,7 +156,7 @@ struct SocketPacket {
                 return binary[dict["num"] as! Int]
             } else {
                 return dict.reduce(NSMutableDictionary(), combine: {cur, keyValue in
-                    cur[keyValue.0 as! NSCopying] = _fillInPlaceholders(keyValue.1)
+                    cur[keyValue.0 as! NSCopying] = _fillInPlaceholders(object: keyValue.1)
                     return cur
                 })
             }
@@ -185,8 +185,8 @@ extension SocketPacket {
     }
     
     static func packetFromEmit(items: [AnyObject], id: Int, nsp: String, ack: Bool) -> SocketPacket {
-        let (parsedData, binary) = deconstructData(items)
-        let packet = SocketPacket(type: findType(binary.count, ack: ack), data: parsedData,
+        let (parsedData, binary) = deconstructData(data: items)
+        let packet = SocketPacket(type: findType(binCount: binary.count, ack: ack), data: parsedData,
             id: id, nsp: nsp, binary: binary)
         
         return packet
@@ -195,7 +195,7 @@ extension SocketPacket {
 
 private extension SocketPacket {
     // Recursive function that looks for NSData in collections
-    static func shred(data: AnyObject, inout binary: [NSData]) -> AnyObject {
+    static func shred(data: AnyObject, binary: inout [NSData]) -> AnyObject {
         let placeholder = ["_placeholder": true, "num": binary.count]
         
         switch data {
@@ -203,10 +203,10 @@ private extension SocketPacket {
             binary.append(bin)
             return placeholder
         case let arr as [AnyObject]:
-            return arr.map({shred($0, binary: &binary)})
+            return arr.map({shred(data: $0, binary: &binary)}) as AnyObject //arr.map({shred($0, binary: &binary)})
         case let dict as NSDictionary:
             return dict.reduce(NSMutableDictionary(), combine: {cur, keyValue in
-                cur[keyValue.0 as! NSCopying] = shred(keyValue.1, binary: &binary)
+                cur[keyValue.0 as! NSCopying] = shred(data: keyValue.1, binary: &binary)
                 return cur
             })
         default:
@@ -219,6 +219,6 @@ private extension SocketPacket {
     static func deconstructData(data: [AnyObject]) -> ([AnyObject], [NSData]) {
         var binary = [NSData]()
         
-        return (data.map({shred($0, binary: &binary)}), binary)
+        return (data.map({shred(data: $0, binary: &binary)}), binary)
     }
 }
