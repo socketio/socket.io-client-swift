@@ -30,13 +30,13 @@ protocol ClientOption : CustomStringConvertible, Hashable {
 
 public enum SocketIOClientOption : ClientOption {
     case ConnectParams([String: AnyObject])
-    case Cookies([NSHTTPCookie])
+    case Cookies([HTTPCookie])
     case DoubleEncodeUTF8(Bool)
     case ExtraHeaders([String: String])
     case ForceNew(Bool)
     case ForcePolling(Bool)
     case ForceWebsockets(Bool)
-    case HandleQueue(dispatch_queue_t)
+    case HandleQueue(DispatchQueue)
     case Log(Bool)
     case Logger(SocketLogger)
     case Nsp(String)
@@ -47,7 +47,7 @@ public enum SocketIOClientOption : ClientOption {
     case Secure(Bool)
     case Security(SSLSecurity)
     case SelfSigned(Bool)
-    case SessionDelegate(NSURLSessionDelegate)
+    case SessionDelegate(URLSessionDelegate)
     case VoipEnabled(Bool)
     
     public var description: String {
@@ -170,7 +170,7 @@ extension NSDictionary {
         switch (key, value) {
         case let ("connectParams", params as [String: AnyObject]):
             return .ConnectParams(params)
-        case let ("cookies", cookies as [NSHTTPCookie]):
+        case let ("cookies", cookies as [HTTPCookie]):
             return .Cookies(cookies)
         case let ("doubleEncodeUTF8", encode as Bool):
             return .DoubleEncodeUTF8(encode)
@@ -182,7 +182,7 @@ extension NSDictionary {
             return .ForcePolling(force)
         case let ("forceWebsockets", force as Bool):
             return .ForceWebsockets(force)
-        case let ("handleQueue", queue as dispatch_queue_t):
+        case let ("handleQueue", queue as DispatchQueue):
             return .HandleQueue(queue)
         case let ("log", log as Bool):
             return .Log(log)
@@ -204,7 +204,7 @@ extension NSDictionary {
             return .Security(security)
         case let ("selfSigned", selfSigned as Bool):
             return .SelfSigned(selfSigned)
-        case let ("sessionDelegate", delegate as NSURLSessionDelegate):
+        case let ("sessionDelegate", delegate as URLSessionDelegate):
             return .SessionDelegate(delegate)
         case let ("voipEnabled", enable as Bool):
             return .VoipEnabled(enable)
@@ -217,8 +217,8 @@ extension NSDictionary {
         var options = Set<SocketIOClientOption>()
         
         for (rawKey, value) in self {
-            if let key = rawKey as? String, opt = NSDictionary.keyValueToSocketIOClientOption(key, value: value) {
-                options.insertIgnore(opt)
+            if let key = rawKey as? String, opt = NSDictionary.keyValueToSocketIOClientOption(key: key, value: value) {
+                options.insertIgnore(element: opt)
             }
         }
         

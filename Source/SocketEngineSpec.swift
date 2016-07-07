@@ -31,16 +31,16 @@ import Foundation
     var connected: Bool { get }
     var connectParams: [String: AnyObject]? { get set }
     var doubleEncodeUTF8: Bool { get }
-    var cookies: [NSHTTPCookie]? { get }
+    var cookies: [HTTPCookie]? { get }
     var extraHeaders: [String: String]? { get }
     var fastUpgrade: Bool { get }
     var forcePolling: Bool { get }
     var forceWebsockets: Bool { get }
-    var parseQueue: dispatch_queue_t! { get }
+    var parseQueue: DispatchQueue! { get }
     var polling: Bool { get }
     var probing: Bool { get }
-    var emitQueue: dispatch_queue_t! { get }
-    var handleQueue: dispatch_queue_t! { get }
+    var emitQueue: DispatchQueue! { get }
+    var handleQueue: DispatchQueue! { get }
     var sid: String { get }
     var socketPath: String { get }
     var urlPolling: NSURL { get }
@@ -62,37 +62,37 @@ import Foundation
 
 extension SocketEngineSpec {
     var urlPollingWithSid: NSURL {
-        let com = NSURLComponents(URL: urlPolling, resolvingAgainstBaseURL: false)!
+        let com = NSURLComponents(url: urlPolling as URL, resolvingAgainstBaseURL: false)!
         com.percentEncodedQuery = com.percentEncodedQuery! + "&sid=\(sid.urlEncode()!)"
         
-        return com.URL!
+        return com.url!
     }
     
     var urlWebSocketWithSid: NSURL {
-        let com = NSURLComponents(URL: urlWebSocket, resolvingAgainstBaseURL: false)!
+        let com = NSURLComponents(url: urlWebSocket as URL, resolvingAgainstBaseURL: false)!
         com.percentEncodedQuery = com.percentEncodedQuery! + (sid == "" ? "" : "&sid=\(sid.urlEncode()!)")
         
-        return com.URL!
+        return com.url!
     }
     
     func createBinaryDataForSend(data: NSData) -> Either<NSData, String> {
         if websocket {
-            var byteArray = [UInt8](count: 1, repeatedValue: 0x4)
+            var byteArray = [UInt8](repeating: 0x4, count: 1)//(count: 1, repeatedValue: 0x4) swift3
             let mutData = NSMutableData(bytes: &byteArray, length: 1)
             
-            mutData.appendData(data)
+            mutData.append(data as Data)
             
             return .Left(mutData)
         } else {
-            let str = "b4" + data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions(rawValue: 0))
+            let str = "b4" + data.base64EncodedString(NSData.Base64EncodingOptions(rawValue: 0))
             
             return .Right(str)
         }
     }
     
     func doubleEncodeUTF8(string: String) -> String {
-        if let latin1 = string.dataUsingEncoding(NSUTF8StringEncoding),
-            utf8 = NSString(data: latin1, encoding: NSISOLatin1StringEncoding) {
+        if let latin1 = string.data(using: String.Encoding.utf8),
+            utf8 = NSString(data: latin1, encoding: String.Encoding.isoLatin1.rawValue) {
                 return utf8 as String
         } else {
             return string
@@ -100,8 +100,8 @@ extension SocketEngineSpec {
     }
     
     func fixDoubleUTF8(string: String) -> String {
-        if let utf8 = string.dataUsingEncoding(NSISOLatin1StringEncoding),
-            latin1 = NSString(data: utf8, encoding: NSUTF8StringEncoding) {
+        if let utf8 = string.data(using: String.Encoding.isoLatin1),
+            latin1 = NSString(data: utf8, encoding: String.Encoding.utf8.rawValue) {
                 return latin1 as String
         } else {
             return string
@@ -110,6 +110,6 @@ extension SocketEngineSpec {
     
     /// Send an engine message (4)
     func send(msg: String, withData datas: [NSData]) {
-        write(msg, withType: .Message, withData: datas)
+        write(msg: msg, withType: .Message, withData: datas)
     }
 }

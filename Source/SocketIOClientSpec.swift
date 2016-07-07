@@ -36,8 +36,8 @@ protocol SocketIOClientSpec : class {
 
 extension SocketIOClientSpec {
     func didError(reason: String) {
-        DefaultSocketLogger.Logger.error("%@", type: "SocketIOClient", args: reason)
+        DefaultSocketLogger.Logger.error(message: "%@", type: "SocketIOClient", args: reason)
         
-        handleEvent("error", data: [reason], isInternalMessage: true, withAck: -1)
+        handleEvent(event: "error", data: [reason], isInternalMessage: true, withAck: -1)
     }
 }
