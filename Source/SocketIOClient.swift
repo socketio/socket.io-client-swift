@@ -49,6 +49,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         return nsp + "#" + (engine?.sid ?? "")
     }
 
+    private let ackQueue = DispatchQueue(label: "com.socketio.ackQueue", attributes: .serial)
     private let emitQueue = DispatchQueue(label: "com.socketio.emitQueue", attributes: .serial)
     private let logType = "SocketIOClient"
     private let parseQueue = DispatchQueue(label: "com.socketio.parseQueue", attributes: .serial)
@@ -60,7 +61,6 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     private var reconnecting = false
 
     private(set) var currentAck = -1
-    // Handle queue also controls access to ackManager
     private(set) var handleQueue = DispatchQueue.main
     private(set) var reconnectAttempts = -1
 
@@ -160,20 +160,21 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
     private func createOnAck(_ items: [AnyObject]) -> OnAckCallback {
         currentAck += 1
-
+        
         return {[weak self, ack = currentAck] timeout, callback in
             if let this = self {
-                this.handleQueue.sync() {
+                this.ackQueue.sync() {
                     this.ackHandlers.addAck(ack, callback: callback)
                 }
                 
+                
                 this._emit(items, ack: ack)
-
+                
                 if timeout != 0 {
                     let time = DispatchTime.now() + Double(Int64(timeout * NSEC_PER_SEC)) / Double(NSEC_PER_SEC)
-
+                    
                     this.handleQueue.after(when: time) {
-                        this.ackHandlers.timeoutAck(ack)
+                        this.ackHandlers.timeoutAck(ack, onQueue: this.handleQueue)
                     }
                 }
             }
@@ -299,7 +300,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         DefaultSocketLogger.Logger.log("Handling ack: %@ with data: %@", type: logType, args: ack, data)
 
         handleQueue.async() {
-            self.ackHandlers.executeAck(ack, items: data)
+            self.ackHandlers.executeAck(ack, with: data, onQueue: self.handleQueue)
         }
     }
 
