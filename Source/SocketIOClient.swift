@@ -61,7 +61,6 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     private var reconnecting = false
 
     private(set) var currentAck = -1
-    // Handle queue also controls access to ackManager
     private(set) var handleQueue = dispatch_get_main_queue()
     private(set) var reconnectAttempts = -1
 
@@ -300,7 +299,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
         DefaultSocketLogger.Logger.log("Handling ack: %@ with data: %@", type: logType, args: ack, data ?? "")
 
-        dispatch_async(handleQueue) {
+        dispatch_async(ackQueue) {
             self.ackHandlers.executeAck(ack, items: data, onQueue: self.handleQueue)
         }
     }
