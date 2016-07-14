@@ -124,11 +124,12 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
     /// Connect to the server.
     public func connect() {
-        connect(0, handleWith: nil)
+        connect(timeoutAfter: 0, withHandler: nil)
     }
 
-    /// Connect to the server. If we aren't connected after timeoutAfter, call handler
-    public func connect(_ timeoutAfter: Int, handleWith handler: (() -> Void)?) {
+    /// Connect to the server. If we aren't connected after timeoutAfter, call withHandler
+    /// 0 Never times out
+    public func connect(timeoutAfter: Int, withHandler handler: (() -> Void)?) {
         assert(timeoutAfter >= 0, "Invalid timeout: \(timeoutAfter)")
 
         guard status != .connected else {
@@ -410,6 +411,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         handlers.removeAll(keepingCapacity: false)
     }
     
+    /// Because Swift 3 removes a lot of implicit briding so we have to perform more casts
     func socketDataToAnyObject(_ data: [SocketData]) -> [AnyObject] {
         return data.flatMap({$0 as? AnyObject})
     }
