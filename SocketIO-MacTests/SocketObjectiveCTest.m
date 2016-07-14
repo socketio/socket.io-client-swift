@@ -21,7 +21,8 @@
 - (void)setUp {
     [super setUp];
     NSURL* url = [[NSURL alloc] initWithString:@"http://localhost"];
-    self.socket = [[SocketIOClient alloc] initWithSocketURL:url options:nil];
+    self.socket = [[SocketIOClient alloc] initWithSocketURL:url
+                                                    options:@{@"handleQueue": dispatch_queue_create(nil, DISPATCH_QUEUE_SERIAL)}];
 }
 
 - (void)testOnSyntax {

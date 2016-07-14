@@ -16,7 +16,8 @@ class SocketSideEffectTest: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        socket = SocketIOClient(socketURL: URL(string: "http://localhost/")!)
+        socket = SocketIOClient(socketURL: URL(string: "http://localhost/")!,
+                                options: [.handleQueue(DispatchQueue(label: "handleQueue", attributes: .serial, target: nil))])
         socket.setTestable()
     }
     

@@ -60,6 +60,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     private var reconnecting = false
 
     private(set) var currentAck = -1
+    // Handle queue also controls access to ackManager
     private(set) var handleQueue = DispatchQueue.main
     private(set) var reconnectAttempts = -1
 
@@ -162,7 +163,10 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
         return {[weak self, ack = currentAck] timeout, callback in
             if let this = self {
-                this.ackHandlers.addAck(ack, callback: callback)
+                this.handleQueue.sync() {
+                    this.ackHandlers.addAck(ack, callback: callback)
+                }
+                
                 this._emit(items, ack: ack)
 
                 if timeout != 0 {
@@ -294,7 +298,9 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
         DefaultSocketLogger.Logger.log("Handling ack: %@ with data: %@", type: logType, args: ack, data)
 
-        ackHandlers.executeAck(ack, items: data)
+        handleQueue.async() {
+            self.ackHandlers.executeAck(ack, items: data)
+        }
     }
 
     /// Causes an event to be handled. Only use if you know what you're doing.
