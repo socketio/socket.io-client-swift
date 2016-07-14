@@ -57,16 +57,20 @@ struct SocketAckManager {
     }
     
     /// Should be called on handle queue
-    mutating func executeAck(ack: Int, items: [AnyObject]) {
+    mutating func executeAck(ack: Int, items: [AnyObject], onQueue: dispatch_queue_t) {
         let callback = acks.remove(SocketAck(ack: ack))
         
-        callback?.callback(items)
+        dispatch_async(onQueue) {
+            callback?.callback(items)
+        }
     }
     
     /// Should be called on handle queue
-    mutating func timeoutAck(ack: Int) {
+    mutating func timeoutAck(ack: Int, onQueue: dispatch_queue_t) {
         let callback = acks.remove(SocketAck(ack: ack))
         
-        callback?.callback(["NO ACK"])
+        dispatch_async(onQueue) {
+            callback?.callback(["NO ACK"])
+        }
     }
 }
