@@ -315,7 +315,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
             self.anyHandler?(SocketAnyEvent(event: event, items: data))
 
             for handler in self.handlers where handler.event == event {
-                handler.executeCallback(data, withAck: ack, withSocket: self)
+                handler.executeCallback(with: data, withAck: ack, withSocket: self)
             }
         }
     }
