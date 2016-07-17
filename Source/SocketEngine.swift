@@ -394,11 +394,11 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         }
     }
 
-    private func handlePong(_ pongMessage: String) {
+    private func handlePong(with message: String) {
         pongsMissed = 0
 
         // We should upgrade
-        if pongMessage == "3probe" {
+        if message == "3probe" {
             upgradeTransport()
         }
     }
@@ -436,7 +436,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         case .noop:
             handleNOOP()
         case .pong:
-            handlePong(fixedString)
+            handlePong(with: fixedString)
         case .open:
             handleOpen(openData: fixedString[fixedString.characters.index(after: fixedString.characters.startIndex)..<fixedString.endIndex])
         case .close:
