@@ -49,6 +49,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         return nsp + "#" + (engine?.sid ?? "")
     }
 
+    private let ackQueue = dispatch_queue_create("com.socketio.ackQueue", DISPATCH_QUEUE_SERIAL)
     private let emitQueue = dispatch_queue_create("com.socketio.emitQueue", DISPATCH_QUEUE_SERIAL)
     private let logType = "SocketIOClient"
     private let parseQueue = dispatch_queue_create("com.socketio.parseQueue", DISPATCH_QUEUE_SERIAL)
@@ -162,14 +163,18 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
         return {[weak self, ack = currentAck] timeout, callback in
             if let this = self {
-                this.ackHandlers.addAck(ack, callback: callback)
+                dispatch_sync(this.ackQueue) {
+                    this.ackHandlers.addAck(ack, callback: callback)
+                }
+
+                
                 this._emit(items, ack: ack)
 
                 if timeout != 0 {
                     let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeout * NSEC_PER_SEC))
 
-                    dispatch_after(time, this.handleQueue) {
-                        this.ackHandlers.timeoutAck(ack)
+                    dispatch_after(time, this.ackQueue) {
+                        this.ackHandlers.timeoutAck(ack, onQueue: this.handleQueue)
                     }
                 }
             }
@@ -294,7 +299,9 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
         DefaultSocketLogger.Logger.log("Handling ack: %@ with data: %@", type: logType, args: ack, data ?? "")
 
-        ackHandlers.executeAck(ack, items: data)
+        dispatch_async(ackQueue) {
+            self.ackHandlers.executeAck(ack, items: data, onQueue: self.handleQueue)
+        }
     }
 
     /// Causes an event to be handled. Only use if you know what you're doing.

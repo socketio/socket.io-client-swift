@@ -24,7 +24,7 @@
 
 import Foundation
 
-private struct SocketAck : Hashable, Equatable {
+private struct SocketAck : Hashable {
     let ack: Int
     var callback: AckCallback!
     var hashValue: Int {
@@ -56,18 +56,20 @@ struct SocketAckManager {
         acks.insert(SocketAck(ack: ack, callback: callback))
     }
     
-    mutating func executeAck(ack: Int, items: [AnyObject]) {
+    /// Should be called on handle queue
+    mutating func executeAck(ack: Int, items: [AnyObject], onQueue: dispatch_queue_t) {
         let callback = acks.remove(SocketAck(ack: ack))
-
-        dispatch_async(dispatch_get_main_queue()) {
+        
+        dispatch_async(onQueue) {
             callback?.callback(items)
         }
     }
     
-    mutating func timeoutAck(ack: Int) {
+    /// Should be called on handle queue
+    mutating func timeoutAck(ack: Int, onQueue: dispatch_queue_t) {
         let callback = acks.remove(SocketAck(ack: ack))
         
-        dispatch_async(dispatch_get_main_queue()) {
+        dispatch_async(onQueue) {
             callback?.callback(["NO ACK"])
         }
     }

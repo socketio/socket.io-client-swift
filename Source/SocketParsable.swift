@@ -63,13 +63,13 @@ extension SocketParsable {
     
     /// Parses a messsage from the engine. Returning either a string error or a complete SocketPacket
     func parseString(message: String) -> Either<String, SocketPacket> {
-        var parser = SocketStringReader(message: message)
+        var reader = SocketStringReader(message: message)
         
-        guard let type = SocketPacket.PacketType(rawValue: Int(parser.read(1)) ?? -1) else {
+        guard let type = SocketPacket.PacketType(rawValue: Int(reader.read(1)) ?? -1) else {
             return .Left("Invalid packet type")
         }
         
-        if !parser.hasNext {
+        if !reader.hasNext {
             return .Right(SocketPacket(type: type, nsp: "/"))
         }
         
@@ -77,37 +77,37 @@ extension SocketParsable {
         var placeholders = -1
         
         if type == .BinaryEvent || type == .BinaryAck {
-            if let holders = Int(parser.readUntilStringOccurence("-")) {
+            if let holders = Int(reader.readUntilStringOccurence("-")) {
                 placeholders = holders
             } else {
                 return .Left("Invalid packet")
             }
         }
         
-        if parser.currentCharacter == "/" {
-            namespace = parser.readUntilStringOccurence(",") ?? parser.readUntilEnd()
+        if reader.currentCharacter == "/" {
+            namespace = reader.readUntilStringOccurence(",") ?? reader.readUntilEnd()
         }
         
-        if !parser.hasNext {
+        if !reader.hasNext {
             return .Right(SocketPacket(type: type, nsp: namespace, placeholders: placeholders))
         }
         
         var idString = ""
         
         if type == .Error {
-            parser.advanceIndexBy(-1)
+            reader.advanceIndexBy(-1)
         } else {
-            while parser.hasNext {
-                if let int = Int(parser.read(1)) {
+            while reader.hasNext {
+                if let int = Int(reader.read(1)) {
                     idString += String(int)
                 } else {
-                    parser.advanceIndexBy(-2)
+                    reader.advanceIndexBy(-2)
                     break
                 }
             }
         }
         
-        let d = message[parser.currentIndex.advancedBy(1)..<message.endIndex]
+        let d = message[reader.currentIndex.advancedBy(1)..<message.endIndex]
         
         switch parseData(d) {
         case let .Left(err):
@@ -126,15 +126,8 @@ extension SocketParsable {
     
     // Parses data for events
     private func parseData(data: String) -> Either<String, [AnyObject]> {
-        let stringData = data.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)
-        
         do {
-            if let arr = try NSJSONSerialization.JSONObjectWithData(stringData!,
-                    options: NSJSONReadingOptions.MutableContainers) as? [AnyObject] {
-                return .Right(arr)
-            } else {
-                return .Left("Expected data array")
-            }
+            return .Right(try data.toArray())
         } catch {
             return .Left("Error parsing data for packet")
         }

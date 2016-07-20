@@ -66,7 +66,7 @@ public final class SocketClientManager : NSObject {
         return sockets.removeValueForKey(label)
     }
 
-    public func removeSocket(socket socket: SocketIOClient) -> SocketIOClient? {
+    public func removeSocket(socket: SocketIOClient) -> SocketIOClient? {
         var returnSocket: SocketIOClient?
         
         for (label, dictSocket) in sockets where dictSocket === socket {

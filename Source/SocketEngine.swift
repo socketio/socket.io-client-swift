@@ -131,21 +131,17 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     }
     
     private func checkAndHandleEngineError(msg: String) {
-        guard let stringData = msg.dataUsingEncoding(NSUTF8StringEncoding,
-            allowLossyConversion: false) else { return }
-        
         do {
-            if let dict = try NSJSONSerialization.JSONObjectWithData(stringData, options: .MutableContainers) as? NSDictionary {
-                guard let error = dict["message"] as? String else { return }
-                
-                /*
-                 0: Unknown transport
-                 1: Unknown sid
-                 2: Bad handshake request
-                 3: Bad request
-                 */
-                didError(error)
-            }
+            let dict = try msg.toNSDictionary()
+            guard let error = dict["message"] as? String else { return }
+            
+            /*
+             0: Unknown transport
+             1: Unknown sid
+             2: Bad handshake request
+             3: Bad request
+             */
+            didError(error)
         } catch {
             client?.engineDidError("Got unknown error from server \(msg)")
         }
@@ -363,23 +359,22 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
     }
 
     private func handleOpen(openData: String) {
-        let mesData = openData.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!
         do {
-            let json = try NSJSONSerialization.JSONObjectWithData(mesData,
-                options: NSJSONReadingOptions.AllowFragments) as? NSDictionary
-            if let sid = json?["sid"] as? String {
+            let json = try openData.toNSDictionary()
+            
+            if let sid = json["sid"] as? String {
                 let upgradeWs: Bool
 
                 self.sid = sid
                 connected = true
 
-                if let upgrades = json?["upgrades"] as? [String] {
+                if let upgrades = json["upgrades"] as? [String] {
                     upgradeWs = upgrades.contains("websocket")
                 } else {
                     upgradeWs = false
                 }
 
-                if let pingInterval = json?["pingInterval"] as? Double, pingTimeout = json?["pingTimeout"] as? Double {
+                if let pingInterval = json["pingInterval"] as? Double, pingTimeout = json["pingTimeout"] as? Double {
                     self.pingInterval = pingInterval / 1000.0
                     self.pingTimeout = pingTimeout / 1000.0
                 }

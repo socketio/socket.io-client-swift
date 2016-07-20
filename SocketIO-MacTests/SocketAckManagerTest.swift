@@ -11,7 +11,7 @@ import XCTest
 
 class SocketAckManagerTest: XCTestCase {
     var ackManager = SocketAckManager()
-    
+
     func testAddAcks() {
         let callbackExpection = self.expectationWithDescription("callbackExpection")
         let itemsArray = ["Hi", "ho"]
@@ -19,8 +19,8 @@ class SocketAckManagerTest: XCTestCase {
             callbackExpection.fulfill()
         }
         ackManager.addAck(1, callback: callback)
-        ackManager.executeAck(1, items: itemsArray)
+        ackManager.executeAck(1, items: itemsArray, onQueue: dispatch_get_main_queue())
         waitForExpectationsWithTimeout(3.0, handler: nil)
-        
+
     }
 }
