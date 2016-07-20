@@ -810,7 +810,7 @@ public class WebSocket : NSObject, StreamDelegate {
                 }
                 if total >= offset {
                     if let queue = self?.queue, let callback = writeCompletion {
-                        queue.asynchronously() {
+                        queue.async {
                             callback()
                         }
                     }

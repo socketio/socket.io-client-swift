@@ -37,18 +37,18 @@ class SocketSideEffectTest: XCTestCase {
     }
     
     func testHandleAck() {
-        let expect = expectation(withDescription: "handled ack")
+        let expect = expectation(description: "handled ack")
         socket.emitWithAck("test")(timeoutAfter: 0) {data in
             XCTAssertEqual(data[0] as? String, "hello world")
             expect.fulfill()
         }
         
         socket.parseSocketMessage("30[\"hello world\"]")
-        waitForExpectations(withTimeout: 3, handler: nil)
+        waitForExpectations(timeout: 3, handler: nil)
     }
     
     func testHandleAck2() {
-        let expect = expectation(withDescription: "handled ack2")
+        let expect = expectation(description: "handled ack2")
         socket.emitWithAck("test")(timeoutAfter: 0) {data in
             XCTAssertTrue(data.count == 2, "Wrong number of ack items")
             expect.fulfill()
@@ -56,33 +56,33 @@ class SocketSideEffectTest: XCTestCase {
         
         socket.parseSocketMessage("61-0[{\"_placeholder\":true,\"num\":0},{\"test\":true}]")
         socket.parseBinaryData(Data())
-        waitForExpectations(withTimeout: 3, handler: nil)
+        waitForExpectations(timeout: 3, handler: nil)
     }
     
     func testHandleEvent() {
-        let expect = expectation(withDescription: "handled event")
+        let expect = expectation(description: "handled event")
         socket.on("test") {data, ack in
             XCTAssertEqual(data[0] as? String, "hello world")
             expect.fulfill()
         }
         
         socket.parseSocketMessage("2[\"test\",\"hello world\"]")
-        waitForExpectations(withTimeout: 3, handler: nil)
+        waitForExpectations(timeout: 3, handler: nil)
     }
     
     func testHandleStringEventWithQuotes() {
-        let expect = expectation(withDescription: "handled event")
+        let expect = expectation(description: "handled event")
         socket.on("test") {data, ack in
             XCTAssertEqual(data[0] as? String, "\"hello world\"")
             expect.fulfill()
         }
         
         socket.parseSocketMessage("2[\"test\",\"\\\"hello world\\\"\"]")
-        waitForExpectations(withTimeout: 3, handler: nil)
+        waitForExpectations(timeout: 3, handler: nil)
     }
     
     func testHandleOnceEvent() {
-        let expect = expectation(withDescription: "handled event")
+        let expect = expectation(description: "handled event")
         socket.once("test") {data, ack in
             XCTAssertEqual(data[0] as? String, "hello world")
             XCTAssertEqual(self.socket.testHandlers.count, 0)
@@ -90,7 +90,7 @@ class SocketSideEffectTest: XCTestCase {
         }
         
         socket.parseSocketMessage("2[\"test\",\"hello world\"]")
-        waitForExpectations(withTimeout: 3, handler: nil)
+        waitForExpectations(timeout: 3, handler: nil)
     }
     
     func testOffWithEvent() {
@@ -112,21 +112,21 @@ class SocketSideEffectTest: XCTestCase {
     }
     
     func testHandlesErrorPacket() {
-        let expect = expectation(withDescription: "Handled error")
+        let expect = expectation(description: "Handled error")
         socket.on("error") {data, ack in
-            if let error = data[0] as? String where error == "test error" {
+            if let error = data[0] as? String, error == "test error" {
                 expect.fulfill()
             }
         }
         
         socket.parseSocketMessage("4\"test error\"")
-        waitForExpectations(withTimeout: 3, handler: nil)
+        waitForExpectations(timeout: 3, handler: nil)
     }
     
     func testHandleBinaryEvent() {
-        let expect = expectation(withDescription: "handled binary event")
+        let expect = expectation(description: "handled binary event")
         socket.on("test") {data, ack in
-            if let dict = data[0] as? NSDictionary, data = dict["test"] as? NSData {
+            if let dict = data[0] as? NSDictionary, let data = dict["test"] as? NSData {
                 XCTAssertEqual(data, self.data)
                 expect.fulfill()
             }
@@ -134,7 +134,7 @@ class SocketSideEffectTest: XCTestCase {
         
         socket.parseSocketMessage("51-[\"test\",{\"test\":{\"_placeholder\":true,\"num\":0}}]")
         socket.parseBinaryData(data)
-        waitForExpectations(withTimeout: 3, handler: nil)
+        waitForExpectations(timeout: 3, handler: nil)
     }
     
     func testSocketDataToAnyObject() {
@@ -144,10 +144,10 @@ class SocketSideEffectTest: XCTestCase {
     }
     
     func testHandleMultipleBinaryEvent() {
-        let expect = expectation(withDescription: "handled multiple binary event")
+        let expect = expectation(description: "handled multiple binary event")
         socket.on("test") {data, ack in
-            if let dict = data[0] as? NSDictionary, data = dict["test"] as? NSData,
-                data2 = dict["test2"] as? NSData {
+            if let dict = data[0] as? NSDictionary, let data = dict["test"] as? NSData,
+                let data2 = dict["test2"] as? NSData {
                     XCTAssertEqual(data, self.data)
                     XCTAssertEqual(data2, self.data2)
                     expect.fulfill()
@@ -157,7 +157,7 @@ class SocketSideEffectTest: XCTestCase {
         socket.parseSocketMessage("52-[\"test\",{\"test\":{\"_placeholder\":true,\"num\":0},\"test2\":{\"_placeholder\":true,\"num\":1}}]")
         socket.parseBinaryData(data)
         socket.parseBinaryData(data2)
-        waitForExpectations(withTimeout: 3, handler: nil)
+        waitForExpectations(timeout: 3, handler: nil)
     }
     
     func testSocketManager() {

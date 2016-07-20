@@ -154,8 +154,8 @@ class SocketBasicPacketTest: XCTestCase {
         if case let .right(packet) = socket.parseString(engineString) {
             var packet = packet
             XCTAssertEqual(packet.event, "test")
-            packet.addData(data)
-            packet.addData(data2)
+            _ = packet.addData(data)
+            _ = packet.addData(data2)
             XCTAssertEqual(packet.args[0] as? String, "~~0")
         } else {
             XCTFail()
