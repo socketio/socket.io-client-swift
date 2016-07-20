@@ -92,7 +92,7 @@ extension SocketEngineSpec {
     
     func doubleEncodeUTF8(_ string: String) -> String {
         if let latin1 = string.data(using: String.Encoding.utf8),
-            utf8 = NSString(data: latin1, encoding: String.Encoding.isoLatin1.rawValue) {
+            let utf8 = NSString(data: latin1, encoding: String.Encoding.isoLatin1.rawValue) {
                 return utf8 as String
         } else {
             return string
@@ -101,7 +101,7 @@ extension SocketEngineSpec {
     
     func fixDoubleUTF8(_ string: String) -> String {
         if let utf8 = string.data(using: String.Encoding.isoLatin1),
-            latin1 = NSString(data: utf8, encoding: String.Encoding.utf8.rawValue) {
+            let latin1 = NSString(data: utf8, encoding: String.Encoding.utf8.rawValue) {
                 return latin1 as String
         } else {
             return string

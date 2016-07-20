@@ -151,8 +151,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         if message.hasPrefix("b4") {
             // binary in base64 string
             let noPrefix = message[message.characters.index(message.startIndex, offsetBy: 2)..<message.endIndex]
-
-            if let data = Data(base64Encoded: noPrefix, options: Data.Base64EncodingOptions(rawValue: 0)) {
+            if let data = Data(base64Encoded: noPrefix, options: Data.Base64DecodingOptions(rawValue: 0)) {
                 client?.parseEngineBinaryData(data)
             }
 
@@ -372,7 +371,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
                     upgradeWs = false
                 }
 
-                if let pingInterval = json["pingInterval"] as? Double, pingTimeout = json["pingTimeout"] as? Double {
+                if let pingInterval = json["pingInterval"] as? Double, let pingTimeout = json["pingTimeout"] as? Double {
                     self.pingInterval = pingInterval / 1000.0
                     self.pingTimeout = pingTimeout / 1000.0
                 }

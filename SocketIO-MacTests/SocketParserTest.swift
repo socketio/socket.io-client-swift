@@ -136,7 +136,7 @@ class SocketParserTest: XCTestCase {
         let keys = Array(SocketParserTest.packetTypes.keys)
         measure {
             for item in keys.enumerated() {
-                self.testSocket.parseString(item.element)
+                _ = self.testSocket.parseString(item.element)
             }
         }
     }

@@ -150,7 +150,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         let time = DispatchTime.now() + Double(Int64(timeoutAfter) * Int64(NSEC_PER_SEC)) / Double(NSEC_PER_SEC)
 
         handleQueue.after(when: time) {[weak self] in
-            if let this = self where this.status != .connected && this.status != .disconnected {
+            if let this = self, this.status != .connected && this.status != .disconnected {
                 this.status = .disconnected
                 this.engine?.disconnect(reason: "Connect timeout")
 

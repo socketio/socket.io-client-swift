@@ -96,7 +96,7 @@ public class SSLSecurity : NSObject {
             DispatchQueue.global(attributes: DispatchQueue.GlobalAttributes.qosDefault).async {
                 let pubKeys = certs.reduce([SecKey]()) { (pubKeys: [SecKey], cert: SSLCert) -> [SecKey] in
                     var pubKeys = pubKeys
-                    if let data = cert.certData where cert.key == nil {
+                    if let data = cert.certData, cert.key == nil {
                         cert.key = self.extractPublicKey(data)
                     }
                     if let key = cert.key {
