@@ -63,13 +63,13 @@ extension SocketParsable {
     
     /// Parses a messsage from the engine. Returning either a string error or a complete SocketPacket
     func parseString(_ message: String) -> Either<String, SocketPacket> {
-        var parser = SocketStringReader(message: message)
+        var reader = SocketStringReader(message: message)
         
-        guard let type = SocketPacket.PacketType(rawValue: Int(parser.read(count: 1)) ?? -1) else {
+        guard let type = SocketPacket.PacketType(rawValue: Int(reader.read(count: 1)) ?? -1) else {
             return .left("Invalid packet type")
         }
         
-        if !parser.hasNext {
+        if !reader.hasNext {
             return .right(SocketPacket(type: type, nsp: "/"))
         }
         
@@ -77,37 +77,37 @@ extension SocketParsable {
         var placeholders = -1
         
         if type == .binaryEvent || type == .binaryAck {
-            if let holders = Int(parser.readUntilOccurence(of: "-")) {
+            if let holders = Int(reader.readUntilOccurence(of: "-")) {
                 placeholders = holders
             } else {
                 return .left("Invalid packet")
             }
         }
         
-        if parser.currentCharacter == "/" {
-            namespace = parser.readUntilOccurence(of: ",") ?? parser.readUntilEnd()
+        if reader.currentCharacter == "/" {
+            namespace = reader.readUntilOccurence(of: ",") ?? reader.readUntilEnd()
         }
         
-        if !parser.hasNext {
+        if !reader.hasNext {
             return .right(SocketPacket(type: type, nsp: namespace, placeholders: placeholders))
         }
         
         var idString = ""
         
         if type == .error {
-            parser.advance(by: -1)
+            reader.advance(by: -1)
         } else {
-            while parser.hasNext {
-                if let int = Int(parser.read(count: 1)) {
+            while reader.hasNext {
+                if let int = Int(reader.read(count: 1)) {
                     idString += String(int)
                 } else {
-                    parser.advance(by: -2)
+                    reader.advance(by: -2)
                     break
                 }
             }
         }
         
-        let d = message[parser.advance(by: 1)..<message.endIndex]
+        let d = message[reader.advance(by: 1)..<message.endIndex]
         
         switch parseData(d) {
         case let .left(err):
