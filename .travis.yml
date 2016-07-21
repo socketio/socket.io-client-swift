@@ -6,5 +6,4 @@ branches:
   only:
     - master
     - development
-install: node Socket.IO-Test-Server/main.js &
 script: xctool -project Socket.IO-Client-Swift.xcodeproj -scheme SocketIO-Mac build test -parallelize
