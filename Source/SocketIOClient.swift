@@ -421,7 +421,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         }
     }
 
-    private func _tryReconnect() { 
+    private func _tryReconnect() {
         if !reconnecting {
             return
         }
