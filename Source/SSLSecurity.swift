@@ -55,7 +55,7 @@ public class SSLSecurity : NSObject {
     
     var isReady = false //is the key processing done?
     var certificates: [NSData]? //the certificates
-    var pubKeys: [SecKeyRef]? //the public keys
+    private var pubKeys: [SecKeyRef]? //the public keys
     var usePublicKeys = false //use public keys or certificate validation?
     
     /**
