@@ -241,7 +241,7 @@ public class SSLSecurity : NSObject {
      
      - returns: the public keys from the certifcate chain for the trust
      */
-    func publicKeyChainForTrust(trust: SecTrustRef) -> [SecKeyRef] {
+    private func publicKeyChainForTrust(trust: SecTrustRef) -> [SecKeyRef] {
         let policy = SecPolicyCreateBasicX509()
         let keys = (0..<SecTrustGetCertificateCount(trust)).reduce([SecKeyRef]()) { (keys: [SecKeyRef], index: Int) -> [SecKeyRef] in
             var keys = keys
