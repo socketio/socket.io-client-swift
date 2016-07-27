@@ -93,16 +93,16 @@ github "socketio/socket.io-client-swift" ~> 6.1.5 # Or latest version
 
 Run `carthage update --platform ios,macosx`.
 
-CocoaPods 0.36.0 or later (iOS 8+)
+CocoaPods 1.0.0 or later
 ------------------
 Create `Podfile` and add `pod 'Socket.IO-Client-Swift'`:
 
 ```ruby
-source 'https://github.com/CocoaPods/Specs.git'
-platform :ios, '8.0'
 use_frameworks!
 
-pod 'Socket.IO-Client-Swift', '~> 6.1.5' # Or latest version
+target 'YourApp' do
+    pod 'Socket.IO-Client-Swift', '~> 6.1.5' # Or latest version
+end
 ```
 
 Install pods:
@@ -121,7 +121,7 @@ import SocketIOClientSwift
 Objective-C:
 
 ```Objective-C
-#import <SocketIOClientSwift/SocketIOClientSwift-Swift.h>
+@import SocketIOClientSwift;
 ```
 
 CocoaSeeds
