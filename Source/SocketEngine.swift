@@ -374,7 +374,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
                     upgradeWs = false
                 }
 
-                if let pingInterval = json["pingInterval"] as? Double, pingTimeout = json["pingTimeout"] as? Double {
+                if let pingInterval = json["pingInterval"] as? Double, let pingTimeout = json["pingTimeout"] as? Double {
                     self.pingInterval = pingInterval / 1000.0
                     self.pingTimeout = pingTimeout / 1000.0
                 }
