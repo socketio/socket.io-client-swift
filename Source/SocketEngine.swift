@@ -102,6 +102,10 @@ public final class SocketEngine : NSObject, NSURLSessionDelegate, SocketEnginePo
                 forceWebsockets = force
             case let .Path(path):
                 socketPath = path
+                
+                if !socketPath.hasSuffix("/") {
+                    socketPath += "/"
+                }
             case let .VoipEnabled(enable):
                 voipEnabled = enable
             case let .Secure(secure):
