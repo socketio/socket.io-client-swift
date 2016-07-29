@@ -141,9 +141,9 @@ public class SSLSecurity : NSObject {
         }
         var policy: SecPolicyRef
         if self.validatedDN {
-            policy = SecPolicyCreateSSL(true, domain)!
+            policy = SecPolicyCreateSSL(true, domain)
         } else {
-            policy = SecPolicyCreateBasicX509()!
+            policy = SecPolicyCreateBasicX509()
         }
         SecTrustSetPolicies(trust,policy)
         if self.usePublicKeys {
@@ -194,7 +194,7 @@ public class SSLSecurity : NSObject {
     func extractPublicKey(data: NSData) -> SecKeyRef? {
         guard let cert = SecCertificateCreateWithData(nil, data) else { return nil }
         
-        return extractPublicKeyFromCert(cert, policy: SecPolicyCreateBasicX509()!)
+        return extractPublicKeyFromCert(cert, policy: SecPolicyCreateBasicX509())
     }
     
     /**
@@ -245,7 +245,7 @@ public class SSLSecurity : NSObject {
         let keys = (0..<SecTrustGetCertificateCount(trust)).reduce([SecKeyRef]()) { (keys: [SecKeyRef], index: Int) -> [SecKeyRef] in
             var keys = keys
             let cert = SecTrustGetCertificateAtIndex(trust, index)
-            if let key = extractPublicKeyFromCert(cert!, policy: policy!) {
+            if let key = extractPublicKeyFromCert(cert!, policy: policy) {
                 keys.append(key)
             }
             
