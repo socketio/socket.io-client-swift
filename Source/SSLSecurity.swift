@@ -54,8 +54,8 @@ public class SSLSecurity : NSObject {
     public var validatedDN = true //should the domain name be validated?
     
     var isReady = false //is the key processing done?
-    var certificates: [Data]? //the certificates
-    var pubKeys: [SecKey]? //the public keys
+    var certificates: [NSData]? //the certificates
+    @nonobjc var pubKeys: [SecKey]? //the public keys
     var usePublicKeys = false //use public keys or certificate validation?
     
     /**
@@ -148,7 +148,7 @@ public class SSLSecurity : NSObject {
         SecTrustSetPolicies(trust,policy)
         if self.usePublicKeys {
             if let keys = self.pubKeys {
-                let serverPubKeys = publicKeyChainForTrust(trust)
+                let serverPubKeys = publicKeyChainForTrust(trust: trust)
                 for serverKey in serverPubKeys as [AnyObject] {
                     for key in keys as [AnyObject] {
                         if serverKey.isEqual(key) {
@@ -241,7 +241,7 @@ public class SSLSecurity : NSObject {
      
      - returns: the public keys from the certifcate chain for the trust
      */
-    func publicKeyChainForTrust(_ trust: SecTrust) -> [SecKey] {
+    @nonobjc func publicKeyChainForTrust(trust: SecTrust) -> [SecKey] {
         let policy = SecPolicyCreateBasicX509()
         let keys = (0..<SecTrustGetCertificateCount(trust)).reduce([SecKey]()) { (keys: [SecKey], index: Int) -> [SecKey] in
             var keys = keys

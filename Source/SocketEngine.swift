@@ -24,7 +24,7 @@
 
 import Foundation
 
-public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWebsocket {
+public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, SocketEngineWebsocket {
     public let emitQueue = DispatchQueue(label: "com.socketio.engineEmitQueue", attributes: DispatchQueueAttributes.serial)
     public let handleQueue = DispatchQueue(label: "com.socketio.engineHandleQueue", attributes: DispatchQueueAttributes.serial)
     public let parseQueue = DispatchQueue(label: "com.socketio.engineParseQueue", attributes: DispatchQueueAttributes.serial)
@@ -103,6 +103,10 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             case let .path(path):
                 socketPath = path
             case let .voipEnabled(enable):
+                if !socketPath.hasSuffix("/") {
+                    socketPath += "/"
+                }
+
                 voipEnabled = enable
             case let .secure(secure):
                 self.secure = secure
@@ -116,7 +120,9 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         }
 
         super.init()
-
+        
+        sessionDelegate = sessionDelegate ?? self
+        
         (urlPolling, urlWebSocket) = createURLs()
     }
 
@@ -204,7 +210,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
             }
         }
 
-        emitQueue.async { self.doLongPoll(for: reqPolling as URLRequest) }
+        doLongPoll(for: reqPolling as URLRequest)
     }
 
     private func createURLs() -> (URL, URL) {
@@ -453,9 +459,7 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         polling = true
         probing = false
         invalidated = false
-        session = URLSession(configuration: .default,
-            delegate: sessionDelegate,
-            delegateQueue: OperationQueue())
+        session = Foundation.URLSession(configuration: .default, delegate: sessionDelegate, delegateQueue: OperationQueue.main)
         sid = ""
         waitingForPoll = false
         waitingForPost = false
@@ -544,5 +548,13 @@ public final class SocketEngine : NSObject, SocketEnginePollable, SocketEngineWe
         } else {
             flushProbeWait()
         }
+    }
+}
+
+extension SocketEngine {
+    public func URLSession(session: URLSession, didBecomeInvalidWithError error: NSError?) {
+        DefaultSocketLogger.Logger.error("Engine URLSession became invalid", type: "SocketEngine")
+        
+        didError(reason: "Engine URLSession became invalid")
     }
 }
