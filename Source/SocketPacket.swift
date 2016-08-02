@@ -152,7 +152,7 @@ struct SocketPacket {
             if dict["_placeholder"] as? Bool ?? false {
                 return binary[dict["num"] as! Int]
             } else {
-                return dict.reduce(NSMutableDictionary(), combine: {cur, keyValue in
+                return dict.reduce(NSMutableDictionary(), {cur, keyValue in
                     cur[keyValue.0 as! NSCopying] = _fillInPlaceholders(keyValue.1)
                     return cur
                 })
@@ -202,7 +202,7 @@ private extension SocketPacket {
         case let arr as [AnyObject]:
             return arr.map({shred($0, binary: &binary)}) as AnyObject
         case let dict as NSDictionary:
-            return dict.reduce(NSMutableDictionary(), combine: {cur, keyValue in
+            return dict.reduce(NSMutableDictionary(), {cur, keyValue in
                 cur[keyValue.0 as! NSCopying] = shred(keyValue.1, binary: &binary)
                 return cur
             })

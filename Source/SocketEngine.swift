@@ -25,9 +25,9 @@
 import Foundation
 
 public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, SocketEngineWebsocket {
-    public let emitQueue = DispatchQueue(label: "com.socketio.engineEmitQueue", attributes: DispatchQueueAttributes.serial)
-    public let handleQueue = DispatchQueue(label: "com.socketio.engineHandleQueue", attributes: DispatchQueueAttributes.serial)
-    public let parseQueue = DispatchQueue(label: "com.socketio.engineParseQueue", attributes: DispatchQueueAttributes.serial)
+    public let emitQueue = DispatchQueue(label: "com.socketio.engineEmitQueue", attributes: [])
+    public let handleQueue = DispatchQueue(label: "com.socketio.engineHandleQueue", attributes: [])
+    public let parseQueue = DispatchQueue(label: "com.socketio.engineParseQueue", attributes: [])
 
     public var connectParams: [String: AnyObject]? {
         didSet {
@@ -218,8 +218,8 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
             return (URL(string: "http://localhost/")!, URL(string: "http://localhost/")!)
         }
 
-        var urlPolling = URLComponents(string: url.absoluteString!)!
-        var urlWebSocket = URLComponents(string: url.absoluteString!)!
+        var urlPolling = URLComponents(string: url.absoluteString)!
+        var urlWebSocket = URLComponents(string: url.absoluteString)!
         var queryString = ""
 
         urlWebSocket.path = socketPath
@@ -482,7 +482,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
             write("", withType: .ping, withData: [])
 
             let time = DispatchTime.now() + Double(Int64(pingInterval * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
-            DispatchQueue.main.after(when: time) {[weak self] in self?.sendPing() }
+            DispatchQueue.main.asyncAfter(deadline: time) {[weak self] in self?.sendPing() }
         }
     }
 

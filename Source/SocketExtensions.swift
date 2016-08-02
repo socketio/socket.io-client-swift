@@ -24,7 +24,7 @@
 
 import Foundation
 
-enum JSONError : ErrorProtocol {
+enum JSONError : Error {
     case notArray
     case notNSDictionary
 }

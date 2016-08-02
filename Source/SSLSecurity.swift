@@ -66,7 +66,7 @@ public class SSLSecurity : NSObject {
      - returns: a representation security object to be used with
      */
     public convenience init(usePublicKeys: Bool = false) {
-        let paths = Bundle.main.pathsForResources(ofType: "cer", inDirectory: ".")
+        let paths = Bundle.main.paths(forResourcesOfType: "cer", inDirectory: ".")
         
         let certs = paths.reduce([SSLCert]()) { (certs: [SSLCert], path: String) -> [SSLCert] in
             var certs = certs
@@ -93,7 +93,7 @@ public class SSLSecurity : NSObject {
         self.usePublicKeys = usePublicKeys
         
         if self.usePublicKeys {
-            DispatchQueue.global(attributes: DispatchQueue.GlobalAttributes.qosDefault).async {
+            DispatchQueue.global(qos: .default).async {
                 let pubKeys = certs.reduce([SecKey]()) { (pubKeys: [SecKey], cert: SSLCert) -> [SecKey] in
                     var pubKeys = pubKeys
                     if let data = cert.certData, cert.key == nil {

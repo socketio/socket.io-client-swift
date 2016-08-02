@@ -49,10 +49,10 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         return nsp + "#" + (engine?.sid ?? "")
     }
 
-    private let ackQueue = DispatchQueue(label: "com.socketio.ackQueue", attributes: .serial)
-    private let emitQueue = DispatchQueue(label: "com.socketio.emitQueue", attributes: .serial)
+    private let ackQueue = DispatchQueue(label: "com.socketio.ackQueue", attributes: [])
+    private let emitQueue = DispatchQueue(label: "com.socketio.emitQueue", attributes: [])
     private let logType = "SocketIOClient"
-    private let parseQueue = DispatchQueue(label: "com.socketio.parseQueue", attributes: .serial)
+    private let parseQueue = DispatchQueue(label: "com.socketio.parseQueue", attributes: [])
 
     private var anyHandler: ((SocketAnyEvent) -> Void)?
     private var currentReconnectAttempt = 0
@@ -71,7 +71,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         self.options = options
         self.socketURL = socketURL
         
-        if socketURL.absoluteString?.hasPrefix("https://") ?? false {
+        if socketURL.absoluteString.hasPrefix("https://") ?? false {
             self.options.insertIgnore(.secure(true))
         }
         
@@ -149,7 +149,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
         let time = DispatchTime.now() + Double(Int64(timeoutAfter) * Int64(NSEC_PER_SEC)) / Double(NSEC_PER_SEC)
 
-        handleQueue.after(when: time) {[weak self] in
+        handleQueue.asyncAfter(deadline: time) {[weak self] in
             if let this = self, this.status != .connected && this.status != .disconnected {
                 this.status = .disconnected
                 this.engine?.disconnect(reason: "Connect timeout")
@@ -174,7 +174,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
                 if timeout != 0 {
                     let time = DispatchTime.now() + Double(Int64(timeout * NSEC_PER_SEC)) / Double(NSEC_PER_SEC)
                     
-                    this.handleQueue.after(when: time) {
+                    this.handleQueue.asyncAfter(deadline: time) {
                         this.ackHandlers.timeoutAck(ack, onQueue: this.handleQueue)
                     }
                 }
@@ -443,7 +443,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         
         let dispatchAfter = DispatchTime.now() + Double(Int64(UInt64(reconnectWait) * NSEC_PER_SEC)) / Double(NSEC_PER_SEC)
         
-        DispatchQueue.main.after(when: dispatchAfter, execute: _tryReconnect)
+        DispatchQueue.main.asyncAfter(deadline: dispatchAfter, execute: _tryReconnect)
     }
 }
 
