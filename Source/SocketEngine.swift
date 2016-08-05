@@ -213,8 +213,8 @@ public final class SocketEngine : NSObject, NSURLSessionDelegate, SocketEnginePo
             return (NSURL(), NSURL())
         }
 
-        let urlPolling = NSURLComponents(string: url.absoluteString)!
-        let urlWebSocket = NSURLComponents(string: url.absoluteString)!
+        let urlPolling = NSURLComponents(string: url.absoluteString!)!
+        let urlWebSocket = NSURLComponents(string: url.absoluteString!)!
         var queryString = ""
         
         urlWebSocket.path = socketPath

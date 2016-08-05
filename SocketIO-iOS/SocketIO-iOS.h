@@ -15,5 +15,5 @@ FOUNDATION_EXPORT double SocketIO_iOSVersionNumber;
 FOUNDATION_EXPORT const unsigned char SocketIO_iOSVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <SocketIO_iOS/PublicHeader.h>
-
+#import <SocketIO-iOS/SocketIOClientSwift-Swift.h>
 
