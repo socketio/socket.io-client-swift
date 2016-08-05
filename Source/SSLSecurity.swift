@@ -164,10 +164,9 @@ public class SSLSecurity : NSObject {
                 collect.append(SecCertificateCreateWithData(nil,cert)!)
             }
             SecTrustSetAnchorCertificates(trust,collect)
-            var result: SecTrustResultType = 0
+            var result: SecTrustResultType = SecTrustResultType.Invalid
             SecTrustEvaluate(trust,&result)
-            let r = Int(result)
-            if r == kSecTrustResultUnspecified || r == kSecTrustResultProceed {
+            if result == SecTrustResultType.Unspecified || result == SecTrustResultType.Proceed {
                 var trustedCount = 0
                 for serverCert in serverCerts {
                     for cert in certs {
@@ -211,7 +210,7 @@ public class SSLSecurity : NSObject {
         
         guard let trust = possibleTrust else { return nil }
         
-        var result: SecTrustResultType = 0
+        var result: SecTrustResultType = SecTrustResultType.Invalid
         SecTrustEvaluate(trust, &result)
         return SecTrustCopyPublicKey(trust)
     }
