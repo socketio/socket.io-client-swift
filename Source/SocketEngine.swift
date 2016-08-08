@@ -259,7 +259,7 @@ public final class SocketEngine : NSObject, NSURLSessionDelegate, SocketEnginePo
             }
         }
 
-        ws?.queue = handleQueue
+        ws?.callbackQueue = handleQueue
         ws?.voipEnabled = voipEnabled
         ws?.delegate = self
         ws?.selfSignedSSL = selfSigned
