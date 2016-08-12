@@ -435,9 +435,9 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         currentReconnectAttempt += 1
         connect()
         
-        let dispatchAfter = dispatch_time(DISPATCH_TIME_NOW, Int64(UInt64(reconnectWait) * NSEC_PER_SEC))
+        let time = dispatch_time(DISPATCH_TIME_NOW, Int64(UInt64(reconnectWait) * NSEC_PER_SEC))
         
-        dispatch_after(dispatchAfter, dispatch_get_main_queue(), _tryReconnect)
+        dispatch_after(time, dispatch_get_main_queue(), _tryReconnect)
     }
 }
 
@@ -456,6 +456,6 @@ extension SocketIOClient {
     }
 
     func emitTest(event: String, _ data: AnyObject...) {
-        self._emit([event] + data)
+        _emit([event] + data)
     }
 }
