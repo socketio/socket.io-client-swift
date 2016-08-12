@@ -153,17 +153,12 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         }
     }
 
-    private func checkIfMessageIsBase64Binary(_ message: String) -> Bool {
-        if message.hasPrefix("b4") {
-            // binary in base64 string
-            let noPrefix = message[message.characters.index(message.startIndex, offsetBy: 2)..<message.endIndex]
-            if let data = Data(base64Encoded: noPrefix, options: Data.Base64DecodingOptions(rawValue: 0)) {
-                client?.parseEngineBinaryData(data)
-            }
-
-            return true
-        } else {
-            return false
+    private func handleBase64(message: String) {
+        // binary in base64 string
+        let noPrefix = message[message.index(message.startIndex, offsetBy: 2)..<message.endIndex]
+        
+        if let data = NSData(base64Encoded: noPrefix, options: .ignoreUnknownCharacters) {
+            client?.parseEngineBinaryData(data as Data)
         }
     }
 
@@ -264,7 +259,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
             }
         }
 
-        ws?.queue = handleQueue
+        ws?.callbackQueue = handleQueue
         ws?.voipEnabled = voipEnabled
         ws?.delegate = self
         ws?.selfSignedSSL = selfSigned
@@ -419,12 +414,14 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
 
         let reader = SocketStringReader(message: message)
         let fixedString: String
+        
+        if message.hasPrefix("b4") {
+            return handleBase64(message: message)
+        }
 
         guard let type = SocketEnginePacketType(rawValue: Int(reader.currentCharacter) ?? -1) else {
-            if !checkIfMessageIsBase64Binary(message) {
-                checkAndHandleEngineError(message)
-            }
-
+            checkAndHandleEngineError(message)
+            
             return
         }
 

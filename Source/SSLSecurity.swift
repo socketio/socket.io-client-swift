@@ -88,9 +88,9 @@ public class SSLSecurity : NSObject {
      - returns: a representation security object to be used with
      */
     public init(certs: [SSLCert], usePublicKeys: Bool) {
-        super.init()
-        
         self.usePublicKeys = usePublicKeys
+        
+        super.init()
         
         if self.usePublicKeys {
             DispatchQueue.global(qos: .default).async {

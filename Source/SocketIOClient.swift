@@ -279,7 +279,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
             didDisconnect(reason: reason)
         } else if !reconnecting {
             reconnecting = true
-            tryReconnect(reason)
+            tryReconnect(reason: reason)
         }
     }
 
@@ -416,19 +416,17 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         return data.flatMap({$0 as? AnyObject})
     }
 
-    private func tryReconnect(_ reason: String) {
-        if reconnecting {
-            DefaultSocketLogger.Logger.log("Starting reconnect", type: logType)
-            handleEvent("reconnect", data: [reason as AnyObject], isInternalMessage: true)
-            
-            _tryReconnect()
-        }
+    private func tryReconnect(reason: String) {
+        guard reconnecting else { return }
+
+        DefaultSocketLogger.Logger.log("Starting reconnect", type: logType)
+        handleEvent("reconnect", data: [reason], isInternalMessage: true)
+        
+        _tryReconnect()
     }
 
     private func _tryReconnect() {
-        if !reconnecting {
-            return
-        }
+        guard reconnecting else { return }
 
         if reconnectAttempts != -1 && currentReconnectAttempt + 1 > reconnectAttempts || !reconnects {
             return didDisconnect(reason: "Reconnect Failed")
@@ -441,9 +439,9 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         currentReconnectAttempt += 1
         connect()
         
-        let dispatchAfter = DispatchTime.now() + Double(Int64(UInt64(reconnectWait) * NSEC_PER_SEC)) / Double(NSEC_PER_SEC)
+        let deadline = DispatchTime.now() + Double(Int64(UInt64(reconnectWait) * NSEC_PER_SEC)) / Double(NSEC_PER_SEC)
         
-        DispatchQueue.main.asyncAfter(deadline: dispatchAfter, execute: _tryReconnect)
+        DispatchQueue.main.asyncAfter(deadline: deadline, execute: _tryReconnect)
     }
 }
 
@@ -461,7 +459,7 @@ extension SocketIOClient {
         self.engine = engine
     }
 
-    func emitTest(_ event: String, _ data: AnyObject...) {
-        self._emit([event as AnyObject] + data)
+    func emitTest(event: String, _ data: AnyObject...) {
+        _emit([event] + data)
     }
 }
