@@ -413,18 +413,16 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     }
 
     private func tryReconnectWithReason(reason: String) {
-        if reconnecting {
-            DefaultSocketLogger.Logger.log("Starting reconnect", type: logType)
-            handleEvent("reconnect", data: [reason], isInternalMessage: true)
-            
-            _tryReconnect()
-        }
+        guard reconnecting else { return }
+
+        DefaultSocketLogger.Logger.log("Starting reconnect", type: logType)
+        handleEvent("reconnect", data: [reason], isInternalMessage: true)
+        
+        _tryReconnect()
     }
 
     private func _tryReconnect() {
-        if !reconnecting {
-            return
-        }
+        guard reconnecting else { return }
 
         if reconnectAttempts != -1 && currentReconnectAttempt + 1 > reconnectAttempts || !reconnects {
             return didDisconnect("Reconnect Failed")
@@ -437,9 +435,9 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         currentReconnectAttempt += 1
         connect()
         
-        let dispatchAfter = dispatch_time(DISPATCH_TIME_NOW, Int64(UInt64(reconnectWait) * NSEC_PER_SEC))
+        let time = dispatch_time(DISPATCH_TIME_NOW, Int64(UInt64(reconnectWait) * NSEC_PER_SEC))
         
-        dispatch_after(dispatchAfter, dispatch_get_main_queue(), _tryReconnect)
+        dispatch_after(time, dispatch_get_main_queue(), _tryReconnect)
     }
 }
 
@@ -458,6 +456,6 @@ extension SocketIOClient {
     }
 
     func emitTest(event: String, _ data: AnyObject...) {
-        self._emit([event] + data)
+        _emit([event] + data)
     }
 }
