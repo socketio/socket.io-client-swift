@@ -413,18 +413,16 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     }
 
     private func tryReconnectWithReason(reason: String) {
-        if reconnecting {
-            DefaultSocketLogger.Logger.log("Starting reconnect", type: logType)
-            handleEvent("reconnect", data: [reason], isInternalMessage: true)
-            
-            _tryReconnect()
-        }
+        guard reconnecting else { return }
+
+        DefaultSocketLogger.Logger.log("Starting reconnect", type: logType)
+        handleEvent("reconnect", data: [reason], isInternalMessage: true)
+        
+        _tryReconnect()
     }
 
     private func _tryReconnect() {
-        if !reconnecting {
-            return
-        }
+        guard reconnecting else { return }
 
         if reconnectAttempts != -1 && currentReconnectAttempt + 1 > reconnectAttempts || !reconnects {
             return didDisconnect("Reconnect Failed")
