@@ -89,24 +89,16 @@ extension NSDictionary {
         }
     }
     
-    func toSocketOptionsSet() -> Set<SocketIOClientOption> {
-        var options = Set<SocketIOClientOption>()
+    func toSocketConfiguration() -> SocketIOClientConfiguration {
+        var options = [] as SocketIOClientConfiguration
         
         for (rawKey, value) in self {
             if let key = rawKey as? String, opt = NSDictionary.keyValueToSocketIOClientOption(key, value: value) {
-                options.insertIgnore(opt)
+                options.insert(opt)
             }
         }
         
         return options
-    }
-}
-
-extension Set where Element : ClientOption {
-    mutating func insertIgnore(element: Element) {
-        if !contains(element) {
-            insert(element)
-        }
     }
 }
 
