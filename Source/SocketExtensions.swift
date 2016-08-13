@@ -29,6 +29,13 @@ enum JSONError : Error {
     case notNSDictionary
 }
 
+extension Array {
+    /// Because Swift 3 removes a lot of implicit briding so we have to perform more casts
+    func toAnyObjectArray() -> [AnyObject] {
+        return flatMap({$0 as? AnyObject})
+    }
+}
+
 extension Array where Element: AnyObject {
     func toJSON() throws -> Data {
         return try JSONSerialization.data(withJSONObject: self as NSArray, options: JSONSerialization.WritingOptions(rawValue: 0))

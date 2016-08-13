@@ -140,7 +140,7 @@ class SocketSideEffectTest: XCTestCase {
     func testSocketDataToAnyObject() {
         let data = ["test", 1, 2.2, ["Hello": 2, "bob": 2.2], true, [1, 2], [1.1, 2]] as [SocketData]
         
-        XCTAssertEqual(data.count, socket.socketDataToAnyObject(data).count)
+        XCTAssertEqual(data.count, data.toAnyObjectArray().count)
     }
     
     func testHandleMultipleBinaryEvent() {

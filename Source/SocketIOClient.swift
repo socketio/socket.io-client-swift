@@ -214,7 +214,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
     /// Send a message to the server
     public func emit(_ event: String, _ items: SocketData...) {
-        emit(event, with: socketDataToAnyObject(items))
+        emit(event, with: items.toAnyObjectArray())
     }
 
     /// Same as emit, but meant for Objective-C
@@ -230,7 +230,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     /// Sends a message to the server, requesting an ack. Use the onAck method of SocketAckHandler to add
     /// an ack.
     public func emitWithAck(_ event: String, _ items: SocketData...) -> OnAckCallback {
-        return emitWithAck(event, with: socketDataToAnyObject(items))
+        return emitWithAck(event, with: items.toAnyObjectArray())
     }
 
     /// Same as emitWithAck, but for Objective-C
@@ -409,11 +409,6 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     /// Can be used after disconnecting to break any potential remaining retain cycles.
     public func removeAllHandlers() {
         handlers.removeAll(keepingCapacity: false)
-    }
-    
-    /// Because Swift 3 removes a lot of implicit briding so we have to perform more casts
-    func socketDataToAnyObject(_ data: [SocketData]) -> [AnyObject] {
-        return data.flatMap({$0 as? AnyObject})
     }
 
     private func tryReconnect(reason: String) {
