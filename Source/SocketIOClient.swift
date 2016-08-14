@@ -45,9 +45,6 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     public var config: SocketIOClientConfiguration
     public var reconnects = true
     public var reconnectWait = 10
-    public var sid: String? {
-        return nsp + "#" + (engine?.sid ?? "")
-    }
 
     private let ackQueue = dispatch_queue_create("com.socketio.ackQueue", DISPATCH_QUEUE_SERIAL)
     private let emitQueue = dispatch_queue_create("com.socketio.emitQueue", DISPATCH_QUEUE_SERIAL)
@@ -65,6 +62,10 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     private(set) var reconnectAttempts = -1
 
     var waitingPackets = [SocketPacket]()
+    
+    public var sid: String? {
+        return nsp + "#" + (engine?.sid ?? "")
+    }
     
     /// Type safe way to create a new SocketIOClient. opts can be omitted
     public init(socketURL: NSURL, config: SocketIOClientConfiguration = []) {

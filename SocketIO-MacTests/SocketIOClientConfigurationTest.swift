@@ -15,7 +15,7 @@ class TestSocketIOClientConfiguration: XCTestCase {
     override func setUp() {
         super.setUp()
         
-        config = [.Log(false), .ForceNew(true)] as SocketIOClientConfiguration
+        config = [.Log(false), .ForceNew(true)]
     }
 
     func testReplaceSameOption() {

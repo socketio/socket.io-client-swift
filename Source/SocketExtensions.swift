@@ -36,7 +36,7 @@ extension Array where Element: AnyObject {
 }
 
 extension NSCharacterSet {
-    class var allowedURLCharacterSet: NSCharacterSet {
+    static var allowedURLCharacterSet: NSCharacterSet {
         return NSCharacterSet(charactersInString: "!*'();:@&=+$,/?%#[]\" {}").invertedSet
     }
 }
