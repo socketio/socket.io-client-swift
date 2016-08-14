@@ -42,12 +42,9 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
     public var forceNew = false
     public var nsp = "/"
-    public var options: Set<SocketIOClientOption>
+    public var config: SocketIOClientConfiguration
     public var reconnects = true
     public var reconnectWait = 10
-    public var sid: String? {
-        return nsp + "#" + (engine?.sid ?? "")
-    }
 
     private let ackQueue = DispatchQueue(label: "com.socketio.ackQueue", attributes: [])
     private let emitQueue = DispatchQueue(label: "com.socketio.emitQueue", attributes: [])
@@ -66,16 +63,20 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
     var waitingPackets = [SocketPacket]()
     
+    public var sid: String? {
+        return nsp + "#" + (engine?.sid ?? "")
+    }
+    
     /// Type safe way to create a new SocketIOClient. opts can be omitted
-    public init(socketURL: URL, options: Set<SocketIOClientOption> = []) {
-        self.options = options
+    public init(socketURL: URL, config: SocketIOClientConfiguration = []) {
+        self.config = config
         self.socketURL = socketURL
         
-        if socketURL.absoluteString.hasPrefix("https://") ?? false {
-            self.options.insertIgnore(.secure(true))
+        if socketURL.absoluteString.hasPrefix("https://") {
+            self.config.insert(.secure(true))
         }
         
-        for option in options {
+        for option in config {
             switch option {
             case let .reconnects(reconnects):
                 self.reconnects = reconnects
@@ -97,16 +98,16 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
                 continue
             }
         }
-        
-        self.options.insertIgnore(.path("/socket.io/"))
+
+        self.config.insert(.path("/socket.io/"), replacing: false)
         
         super.init()
     }
     
     /// Not so type safe way to create a SocketIOClient, meant for Objective-C compatiblity.
     /// If using Swift it's recommended to use `init(socketURL: NSURL, options: Set<SocketIOClientOption>)`
-    public convenience init(socketURL: URL, options: NSDictionary?) {
-        self.init(socketURL: socketURL, options: options?.toSocketOptionsSet() ?? [])
+    public convenience init(socketURL: NSURL, config: NSDictionary?) {
+        self.init(socketURL: socketURL as URL, config: config?.toSocketConfiguration() ?? [])
     }
 
     deinit {
@@ -117,7 +118,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     private func addEngine() -> SocketEngineSpec {
         DefaultSocketLogger.Logger.log("Adding engine", type: logType, args: "")
 
-        engine = SocketEngine(client: self, url: socketURL, options: options)
+        engine = SocketEngine(client: self, url: socketURL, config: config)
 
         return engine!
     }

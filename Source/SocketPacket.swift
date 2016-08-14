@@ -26,6 +26,10 @@
 import Foundation
 
 struct SocketPacket {
+    enum PacketType: Int {
+        case connect, disconnect, event, ack, error, binaryEvent, binaryAck
+    }
+    
     private let placeholders: Int
     
     private static let logType = "SocketPacket"
@@ -34,9 +38,8 @@ struct SocketPacket {
     let id: Int
     let type: PacketType
     
-    enum PacketType: Int {
-        case connect, disconnect, event, ack, error, binaryEvent, binaryAck
-    }
+    var binary: [Data]
+    var data: [AnyObject]
     
     var args: [AnyObject] {
         if type == .event || type == .binaryEvent && data.count != 0 {
@@ -46,8 +49,6 @@ struct SocketPacket {
         }
     }
     
-    var binary: [Data]
-    var data: [AnyObject]
     var description: String {
         return "SocketPacket {type: \(String(type.rawValue)); data: " +
             "\(String(data)); id: \(id); placeholders: \(placeholders); nsp: \(nsp)}"
@@ -110,27 +111,12 @@ struct SocketPacket {
     
     private func createPacketString() -> String {
         let typeString = String(type.rawValue)
-        let binaryCountString: String
-        let nspString: String
-        let idString: String
-        
-        if type == .binaryEvent || type == .binaryAck {
-            binaryCountString = typeString + String(binary.count) + "-"
-        } else {
-            binaryCountString = typeString
-        }
-        
-        if nsp != "/" {
-            nspString = binaryCountString + nsp + ","
-        } else {
-            nspString = binaryCountString
-        }
-        
-        if id != -1 {
-            idString = nspString + String(id)
-        } else {
-            idString = nspString
-        }
+        // Binary count?
+        let binaryCountString = typeString + (type == .binaryEvent || type == .binaryAck ? String(binary.count) + "-" : "")
+        // Namespace?
+        let nspString = binaryCountString + (nsp != "/" ? nsp + "," : "")
+        // Ack number?
+        let idString = nspString + (id != -1 ? String(id) : "")
         
         return completeMessage(idString)
     }

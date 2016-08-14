@@ -24,7 +24,7 @@
 
 import Foundation
 
-protocol ClientOption : CustomStringConvertible, Hashable {
+protocol ClientOption : CustomStringConvertible, Equatable {
     func getSocketIOOptionValue() -> AnyObject
 }
 
@@ -97,10 +97,6 @@ public enum SocketIOClientOption : ClientOption {
         }
         
         return description
-    }
-    
-    public var hashValue: Int {
-        return description.hashValue
     }
     
     func getSocketIOOptionValue() -> AnyObject {
