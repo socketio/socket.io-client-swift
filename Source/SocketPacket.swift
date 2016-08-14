@@ -49,8 +49,7 @@ struct SocketPacket {
     var binary: [NSData]
     var data: [AnyObject]
     var description: String {
-        return "SocketPacket {type: \(String(type.rawValue)); data: " +
-            "\(String(data)); id: \(id); placeholders: \(placeholders); nsp: \(nsp)}"
+        return "SocketPacket {type: \(String(type.rawValue)); data: \(String(data)); id: \(id); placeholders: \(placeholders); nsp: \(nsp)}"
     }
     
     var event: String {
@@ -90,12 +89,12 @@ struct SocketPacket {
         let restOfMessage: String
         
         if data.count == 0 {
-            return message + "[]"
+            return "\(message)[]"
         }
         
         do {
             let jsonSend = try data.toJSON()
-            guard let jsonString = String(data: jsonSend, encoding: NSUTF8StringEncoding) else { return message + "[]" }
+            guard let jsonString = String(data: jsonSend, encoding: NSUTF8StringEncoding) else { return "\(message)[]" }
             
             restOfMessage = jsonString
         } catch {
@@ -105,7 +104,7 @@ struct SocketPacket {
             restOfMessage = "[]"
         }
         
-        return message + restOfMessage
+        return "\(message)\(restOfMessage)"
     }
     
     private func createPacketString() -> String {
@@ -115,19 +114,19 @@ struct SocketPacket {
         let idString: String
         
         if type == .BinaryEvent || type == .BinaryAck {
-            binaryCountString = typeString + String(binary.count) + "-"
+            binaryCountString = "\(typeString)\(String(binary.count))-"
         } else {
             binaryCountString = typeString
         }
         
         if nsp != "/" {
-            nspString = binaryCountString + nsp + ","
+            nspString = "\(binaryCountString)\(nsp),"
         } else {
             nspString = binaryCountString
         }
         
         if id != -1 {
-            idString = nspString + String(id)
+            idString = "\(nspString)\(String(id))"
         } else {
             idString = nspString
         }
