@@ -5,11 +5,7 @@ Socket.IO-client for iOS/OS X.
 
 ##Example
 ```swift
-<<<<<<< HEAD
-let socket = SocketIOClient(socketURL: NSURL(string: "http://localhost:8080")!, options: [.log(true), .forcePolling(true)])
-=======
-let socket = SocketIOClient(socketURL: NSURL(string: "http://localhost:8080")!, config: [.Log(true), .ForcePolling(true)])
->>>>>>> development
+let socket = SocketIOClient(socketURL: NSURL(string: "http://localhost:8080")!, config: [.log(true), .forcePolling(true)])
 
 socket.on("connect") {data, ack in
     print("socket connected")
