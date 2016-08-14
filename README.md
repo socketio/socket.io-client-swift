@@ -5,7 +5,7 @@ Socket.IO-client for iOS/OS X.
 
 ##Example
 ```swift
-let socket = SocketIOClient(socketURL: NSURL(string: "http://localhost:8080")!, options: [.Log(true), .ForcePolling(true)])
+let socket = SocketIOClient(socketURL: NSURL(string: "http://localhost:8080")!, config: [.Log(true), .ForcePolling(true)])
 
 socket.on("connect") {data, ack in
     print("socket connected")
@@ -27,7 +27,7 @@ socket.connect()
 ##Objective-C Example
 ```objective-c
 NSURL* url = [[NSURL alloc] initWithString:@"http://localhost:8080"];
-SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url options:@{@"log": @YES, @"forcePolling": @YES}];
+SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{@"log": @YES, @"forcePolling": @YES}];
 
 [socket on:@"connect" callback:^(NSArray* data, SocketAckEmitter* ack) {
     NSLog(@"socket connected");
@@ -139,7 +139,7 @@ Run `seed install`.
 ##API
 Constructors
 -----------
-`init(var socketURL: NSURL, options: Set<SocketIOClientOption> = [])` - Creates a new SocketIOClient. options is a Set of SocketIOClientOption. If your socket.io server is secure, you need to specify `https` in your socketURL.
+`init(var socketURL: NSURL, config: SocketIOClientConfiguration = [])` - Creates a new SocketIOClient. options is a Set of SocketIOClientOption. If your socket.io server is secure, you need to specify `https` in your socketURL.
 
 `convenience init(socketURL: NSURL, options: NSDictionary?)` - Same as above, but meant for Objective-C. See Options on how convert between SocketIOClientOptions and dictionary keys.
 

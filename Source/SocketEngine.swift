@@ -80,7 +80,7 @@ public final class SocketEngine : NSObject, NSURLSessionDelegate, SocketEnginePo
     private var selfSigned = false
     private var voipEnabled = false
 
-    public init(client: SocketEngineClient, url: NSURL, options: Set<SocketIOClientOption>) {
+    public init(client: SocketEngineClient, url: NSURL, options: SocketIOClientConfiguration) {
         self.client = client
         self.url = url
         
@@ -127,7 +127,7 @@ public final class SocketEngine : NSObject, NSURLSessionDelegate, SocketEnginePo
     }
     
     public convenience init(client: SocketEngineClient, url: NSURL, options: NSDictionary?) {
-        self.init(client: client, url: url, options: options?.toSocketOptionsSet() ?? [])
+        self.init(client: client, url: url, options: options?.toSocketConfiguration() ?? [])
     }
     
     deinit {
