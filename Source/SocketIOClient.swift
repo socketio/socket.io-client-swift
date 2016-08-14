@@ -118,7 +118,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     private func addEngine() -> SocketEngineSpec {
         DefaultSocketLogger.Logger.log("Adding engine", type: logType)
 
-        engine = SocketEngine(client: self, url: socketURL, options: config)
+        engine = SocketEngine(client: self, url: socketURL, config: config)
 
         return engine!
     }

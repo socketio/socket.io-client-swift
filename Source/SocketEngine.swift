@@ -80,11 +80,11 @@ public final class SocketEngine : NSObject, NSURLSessionDelegate, SocketEnginePo
     private var selfSigned = false
     private var voipEnabled = false
 
-    public init(client: SocketEngineClient, url: NSURL, options: SocketIOClientConfiguration) {
+    public init(client: SocketEngineClient, url: NSURL, config: SocketIOClientConfiguration) {
         self.client = client
         self.url = url
         
-        for option in options {
+        for option in config {
             switch option {
             case let .ConnectParams(params):
                 connectParams = params
@@ -127,7 +127,7 @@ public final class SocketEngine : NSObject, NSURLSessionDelegate, SocketEnginePo
     }
     
     public convenience init(client: SocketEngineClient, url: NSURL, options: NSDictionary?) {
-        self.init(client: client, url: url, options: options?.toSocketConfiguration() ?? [])
+        self.init(client: client, url: url, config: options?.toSocketConfiguration() ?? [])
     }
     
     deinit {
