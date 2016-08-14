@@ -243,8 +243,8 @@ public final class SocketEngine : NSObject, NSURLSessionDelegate, SocketEnginePo
             }
         }
 
-        urlWebSocket.percentEncodedQuery = "transport=websocket" + queryString
-        urlPolling.percentEncodedQuery = "transport=polling&b64=1" + queryString
+        urlWebSocket.percentEncodedQuery = "transport=websocket\(queryString)"
+        urlPolling.percentEncodedQuery = "transport=polling&b64=1\(queryString)"
         
         return (urlPolling.URL!, urlWebSocket.URL!)
     }
