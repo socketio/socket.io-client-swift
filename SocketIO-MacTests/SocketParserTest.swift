@@ -15,19 +15,19 @@ class SocketParserTest: XCTestCase {
     //Format key: message; namespace-data-binary-id
     static let packetTypes: [String: (String, [AnyObject], [Data], Int)] = [
         "0": ("/", [], [], -1), "1": ("/", [], [], -1),
-        "25[\"test\"]": ("/", ["test"], [], 5),
-        "2[\"test\",\"~~0\"]": ("/", ["test", "~~0"], [], -1),
-        "2/swift,[\"testArrayEmitReturn\",[\"test3\",\"test4\"]]": ("/swift", ["testArrayEmitReturn", ["test3", "test4"]], [], -1),
-        "51-/swift,[\"testMultipleItemsWithBufferEmitReturn\",[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]": ("/swift", ["testMultipleItemsWithBufferEmitReturn", [1, 2], ["test": "bob"], 25, "polo", ["_placeholder": true, "num": 0]], [], -1),
-        "3/swift,0[[\"test3\",\"test4\"]]": ("/swift", [["test3", "test4"]], [], 0),
+        "25[\"test\"]": ("/", ["test" as AnyObject], [], 5),
+        "2[\"test\",\"~~0\"]": ("/", ["test" as AnyObject, "~~0" as AnyObject], [], -1),
+        "2/swift,[\"testArrayEmitReturn\",[\"test3\",\"test4\"]]": ("/swift", ["testArrayEmitReturn" as AnyObject, ["test3" as AnyObject, "test4" as AnyObject] as NSArray], [], -1),
+        "51-/swift,[\"testMultipleItemsWithBufferEmitReturn\",[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]": ("/swift", ["testMultipleItemsWithBufferEmitReturn" as AnyObject, [1, 2] as NSArray, ["test": "bob"] as NSDictionary, 25 as AnyObject, "polo" as AnyObject, ["_placeholder": true, "num": 0] as NSDictionary], [], -1),
+        "3/swift,0[[\"test3\",\"test4\"]]": ("/swift", [["test3", "test4"] as NSArray], [], 0),
         "61-/swift,19[[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]":
-            ("/swift", [ [1, 2], ["test": "bob"], 25, "polo", ["_placeholder": true, "num": 0]], [], 19),
+            ("/swift", [ [1, 2] as NSArray, ["test": "bob"] as NSDictionary, 25 as AnyObject, "polo" as AnyObject, ["_placeholder": true, "num": 0] as NSDictionary], [], 19),
         "4/swift,": ("/swift", [], [], -1),
         "0/swift": ("/swift", [], [], -1),
         "1/swift": ("/swift", [], [], -1),
-        "4\"ERROR\"": ("/", ["ERROR"], [], -1),
-        "4{\"test\":2}": ("/", [["test": 2]], [], -1),
-        "41": ("/", [1], [], -1)]
+        "4\"ERROR\"": ("/", ["ERROR" as AnyObject], [], -1),
+        "4{\"test\":2}": ("/", [["test": 2] as NSDictionary], [], -1),
+        "41": ("/", [1 as AnyObject], [], -1)]
     
     func testDisconnect() {
         let message = "1"

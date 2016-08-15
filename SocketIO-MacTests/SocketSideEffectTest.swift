@@ -25,20 +25,20 @@ class SocketSideEffectTest: XCTestCase {
     }
     
     func testFirstAck() {
-        socket.emitWithAck("test")(timeoutAfter: 0) {data in}
+        socket.emitWithAck("test")(0) {data in}
         XCTAssertEqual(socket.currentAck, 0)
     }
     
     func testSecondAck() {
-        socket.emitWithAck("test")(timeoutAfter: 0) {data in}
-        socket.emitWithAck("test")(timeoutAfter: 0) {data in}
+        socket.emitWithAck("test")(0) {data in}
+        socket.emitWithAck("test")(0) {data in}
         
         XCTAssertEqual(socket.currentAck, 1)
     }
     
     func testHandleAck() {
         let expect = expectation(description: "handled ack")
-        socket.emitWithAck("test")(timeoutAfter: 0) {data in
+        socket.emitWithAck("test")(0) {data in
             XCTAssertEqual(data[0] as? String, "hello world")
             expect.fulfill()
         }
@@ -49,7 +49,7 @@ class SocketSideEffectTest: XCTestCase {
     
     func testHandleAck2() {
         let expect = expectation(description: "handled ack2")
-        socket.emitWithAck("test")(timeoutAfter: 0) {data in
+        socket.emitWithAck("test")(0) {data in
             XCTAssertTrue(data.count == 2, "Wrong number of ack items")
             expect.fulfill()
         }
@@ -127,7 +127,7 @@ class SocketSideEffectTest: XCTestCase {
         let expect = expectation(description: "handled binary event")
         socket.on("test") {data, ack in
             if let dict = data[0] as? NSDictionary, let data = dict["test"] as? NSData {
-                XCTAssertEqual(data, self.data)
+                XCTAssertEqual(data as Data, self.data)
                 expect.fulfill()
             }
         }
@@ -148,8 +148,8 @@ class SocketSideEffectTest: XCTestCase {
         socket.on("test") {data, ack in
             if let dict = data[0] as? NSDictionary, let data = dict["test"] as? NSData,
                 let data2 = dict["test2"] as? NSData {
-                    XCTAssertEqual(data, self.data)
-                    XCTAssertEqual(data2, self.data2)
+                    XCTAssertEqual(data as Data, self.data)
+                    XCTAssertEqual(data2 as Data, self.data2)
                     expect.fulfill()
             }
         }

@@ -19,7 +19,7 @@ class SocketAckManagerTest: XCTestCase {
             callbackExpection.fulfill()
         }
         ackManager.addAck(1, callback: callback)
-        ackManager.executeAck(1, with: itemsArray, onQueue: DispatchQueue.main)
+        ackManager.executeAck(1, with: itemsArray as [AnyObject], onQueue: DispatchQueue.main)
         
         waitForExpectations(timeout: 3.0, handler: nil)
     }
