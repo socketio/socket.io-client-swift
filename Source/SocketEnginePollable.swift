@@ -100,7 +100,7 @@ extension SocketEnginePollable {
         doLongPoll(for: req )
     }
     
-    func doRequest(for req: URLRequest, callbackWith callback: (Data?, URLResponse?, Error?) -> Void) {
+    func doRequest(for req: URLRequest, callbackWith callback: @escaping (Data?, URLResponse?, Error?) -> Void) {
         if !polling || closed || invalidated || fastUpgrade {
             return
         }

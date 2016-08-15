@@ -41,7 +41,7 @@ extension String : SocketData {}
 
 public typealias AckCallback = ([AnyObject]) -> Void
 public typealias NormalCallback = ([AnyObject], SocketAckEmitter) -> Void
-public typealias OnAckCallback = (timeoutAfter: UInt64, callback: AckCallback) -> Void
+public typealias OnAckCallback = (_ timeoutAfter: UInt64, _ callback: AckCallback) -> Void
 
 typealias Probe = (msg: String, type: SocketEnginePacketType, data: [Data])
 typealias ProbeWaitQueue = [Probe]

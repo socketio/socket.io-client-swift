@@ -116,7 +116,7 @@ public class SSLSecurity : NSObject {
                 }
                 return certificates
             }
-            self.certificates = certificates
+            self.certificates = certificates as [NSData]
             self.isReady = true
         }
     }
@@ -141,7 +141,7 @@ public class SSLSecurity : NSObject {
         }
         var policy: SecPolicy
         if self.validatedDN {
-            policy = SecPolicyCreateSSL(true, domain)
+            policy = SecPolicyCreateSSL(true, domain as CFString?)
         } else {
             policy = SecPolicyCreateBasicX509()
         }
@@ -163,7 +163,7 @@ public class SSLSecurity : NSObject {
             for cert in certs {
                 collect.append(SecCertificateCreateWithData(nil,cert)!)
             }
-            SecTrustSetAnchorCertificates(trust,collect)
+            SecTrustSetAnchorCertificates(trust,collect as CFArray)
             var result = SecTrustResultType(rawValue: 0)!
             SecTrustEvaluate(trust,&result)
             let r = Int(result.rawValue)
@@ -171,7 +171,7 @@ public class SSLSecurity : NSObject {
                 var trustedCount = 0
                 for serverCert in serverCerts {
                     for cert in certs {
-                        if cert == serverCert {
+                        if cert as Data == serverCert {
                             trustedCount += 1
                             break
                         }
@@ -193,7 +193,7 @@ public class SSLSecurity : NSObject {
      - returns: a public key
      */
     func extractPublicKey(_ data: Data) -> SecKey? {
-        guard let cert = SecCertificateCreateWithData(nil, data) else { return nil }
+        guard let cert = SecCertificateCreateWithData(nil, data as CFData) else { return nil }
         
         return extractPublicKeyFromCert(cert, policy: SecPolicyCreateBasicX509())
     }

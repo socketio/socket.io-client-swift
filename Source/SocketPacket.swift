@@ -51,11 +51,11 @@ struct SocketPacket {
     
     var description: String {
         return "SocketPacket {type: \(String(type.rawValue)); data: " +
-            "\(String(data)); id: \(id); placeholders: \(placeholders); nsp: \(nsp)}"
+            "\(String(describing: data)); id: \(id); placeholders: \(placeholders); nsp: \(nsp)}"
     }
     
     var event: String {
-        return String(data[0])
+        return String(describing: data[0])
     }
     
     var packetString: String {
@@ -136,10 +136,10 @@ struct SocketPacket {
         switch object {
         case let dict as NSDictionary:
             if dict["_placeholder"] as? Bool ?? false {
-                return binary[dict["num"] as! Int]
+                return binary[dict["num"] as! Int] as AnyObject
             } else {
                 return dict.reduce(NSMutableDictionary(), {cur, keyValue in
-                    cur[keyValue.0 as! NSCopying] = _fillInPlaceholders(keyValue.1)
+                    cur[keyValue.0 as! NSCopying] = _fillInPlaceholders(keyValue.1 as AnyObject)
                     return cur
                 })
             }
@@ -179,7 +179,7 @@ extension SocketPacket {
 private extension SocketPacket {
     // Recursive function that looks for NSData in collections
     static func shred(_ data: AnyObject, binary: inout [Data]) -> AnyObject {
-        let placeholder = ["_placeholder": true, "num": binary.count as AnyObject]
+        let placeholder = ["_placeholder": true, "num": binary.count as AnyObject] as [String : Any]
         
         switch data {
         case let bin as Data:
@@ -189,7 +189,7 @@ private extension SocketPacket {
             return arr.map({shred($0, binary: &binary)}) as AnyObject
         case let dict as NSDictionary:
             return dict.reduce(NSMutableDictionary(), {cur, keyValue in
-                cur[keyValue.0 as! NSCopying] = shred(keyValue.1, binary: &binary)
+                cur[keyValue.0 as! NSCopying] = shred(keyValue.1 as AnyObject, binary: &binary)
                 return cur
             })
         default:

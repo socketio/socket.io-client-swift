@@ -85,7 +85,7 @@ extension SocketParsable {
         }
         
         if reader.currentCharacter == "/" {
-            namespace = reader.readUntilOccurence(of: ",") ?? reader.readUntilEnd()
+            namespace = reader.readUntilOccurence(of: ",") 
         }
         
         if !reader.hasNext {
@@ -160,8 +160,7 @@ extension SocketParsable {
         let packet = waitingPackets.removeLast()
         
         if packet.type != .binaryAck {
-            handleEvent(packet.event, data: packet.args ?? [],
-                isInternalMessage: false, withAck: packet.id)
+            handleEvent(packet.event, data: packet.args, isInternalMessage: false, withAck: packet.id)
         } else {
             handleAck(packet.id, data: packet.args)
         }

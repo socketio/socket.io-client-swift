@@ -244,7 +244,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     }
 
     private func createWebsocketAndConnect() {
-        ws = WebSocket(url: urlWebSocketWithSid)
+        ws = WebSocket(url: urlWebSocketWithSid as NSURL)
 
         if cookies != nil {
             let headers = HTTPCookie.requestHeaderFields(with: cookies!)

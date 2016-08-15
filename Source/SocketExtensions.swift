@@ -100,7 +100,7 @@ extension NSDictionary {
         var options = [] as SocketIOClientConfiguration
         
         for (rawKey, value) in self {
-            if let key = rawKey as? String, let opt = NSDictionary.keyValueToSocketIOClientOption(key: key, value: value) {
+            if let key = rawKey as? String, let opt = NSDictionary.keyValueToSocketIOClientOption(key: key, value: value as AnyObject) {
                 options.insert(opt)
             }
         }

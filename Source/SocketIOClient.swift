@@ -242,7 +242,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     private func _emit(_ data: [AnyObject], ack: Int? = nil) {
         emitQueue.async {
             guard self.status == .connected else {
-                self.handleEvent("error", data: ["Tried emitting when not connected"], isInternalMessage: true)
+                self.handleEvent("error", data: ["Tried emitting when not connected" as AnyObject], isInternalMessage: true)
                 return
             }
             
@@ -259,7 +259,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     func emitAck(_ ack: Int, with items: [AnyObject]) {
         emitQueue.async {
             if self.status == .connected {
-                let packet = SocketPacket.packetFromEmit(items, id: ack ?? -1, nsp: self.nsp, ack: true)
+                let packet = SocketPacket.packetFromEmit(items, id: ack, nsp: self.nsp, ack: true)
                 let str = packet.packetString
 
                 DefaultSocketLogger.Logger.log("Emitting Ack: %@", type: self.logType, args: str)
@@ -310,7 +310,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     public func handleEvent(_ event: String, data: [AnyObject], isInternalMessage: Bool, withAck ack: Int = -1) {
         guard status == .connected || isInternalMessage else { return }
 
-        DefaultSocketLogger.Logger.log("Handling event: %@ with data: %@", type: logType, args: event, data ?? "")
+        DefaultSocketLogger.Logger.log("Handling event: %@ with data: %@", type: logType, args: event, data)
 
         handleQueue.async {
             self.anyHandler?(SocketAnyEvent(event: event, items: data))
@@ -385,7 +385,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     }
 
     /// Adds a handler that will be called on every event.
-    public func onAny(_ handler: (SocketAnyEvent) -> Void) {
+    public func onAny(_ handler: @escaping (SocketAnyEvent) -> Void) {
         anyHandler = handler
     }
 
@@ -416,7 +416,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         guard reconnecting else { return }
 
         DefaultSocketLogger.Logger.log("Starting reconnect", type: logType)
-        handleEvent("reconnect", data: [reason], isInternalMessage: true)
+        handleEvent("reconnect", data: [reason as AnyObject], isInternalMessage: true)
         
         _tryReconnect()
     }
@@ -439,23 +439,22 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         
         DispatchQueue.main.asyncAfter(deadline: deadline, execute: _tryReconnect)
     }
-}
-
-// Test extensions
-extension SocketIOClient {
+    
+    // Test properties
+    
     var testHandlers: [SocketEventHandler] {
         return handlers
     }
-
+    
     func setTestable() {
         status = .connected
     }
-
+    
     func setTestEngine(_ engine: SocketEngineSpec?) {
         self.engine = engine
     }
-
+    
     func emitTest(event: String, _ data: AnyObject...) {
-        _emit([event] + data)
+        _emit([event as AnyObject] + data)
     }
 }
