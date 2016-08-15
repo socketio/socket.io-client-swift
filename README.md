@@ -5,6 +5,8 @@ Socket.IO-client for iOS/OS X.
 
 ##Example
 ```swift
+import SocketIO
+
 let socket = SocketIOClient(socketURL: NSURL(string: "http://localhost:8080")!, config: [.Log(true), .ForcePolling(true)])
 
 socket.on("connect") {data, ack in
@@ -26,6 +28,7 @@ socket.connect()
 
 ##Objective-C Example
 ```objective-c
+@import SocketIO;
 NSURL* url = [[NSURL alloc] initWithString:@"http://localhost:8080"];
 SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{@"log": @YES, @"forcePolling": @YES}];
 
@@ -115,13 +118,13 @@ Import the module:
 
 Swift:
 ```swift
-import SocketIOClientSwift
+import SocketIO
 ```
 
 Objective-C:
 
 ```Objective-C
-@import SocketIOClientSwift;
+@import SocketIO;
 ```
 
 CocoaSeeds
