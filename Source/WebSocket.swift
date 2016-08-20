@@ -306,14 +306,14 @@ public class WebSocket : NSObject, StreamDelegate {
         inStream.delegate = self
         outStream.delegate = self
         if supportedSSLSchemes.contains(url.scheme!) {
-            // inStream.setProperty(StreamSocketSecurityLevel.negotiatedSSL, forKey: Stream.PropertyKey.socketSecurityLevelKey)
-            // outStream.setProperty(StreamSocketSecurityLevel.negotiatedSSL, forKey: Stream.PropertyKey.socketSecurityLevelKey)
+            inStream.setProperty(StreamSocketSecurityLevel.negotiatedSSL as AnyObject, forKey: Stream.PropertyKey.socketSecurityLevelKey)
+            outStream.setProperty(StreamSocketSecurityLevel.negotiatedSSL as AnyObject, forKey: Stream.PropertyKey.socketSecurityLevelKey)
         } else {
             certValidated = true //not a https session, so no need to check SSL pinning
         }
         if voipEnabled {
-            inStream.setProperty(StreamNetworkServiceTypeValue.voIP as NSString, forKey: Stream.PropertyKey(rawValue: Stream.PropertyKey.networkServiceType.rawValue))
-            outStream.setProperty(StreamNetworkServiceTypeValue.voIP as NSString, forKey: Stream.PropertyKey(rawValue: Stream.PropertyKey.networkServiceType.rawValue))
+            inStream.setProperty(StreamNetworkServiceTypeValue.voIP as AnyObject, forKey: Stream.PropertyKey.networkServiceType)
+            outStream.setProperty(StreamNetworkServiceTypeValue.voIP as AnyObject, forKey: Stream.PropertyKey.networkServiceType)
         }
         if selfSignedSSL {
             let settings: [NSObject: NSObject] = [kCFStreamSSLValidatesCertificateChain: NSNumber(value: false), kCFStreamSSLPeerName: kCFNull]
@@ -863,10 +863,10 @@ public class WebSocket : NSObject, StreamDelegate {
     
 }
 
-private extension NSData {
+private extension Data {
     
-    convenience init(buffer: UnsafeBufferPointer<UInt8>) {
-        self.init(bytes: buffer.baseAddress, length: buffer.count)
+    init(buffer: UnsafeBufferPointer<UInt8>) {
+        self.init(bytes: buffer.baseAddress!, count: buffer.count)
     }
     
 }
