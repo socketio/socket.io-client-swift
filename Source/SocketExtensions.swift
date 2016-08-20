@@ -30,9 +30,9 @@ enum JSONError : Error {
 }
 
 extension Array {
-    /// Because Swift 3 removes a lot of implicit briding so we have to perform more casts
+    /// Because Swift 3 removes a lot of implicit briding so we have to perform more explicit bridging
     func toAnyObjectArray() -> [AnyObject] {
-        return flatMap({$0 as? AnyObject})
+        return flatMap({ $0 as AnyObject })
     }
 }
 
