@@ -134,12 +134,12 @@ struct SocketPacket {
     // binary data
     private func _fillInPlaceholders(_ object: Any) -> Any {
         switch object {
-        case let dict as NSDictionary:
+        case let dict as [String: Any]:
             if dict["_placeholder"] as? Bool ?? false {
                 return binary[dict["num"] as! Int]
             } else {
                 return dict.reduce(NSMutableDictionary(), {cur, keyValue in
-                    cur[keyValue.0 as! NSCopying] = _fillInPlaceholders(keyValue.1)
+                    cur[keyValue.0] = _fillInPlaceholders(keyValue.1)
                     return cur
                 })
             }
@@ -187,10 +187,13 @@ private extension SocketPacket {
             return placeholder
         case let arr as [Any]:
             return arr.map({shred($0, binary: &binary)})
-        case let dict as NSDictionary:
-            return dict.reduce(NSMutableDictionary(), {cur, keyValue in
-                cur[keyValue.0 as! NSCopying] = shred(keyValue.1, binary: &binary)
-                return cur
+        case let dict as [String: Any]:
+            return dict.reduce([String: Any](), {cur, keyValue in
+                var mutCur = cur
+                
+                mutCur[keyValue.0] = shred(keyValue.1, binary: &binary)
+                
+                return mutCur
             })
         default:
             return data

@@ -38,7 +38,7 @@ class SocketNamespacePacketTest: XCTestCase {
     }
     
     func testJSONEmit() {
-        let expectedSendString = "2/swift,[\"test\",{\"test\":\"hello\",\"hello\":1,\"foobar\":1,\"null\":null}]"
+        let expectedSendString = "2/swift,[\"test\",{\"test\":\"hello\",\"hello\":1,\"foobar\":true,\"null\":null}]"
         let sendData: [Any] = ["test", ["foobar": true, "hello": 1, "test": "hello", "null": NSNull()] as NSDictionary]
         let packet = SocketPacket.packetFromEmit(sendData, id: -1, nsp: "/swift", ack: false)
         
@@ -46,7 +46,7 @@ class SocketNamespacePacketTest: XCTestCase {
     }
     
     func testArrayEmit() {
-        let expectedSendString = "2/swift,[\"test\",[\"hello\",1,{\"test\":\"test\"}]]"
+        let expectedSendString = "2/swift,[\"test\",[\"hello\",true,{\"test\":\"test\"}]]"
         let sendData: [Any] = ["test", ["hello", 1, ["test": "test"]]]
         let packet = SocketPacket.packetFromEmit(sendData, id: -1, nsp: "/swift", ack: false)
         
@@ -55,7 +55,7 @@ class SocketNamespacePacketTest: XCTestCase {
     }
     
     func testBinaryEmit() {
-        let expectedSendString = "51-/swift,[\"test\",{\"_placeholder\":1,\"num\":0}]"
+        let expectedSendString = "51-/swift,[\"test\",{\"_placeholder\":true,\"num\":0}]"
         let sendData: [Any] = ["test", data]
         let packet = SocketPacket.packetFromEmit(sendData, id: -1, nsp: "/swift", ack: false)
         
@@ -64,7 +64,7 @@ class SocketNamespacePacketTest: XCTestCase {
     }
     
     func testMultipleBinaryEmit() {
-        let expectedSendString = "52-/swift,[\"test\",{\"data1\":{\"_placeholder\":1,\"num\":0},\"data2\":{\"_placeholder\":1,\"num\":1}}]"
+        let expectedSendString = "52-/swift,[\"test\",{\"data1\":{\"_placeholder\":true,\"num\":0},\"data2\":{\"_placeholder\":true,\"num\":1}}]"
         let sendData: [Any] = ["test", ["data1": data, "data2": data2] as NSDictionary]
         let packet = SocketPacket.packetFromEmit(sendData, id: -1, nsp: "/swift", ack: false)
         
@@ -81,7 +81,7 @@ class SocketNamespacePacketTest: XCTestCase {
     }
     
     func testEmitDataWithAck() {
-        let expectedSendString = "51-/swift,0[\"test\",{\"_placeholder\":1,\"num\":0}]"
+        let expectedSendString = "51-/swift,0[\"test\",{\"_placeholder\":true,\"num\":0}]"
         let sendData: [Any] = ["test", data]
         let packet = SocketPacket.packetFromEmit(sendData, id: 0, nsp: "/swift", ack: false)
         
@@ -114,7 +114,7 @@ class SocketNamespacePacketTest: XCTestCase {
     }
     
     func testJSONAck() {
-        let expectedSendString = "3/swift,0[{\"test\":\"hello\",\"hello\":1,\"foobar\":1,\"null\":null}]"
+        let expectedSendString = "3/swift,0[{\"test\":\"hello\",\"hello\":1,\"foobar\":true,\"null\":null}]"
         let sendData = [["foobar": true, "hello": 1, "test": "hello", "null": NSNull()]]
         let packet = SocketPacket.packetFromEmit(sendData, id: 0, nsp: "/swift", ack: true)
         
@@ -122,7 +122,7 @@ class SocketNamespacePacketTest: XCTestCase {
     }
     
     func testBinaryAck() {
-        let expectedSendString = "61-/swift,0[{\"_placeholder\":1,\"num\":0}]"
+        let expectedSendString = "61-/swift,0[{\"_placeholder\":true,\"num\":0}]"
         let sendData = [data]
         let packet = SocketPacket.packetFromEmit(sendData, id: 0, nsp: "/swift", ack: true)
         
@@ -131,7 +131,7 @@ class SocketNamespacePacketTest: XCTestCase {
     }
     
     func testMultipleBinaryAck() {
-        let expectedSendString = "62-/swift,0[{\"data2\":{\"_placeholder\":1,\"num\":0},\"data1\":{\"_placeholder\":1,\"num\":1}}]"
+        let expectedSendString = "62-/swift,0[{\"data2\":{\"_placeholder\":true,\"num\":0},\"data1\":{\"_placeholder\":true,\"num\":1}}]"
         let sendData = [["data1": data, "data2": data2]]
         let packet = SocketPacket.packetFromEmit(sendData, id: 0, nsp: "/swift", ack: true)
         
