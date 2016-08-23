@@ -29,8 +29,8 @@ protocol SocketIOClientSpec : class {
     func didConnect()
     func didDisconnect(reason: String)
     func didError(reason: String)
-    func handleAck(_ ack: Int, data: [AnyObject])
-    func handleEvent(_ event: String, data: [AnyObject], isInternalMessage: Bool, withAck ack: Int)
+    func handleAck(_ ack: Int, data: [Any])
+    func handleEvent(_ event: String, data: [Any], isInternalMessage: Bool, withAck ack: Int)
     func joinNamespace(_ namespace: String)
 }
 
@@ -38,6 +38,6 @@ extension SocketIOClientSpec {
     func didError(reason: String) {
         DefaultSocketLogger.Logger.error("%@", type: "SocketIOClient", args: reason)
         
-        handleEvent("error", data: [reason as AnyObject], isInternalMessage: true, withAck: -1)
+        handleEvent("error", data: [reason], isInternalMessage: true, withAck: -1)
     }
 }

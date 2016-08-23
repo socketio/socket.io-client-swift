@@ -15,40 +15,40 @@ class SocketNamespacePacketTest: XCTestCase {
     
     func testEmpyEmit() {
         let expectedSendString = "2/swift,[\"test\"]"
-        let sendData = ["test"]
-        let packet = SocketPacket.packetFromEmit(sendData as [AnyObject], id: -1, nsp: "/swift", ack: false)
+        let sendData: [Any] = ["test"]
+        let packet = SocketPacket.packetFromEmit(sendData, id: -1, nsp: "/swift", ack: false)
         
         XCTAssertEqual(packet.packetString, expectedSendString)
     }
     
     func testNullEmit() {
         let expectedSendString = "2/swift,[\"test\",null]"
-        let sendData = ["test", NSNull()] as [Any]
-        let packet = SocketPacket.packetFromEmit(sendData as [AnyObject], id: -1, nsp: "/swift", ack: false)
+        let sendData: [Any] = ["test", NSNull()]
+        let packet = SocketPacket.packetFromEmit(sendData, id: -1, nsp: "/swift", ack: false)
         
         XCTAssertEqual(packet.packetString, expectedSendString)
     }
     
     func testStringEmit() {
         let expectedSendString = "2/swift,[\"test\",\"foo bar\"]"
-        let sendData = ["test", "foo bar"]
-        let packet = SocketPacket.packetFromEmit(sendData as [AnyObject], id: -1, nsp: "/swift", ack: false)
+        let sendData: [Any] = ["test", "foo bar"]
+        let packet = SocketPacket.packetFromEmit(sendData, id: -1, nsp: "/swift", ack: false)
         
         XCTAssertEqual(packet.packetString, expectedSendString)
     }
     
     func testJSONEmit() {
         let expectedSendString = "2/swift,[\"test\",{\"test\":\"hello\",\"hello\":1,\"foobar\":1,\"null\":null}]"
-        let sendData = ["test" as AnyObject, ["foobar": true, "hello": 1, "test": "hello", "null": NSNull()] as NSDictionary] as [AnyObject]
-        let packet = SocketPacket.packetFromEmit(sendData as [AnyObject], id: -1, nsp: "/swift", ack: false)
+        let sendData: [Any] = ["test", ["foobar": true, "hello": 1, "test": "hello", "null": NSNull()] as NSDictionary]
+        let packet = SocketPacket.packetFromEmit(sendData, id: -1, nsp: "/swift", ack: false)
         
         XCTAssertEqual(packet.packetString, expectedSendString)
     }
     
     func testArrayEmit() {
         let expectedSendString = "2/swift,[\"test\",[\"hello\",1,{\"test\":\"test\"}]]"
-        let sendData = ["test", ["hello", 1, ["test": "test"]]] as [Any]
-        let packet = SocketPacket.packetFromEmit(sendData as [AnyObject], id: -1, nsp: "/swift", ack: false)
+        let sendData: [Any] = ["test", ["hello", 1, ["test": "test"]]]
+        let packet = SocketPacket.packetFromEmit(sendData, id: -1, nsp: "/swift", ack: false)
         
         
         XCTAssertEqual(packet.packetString, expectedSendString)
@@ -56,8 +56,8 @@ class SocketNamespacePacketTest: XCTestCase {
     
     func testBinaryEmit() {
         let expectedSendString = "51-/swift,[\"test\",{\"_placeholder\":1,\"num\":0}]"
-        let sendData = ["test" as AnyObject, data as AnyObject] as [AnyObject]
-        let packet = SocketPacket.packetFromEmit(sendData as [AnyObject], id: -1, nsp: "/swift", ack: false)
+        let sendData: [Any] = ["test", data]
+        let packet = SocketPacket.packetFromEmit(sendData, id: -1, nsp: "/swift", ack: false)
         
         XCTAssertEqual(packet.packetString, expectedSendString)
         XCTAssertEqual(packet.binary, [data])
@@ -65,8 +65,8 @@ class SocketNamespacePacketTest: XCTestCase {
     
     func testMultipleBinaryEmit() {
         let expectedSendString = "52-/swift,[\"test\",{\"data1\":{\"_placeholder\":1,\"num\":0},\"data2\":{\"_placeholder\":1,\"num\":1}}]"
-        let sendData = ["test" as AnyObject, ["data1": data, "data2": data2] as NSDictionary] as [AnyObject]
-        let packet = SocketPacket.packetFromEmit(sendData as [AnyObject], id: -1, nsp: "/swift", ack: false)
+        let sendData: [Any] = ["test", ["data1": data, "data2": data2] as NSDictionary]
+        let packet = SocketPacket.packetFromEmit(sendData, id: -1, nsp: "/swift", ack: false)
         
         XCTAssertEqual(packet.packetString, expectedSendString)
         XCTAssertEqual(packet.binary, [data, data2])
@@ -75,15 +75,15 @@ class SocketNamespacePacketTest: XCTestCase {
     func testEmitWithAck() {
         let expectedSendString = "2/swift,0[\"test\"]"
         let sendData = ["test"]
-        let packet = SocketPacket.packetFromEmit(sendData as [AnyObject], id: 0, nsp: "/swift", ack: false)
+        let packet = SocketPacket.packetFromEmit(sendData, id: 0, nsp: "/swift", ack: false)
         
         XCTAssertEqual(packet.packetString, expectedSendString)
     }
     
     func testEmitDataWithAck() {
         let expectedSendString = "51-/swift,0[\"test\",{\"_placeholder\":1,\"num\":0}]"
-        let sendData = ["test" as AnyObject, data as AnyObject] as [AnyObject]
-        let packet = SocketPacket.packetFromEmit(sendData as [AnyObject], id: 0, nsp: "/swift", ack: false)
+        let sendData: [Any] = ["test", data]
+        let packet = SocketPacket.packetFromEmit(sendData, id: 0, nsp: "/swift", ack: false)
         
         XCTAssertEqual(packet.packetString, expectedSendString)
         XCTAssertEqual(packet.binary, [data])
@@ -108,7 +108,7 @@ class SocketNamespacePacketTest: XCTestCase {
     func testStringAck() {
         let expectedSendString = "3/swift,0[\"test\"]"
         let sendData = ["test"]
-        let packet = SocketPacket.packetFromEmit(sendData as [AnyObject], id: 0, nsp: "/swift", ack: true)
+        let packet = SocketPacket.packetFromEmit(sendData, id: 0, nsp: "/swift", ack: true)
         
         XCTAssertEqual(packet.packetString, expectedSendString)
     }
@@ -116,7 +116,7 @@ class SocketNamespacePacketTest: XCTestCase {
     func testJSONAck() {
         let expectedSendString = "3/swift,0[{\"test\":\"hello\",\"hello\":1,\"foobar\":1,\"null\":null}]"
         let sendData = [["foobar": true, "hello": 1, "test": "hello", "null": NSNull()]]
-        let packet = SocketPacket.packetFromEmit(sendData as [AnyObject], id: 0, nsp: "/swift", ack: true)
+        let packet = SocketPacket.packetFromEmit(sendData, id: 0, nsp: "/swift", ack: true)
         
         XCTAssertEqual(packet.packetString, expectedSendString)
     }
@@ -124,7 +124,7 @@ class SocketNamespacePacketTest: XCTestCase {
     func testBinaryAck() {
         let expectedSendString = "61-/swift,0[{\"_placeholder\":1,\"num\":0}]"
         let sendData = [data]
-        let packet = SocketPacket.packetFromEmit(sendData as [AnyObject], id: 0, nsp: "/swift", ack: true)
+        let packet = SocketPacket.packetFromEmit(sendData, id: 0, nsp: "/swift", ack: true)
         
         XCTAssertEqual(packet.packetString, expectedSendString)
         XCTAssertEqual(packet.binary, [data])
@@ -133,7 +133,7 @@ class SocketNamespacePacketTest: XCTestCase {
     func testMultipleBinaryAck() {
         let expectedSendString = "62-/swift,0[{\"data2\":{\"_placeholder\":1,\"num\":0},\"data1\":{\"_placeholder\":1,\"num\":1}}]"
         let sendData = [["data1": data, "data2": data2]]
-        let packet = SocketPacket.packetFromEmit(sendData as [AnyObject], id: 0, nsp: "/swift", ack: true)
+        let packet = SocketPacket.packetFromEmit(sendData, id: 0, nsp: "/swift", ack: true)
         
         XCTAssertEqual(packet.packetString, expectedSendString)
         XCTAssertEqual(packet.binary, [data2, data])

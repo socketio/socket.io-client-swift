@@ -29,7 +29,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     public let handleQueue = DispatchQueue(label: "com.socketio.engineHandleQueue", attributes: [])
     public let parseQueue = DispatchQueue(label: "com.socketio.engineParseQueue", attributes: [])
 
-    public var connectParams: [String: AnyObject]? {
+    public var connectParams: [String: Any]? {
         didSet {
             (urlPolling, urlWebSocket) = createURLs()
         }

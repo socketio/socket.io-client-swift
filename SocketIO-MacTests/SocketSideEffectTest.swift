@@ -137,12 +137,6 @@ class SocketSideEffectTest: XCTestCase {
         waitForExpectations(timeout: 3, handler: nil)
     }
     
-    func testSocketDataToAnyObject() {
-        let data = ["test", 1, 2.2, ["Hello": 2, "bob": 2.2], true, [1, 2], [1.1, 2]] as [SocketData]
-        
-        XCTAssertEqual(data.count, data.toAnyObjectArray().count)
-    }
-    
     func testHandleMultipleBinaryEvent() {
         let expect = expectation(description: "handled multiple binary event")
         socket.on("test") {data, ack in
