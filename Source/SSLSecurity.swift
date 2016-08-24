@@ -149,9 +149,9 @@ public class SSLSecurity : NSObject {
         if self.usePublicKeys {
             if let keys = self.pubKeys {
                 let serverPubKeys = publicKeyChainForTrust(trust: trust)
-                for serverKey in serverPubKeys as [AnyObject] {
-                    for key in keys as [AnyObject] {
-                        if serverKey.isEqual(key) {
+                for serverKey in serverPubKeys {
+                    for key in keys {
+                        if CFEqual(serverKey, key) {
                             return true
                         }
                     }

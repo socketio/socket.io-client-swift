@@ -367,7 +367,7 @@ public class WebSocket : NSObject, StreamDelegate {
     // Delegate for the stream methods. Processes incoming bytes.
     public func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
         if let sec = security , !certValidated && [.hasBytesAvailable, .hasSpaceAvailable].contains(eventCode) {
-            let possibleTrust = aStream.property(forKey: kCFStreamPropertySSLPeerTrust as Stream.PropertyKey) as AnyObject
+            let possibleTrust = aStream.property(forKey: kCFStreamPropertySSLPeerTrust as Stream.PropertyKey)
             let domain = aStream.property(forKey: kCFStreamSSLPeerName as Stream.PropertyKey) as? String
             if sec.isValid(possibleTrust as! SecTrust, domain: domain) {
                 certValidated = true

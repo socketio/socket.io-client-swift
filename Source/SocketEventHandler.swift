@@ -29,7 +29,7 @@ struct SocketEventHandler {
     let id: UUID
     let callback: NormalCallback
     
-    func executeCallback(with items: [AnyObject], withAck ack: Int, withSocket socket: SocketIOClient) {
+    func executeCallback(with items: [Any], withAck ack: Int, withSocket socket: SocketIOClient) {
         callback(items, SocketAckEmitter(socket: socket, ackNum: ack))
     }
 }

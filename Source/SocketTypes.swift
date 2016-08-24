@@ -39,8 +39,8 @@ extension NSString : SocketData {}
 extension NSNull : SocketData {}
 extension String : SocketData {}
 
-public typealias AckCallback = ([AnyObject]) -> Void
-public typealias NormalCallback = ([AnyObject], SocketAckEmitter) -> Void
+public typealias AckCallback = ([Any]) -> Void
+public typealias NormalCallback = ([Any], SocketAckEmitter) -> Void
 public typealias OnAckCallback = (_ timeoutAfter: UInt64, _ callback: AckCallback) -> Void
 
 typealias Probe = (msg: String, type: SocketEnginePacketType, data: [Data])
