@@ -97,7 +97,7 @@ public struct SocketIOClientConfiguration : ArrayLiteralConvertible, CollectionT
     
     @warn_unused_result
     public func prefixThrough(position: Index) -> SubSequence {
-        return prefixThrough(position)
+        return backingArray.prefixThrough(position)
     }
 
     @warn_unused_result
