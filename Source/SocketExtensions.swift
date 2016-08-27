@@ -36,8 +36,69 @@ extension Array where Element: AnyObject {
 }
 
 extension NSCharacterSet {
-    class var allowedURLCharacterSet: NSCharacterSet {
+    static var allowedURLCharacterSet: NSCharacterSet {
         return NSCharacterSet(charactersInString: "!*'();:@&=+$,/?%#[]\" {}").invertedSet
+    }
+}
+
+extension NSDictionary {
+    private static func keyValueToSocketIOClientOption(key: String, value: AnyObject) -> SocketIOClientOption? {
+        switch (key, value) {
+        case let ("connectParams", params as [String: AnyObject]):
+            return .ConnectParams(params)
+        case let ("cookies", cookies as [NSHTTPCookie]):
+            return .Cookies(cookies)
+        case let ("doubleEncodeUTF8", encode as Bool):
+            return .DoubleEncodeUTF8(encode)
+        case let ("extraHeaders", headers as [String: String]):
+            return .ExtraHeaders(headers)
+        case let ("forceNew", force as Bool):
+            return .ForceNew(force)
+        case let ("forcePolling", force as Bool):
+            return .ForcePolling(force)
+        case let ("forceWebsockets", force as Bool):
+            return .ForceWebsockets(force)
+        case let ("handleQueue", queue as dispatch_queue_t):
+            return .HandleQueue(queue)
+        case let ("log", log as Bool):
+            return .Log(log)
+        case let ("logger", logger as SocketLogger):
+            return .Logger(logger)
+        case let ("nsp", nsp as String):
+            return .Nsp(nsp)
+        case let ("path", path as String):
+            return .Path(path)
+        case let ("reconnects", reconnects as Bool):
+            return .Reconnects(reconnects)
+        case let ("reconnectAttempts", attempts as Int):
+            return .ReconnectAttempts(attempts)
+        case let ("reconnectWait", wait as Int):
+            return .ReconnectWait(wait)
+        case let ("secure", secure as Bool):
+            return .Secure(secure)
+        case let ("security", security as SSLSecurity):
+            return .Security(security)
+        case let ("selfSigned", selfSigned as Bool):
+            return .SelfSigned(selfSigned)
+        case let ("sessionDelegate", delegate as NSURLSessionDelegate):
+            return .SessionDelegate(delegate)
+        case let ("voipEnabled", enable as Bool):
+            return .VoipEnabled(enable)
+        default:
+            return nil
+        }
+    }
+    
+    func toSocketConfiguration() -> SocketIOClientConfiguration {
+        var options = [] as SocketIOClientConfiguration
+        
+        for (rawKey, value) in self {
+            if let key = rawKey as? String, opt = NSDictionary.keyValueToSocketIOClientOption(key, value: value) {
+                options.insert(opt)
+            }
+        }
+        
+        return options
     }
 }
 

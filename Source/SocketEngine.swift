@@ -80,11 +80,11 @@ public final class SocketEngine : NSObject, NSURLSessionDelegate, SocketEnginePo
     private var selfSigned = false
     private var voipEnabled = false
 
-    public init(client: SocketEngineClient, url: NSURL, options: Set<SocketIOClientOption>) {
+    public init(client: SocketEngineClient, url: NSURL, config: SocketIOClientConfiguration) {
         self.client = client
         self.url = url
         
-        for option in options {
+        for option in config {
             switch option {
             case let .ConnectParams(params):
                 connectParams = params
@@ -127,7 +127,7 @@ public final class SocketEngine : NSObject, NSURLSessionDelegate, SocketEnginePo
     }
     
     public convenience init(client: SocketEngineClient, url: NSURL, options: NSDictionary?) {
-        self.init(client: client, url: url, options: options?.toSocketOptionsSet() ?? [])
+        self.init(client: client, url: url, config: options?.toSocketConfiguration() ?? [])
     }
     
     deinit {
@@ -153,18 +153,12 @@ public final class SocketEngine : NSObject, NSURLSessionDelegate, SocketEnginePo
         }
     }
 
-    private func checkIfMessageIsBase64Binary(message: String) -> Bool {
-        if message.hasPrefix("b4") {
-            // binary in base64 string
-            let noPrefix = message[message.startIndex.advancedBy(2)..<message.endIndex]
-
-            if let data = NSData(base64EncodedString: noPrefix, options: .IgnoreUnknownCharacters) {
-                client?.parseEngineBinaryData(data)
-            }
-            
-            return true
-        } else {
-            return false
+    private func handleBase64(message: String) {
+        // binary in base64 string
+        let noPrefix = message[message.startIndex.advancedBy(2)..<message.endIndex]
+        
+        if let data = NSData(base64EncodedString: noPrefix, options: .IgnoreUnknownCharacters) {
+            client?.parseEngineBinaryData(data)
         }
     }
     
@@ -265,7 +259,7 @@ public final class SocketEngine : NSObject, NSURLSessionDelegate, SocketEnginePo
             }
         }
 
-        ws?.queue = handleQueue
+        ws?.callbackQueue = handleQueue
         ws?.voipEnabled = voipEnabled
         ws?.delegate = self
         ws?.selfSignedSSL = selfSigned
@@ -419,11 +413,13 @@ public final class SocketEngine : NSObject, NSURLSessionDelegate, SocketEnginePo
         
         let reader = SocketStringReader(message: message)
         let fixedString: String
+        
+        if message.hasPrefix("b4") {
+            return handleBase64(message)
+        }
 
         guard let type = SocketEnginePacketType(rawValue: Int(reader.currentCharacter) ?? -1) else {
-            if !checkIfMessageIsBase64Binary(message) {
-                checkAndHandleEngineError(message)
-            }
+            checkAndHandleEngineError(message)
             
             return
         }

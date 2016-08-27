@@ -8,7 +8,7 @@
 //
 
 #import <XCTest/XCTest.h>
-@import SocketIOClientSwift;
+@import SocketIO;
 
 @interface SocketObjectiveCTest : XCTestCase
 
@@ -21,7 +21,7 @@
 - (void)setUp {
     [super setUp];
     NSURL* url = [[NSURL alloc] initWithString:@"http://localhost"];
-    self.socket = [[SocketIOClient alloc] initWithSocketURL:url options:nil];
+    self.socket = [[SocketIOClient alloc] initWithSocketURL:url config:nil];
 }
 
 - (void)testOnSyntax {
