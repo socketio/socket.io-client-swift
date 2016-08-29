@@ -359,7 +359,7 @@ public final class SocketEngine : NSObject, NSURLSessionDelegate, SocketEnginePo
     private func handleOpen(openData: String) {
         do {
             let json = try openData.toNSDictionary()
-            guard let sid = json[sid] as? String else {
+            guard let sid = json["sid"] as? String else {
                 client?.engineDidError("Open packet contained no sid")
                 return
             }
