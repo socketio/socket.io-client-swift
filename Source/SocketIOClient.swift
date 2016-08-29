@@ -67,7 +67,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         return nsp + "#" + (engine?.sid ?? "")
     }
     
-    /// Type safe way to create a new SocketIOClient. opts can be omitted
+    /// Type safe way to create a new SocketIOClient. config can be omitted
     public init(socketURL: NSURL, config: SocketIOClientConfiguration = []) {
         self.config = config
         self.socketURL = socketURL
@@ -150,12 +150,12 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeoutAfter) * Int64(NSEC_PER_SEC))
 
         dispatch_after(time, handleQueue) {[weak self] in
-            if let this = self where this.status != .Connected && this.status != .Disconnected {
-                this.status = .Disconnected
-                this.engine?.disconnect("Connect timeout")
-
-                handler?()
-            }
+            guard let this = self where this.status != .Connected && this.status != .Disconnected else { return }
+            
+            this.status = .Disconnected
+            this.engine?.disconnect("Connect timeout")
+            
+            handler?()
         }
     }
 
@@ -163,20 +163,20 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         currentAck += 1
 
         return {[weak self, ack = currentAck] timeout, callback in
-            if let this = self {
-                dispatch_sync(this.ackQueue) {
-                    this.ackHandlers.addAck(ack, callback: callback)
-                }
-
+            guard let this = self else { return }
+            
+            dispatch_sync(this.ackQueue) {
+                this.ackHandlers.addAck(ack, callback: callback)
+            }
+            
+            
+            this._emit(items, ack: ack)
+            
+            if timeout != 0 {
+                let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeout * NSEC_PER_SEC))
                 
-                this._emit(items, ack: ack)
-
-                if timeout != 0 {
-                    let time = dispatch_time(DISPATCH_TIME_NOW, Int64(timeout * NSEC_PER_SEC))
-
-                    dispatch_after(time, this.ackQueue) {
-                        this.ackHandlers.timeoutAck(ack, onQueue: this.handleQueue)
-                    }
+                dispatch_after(time, this.ackQueue) {
+                    this.ackHandlers.timeoutAck(ack, onQueue: this.handleQueue)
                 }
             }
         }
@@ -196,6 +196,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
         DefaultSocketLogger.Logger.log("Disconnected: %@", type: logType, args: reason)
 
+        reconnecting = false
         status = .Disconnected
 
         // Make sure the engine is actually dead.
@@ -205,8 +206,6 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
     /// Disconnects the socket.
     public func disconnect() {
-        assert(status != .NotConnected, "Tried closing a NotConnected client")
-        
         DefaultSocketLogger.Logger.log("Closing socket", type: logType)
 
         didDisconnect("Disconnect")
