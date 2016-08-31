@@ -8,7 +8,7 @@
 //
 
 #import <XCTest/XCTest.h>
-@import SocketIOClientSwift;
+@import SocketIO;
 
 @interface SocketObjectiveCTest : XCTestCase
 

@@ -5,6 +5,7 @@ Socket.IO-client for iOS/OS X.
 
 ##Example
 ```swift
+import SocketIO
 let socket = SocketIOClient(socketURL: NSURL(string: "http://localhost:8080")!, config: [.log(true), .forcePolling(true)])
 
 socket.on("connect") {data, ack in
@@ -26,6 +27,7 @@ socket.connect()
 
 ##Objective-C Example
 ```objective-c
+@import SocketIO;
 NSURL* url = [[NSURL alloc] initWithString:@"http://localhost:8080"];
 SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{@"log": @YES, @"forcePolling": @YES}];
 
@@ -90,7 +92,7 @@ Carthage
 -----------------
 Add this line to your `Cartfile`:
 ```
-github "socketio/socket.io-client-swift" ~> 6.1.6 # Or latest version
+github "socketio/socket.io-client-swift" ~> 7.0.3 # Or latest version
 ```
 
 Run `carthage update --platform ios,macosx`.
@@ -103,7 +105,7 @@ Create `Podfile` and add `pod 'Socket.IO-Client-Swift'`:
 use_frameworks!
 
 target 'YourApp' do
-    pod 'Socket.IO-Client-Swift', '~> 6.1.6' # Or latest version
+    pod 'Socket.IO-Client-Swift', '~> 7.0.3' # Or latest version
 end
 ```
 
@@ -117,13 +119,13 @@ Import the module:
 
 Swift:
 ```swift
-import SocketIOClientSwift
+import SocketIO
 ```
 
 Objective-C:
 
 ```Objective-C
-@import SocketIOClientSwift;
+@import SocketIO;
 ```
 
 CocoaSeeds
@@ -132,7 +134,7 @@ CocoaSeeds
 Add this line to your `Seedfile`:
 
 ```
-github "socketio/socket.io-client-swift", "v6.1.6", :files => "Source/*.swift" # Or latest version
+github "socketio/socket.io-client-swift", "v7.0.3", :files => "Source/*.swift" # Or latest version
 ```
 
 Run `seed install`.
@@ -141,7 +143,7 @@ Run `seed install`.
 ##API
 Constructors
 -----------
-`init(var socketURL: NSURL, config: SocketIOClientConfiguration = [])` - Creates a new SocketIOClient. options is a Set of SocketIOClientOption. If your socket.io server is secure, you need to specify `https` in your socketURL.
+`init(var socketURL: NSURL, config: SocketIOClientConfiguration = [])` - Creates a new SocketIOClient. If your socket.io server is secure, you need to specify `https` in your socketURL.
 
 `convenience init(socketURL: NSURL, options: NSDictionary?)` - Same as above, but meant for Objective-C. See Options on how convert between SocketIOClientOptions and dictionary keys.
 

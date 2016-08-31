@@ -32,8 +32,8 @@ extension SocketParsable {
         return nsp == self.nsp
     }
     
-    private func handleConnect(_ p: SocketPacket) {
-        if p.nsp == "/" && nsp != "/" {
+    private func handleConnect(packetNamespace: String) {
+        if packetNamespace == "/" && nsp != "/" {
             joinNamespace(nsp)
         } else {
             didConnect()
@@ -51,9 +51,9 @@ extension SocketParsable {
         case .binaryAck where isCorrectNamespace(pack.nsp):
             waitingPackets.append(pack)
         case .connect:
-            handleConnect(pack)
+            handleConnect(pack.nsp)
         case .disconnect:
-            didDisconnect(reason: "Got Disconnect")
+            didDisconnect("Got Disconnect")
         case .error:
             handleEvent("error", data: pack.data, isInternalMessage: true, withAck: pack.id)
         default:
