@@ -359,7 +359,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         do {
             let json = try openData.toNSDictionary()
             guard let sid = json["sid"] as? String else {
-                client?.engineDidError("Open packet contained no sid")
+                client?.engineDidError(reason: "Open packet contained no sid")
                 return
             }
             
@@ -374,7 +374,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
                 upgradeWs = false
             }
             
-            if let pingInterval = json["pingInterval"] as? Double, pingTimeout = json["pingTimeout"] as? Double {
+            if let pingInterval = json["pingInterval"] as? Double, let pingTimeout = json["pingTimeout"] as? Double {
                 self.pingInterval = pingInterval / 1000.0
                 self.pingTimeout = pingTimeout / 1000.0
             }
@@ -389,7 +389,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
                 doPoll()
             }
             
-            client?.engineDidOpen("Connect")
+            client?.engineDidOpen(reason: "Connect")
         } catch {
             didError(reason: "Error parsing open packet")
         }
