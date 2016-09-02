@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
   s.license      = { :type => 'MIT' }
   s.author       = { "Erik" => "nuclear.ace@gmail.com" }
   s.ios.deployment_target = '8.0'
-  s.osx.deployment_target = '10.10'
+  s.osx.deployment_target = '10.9'
   s.tvos.deployment_target = '9.0'
   s.source       = { :git => "https://github.com/socketio/socket.io-client-swift.git", :tag => 'v7.0.3' }
   s.source_files  = "Source/**/*.swift"
