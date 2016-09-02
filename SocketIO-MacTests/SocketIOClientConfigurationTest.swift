@@ -7,7 +7,7 @@
 //
 
 import XCTest
-import SocketIOClientSwift
+import SocketIO
 
 class TestSocketIOClientConfiguration: XCTestCase {
     var config = [] as SocketIOClientConfiguration

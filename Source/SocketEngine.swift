@@ -80,11 +80,11 @@ public final class SocketEngine : NSObject, NSURLSessionDelegate, SocketEnginePo
     private var selfSigned = false
     private var voipEnabled = false
 
-    public init(client: SocketEngineClient, url: NSURL, options: SocketIOClientConfiguration) {
+    public init(client: SocketEngineClient, url: NSURL, config: SocketIOClientConfiguration) {
         self.client = client
         self.url = url
         
-        for option in options {
+        for option in config {
             switch option {
             case let .ConnectParams(params):
                 connectParams = params
@@ -127,7 +127,7 @@ public final class SocketEngine : NSObject, NSURLSessionDelegate, SocketEnginePo
     }
     
     public convenience init(client: SocketEngineClient, url: NSURL, options: NSDictionary?) {
-        self.init(client: client, url: url, options: options?.toSocketConfiguration() ?? [])
+        self.init(client: client, url: url, config: options?.toSocketConfiguration() ?? [])
     }
     
     deinit {
@@ -359,36 +359,38 @@ public final class SocketEngine : NSObject, NSURLSessionDelegate, SocketEnginePo
     private func handleOpen(openData: String) {
         do {
             let json = try openData.toNSDictionary()
-            
-            if let sid = json["sid"] as? String {
-                let upgradeWs: Bool
-
-                self.sid = sid
-                connected = true
-
-                if let upgrades = json["upgrades"] as? [String] {
-                    upgradeWs = upgrades.contains("websocket")
-                } else {
-                    upgradeWs = false
-                }
-
-                if let pingInterval = json["pingInterval"] as? Double, let pingTimeout = json["pingTimeout"] as? Double {
-                    self.pingInterval = pingInterval / 1000.0
-                    self.pingTimeout = pingTimeout / 1000.0
-                }
-
-                if !forcePolling && !forceWebsockets && upgradeWs {
-                    createWebsocketAndConnect()
-                }
-                
-                sendPing()
-                
-                if !forceWebsockets {
-                    doPoll()
-                }
-                
-                client?.engineDidOpen("Connect")
+            guard let sid = json["sid"] as? String else {
+                client?.engineDidError("Open packet contained no sid")
+                return
             }
+            
+            let upgradeWs: Bool
+            
+            self.sid = sid
+            connected = true
+            
+            if let upgrades = json["upgrades"] as? [String] {
+                upgradeWs = upgrades.contains("websocket")
+            } else {
+                upgradeWs = false
+            }
+            
+            if let pingInterval = json["pingInterval"] as? Double, let pingTimeout = json["pingTimeout"] as? Double {
+                self.pingInterval = pingInterval / 1000.0
+                self.pingTimeout = pingTimeout / 1000.0
+            }
+            
+            if !forcePolling && !forceWebsockets && upgradeWs {
+                createWebsocketAndConnect()
+            }
+            
+            sendPing()
+            
+            if !forceWebsockets {
+                doPoll()
+            }
+            
+            client?.engineDidOpen("Connect")
         } catch {
             didError("Error parsing open packet")
         }
