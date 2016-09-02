@@ -27,7 +27,8 @@ class SocketParserTest: XCTestCase {
         "1/swift": ("/swift", [], [], -1),
         "4\"ERROR\"": ("/", ["ERROR"], [], -1),
         "4{\"test\":2}": ("/", [["test": 2]], [], -1),
-        "41": ("/", [1], [], -1)]
+        "41": ("/", [1], [], -1),
+        "4[1, \"hello\"]": ("/", [1, "hello"], [], -1)]
     
     func testDisconnect() {
         let message = "1"
@@ -99,6 +100,11 @@ class SocketParserTest: XCTestCase {
         validateParseResult(message)
     }
     
+    func testErrorTypeArray() {
+        let message = "4[1, \"hello\"]"
+        validateParseResult(message)
+    }
+    
     func testInvalidInput() {
         let message = "8"
         switch testSocket.parseString(message) {
@@ -120,7 +126,7 @@ class SocketParserTest: XCTestCase {
     func validateParseResult(message: String) {
         let validValues = SocketParserTest.packetTypes[message]!
         let packet = testSocket.parseString(message)
-        let type = message.substringWithRange(Range<String.Index>(message.startIndex..<message.startIndex.advancedBy(1)))
+        let type = String(message.characters.prefixUpTo(message.startIndex.advancedBy(1)))
         if case let .Right(packet) = packet {
             XCTAssertEqual(packet.type, SocketPacket.PacketType(rawValue: Int(type) ?? -1)!)
             XCTAssertEqual(packet.nsp, validValues.0)

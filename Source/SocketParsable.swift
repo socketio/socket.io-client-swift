@@ -107,17 +107,15 @@ extension SocketParsable {
             }
         }
         
-        let d = message[reader.currentIndex.advancedBy(1)..<message.endIndex]
+        var dataArray = message[reader.currentIndex.advancedBy(1)..<message.endIndex]
         
-        switch parseData(d) {
+        if type == .Error && !dataArray.hasPrefix("[") && !dataArray.hasSuffix("]") {
+            dataArray = "[" + dataArray + "]"
+        }
+        
+        switch parseData(dataArray) {
         case let .Left(err):
-            // Errors aren't always enclosed in an array
-            if case let .Right(data) = parseData("\([d as AnyObject])") {
-                return .Right(SocketPacket(type: type, data: data, id: Int(idString) ?? -1,
-                    nsp: namespace, placeholders: placeholders))
-            } else {
-                return .Left(err)
-            }
+            return .Left(err)
         case let .Right(data):
             return .Right(SocketPacket(type: type, data: data, id: Int(idString) ?? -1,
                 nsp: namespace, placeholders: placeholders))
