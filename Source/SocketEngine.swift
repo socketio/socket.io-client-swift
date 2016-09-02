@@ -355,45 +355,45 @@ public final class SocketEngine : NSObject, NSURLSessionDelegate, SocketEnginePo
     private func handleNOOP() {
         doPoll()
     }
-
+    
     private func handleOpen(openData: String) {
-        do {
-            let json = try openData.toNSDictionary()
-            guard let sid = json["sid"] as? String else {
-                client?.engineDidError("Open packet contained no sid")
-                return
-            }
-            
-            let upgradeWs: Bool
-            
-            self.sid = sid
-            connected = true
-            
-            if let upgrades = json["upgrades"] as? [String] {
-                upgradeWs = upgrades.contains("websocket")
-            } else {
-                upgradeWs = false
-            }
-            
-            if let pingInterval = json["pingInterval"] as? Double, pingTimeout = json["pingTimeout"] as? Double {
-                self.pingInterval = pingInterval / 1000.0
-                self.pingTimeout = pingTimeout / 1000.0
-            }
-            
-            if !forcePolling && !forceWebsockets && upgradeWs {
-                createWebsocketAndConnect()
-            }
-            
-            sendPing()
-            
-            if !forceWebsockets {
-                doPoll()
-            }
-            
-            client?.engineDidOpen("Connect")
-        } catch {
+        guard let json = try? openData.toNSDictionary() else {
             didError("Error parsing open packet")
+            return
         }
+        
+        guard let sid = json["sid"] as? String else {
+            didError("Open packet contained no sid")
+            return
+        }
+        
+        let upgradeWs: Bool
+        
+        self.sid = sid
+        connected = true
+        
+        if let upgrades = json["upgrades"] as? [String] {
+            upgradeWs = upgrades.contains("websocket")
+        } else {
+            upgradeWs = false
+        }
+        
+        if let pingInterval = json["pingInterval"] as? Double, pingTimeout = json["pingTimeout"] as? Double {
+            self.pingInterval = pingInterval / 1000.0
+            self.pingTimeout = pingTimeout / 1000.0
+        }
+        
+        if !forcePolling && !forceWebsockets && upgradeWs {
+            createWebsocketAndConnect()
+        }
+        
+        sendPing()
+        
+        if !forceWebsockets {
+            doPoll()
+        }
+        
+        client?.engineDidOpen("Connect")
     }
 
     private func handlePong(pongMessage: String) {
