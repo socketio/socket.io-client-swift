@@ -32,8 +32,8 @@ extension SocketParsable {
         return nsp == self.nsp
     }
     
-    private func handleConnect(_ p: SocketPacket) {
-        if p.nsp == "/" && nsp != "/" {
+    private func handleConnect(_ packetNamespace: String) {
+        if packetNamespace == "/" && nsp != "/" {
             joinNamespace(nsp)
         } else {
             didConnect()
@@ -51,7 +51,7 @@ extension SocketParsable {
         case .binaryAck where isCorrectNamespace(pack.nsp):
             waitingPackets.append(pack)
         case .connect:
-            handleConnect(pack)
+            handleConnect(pack.nsp)
         case .disconnect:
             didDisconnect(reason: "Got Disconnect")
         case .error:
@@ -65,7 +65,7 @@ extension SocketParsable {
     func parseString(_ message: String) -> Either<String, SocketPacket> {
         var reader = SocketStringReader(message: message)
         
-        guard let type = SocketPacket.PacketType(rawValue: Int(reader.read(count: 1)) ?? -1) else {
+		guard let type = Int(reader.read(count: 1)).flatMap({ SocketPacket.PacketType(rawValue: $0) }) else {
             return .left("Invalid packet type")
         }
         
@@ -112,7 +112,7 @@ extension SocketParsable {
         switch parseData(d) {
         case let .left(err):
             // Errors aren't always enclosed in an array
-            if case let .right(data) = parseData("\([d as AnyObject])") {
+            if case let .right(data) = parseData("[\(d)]") {
                 return .right(SocketPacket(type: type, data: data, id: Int(idString) ?? -1,
                     nsp: namespace, placeholders: placeholders))
             } else {
@@ -125,7 +125,7 @@ extension SocketParsable {
     }
     
     // Parses data for events
-    private func parseData(_ data: String) -> Either<String, [AnyObject]> {
+    private func parseData(_ data: String) -> Either<String, [Any]> {
         do {
             return .right(try data.toArray())
         } catch {

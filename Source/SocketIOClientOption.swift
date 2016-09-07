@@ -25,11 +25,11 @@
 import Foundation
 
 protocol ClientOption : CustomStringConvertible, Equatable {
-    func getSocketIOOptionValue() -> AnyObject
+    func getSocketIOOptionValue() -> Any
 }
 
 public enum SocketIOClientOption : ClientOption {
-    case connectParams([String: AnyObject])
+    case connectParams([String: Any])
     case cookies([HTTPCookie])
     case doubleEncodeUTF8(Bool)
     case extraHeaders([String: String])
@@ -99,50 +99,50 @@ public enum SocketIOClientOption : ClientOption {
         return description
     }
     
-    func getSocketIOOptionValue() -> AnyObject {
-        let value: AnyObject
+    func getSocketIOOptionValue() -> Any {
+        let value: Any
         
         switch self {
         case let .connectParams(params):
-            value = params as AnyObject
+            value = params
         case let .cookies(cookies):
-            value = cookies as AnyObject
+            value = cookies
         case let .doubleEncodeUTF8(encode):
-            value = encode as AnyObject
+            value = encode
         case let .extraHeaders(headers):
-            value = headers as AnyObject
+            value = headers
         case let .forceNew(force):
-            value = force as AnyObject
+            value = force
         case let .forcePolling(force):
-            value = force as AnyObject
+            value = force
         case let .forceWebsockets(force):
-            value = force as AnyObject
+            value = force
         case let .handleQueue(queue):
-            value = queue as AnyObject
+            value = queue
         case let .log(log):
-            value = log as AnyObject
+            value = log
         case let .logger(logger):
-            value = logger as AnyObject
+            value = logger
         case let .nsp(nsp):
-            value = nsp as AnyObject
+            value = nsp
         case let .path(path):
-            value = path as AnyObject
+            value = path
         case let .reconnects(reconnects):
-            value = reconnects as AnyObject
+            value = reconnects
         case let .reconnectAttempts(attempts):
-            value = attempts as AnyObject
+            value = attempts
         case let .reconnectWait(wait):
-            value = wait as AnyObject
+            value = wait
         case let .secure(secure):
-            value = secure as AnyObject
+            value = secure
         case let .security(security):
             value = security
         case let .selfSigned(signed):
-            value = signed as AnyObject
+            value = signed
         case let .sessionDelegate(delegate):
-            value = delegate as AnyObject
+            value = delegate
         case let .voipEnabled(enabled):
-            value = enabled as AnyObject
+            value = enabled
         }
         
         return value

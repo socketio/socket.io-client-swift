@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import SocketIOClientSwift
+@testable import SocketIO
 
 class SocketEngineTest: XCTestCase {
     var client: SocketIOClient!
@@ -89,14 +89,14 @@ class SocketEngineTest: XCTestCase {
 
     func testEncodeURLProperly() {
         engine.connectParams = [
-            "created": "2016-05-04T18:31:15+0200" as AnyObject
+            "created": "2016-05-04T18:31:15+0200"
         ]
 
         XCTAssertEqual(engine.urlPolling.query, "transport=polling&b64=1&created=2016-05-04T18%3A31%3A15%2B0200")
         XCTAssertEqual(engine.urlWebSocket.query, "transport=websocket&created=2016-05-04T18%3A31%3A15%2B0200")
 
         engine.connectParams = [
-            "forbidden": "!*'();:@&=+$,/?%#[]\" {}" as AnyObject
+            "forbidden": "!*'();:@&=+$,/?%#[]\" {}"
         ]
 
         XCTAssertEqual(engine.urlPolling.query, "transport=polling&b64=1&forbidden=%21%2A%27%28%29%3B%3A%40%26%3D%2B%24%2C%2F%3F%25%23%5B%5D%22%20%7B%7D")

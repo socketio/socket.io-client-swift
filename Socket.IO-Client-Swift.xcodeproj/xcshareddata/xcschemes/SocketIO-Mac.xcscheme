@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "572EF2371B51F18A00EEBB58"
-               BuildableName = "SocketIOClientSwift.framework"
+               BuildableName = "SocketIO.framework"
                BlueprintName = "SocketIO-Mac"
                ReferencedContainer = "container:Socket.IO-Client-Swift.xcodeproj">
             </BuildableReference>
@@ -57,7 +57,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "572EF2371B51F18A00EEBB58"
-            BuildableName = "SocketIOClientSwift.framework"
+            BuildableName = "SocketIO.framework"
             BlueprintName = "SocketIO-Mac"
             ReferencedContainer = "container:Socket.IO-Client-Swift.xcodeproj">
          </BuildableReference>
@@ -79,7 +79,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "572EF2371B51F18A00EEBB58"
-            BuildableName = "SocketIOClientSwift.framework"
+            BuildableName = "SocketIO.framework"
             BlueprintName = "SocketIO-Mac"
             ReferencedContainer = "container:Socket.IO-Client-Swift.xcodeproj">
          </BuildableReference>
@@ -97,7 +97,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "572EF2371B51F18A00EEBB58"
-            BuildableName = "SocketIOClientSwift.framework"
+            BuildableName = "SocketIO.framework"
             BlueprintName = "SocketIO-Mac"
             ReferencedContainer = "container:Socket.IO-Client-Swift.xcodeproj">
          </BuildableReference>

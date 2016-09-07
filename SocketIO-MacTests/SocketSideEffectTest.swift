@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import SocketIOClientSwift
+@testable import SocketIO
 
 class SocketSideEffectTest: XCTestCase {
     let data = "test".data(using: String.Encoding.utf8)!
@@ -135,12 +135,6 @@ class SocketSideEffectTest: XCTestCase {
         socket.parseSocketMessage("51-[\"test\",{\"test\":{\"_placeholder\":true,\"num\":0}}]")
         socket.parseBinaryData(data)
         waitForExpectations(timeout: 3, handler: nil)
-    }
-    
-    func testSocketDataToAnyObject() {
-        let data = ["test", 1, 2.2, ["Hello": 2, "bob": 2.2], true, [1, 2], [1.1, 2]] as [SocketData]
-        
-        XCTAssertEqual(data.count, data.toAnyObjectArray().count)
     }
     
     func testHandleMultipleBinaryEvent() {

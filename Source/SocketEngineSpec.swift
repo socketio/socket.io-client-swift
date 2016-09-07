@@ -29,7 +29,7 @@ import Foundation
     weak var client: SocketEngineClient? { get set }
     var closed: Bool { get }
     var connected: Bool { get }
-    var connectParams: [String: AnyObject]? { get set }
+    var connectParams: [String: Any]? { get set }
     var doubleEncodeUTF8: Bool { get }
     var cookies: [HTTPCookie]? { get }
     var extraHeaders: [String: String]? { get }

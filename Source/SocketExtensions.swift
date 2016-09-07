@@ -30,13 +30,6 @@ enum JSONError : Error {
 }
 
 extension Array {
-    /// Because Swift 3 removes a lot of implicit briding so we have to perform more explicit bridging
-    func toAnyObjectArray() -> [AnyObject] {
-        return flatMap({ $0 as AnyObject })
-    }
-}
-
-extension Array where Element: AnyObject {
     func toJSON() throws -> Data {
         return try JSONSerialization.data(withJSONObject: self as NSArray, options: JSONSerialization.WritingOptions(rawValue: 0))
     }
@@ -49,9 +42,9 @@ extension CharacterSet {
 }
 
 extension NSDictionary {
-    private static func keyValueToSocketIOClientOption(key: String, value: AnyObject) -> SocketIOClientOption? {
+    private static func keyValueToSocketIOClientOption(key: String, value: Any) -> SocketIOClientOption? {
         switch (key, value) {
-        case let ("connectParams", params as [String: AnyObject]):
+        case let ("connectParams", params as [String: Any]):
             return .connectParams(params)
         case let ("cookies", cookies as [HTTPCookie]):
             return .cookies(cookies)
@@ -100,7 +93,7 @@ extension NSDictionary {
         var options = [] as SocketIOClientConfiguration
         
         for (rawKey, value) in self {
-            if let key = rawKey as? String, let opt = NSDictionary.keyValueToSocketIOClientOption(key: key, value: value as AnyObject) {
+            if let key = rawKey as? String, let opt = NSDictionary.keyValueToSocketIOClientOption(key: key, value: value) {
                 options.insert(opt)
             }
         }
@@ -110,9 +103,9 @@ extension NSDictionary {
 }
 
 extension String {
-    func toArray() throws -> [AnyObject] {
+    func toArray() throws -> [Any] {
         guard let stringData = data(using: .utf8, allowLossyConversion: false) else { return [] }
-        guard let array = try JSONSerialization.jsonObject(with: stringData, options: .mutableContainers) as? [AnyObject] else {
+        guard let array = try JSONSerialization.jsonObject(with: stringData, options: .mutableContainers) as? [Any] else {
              throw JSONError.notArray
         }
         

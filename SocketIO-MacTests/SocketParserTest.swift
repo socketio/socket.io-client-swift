@@ -7,27 +7,27 @@
 //
 
 import XCTest
-@testable import SocketIOClientSwift
+@testable import SocketIO
 
 class SocketParserTest: XCTestCase {
     let testSocket = SocketIOClient(socketURL: URL(string: "http://localhost/")!)
     
     //Format key: message; namespace-data-binary-id
-    static let packetTypes: [String: (String, [AnyObject], [Data], Int)] = [
+    static let packetTypes: [String: (String, [Any], [Data], Int)] = [
         "0": ("/", [], [], -1), "1": ("/", [], [], -1),
-        "25[\"test\"]": ("/", ["test" as AnyObject], [], 5),
-        "2[\"test\",\"~~0\"]": ("/", ["test" as AnyObject, "~~0" as AnyObject], [], -1),
-        "2/swift,[\"testArrayEmitReturn\",[\"test3\",\"test4\"]]": ("/swift", ["testArrayEmitReturn" as AnyObject, ["test3" as AnyObject, "test4" as AnyObject] as NSArray], [], -1),
-        "51-/swift,[\"testMultipleItemsWithBufferEmitReturn\",[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]": ("/swift", ["testMultipleItemsWithBufferEmitReturn" as AnyObject, [1, 2] as NSArray, ["test": "bob"] as NSDictionary, 25 as AnyObject, "polo" as AnyObject, ["_placeholder": true, "num": 0] as NSDictionary], [], -1),
+        "25[\"test\"]": ("/", ["test"], [], 5),
+        "2[\"test\",\"~~0\"]": ("/", ["test", "~~0"], [], -1),
+        "2/swift,[\"testArrayEmitReturn\",[\"test3\",\"test4\"]]": ("/swift", ["testArrayEmitReturn", ["test3", "test4"] as NSArray], [], -1),
+        "51-/swift,[\"testMultipleItemsWithBufferEmitReturn\",[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]": ("/swift", ["testMultipleItemsWithBufferEmitReturn", [1, 2] as NSArray, ["test": "bob"] as NSDictionary, 25, "polo", ["_placeholder": true, "num": 0] as NSDictionary], [], -1),
         "3/swift,0[[\"test3\",\"test4\"]]": ("/swift", [["test3", "test4"] as NSArray], [], 0),
         "61-/swift,19[[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]":
-            ("/swift", [ [1, 2] as NSArray, ["test": "bob"] as NSDictionary, 25 as AnyObject, "polo" as AnyObject, ["_placeholder": true, "num": 0] as NSDictionary], [], 19),
+            ("/swift", [ [1, 2] as NSArray, ["test": "bob"] as NSDictionary, 25, "polo", ["_placeholder": true, "num": 0] as NSDictionary], [], 19),
         "4/swift,": ("/swift", [], [], -1),
         "0/swift": ("/swift", [], [], -1),
         "1/swift": ("/swift", [], [], -1),
-        "4\"ERROR\"": ("/", ["ERROR" as AnyObject], [], -1),
+        "4\"ERROR\"": ("/", ["ERROR"], [], -1),
         "4{\"test\":2}": ("/", [["test": 2] as NSDictionary], [], -1),
-        "41": ("/", [1 as AnyObject], [], -1)]
+        "41": ("/", [1], [], -1)]
     
     func testDisconnect() {
         let message = "1"
@@ -120,7 +120,7 @@ class SocketParserTest: XCTestCase {
     func validateParseResult(_ message: String) {
         let validValues = SocketParserTest.packetTypes[message]!
         let packet = testSocket.parseString(message)
-        let type = message.substring(with: Range<String.Index>(message.startIndex..<message.characters.index(message.startIndex, offsetBy: 1)))
+        let type = String(message.characters.prefix(1))
         if case let .right(packet) = packet {
             XCTAssertEqual(packet.type, SocketPacket.PacketType(rawValue: Int(type) ?? -1)!)
             XCTAssertEqual(packet.nsp, validValues.0)

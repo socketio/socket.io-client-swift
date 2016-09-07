@@ -39,9 +39,9 @@ struct SocketPacket {
     let type: PacketType
     
     var binary: [Data]
-    var data: [AnyObject]
+    var data: [Any]
     
-    var args: [AnyObject] {
+    var args: [Any] {
         if type == .event || type == .binaryEvent && data.count != 0 {
             return Array(data.dropFirst())
         } else {
@@ -62,7 +62,7 @@ struct SocketPacket {
         return createPacketString()
     }
     
-    init(type: PacketType, data: [AnyObject] = [AnyObject](), id: Int = -1,
+    init(type: PacketType, data: [Any] = [Any](), id: Int = -1,
         nsp: String, placeholders: Int = 0, binary: [Data] = [Data]()) {
         self.data = data
         self.id = id
@@ -132,19 +132,19 @@ struct SocketPacket {
     // If object is a collection it will recurse
     // Returns the object if it is not a placeholder or the corresponding
     // binary data
-    private func _fillInPlaceholders(_ object: AnyObject) -> AnyObject {
+    private func _fillInPlaceholders(_ object: Any) -> Any {
         switch object {
-        case let dict as [AnyHashable: AnyObject]:
+        case let dict as [String: Any]:
             if dict["_placeholder"] as? Bool ?? false {
-                return binary[dict["num"] as! Int] as AnyObject
+                return binary[dict["num"] as! Int]
             } else {
                 return dict.reduce(NSMutableDictionary(), {cur, keyValue in
-                    cur[keyValue.0 as! NSCopying] = _fillInPlaceholders(keyValue.1 as AnyObject)
+                    cur[keyValue.0] = _fillInPlaceholders(keyValue.1)
                     return cur
                 })
             }
-        case let arr as [AnyObject]:
-            return arr.map(_fillInPlaceholders) as AnyObject
+        case let arr as [Any]:
+            return arr.map(_fillInPlaceholders)
         default:
             return object
         }
@@ -167,7 +167,7 @@ extension SocketPacket {
         }
     }
     
-    static func packetFromEmit(_ items: [AnyObject], id: Int, nsp: String, ack: Bool) -> SocketPacket {
+    static func packetFromEmit(_ items: [Any], id: Int, nsp: String, ack: Bool) -> SocketPacket {
         let (parsedData, binary) = deconstructData(items)
         let packet = SocketPacket(type: findType(binary.count, ack: ack), data: parsedData,
             id: id, nsp: nsp, binary: binary)
@@ -178,23 +178,23 @@ extension SocketPacket {
 
 private extension SocketPacket {
     // Recursive function that looks for NSData in collections
-    static func shred(_ data: AnyObject, binary: inout [Data]) -> AnyObject {
-        let placeholder = ["_placeholder": true, "num": binary.count as AnyObject] as [String : Any]
+    static func shred(_ data: Any, binary: inout [Data]) -> Any {
+        let placeholder = ["_placeholder": true, "num": binary.count] as [String : Any]
         
         switch data {
         case let bin as Data:
             binary.append(bin)
-            return placeholder as AnyObject
-        case let arr as [AnyObject]:
-            return arr.map({shred($0, binary: &binary)}) as AnyObject
-        case let dict as [AnyHashable: AnyObject]:
-            return dict.reduce([AnyHashable: AnyObject](), {cur, keyValue in
+            return placeholder
+        case let arr as [Any]:
+            return arr.map({shred($0, binary: &binary)})
+        case let dict as [String: Any]:
+            return dict.reduce([String: Any](), {cur, keyValue in
                 var mutCur = cur
                 
-                mutCur[keyValue.0] = shred(keyValue.1 as AnyObject, binary: &binary)
+                mutCur[keyValue.0] = shred(keyValue.1, binary: &binary)
                 
                 return mutCur
-            }) as AnyObject
+            })
         default:
             return data
         }
@@ -202,7 +202,7 @@ private extension SocketPacket {
     
     // Removes binary data from emit data
     // Returns a type containing the de-binaryed data and the binary
-    static func deconstructData(_ data: [AnyObject]) -> ([AnyObject], [Data]) {
+    static func deconstructData(_ data: [Any]) -> ([Any], [Data]) {
         var binary = [Data]()
         
         return (data.map({shred($0, binary: &binary)}), binary)

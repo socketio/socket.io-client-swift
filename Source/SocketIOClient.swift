@@ -151,33 +151,33 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         let time = DispatchTime.now() + Double(Int64(timeoutAfter) * Int64(NSEC_PER_SEC)) / Double(NSEC_PER_SEC)
 
         handleQueue.asyncAfter(deadline: time) {[weak self] in
-            if let this = self, this.status != .connected && this.status != .disconnected {
-                this.status = .disconnected
-                this.engine?.disconnect(reason: "Connect timeout")
-
-                handler?()
-            }
+            guard let this = self, this.status != .connected && this.status != .disconnected else { return }
+            
+            this.status = .disconnected
+            this.engine?.disconnect(reason: "Connect timeout")
+            
+            handler?()
         }
     }
 
-    private func createOnAck(_ items: [AnyObject]) -> OnAckCallback {
+    private func createOnAck(_ items: [Any]) -> OnAckCallback {
         currentAck += 1
         
         return {[weak self, ack = currentAck] timeout, callback in
-            if let this = self {
-                this.ackQueue.sync() {
-                    this.ackHandlers.addAck(ack, callback: callback)
-                }
+            guard let this = self else { return }
+
+            this.ackQueue.sync() {
+                this.ackHandlers.addAck(ack, callback: callback)
+            }
+            
+            
+            this._emit(items, ack: ack)
+            
+            if timeout != 0 {
+                let time = DispatchTime.now() + Double(Int64(timeout * NSEC_PER_SEC)) / Double(NSEC_PER_SEC)
                 
-                
-                this._emit(items, ack: ack)
-                
-                if timeout != 0 {
-                    let time = DispatchTime.now() + Double(Int64(timeout * NSEC_PER_SEC)) / Double(NSEC_PER_SEC)
-                    
-                    this.handleQueue.asyncAfter(deadline: time) {
-                        this.ackHandlers.timeoutAck(ack, onQueue: this.handleQueue)
-                    }
+                this.handleQueue.asyncAfter(deadline: time) {
+                    this.ackHandlers.timeoutAck(ack, onQueue: this.handleQueue)
                 }
             }
         }
@@ -197,17 +197,16 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
         DefaultSocketLogger.Logger.log("Disconnected: %@", type: logType, args: reason)
 
+        reconnecting = false
         status = .disconnected
 
         // Make sure the engine is actually dead.
         engine?.disconnect(reason: reason)
-        handleEvent("disconnect", data: [reason as AnyObject], isInternalMessage: true)
+        handleEvent("disconnect", data: [reason], isInternalMessage: true)
     }
 
     /// Disconnects the socket.
     public func disconnect() {
-        assert(status != .notConnected, "Tried closing a NotConnected client")
-        
         DefaultSocketLogger.Logger.log("Closing socket", type: logType)
 
         didDisconnect(reason: "Disconnect")
@@ -215,34 +214,34 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
     /// Send a message to the server
     public func emit(_ event: String, _ items: SocketData...) {
-        emit(event, with: items.toAnyObjectArray())
+        emit(event, with: items)
     }
 
     /// Same as emit, but meant for Objective-C
-    public func emit(_ event: String, with items: [AnyObject]) {
+    public func emit(_ event: String, with items: [Any]) {
         guard status == .connected else {
-            handleEvent("error", data: ["Tried emitting \(event) when not connected" as AnyObject], isInternalMessage: true)
+            handleEvent("error", data: ["Tried emitting \(event) when not connected"], isInternalMessage: true)
             return
         }
         
-        _emit([event as AnyObject] + items)
+        _emit([event] + items)
     }
 
     /// Sends a message to the server, requesting an ack. Use the onAck method of SocketAckHandler to add
     /// an ack.
     public func emitWithAck(_ event: String, _ items: SocketData...) -> OnAckCallback {
-        return emitWithAck(event, with: items.toAnyObjectArray())
+        return emitWithAck(event, with: items)
     }
 
     /// Same as emitWithAck, but for Objective-C
-    public func emitWithAck(_ event: String, with items: [AnyObject]) -> OnAckCallback {
-        return createOnAck([event as AnyObject] + items)
+    public func emitWithAck(_ event: String, with items: [Any]) -> OnAckCallback {
+        return createOnAck([event] + items)
     }
 
-    private func _emit(_ data: [AnyObject], ack: Int? = nil) {
+    private func _emit(_ data: [Any], ack: Int? = nil) {
         emitQueue.async {
             guard self.status == .connected else {
-                self.handleEvent("error", data: ["Tried emitting when not connected" as AnyObject], isInternalMessage: true)
+                self.handleEvent("error", data: ["Tried emitting when not connected"], isInternalMessage: true)
                 return
             }
             
@@ -256,7 +255,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     }
 
     // If the server wants to know that the client received data
-    func emitAck(_ ack: Int, with items: [AnyObject]) {
+    func emitAck(_ ack: Int, with items: [Any]) {
         emitQueue.async {
             if self.status == .connected {
                 let packet = SocketPacket.packetFromEmit(items, id: ack, nsp: self.nsp, ack: true)
@@ -288,7 +287,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     public func engineDidError(reason: String) {
         DefaultSocketLogger.Logger.error("%@", type: logType, args: reason)
 
-        handleEvent("error", data: [reason as AnyObject], isInternalMessage: true)
+        handleEvent("error", data: [reason], isInternalMessage: true)
     }
     
     public func engineDidOpen(reason: String) {
@@ -296,7 +295,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     }
 
     // Called when the socket gets an ack for something it sent
-    func handleAck(_ ack: Int, data: [AnyObject]) {
+    func handleAck(_ ack: Int, data: [Any]) {
         guard status == .connected else { return }
 
         DefaultSocketLogger.Logger.log("Handling ack: %@ with data: %@", type: logType, args: ack, data)
@@ -307,7 +306,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     }
 
     /// Causes an event to be handled. Only use if you know what you're doing.
-    public func handleEvent(_ event: String, data: [AnyObject], isInternalMessage: Bool, withAck ack: Int = -1) {
+    public func handleEvent(_ event: String, data: [Any], isInternalMessage: Bool, withAck ack: Int = -1) {
         guard status == .connected || isInternalMessage else { return }
 
         DefaultSocketLogger.Logger.log("Handling event: %@ with data: %@", type: logType, args: event, data)
@@ -416,7 +415,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         guard reconnecting else { return }
 
         DefaultSocketLogger.Logger.log("Starting reconnect", type: logType)
-        handleEvent("reconnect", data: [reason as AnyObject], isInternalMessage: true)
+        handleEvent("reconnect", data: [reason], isInternalMessage: true)
         
         _tryReconnect()
     }
@@ -429,7 +428,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         }
 
         DefaultSocketLogger.Logger.log("Trying to reconnect", type: logType)
-        handleEvent("reconnectAttempt", data: [(reconnectAttempts - currentReconnectAttempt) as AnyObject],
+        handleEvent("reconnectAttempt", data: [(reconnectAttempts - currentReconnectAttempt)],
             isInternalMessage: true)
 
         currentReconnectAttempt += 1
@@ -454,7 +453,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         self.engine = engine
     }
     
-    func emitTest(event: String, _ data: AnyObject...) {
-        _emit([event as AnyObject] + data)
+    func emitTest(event: String, _ data: Any...) {
+        _emit([event] + data)
     }
 }

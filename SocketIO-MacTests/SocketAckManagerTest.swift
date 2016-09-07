@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import SocketIOClientSwift
+@testable import SocketIO
 
 class SocketAckManagerTest: XCTestCase {
     var ackManager = SocketAckManager()
@@ -15,11 +15,11 @@ class SocketAckManagerTest: XCTestCase {
     func testAddAcks() {
         let callbackExpection = self.expectation(description: "callbackExpection")
         let itemsArray = ["Hi", "ho"]
-        func callback(_ items: [AnyObject]) {
+        func callback(_ items: [Any]) {
             callbackExpection.fulfill()
         }
         ackManager.addAck(1, callback: callback)
-        ackManager.executeAck(1, with: itemsArray as [AnyObject], onQueue: DispatchQueue.main)
+        ackManager.executeAck(1, with: itemsArray, onQueue: DispatchQueue.main)
         
         waitForExpectations(timeout: 3.0, handler: nil)
     }
