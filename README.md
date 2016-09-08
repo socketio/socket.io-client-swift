@@ -59,7 +59,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 ##Installation
 Requires Swift 3/Xcode 8.x
 
-If you need swift 2.2 use 6.x (Pre-Swift 3 support is no longer maintained)
+If you need swift 2.2 use 7.x (Pre-Swift 3 support is no longer maintained)
 
 If you need Swift 2.1 use v5.5.0 (Pre-Swift 2.2 support is no longer maintained)
 
