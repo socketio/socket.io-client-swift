@@ -407,7 +407,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     public func parseEngineData(_ data: Data) {
         DefaultSocketLogger.Logger.log("Got binary data: %@", type: "SocketEngine", args: data)
 
-        client?.parseEngineBinaryData(data.subdata(in: Range<Int>(uncheckedBounds: (1, data.count - 1))))
+        client?.parseEngineBinaryData(data.subdata(in: 1..<data.endIndex))
     }
 
     public func parseEngineMessage(_ message: String, fromPolling: Bool) {
