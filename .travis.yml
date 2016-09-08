@@ -5,4 +5,5 @@ osx_image: xcode8
 branches:
   only:
     - master
+    - development
 script: xctool -project Socket.IO-Client-Swift.xcodeproj -scheme SocketIO-Mac build test -parallelize
