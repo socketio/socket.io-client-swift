@@ -107,17 +107,17 @@ extension SocketParsable {
             }
         }
         
-        let d = message[reader.advance(by: 1)..<message.endIndex]
         
-        switch parseData(d) {
+        
+        var dataArray = message[message.characters.index(reader.currentIndex, offsetBy: 1)..<message.endIndex]
+        
+        if type == .error && !dataArray.hasPrefix("[") && !dataArray.hasSuffix("]") {
+            dataArray = "[" + dataArray + "]"
+        }
+        
+        switch parseData(dataArray) {
         case let .left(err):
-            // Errors aren't always enclosed in an array
-            if case let .right(data) = parseData("[\(d)]") {
-                return .right(SocketPacket(type: type, data: data, id: Int(idString) ?? -1,
-                    nsp: namespace, placeholders: placeholders))
-            } else {
-                return .left(err)
-            }
+            return .left(err)
         case let .right(data):
             return .right(SocketPacket(type: type, data: data, id: Int(idString) ?? -1,
                 nsp: namespace, placeholders: placeholders))

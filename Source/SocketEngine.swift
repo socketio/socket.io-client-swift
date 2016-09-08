@@ -354,10 +354,11 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     private func handleNOOP() {
         doPoll()
     }
-
+    
     private func handleOpen(openData: String) {
         guard let json = try? openData.toNSDictionary() else {
             didError(reason: "Error parsing open packet")
+            
             return
         }
         
