@@ -6,7 +6,6 @@ branches:
   only:
     - master
     - development
-    - travis-test
 before_install:
   - brew update
   - brew outdated xctool || brew upgrade xctool
