@@ -257,14 +257,14 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     // If the server wants to know that the client received data
     func emitAck(_ ack: Int, with items: [Any]) {
         emitQueue.async {
-            if self.status == .connected {
-                let packet = SocketPacket.packetFromEmit(items, id: ack, nsp: self.nsp, ack: true)
-                let str = packet.packetString
-
-                DefaultSocketLogger.Logger.log("Emitting Ack: %@", type: self.logType, args: str)
-
-                self.engine?.send(str, withData: packet.binary)
-            }
+            guard self.status == .connected else { return }
+            
+            let packet = SocketPacket.packetFromEmit(items, id: ack, nsp: self.nsp, ack: true)
+            let str = packet.packetString
+            
+            DefaultSocketLogger.Logger.log("Emitting Ack: %@", type: self.logType, args: str)
+            
+            self.engine?.send(str, withData: packet.binary)
         }
     }
 
@@ -428,8 +428,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         }
 
         DefaultSocketLogger.Logger.log("Trying to reconnect", type: logType)
-        handleEvent("reconnectAttempt", data: [(reconnectAttempts - currentReconnectAttempt)],
-            isInternalMessage: true)
+        handleEvent("reconnectAttempt", data: [(reconnectAttempts - currentReconnectAttempt)], isInternalMessage: true)
 
         currentReconnectAttempt += 1
         connect()

@@ -340,7 +340,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
             ws.writeString(msg)
         }
 
-        postWait.removeAll(keepingCapacity: true)
+        postWait.removeAll(keepingCapacity: false)
     }
 
     private func handleClose(_ reason: String) {
@@ -364,6 +364,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         
         guard let sid = json["sid"] as? String else {
             didError(reason: "Open packet contained no sid")
+            
             return
         }
         
@@ -435,14 +436,13 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
 
         switch type {
         case .message:
-            handleMessage(
-                fixedString[fixedString.characters.index(after: fixedString.characters.startIndex)..<fixedString.endIndex])
+            handleMessage(String(fixedString.characters.dropFirst()))
         case .noop:
             handleNOOP()
         case .pong:
             handlePong(with: fixedString)
         case .open:
-            handleOpen(openData: fixedString[fixedString.characters.index(after: fixedString.characters.startIndex)..<fixedString.endIndex])
+            handleOpen(openData: String(fixedString.characters.dropFirst()))
         case .close:
             handleClose(fixedString)
         default:

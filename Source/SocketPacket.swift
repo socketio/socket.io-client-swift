@@ -40,7 +40,6 @@ struct SocketPacket {
     
     var binary: [Data]
     var data: [Any]
-    
     var args: [Any] {
         if type == .event || type == .binaryEvent && data.count != 0 {
             return Array(data.dropFirst())
@@ -62,8 +61,8 @@ struct SocketPacket {
         return createPacketString()
     }
     
-    init(type: PacketType, data: [Any] = [Any](), id: Int = -1,
-        nsp: String, placeholders: Int = 0, binary: [Data] = [Data]()) {
+    init(type: PacketType, data: [Any] = [Any](), id: Int = -1, nsp: String, placeholders: Int = 0,
+         binary: [Data] = [Data]()) {
         self.data = data
         self.id = id
         self.nsp = nsp
@@ -112,9 +111,9 @@ struct SocketPacket {
     private func createPacketString() -> String {
         let typeString = String(type.rawValue)
         // Binary count?
-        let binaryCountString = typeString + (type == .binaryEvent || type == .binaryAck ? String(binary.count) + "-" : "")
+        let binaryCountString = typeString + (type == .binaryEvent || type == .binaryAck ? "\(String(binary.count))-" : "")
         // Namespace?
-        let nspString = binaryCountString + (nsp != "/" ? nsp + "," : "")
+        let nspString = binaryCountString + (nsp != "/" ? "\(nsp)," : "")
         // Ack number?
         let idString = nspString + (id != -1 ? String(id) : "")
         

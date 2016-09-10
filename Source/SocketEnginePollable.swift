@@ -90,7 +90,9 @@ extension SocketEnginePollable {
     }
     
     public func doPoll() {
-        if websocket || waitingForPoll || !connected || closed { return }
+        if websocket || waitingForPoll || !connected || closed {
+            return
+        }
         
         waitingForPoll = true
         

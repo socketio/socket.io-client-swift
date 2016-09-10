@@ -31,7 +31,7 @@ enum JSONError : Error {
 
 extension Array {
     func toJSON() throws -> Data {
-        return try JSONSerialization.data(withJSONObject: self as NSArray, options: JSONSerialization.WritingOptions(rawValue: 0))
+        return try JSONSerialization.data(withJSONObject: self, options: JSONSerialization.WritingOptions(rawValue: 0))
     }
 }
 
