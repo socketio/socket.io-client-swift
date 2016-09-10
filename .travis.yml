@@ -6,4 +6,9 @@ branches:
   only:
     - master
     - development
-script: xctool -project Socket.IO-Client-Swift.xcodeproj -scheme SocketIO-Mac build test -parallelize
+    - travis-test
+before_install:
+  - brew update
+  - brew outdated xctool || brew upgrade xctool
+# script: xctool -project Socket.IO-Client-Swift.xcodeproj -scheme SocketIO-Mac build test -parallelize
+script: xcodebuild -project Socket.IO-Client-Swift.xcodeproj -scheme SocketIO-Mac build test
