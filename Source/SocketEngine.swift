@@ -466,23 +466,22 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     }
 
     private func sendPing() {
-        if !connected {
-            return
-        }
+        guard connected else { return }
 
-        //Server is not responding
+        // Server is not responding
         if pongsMissed > pongsMissedMax {
             client?.engineDidClose(reason: "Ping timeout")
+            
             return
         }
 
-        if let pingInterval = pingInterval {
-            pongsMissed += 1
-            write("", withType: .ping, withData: [])
-
-            let time = DispatchTime.now() + Double(Int64(pingInterval * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
-            DispatchQueue.main.asyncAfter(deadline: time) {[weak self] in self?.sendPing() }
-        }
+        guard let pingInterval = pingInterval else { return }
+        
+        pongsMissed += 1
+        write("", withType: .ping, withData: [])
+        
+        let time = DispatchTime.now() + Double(Int64(pingInterval * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
+        DispatchQueue.main.asyncAfter(deadline: time) {[weak self] in self?.sendPing() }
     }
 
     // Moves from long-polling to websockets
@@ -532,6 +531,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
 
         if closed {
             client?.engineDidClose(reason: "Disconnect")
+            
             return
         }
 
