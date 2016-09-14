@@ -6,7 +6,7 @@ Socket.IO-client for iOS/OS X.
 ##Example
 ```swift
 import SocketIO
-let socket = SocketIOClient(socketURL: NSURL(string: "http://localhost:8080")!, config: [.log(true), .forcePolling(true)])
+let socket = SocketIOClient(socketURL: URL(string: "http://localhost:8080")!, config: [.log(true), .forcePolling(true)])
 
 socket.on("connect") {data, ack in
     print("socket connected")
@@ -14,7 +14,7 @@ socket.on("connect") {data, ack in
 
 socket.on("currentAmount") {data, ack in
     if let cur = data[0] as? Double {
-        socket.emitWithAck("canUpdate", cur)(timeoutAfter: 0) {data in
+        socket.emitWithAck("canUpdate", cur)(0) {data in
             socket.emit("update", ["amount": cur + 2.50])
         }
 
@@ -59,6 +59,8 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 ##Installation
 Requires Swift 3/Xcode 8.x
 
+If you need swift 2.3 use the swift2.3 branch (Pre-Swift 3 support is no longer maintained)
+
 If you need swift 2.2 use 7.x (Pre-Swift 3 support is no longer maintained)
 
 If you need Swift 2.1 use v5.5.0 (Pre-Swift 2.2 support is no longer maintained)
@@ -81,7 +83,7 @@ import PackageDescription
 let package = Package(
     name: "YourSocketIOProject",
     dependencies: [
-        .Package(url: "https://github.com/socketio/socket.io-client-swift", majorVersion: 6)
+        .Package(url: "https://github.com/socketio/socket.io-client-swift", majorVersion: 8)
     ]
 )
 ```
@@ -92,7 +94,7 @@ Carthage
 -----------------
 Add this line to your `Cartfile`:
 ```
-github "socketio/socket.io-client-swift" ~> 7.0.3 # Or latest version
+github "socketio/socket.io-client-swift" ~> 8.0.0 # Or latest version
 ```
 
 Run `carthage update --platform ios,macosx`.
@@ -105,7 +107,7 @@ Create `Podfile` and add `pod 'Socket.IO-Client-Swift'`:
 use_frameworks!
 
 target 'YourApp' do
-    pod 'Socket.IO-Client-Swift', '~> 7.0.3' # Or latest version
+    pod 'Socket.IO-Client-Swift', '~> 8.0.0' # Or latest version
 end
 ```
 
@@ -134,7 +136,7 @@ CocoaSeeds
 Add this line to your `Seedfile`:
 
 ```
-github "socketio/socket.io-client-swift", "v7.0.3", :files => "Source/*.swift" # Or latest version
+github "socketio/socket.io-client-swift", "v8.0.0", :files => "Source/*.swift" # Or latest version
 ```
 
 Run `seed install`.
