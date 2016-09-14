@@ -137,8 +137,11 @@ struct SocketPacket {
             if dict["_placeholder"] as? Bool ?? false {
                 return binary[dict["num"] as! Int]
             } else {
-                return dict.reduce(NSMutableDictionary(), {cur, keyValue in
+                return dict.reduce([String: Any](), {cur, keyValue in
+                    var cur = cur
+                    
                     cur[keyValue.0] = _fillInPlaceholders(keyValue.1)
+                    
                     return cur
                 })
             }
@@ -183,6 +186,7 @@ private extension SocketPacket {
         switch data {
         case let bin as Data:
             binary.append(bin)
+            
             return placeholder
         case let arr as [Any]:
             return arr.map({shred($0, binary: &binary)})
