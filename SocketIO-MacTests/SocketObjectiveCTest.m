@@ -31,11 +31,11 @@
 }
 
 - (void)testEmitSyntax {
-    [self.socket emit:@"testEmit" withItems:@[@YES]];
+    [self.socket emit:@"testEmit" with:@[@YES]];
 }
 
 - (void)testEmitWithAckSyntax {
-    [self.socket emitWithAck:@"testAckEmit" withItems:@[@YES]](0, ^(NSArray* data) {
+    [self.socket emitWithAck:@"testAckEmit" with:@[@YES]](0, ^(NSArray* data) {
         
     });
 }
@@ -47,7 +47,7 @@
 - (void)testSocketManager {
     SocketClientManager* manager = [SocketClientManager sharedManager];
     [manager addSocket:self.socket labeledAs:@"test"];
-    [manager removeSocketWithLabel:@"test"];    
+    [manager removeSocketWithLabel:@"test"];
 }
 
 @end

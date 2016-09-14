@@ -29,6 +29,6 @@ import Foundation
     func engineDidError(reason: String)
     func engineDidClose(reason: String)
     func engineDidOpen(reason: String)
-    func parseEngineMessage(msg: String)
-    func parseEngineBinaryData(data: NSData)
+    func parseEngineMessage(_ msg: String)
+    func parseEngineBinaryData(_ data: Data)
 }

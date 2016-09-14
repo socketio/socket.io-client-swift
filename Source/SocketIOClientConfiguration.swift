@@ -22,7 +22,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-public struct SocketIOClientConfiguration : ArrayLiteralConvertible, CollectionType, MutableCollectionType {
+public struct SocketIOClientConfiguration : ExpressibleByArrayLiteral, Collection, MutableCollection {
     public typealias Element = SocketIOClientOption
     public typealias Index = Array<SocketIOClientOption>.Index
     public typealias Generator = Array<SocketIOClientOption>.Generator
@@ -42,7 +42,7 @@ public struct SocketIOClientConfiguration : ArrayLiteralConvertible, CollectionT
         return backingArray.isEmpty
     }
 
-    public var count: Index.Distance {
+    public var count: Index.Stride {
         return backingArray.count
     }
     
@@ -75,10 +75,14 @@ public struct SocketIOClientConfiguration : ArrayLiteralConvertible, CollectionT
     }
     
     public func generate() -> Generator {
-        return backingArray.generate()
+        return backingArray.makeIterator()
     }
     
-    public mutating func insert(element: Element, replacing replace: Bool = true) {
+    public func index(after i: Index) -> Index {
+        return backingArray.index(after: i)
+    }
+    
+    public mutating func insert(_ element: Element, replacing replace: Bool = true) {
         for i in 0..<backingArray.count where backingArray[i] == element {
             guard replace else { return }
             
@@ -90,18 +94,15 @@ public struct SocketIOClientConfiguration : ArrayLiteralConvertible, CollectionT
         backingArray.append(element)
     }
     
-    @warn_unused_result
-    public func prefixUpTo(end: Index) -> SubSequence {
-        return backingArray.prefixUpTo(end)
+    public func prefix(upTo end: Index) -> SubSequence {
+        return backingArray.prefix(upTo: end)
     }
     
-    @warn_unused_result
-    public func prefixThrough(position: Index) -> SubSequence {
-        return backingArray.prefixThrough(position)
+    public func prefix(through position: Index) -> SubSequence {
+        return backingArray.prefix(through: position)
     }
 
-    @warn_unused_result
-    public func suffixFrom(start: Index) -> SubSequence {
-        return backingArray.suffixFrom(start)
+    public func suffix(from start: Index) -> SubSequence {
+        return backingArray.suffix(from: start)
     }
 }

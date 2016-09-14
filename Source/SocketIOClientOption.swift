@@ -25,123 +25,123 @@
 import Foundation
 
 protocol ClientOption : CustomStringConvertible, Equatable {
-    func getSocketIOOptionValue() -> AnyObject
+    func getSocketIOOptionValue() -> Any
 }
 
 public enum SocketIOClientOption : ClientOption {
-    case ConnectParams([String: AnyObject])
-    case Cookies([NSHTTPCookie])
-    case DoubleEncodeUTF8(Bool)
-    case ExtraHeaders([String: String])
-    case ForceNew(Bool)
-    case ForcePolling(Bool)
-    case ForceWebsockets(Bool)
-    case HandleQueue(dispatch_queue_t)
-    case Log(Bool)
-    case Logger(SocketLogger)
-    case Nsp(String)
-    case Path(String)
-    case Reconnects(Bool)
-    case ReconnectAttempts(Int)
-    case ReconnectWait(Int)
-    case Secure(Bool)
-    case Security(SSLSecurity)
-    case SelfSigned(Bool)
-    case SessionDelegate(NSURLSessionDelegate)
-    case VoipEnabled(Bool)
+    case connectParams([String: Any])
+    case cookies([HTTPCookie])
+    case doubleEncodeUTF8(Bool)
+    case extraHeaders([String: String])
+    case forceNew(Bool)
+    case forcePolling(Bool)
+    case forceWebsockets(Bool)
+    case handleQueue(DispatchQueue)
+    case log(Bool)
+    case logger(SocketLogger)
+    case nsp(String)
+    case path(String)
+    case reconnects(Bool)
+    case reconnectAttempts(Int)
+    case reconnectWait(Int)
+    case secure(Bool)
+    case security(SSLSecurity)
+    case selfSigned(Bool)
+    case sessionDelegate(URLSessionDelegate)
+    case voipEnabled(Bool)
     
     public var description: String {
         let description: String
         
         switch self {
-        case .ConnectParams:
+        case .connectParams:
             description = "connectParams"
-        case .Cookies:
+        case .cookies:
             description = "cookies"
-        case .DoubleEncodeUTF8:
+        case .doubleEncodeUTF8:
             description = "doubleEncodeUTF8"
-        case .ExtraHeaders:
+        case .extraHeaders:
             description = "extraHeaders"
-        case .ForceNew:
+        case .forceNew:
             description = "forceNew"
-        case .ForcePolling:
+        case .forcePolling:
             description = "forcePolling"
-        case .ForceWebsockets:
+        case .forceWebsockets:
             description = "forceWebsockets"
-        case .HandleQueue:
+        case .handleQueue:
             description = "handleQueue"
-        case .Log:
+        case .log:
             description = "log"
-        case .Logger:
+        case .logger:
             description = "logger"
-        case .Nsp:
+        case .nsp:
             description = "nsp"
-        case .Path:
+        case .path:
             description = "path"
-        case .Reconnects:
+        case .reconnects:
             description = "reconnects"
-        case .ReconnectAttempts:
+        case .reconnectAttempts:
             description = "reconnectAttempts"
-        case .ReconnectWait:
+        case .reconnectWait:
             description = "reconnectWait"
-        case .Secure:
+        case .secure:
             description = "secure"
-        case .Security:
-            description = "security"
-        case .SelfSigned:
+        case .selfSigned:
             description = "selfSigned"
-        case .SessionDelegate:
+        case .security:
+            description = "security"
+        case .sessionDelegate:
             description = "sessionDelegate"
-        case .VoipEnabled:
+        case .voipEnabled:
             description = "voipEnabled"
         }
         
         return description
     }
     
-    func getSocketIOOptionValue() -> AnyObject {
-        let value: AnyObject
+    func getSocketIOOptionValue() -> Any {
+        let value: Any
         
         switch self {
-        case let .ConnectParams(params):
+        case let .connectParams(params):
             value = params
-        case let .Cookies(cookies):
+        case let .cookies(cookies):
             value = cookies
-        case let .DoubleEncodeUTF8(encode):
+        case let .doubleEncodeUTF8(encode):
             value = encode
-        case let .ExtraHeaders(headers):
+        case let .extraHeaders(headers):
             value = headers
-        case let .ForceNew(force):
+        case let .forceNew(force):
             value = force
-        case let .ForcePolling(force):
+        case let .forcePolling(force):
             value = force
-        case let .ForceWebsockets(force):
+        case let .forceWebsockets(force):
             value = force
-        case let .HandleQueue(queue):
+        case let .handleQueue(queue):
             value = queue
-        case let .Log(log):
+        case let .log(log):
             value = log
-        case let .Logger(logger):
+        case let .logger(logger):
             value = logger
-        case let .Nsp(nsp):
+        case let .nsp(nsp):
             value = nsp
-        case let .Path(path):
+        case let .path(path):
             value = path
-        case let .Reconnects(reconnects):
+        case let .reconnects(reconnects):
             value = reconnects
-        case let .ReconnectAttempts(attempts):
+        case let .reconnectAttempts(attempts):
             value = attempts
-        case let .ReconnectWait(wait):
+        case let .reconnectWait(wait):
             value = wait
-        case let .Secure(secure):
+        case let .secure(secure):
             value = secure
-        case let .Security(security):
+        case let .security(security):
             value = security
-        case let .SelfSigned(signed):
+        case let .selfSigned(signed):
             value = signed
-        case let .SessionDelegate(delegate):
+        case let .sessionDelegate(delegate):
             value = delegate
-        case let .VoipEnabled(enabled):
+        case let .voipEnabled(enabled):
             value = enabled
         }
         

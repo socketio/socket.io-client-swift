@@ -24,14 +24,29 @@
 
 import Foundation
 
-public typealias AckCallback = ([AnyObject]) -> Void
-public typealias NormalCallback = ([AnyObject], SocketAckEmitter) -> Void
-public typealias OnAckCallback = (timeoutAfter: UInt64, callback: AckCallback) -> Void
+public protocol SocketData {}
 
-typealias Probe = (msg: String, type: SocketEnginePacketType, data: [NSData])
+extension Array : SocketData {}
+extension Bool : SocketData {}
+extension Dictionary : SocketData {}
+extension Double : SocketData {}
+extension Int : SocketData {}
+extension NSArray : SocketData {}
+extension Data : SocketData {}
+extension NSData : SocketData {}
+extension NSDictionary : SocketData {}
+extension NSString : SocketData {}
+extension NSNull : SocketData {}
+extension String : SocketData {}
+
+public typealias AckCallback = ([Any]) -> Void
+public typealias NormalCallback = ([Any], SocketAckEmitter) -> Void
+public typealias OnAckCallback = (_ timeoutAfter: UInt64, _ callback: @escaping AckCallback) -> Void
+
+typealias Probe = (msg: String, type: SocketEnginePacketType, data: [Data])
 typealias ProbeWaitQueue = [Probe]
 
 enum Either<E, V> {
-    case Left(E)
-    case Right(V)
+    case left(E)
+    case right(V)
 }

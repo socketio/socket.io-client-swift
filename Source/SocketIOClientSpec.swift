@@ -29,9 +29,9 @@ protocol SocketIOClientSpec : class {
     func didConnect()
     func didDisconnect(reason: String)
     func didError(reason: String)
-    func handleAck(ack: Int, data: [AnyObject])
-    func handleEvent(event: String, data: [AnyObject], isInternalMessage: Bool, withAck ack: Int)
-    func joinNamespace(namespace: String)
+    func handleAck(_ ack: Int, data: [Any])
+    func handleEvent(_ event: String, data: [Any], isInternalMessage: Bool, withAck ack: Int)
+    func joinNamespace(_ namespace: String)
 }
 
 extension SocketIOClientSpec {

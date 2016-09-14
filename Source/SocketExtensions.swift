@@ -24,66 +24,66 @@
 
 import Foundation
 
-enum JSONError : ErrorType {
+enum JSONError : Error {
     case notArray
     case notNSDictionary
 }
 
-extension Array where Element: AnyObject {
-    func toJSON() throws -> NSData {
-        return try NSJSONSerialization.dataWithJSONObject(self as NSArray, options: NSJSONWritingOptions(rawValue: 0))
+extension Array {
+    func toJSON() throws -> Data {
+        return try JSONSerialization.data(withJSONObject: self, options: JSONSerialization.WritingOptions(rawValue: 0))
     }
 }
 
-extension NSCharacterSet {
-    static var allowedURLCharacterSet: NSCharacterSet {
-        return NSCharacterSet(charactersInString: "!*'();:@&=+$,/?%#[]\" {}").invertedSet
+extension CharacterSet {
+    static var allowedURLCharacterSet: CharacterSet {
+        return CharacterSet(charactersIn: "!*'();:@&=+$,/?%#[]\" {}").inverted
     }
 }
 
 extension NSDictionary {
-    private static func keyValueToSocketIOClientOption(key: String, value: AnyObject) -> SocketIOClientOption? {
+    private static func keyValueToSocketIOClientOption(key: String, value: Any) -> SocketIOClientOption? {
         switch (key, value) {
-        case let ("connectParams", params as [String: AnyObject]):
-            return .ConnectParams(params)
-        case let ("cookies", cookies as [NSHTTPCookie]):
-            return .Cookies(cookies)
+        case let ("connectParams", params as [String: Any]):
+            return .connectParams(params)
+        case let ("cookies", cookies as [HTTPCookie]):
+            return .cookies(cookies)
         case let ("doubleEncodeUTF8", encode as Bool):
-            return .DoubleEncodeUTF8(encode)
+            return .doubleEncodeUTF8(encode)
         case let ("extraHeaders", headers as [String: String]):
-            return .ExtraHeaders(headers)
+            return .extraHeaders(headers)
         case let ("forceNew", force as Bool):
-            return .ForceNew(force)
+            return .forceNew(force)
         case let ("forcePolling", force as Bool):
-            return .ForcePolling(force)
+            return .forcePolling(force)
         case let ("forceWebsockets", force as Bool):
-            return .ForceWebsockets(force)
-        case let ("handleQueue", queue as dispatch_queue_t):
-            return .HandleQueue(queue)
+            return .forceWebsockets(force)
+        case let ("handleQueue", queue as DispatchQueue):
+            return .handleQueue(queue)
         case let ("log", log as Bool):
-            return .Log(log)
+            return .log(log)
         case let ("logger", logger as SocketLogger):
-            return .Logger(logger)
+            return .logger(logger)
         case let ("nsp", nsp as String):
-            return .Nsp(nsp)
+            return .nsp(nsp)
         case let ("path", path as String):
-            return .Path(path)
+            return .path(path)
         case let ("reconnects", reconnects as Bool):
-            return .Reconnects(reconnects)
+            return .reconnects(reconnects)
         case let ("reconnectAttempts", attempts as Int):
-            return .ReconnectAttempts(attempts)
+            return .reconnectAttempts(attempts)
         case let ("reconnectWait", wait as Int):
-            return .ReconnectWait(wait)
+            return .reconnectWait(wait)
         case let ("secure", secure as Bool):
-            return .Secure(secure)
+            return .secure(secure)
         case let ("security", security as SSLSecurity):
-            return .Security(security)
+            return .security(security)
         case let ("selfSigned", selfSigned as Bool):
-            return .SelfSigned(selfSigned)
-        case let ("sessionDelegate", delegate as NSURLSessionDelegate):
-            return .SessionDelegate(delegate)
+            return .selfSigned(selfSigned)
+        case let ("sessionDelegate", delegate as URLSessionDelegate):
+            return .sessionDelegate(delegate)
         case let ("voipEnabled", enable as Bool):
-            return .VoipEnabled(enable)
+            return .voipEnabled(enable)
         default:
             return nil
         }
@@ -93,7 +93,7 @@ extension NSDictionary {
         var options = [] as SocketIOClientConfiguration
         
         for (rawKey, value) in self {
-            if let key = rawKey as? String, opt = NSDictionary.keyValueToSocketIOClientOption(key, value: value) {
+            if let key = rawKey as? String, let opt = NSDictionary.keyValueToSocketIOClientOption(key: key, value: value) {
                 options.insert(opt)
             }
         }
@@ -103,9 +103,9 @@ extension NSDictionary {
 }
 
 extension String {
-    func toArray() throws -> [AnyObject] {
-        guard let stringData = dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false) else { return [] }
-        guard let array = try NSJSONSerialization.JSONObjectWithData(stringData, options: .MutableContainers) as? [AnyObject] else {
+    func toArray() throws -> [Any] {
+        guard let stringData = data(using: .utf8, allowLossyConversion: false) else { return [] }
+        guard let array = try JSONSerialization.jsonObject(with: stringData, options: .mutableContainers) as? [Any] else {
              throw JSONError.notArray
         }
         
@@ -113,8 +113,8 @@ extension String {
     }
     
     func toNSDictionary() throws -> NSDictionary {
-        guard let binData = dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false) else { return [:] }
-        guard let json = try NSJSONSerialization.JSONObjectWithData(binData, options: .AllowFragments) as? NSDictionary else {
+        guard let binData = data(using: .utf8, allowLossyConversion: false) else { return [:] }
+        guard let json = try JSONSerialization.jsonObject(with: binData, options: .allowFragments) as? NSDictionary else {
             throw JSONError.notNSDictionary
         }
         
@@ -122,6 +122,6 @@ extension String {
     }
     
     func urlEncode() -> String? {
-        return stringByAddingPercentEncodingWithAllowedCharacters(.allowedURLCharacterSet)
+        return addingPercentEncoding(withAllowedCharacters: .allowedURLCharacterSet)
     }
 }
