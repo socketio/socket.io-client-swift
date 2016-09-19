@@ -101,11 +101,11 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
                 forceWebsockets = force
             case let .path(path):
                 socketPath = path
-            case let .voipEnabled(enable):
+                
                 if !socketPath.hasSuffix("/") {
                     socketPath += "/"
                 }
-
+            case let .voipEnabled(enable):
                 voipEnabled = enable
             case let .secure(secure):
                 self.secure = secure
@@ -215,7 +215,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         var urlPolling = URLComponents(string: url.absoluteString)!
         var urlWebSocket = URLComponents(string: url.absoluteString)!
         var queryString = ""
-
+        
         urlWebSocket.path = socketPath
         urlPolling.path = socketPath
 
