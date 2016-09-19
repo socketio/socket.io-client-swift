@@ -88,13 +88,13 @@ let package = Package(
 )
 ```
 
-Then import `import SocketIOClientSwift`.
+Then import `import SocketIO`.
 
 Carthage
 -----------------
 Add this line to your `Cartfile`:
 ```
-github "socketio/socket.io-client-swift" ~> 8.0.0 # Or latest version
+github "socketio/socket.io-client-swift" ~> 8.0.1 # Or latest version
 ```
 
 Run `carthage update --platform ios,macosx`.
@@ -107,7 +107,7 @@ Create `Podfile` and add `pod 'Socket.IO-Client-Swift'`:
 use_frameworks!
 
 target 'YourApp' do
-    pod 'Socket.IO-Client-Swift', '~> 8.0.0' # Or latest version
+    pod 'Socket.IO-Client-Swift', '~> 8.0.1' # Or latest version
 end
 ```
 
@@ -136,7 +136,7 @@ CocoaSeeds
 Add this line to your `Seedfile`:
 
 ```
-github "socketio/socket.io-client-swift", "v8.0.0", :files => "Source/*.swift" # Or latest version
+github "socketio/socket.io-client-swift", "v8.0.1", :files => "Source/*.swift" # Or latest version
 ```
 
 Run `seed install`.
