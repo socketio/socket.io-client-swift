@@ -41,22 +41,22 @@ extension SocketEngineWebsocket {
     /// Send message on WebSockets
     /// Only call on emitQueue
     public func sendWebSocketMessage(_ str: String, withType type: SocketEnginePacketType, withData datas: [Data]) {
-            DefaultSocketLogger.Logger.log("Sending ws: %@ as type: %@", type: "SocketEngine", args: str, type.rawValue)
-            
-            ws?.writeString("\(type.rawValue)\(str)")
-            
-            for data in datas {
-                if case let .left(bin) = createBinaryDataForSend(using: data) {
-                    ws?.writeData(bin)
-                }
+        DefaultSocketLogger.Logger.log("Sending ws: %@ as type: %@", type: "SocketEngine", args: str, type.rawValue)
+        
+        ws?.write(string: "\(type.rawValue)\(str)")
+        
+        for data in datas {
+            if case let .left(bin) = createBinaryDataForSend(using: data) {
+                ws?.write(data: bin)
             }
+        }
     }
     
-    public func websocketDidReceiveMessage(_ socket: WebSocket, text: String) {
+    public func websocketDidReceiveMessage(socket: WebSocket, text: String) {
         parseEngineMessage(text, fromPolling: false)
     }
     
-    public func websocketDidReceiveData(_ socket: WebSocket, data: Data) {
+    public func websocketDidReceiveData(socket: WebSocket, data: Data) {
         parseEngineData(data)
     }
 }

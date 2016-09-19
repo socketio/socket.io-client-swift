@@ -243,7 +243,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     }
 
     private func createWebsocketAndConnect() {
-        ws = WebSocket(url: urlWebSocketWithSid as NSURL)
+        ws = WebSocket(url: urlWebSocketWithSid as URL)
 
         if cookies != nil {
             let headers = HTTPCookie.requestHeaderFields(with: cookies!)
@@ -261,7 +261,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         ws?.callbackQueue = handleQueue
         ws?.voipEnabled = voipEnabled
         ws?.delegate = self
-        ws?.selfSignedSSL = selfSigned
+        ws?.disableSSLCertValidation = selfSigned
         ws?.security = security
 
         ws?.connect()
@@ -337,7 +337,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         guard let ws = self.ws else { return }
 
         for msg in postWait {
-            ws.writeString(msg)
+            ws.write(string: msg)
         }
 
         postWait.removeAll(keepingCapacity: false)
@@ -515,7 +515,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     }
 
     // Delegate methods
-    public func websocketDidConnect(_ socket: WebSocket) {
+    public func websocketDidConnect(socket: WebSocket) {
         if !forceWebsockets {
             probing = true
             probeWebSocket()
@@ -526,7 +526,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         }
     }
 
-    public func websocketDidDisconnect(_ socket: WebSocket, error: NSError?) {
+    public func websocketDidDisconnect(socket: WebSocket, error: NSError?) {
         probing = false
 
         if closed {

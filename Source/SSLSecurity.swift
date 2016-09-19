@@ -54,8 +54,8 @@ public class SSLSecurity : NSObject {
     public var validatedDN = true //should the domain name be validated?
     
     var isReady = false //is the key processing done?
-    var certificates: [NSData]? //the certificates
-    @nonobjc var pubKeys: [SecKey]? //the public keys
+    var certificates: [Data]? //the certificates
+    var pubKeys: [SecKey]? //the public keys
     var usePublicKeys = false //use public keys or certificate validation?
     
     /**
@@ -116,7 +116,7 @@ public class SSLSecurity : NSObject {
                 }
                 return certificates
             }
-            self.certificates = certificates as [NSData]
+            self.certificates = certificates
             self.isReady = true
         }
     }
@@ -132,7 +132,7 @@ public class SSLSecurity : NSObject {
     public func isValid(_ trust: SecTrust, domain: String?) -> Bool {
         
         var tries = 0
-        while(!self.isReady) {
+        while !self.isReady {
             usleep(1000)
             tries += 1
             if tries > 5 {
@@ -141,37 +141,36 @@ public class SSLSecurity : NSObject {
         }
         var policy: SecPolicy
         if self.validatedDN {
-            policy = SecPolicyCreateSSL(true, domain as CFString?)
+            policy = SecPolicyCreateSSL(true, domain as NSString?)
         } else {
             policy = SecPolicyCreateBasicX509()
         }
         SecTrustSetPolicies(trust,policy)
         if self.usePublicKeys {
             if let keys = self.pubKeys {
-                let serverPubKeys = publicKeyChainForTrust(trust: trust)
-                for serverKey in serverPubKeys {
-                    for key in keys {
-                        if CFEqual(serverKey, key) {
+                let serverPubKeys = publicKeyChain(trust)
+                for serverKey in serverPubKeys as [AnyObject] {
+                    for key in keys as [AnyObject] {
+                        if serverKey.isEqual(key) {
                             return true
                         }
                     }
                 }
             }
         } else if let certs = self.certificates {
-            let serverCerts = certificateChainForTrust(trust)
+            let serverCerts = certificateChain(trust)
             var collect = [SecCertificate]()
             for cert in certs {
-                collect.append(SecCertificateCreateWithData(nil,cert)!)
+                collect.append(SecCertificateCreateWithData(nil,cert as CFData)!)
             }
-            SecTrustSetAnchorCertificates(trust,collect as CFArray)
-            var result = SecTrustResultType(rawValue: 0)!
+            SecTrustSetAnchorCertificates(trust,collect as NSArray)
+            var result: SecTrustResultType = .unspecified
             SecTrustEvaluate(trust,&result)
-            let r = Int(result.rawValue)
-            if r == Int(SecTrustResultType.unspecified.rawValue) || r == Int(SecTrustResultType.proceed.rawValue) {
+            if result == .unspecified || result == .proceed {
                 var trustedCount = 0
                 for serverCert in serverCerts {
                     for cert in certs {
-                        if cert as Data == serverCert {
+                        if cert == serverCert {
                             trustedCount += 1
                             break
                         }
@@ -195,7 +194,7 @@ public class SSLSecurity : NSObject {
     func extractPublicKey(_ data: Data) -> SecKey? {
         guard let cert = SecCertificateCreateWithData(nil, data as CFData) else { return nil }
         
-        return extractPublicKeyFromCert(cert, policy: SecPolicyCreateBasicX509())
+        return extractPublicKey(cert, policy: SecPolicyCreateBasicX509())
     }
     
     /**
@@ -205,13 +204,12 @@ public class SSLSecurity : NSObject {
      
      - returns: a public key
      */
-    func extractPublicKeyFromCert(_ cert: SecCertificate, policy: SecPolicy) -> SecKey? {
+    func extractPublicKey(_ cert: SecCertificate, policy: SecPolicy) -> SecKey? {
         var possibleTrust: SecTrust?
         SecTrustCreateWithCertificates(cert, policy, &possibleTrust)
         
         guard let trust = possibleTrust else { return nil }
-        
-        var result = SecTrustResultType(rawValue: 0)!
+        var result: SecTrustResultType = .unspecified
         SecTrustEvaluate(trust, &result)
         return SecTrustCopyPublicKey(trust)
     }
@@ -223,7 +221,7 @@ public class SSLSecurity : NSObject {
      
      - returns: the certificate chain for the trust
      */
-    func certificateChainForTrust(_ trust: SecTrust) -> [Data] {
+    func certificateChain(_ trust: SecTrust) -> [Data] {
         let certificates = (0..<SecTrustGetCertificateCount(trust)).reduce([Data]()) { (certificates: [Data], index: Int) -> [Data] in
             var certificates = certificates
             let cert = SecTrustGetCertificateAtIndex(trust, index)
@@ -241,12 +239,12 @@ public class SSLSecurity : NSObject {
      
      - returns: the public keys from the certifcate chain for the trust
      */
-    @nonobjc func publicKeyChainForTrust(trust: SecTrust) -> [SecKey] {
+    func publicKeyChain(_ trust: SecTrust) -> [SecKey] {
         let policy = SecPolicyCreateBasicX509()
         let keys = (0..<SecTrustGetCertificateCount(trust)).reduce([SecKey]()) { (keys: [SecKey], index: Int) -> [SecKey] in
             var keys = keys
             let cert = SecTrustGetCertificateAtIndex(trust, index)
-            if let key = extractPublicKeyFromCert(cert!, policy: policy) {
+            if let key = extractPublicKey(cert!, policy: policy) {
                 keys.append(key)
             }
             
