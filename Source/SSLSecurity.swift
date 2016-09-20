@@ -55,7 +55,7 @@ public class SSLSecurity : NSObject {
     
     var isReady = false //is the key processing done?
     var certificates: [Data]? //the certificates
-    var pubKeys: [SecKey]? //the public keys
+    @nonobjc var pubKeys: [SecKey]? //the public keys
     var usePublicKeys = false //use public keys or certificate validation?
     
     /**
@@ -239,7 +239,7 @@ public class SSLSecurity : NSObject {
      
      - returns: the public keys from the certifcate chain for the trust
      */
-    func publicKeyChain(_ trust: SecTrust) -> [SecKey] {
+    @nonobjc func publicKeyChain(_ trust: SecTrust) -> [SecKey] {
         let policy = SecPolicyCreateBasicX509()
         let keys = (0..<SecTrustGetCertificateCount(trust)).reduce([SecKey]()) { (keys: [SecKey], index: Int) -> [SecKey] in
             var keys = keys
