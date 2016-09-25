@@ -6,6 +6,7 @@ Socket.IO-client for iOS/OS X.
 ##Example
 ```swift
 import SocketIO
+
 let socket = SocketIOClient(socketURL: URL(string: "http://localhost:8080")!, config: [.log(true), .forcePolling(true)])
 
 socket.on("connect") {data, ack in
@@ -14,7 +15,7 @@ socket.on("connect") {data, ack in
 
 socket.on("currentAmount") {data, ack in
     if let cur = data[0] as? Double {
-        socket.emitWithAck("canUpdate", cur)(0) {data in
+        socket.emitWithAck("canUpdate", cur).timingOut(after: 0) {data in
             socket.emit("update", ["amount": cur + 2.50])
         }
 
@@ -38,9 +39,9 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 [socket on:@"currentAmount" callback:^(NSArray* data, SocketAckEmitter* ack) {
     double cur = [[data objectAtIndex:0] floatValue];
 
-    [socket emitWithAck:@"canUpdate" withItems:@[@(cur)]](0, ^(NSArray* data) {
+    [[socket emitWithAck:@"canUpdate" withItems:@[@(cur)]] timingOutAfter:0 callback:^(NSArray* data) {
         [socket emit:@"update" withItems:@[@{@"amount": @(cur + 2.50)}]];
-    });
+    }];
 
     [ack with:@[@"Got your currentAmount, ", @"dude"]];
 }];
@@ -182,8 +183,8 @@ Methods
 3. `onAny(callback:((event: String, items: AnyObject?)) -> Void)` - Adds a handler for all events. It will be called on any received event.
 4. `emit(_ event: String, _ items: AnyObject...)` - Sends a message. Can send multiple items.
 5. `emit(_ event: String, withItems items: [AnyObject])` - `emit` for Objective-C
-6. `emitWithAck(_ event: String, _ items: AnyObject...) -> (timeoutAfter: UInt64, callback: (NSArray?) -> Void) -> Void` - Sends a message that requests an acknowledgement from the server. Returns a function which you can use to add a handler. See example. Note: The message is not sent until you call the returned function.
-7. `emitWithAck(_ event: String, withItems items: [AnyObject]) -> (UInt64, (NSArray?) -> Void) -> Void` - `emitWithAck` for Objective-C. Note: The message is not sent until you call the returned function.
+6. `emitWithAck(_ event: String, _ items: AnyObject...) -> OnAckCallback` - Sends a message that requests an acknowledgement from the server. Returns an object which you can use to add a handler. See example. Note: The message is not sent until you call timingOut(after:) on the returned object.
+7. `emitWithAck(_ event: String, withItems items: [AnyObject]) -> OnAckCallback` - `emitWithAck` for Objective-C. Note: The message is not sent until you call timingOutAfter on the returned object.
 8. `connect()` - Establishes a connection to the server. A "connect" event is fired upon successful connection.
 9. `connect(timeoutAfter timeoutAfter: Int, withTimeoutHandler handler: (() -> Void)?)` - Connect to the server. If it isn't connected after timeoutAfter seconds, the handler is called.
 10. `disconnect()` - Closes the socket. Reopening a disconnected socket is not fully tested.

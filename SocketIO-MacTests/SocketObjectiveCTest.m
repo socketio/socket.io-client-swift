@@ -35,9 +35,9 @@
 }
 
 - (void)testEmitWithAckSyntax {
-    [self.socket emitWithAck:@"testAckEmit" with:@[@YES]](0, ^(NSArray* data) {
+    [[self.socket emitWithAck:@"testAckEmit" with:@[@YES]] timingOutAfter:0 callback:^(NSArray* data) {
         
-    });
+    }];
 }
 
 - (void)testOffSyntax {
