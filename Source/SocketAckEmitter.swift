@@ -68,12 +68,11 @@ public final class OnAckCallback : NSObject {
             socket.ackHandlers.addAck(ackNumber, callback: callback)
         }
         
-        
         socket._emit(items, ack: ackNumber)
         
         guard seconds != 0 else { return }
         
-        let time = DispatchTime.now() + Double(Int64(UInt64(seconds) * NSEC_PER_SEC)) / Double(NSEC_PER_SEC)
+        let time = DispatchTime.now() + Double(UInt64(seconds) * NSEC_PER_SEC) / Double(NSEC_PER_SEC)
         
         socket.handleQueue.asyncAfter(deadline: time) {
             socket.ackHandlers.timeoutAck(self.ackNumber, onQueue: socket.handleQueue)
