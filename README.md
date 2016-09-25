@@ -206,5 +206,7 @@ Client Events
 ##Detailed Example
 A more detailed example can be found [here](https://github.com/nuclearace/socket.io-client-swift-example)
 
+An example using the Swift Package Manager can be found [here](https://github.com/nuclearace/socket.io-client-swift-spm-example)
+
 ##License
 MIT
