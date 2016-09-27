@@ -21,7 +21,7 @@
 - (void)setUp {
     [super setUp];
     NSURL* url = [[NSURL alloc] initWithString:@"http://localhost"];
-    self.socket = [[SocketIOClient alloc] initWithSocketURL:url config:nil];
+    self.socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{@"log": @YES, @"forcePolling": @YES}];
 }
 
 - (void)testOnSyntax {
