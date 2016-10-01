@@ -253,7 +253,9 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     }
 
     public func engineDidClose(reason: String) {
-        waitingPackets.removeAll()
+        parseQueue.sync {
+            self.waitingPackets.removeAll()
+        }
         
         if status != .disconnected {
             status = .notConnected
