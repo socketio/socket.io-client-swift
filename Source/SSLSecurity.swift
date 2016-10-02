@@ -50,7 +50,7 @@ public class SSLCert : NSObject {
     }
 }
 
-public class SSLSecurity : NSObject {
+open class SSLSecurity : NSObject {
     public var validatedDN = true //should the domain name be validated?
     
     var isReady = false //is the key processing done?
@@ -129,7 +129,7 @@ public class SSLSecurity : NSObject {
      
      - returns: if the key was successfully validated
      */
-    public func isValid(_ trust: SecTrust, domain: String?) -> Bool {
+    open func isValid(_ trust: SecTrust, domain: String?) -> Bool {
         
         var tries = 0
         while !self.isReady {
