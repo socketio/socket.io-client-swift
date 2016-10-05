@@ -38,7 +38,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 [socket on:@"currentAmount" callback:^(NSArray* data, SocketAckEmitter* ack) {
     double cur = [[data objectAtIndex:0] floatValue];
 
-    [socket emitWithAck:@"canUpdate" withItems:@[@(cur)]](0, ^(NSArray* data) {
+    [socket emitWithAck:@"canUpdate" with:@[@(cur)]](0, ^(NSArray* data) {
         [socket emit:@"update" withItems:@[@{@"amount": @(cur + 2.50)}]];
     });
 
