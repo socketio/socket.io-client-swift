@@ -3,7 +3,7 @@
 //  Websocket.swift
 //
 //  Created by Dalton Cherry on 7/16/14.
-//  Copyright (c) 2014-2015 Dalton Cherry.
+//  Copyright (c) 2014-2016 Dalton Cherry.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public protocol WebSocketPongDelegate: class {
     func websocketDidReceivePong(socket: WebSocket, data: Data?)
 }
 
-public class WebSocket : NSObject, StreamDelegate {
+open class WebSocket : NSObject, StreamDelegate {
     
     enum OpCode : UInt8 {
         case continueFrame = 0x0
@@ -190,15 +190,19 @@ public class WebSocket : NSObject, StreamDelegate {
     
     /**
      Disconnect from the server. I send a Close control frame to the server, then expect the server to respond with a Close control frame and close the socket from its end. I notify my delegate once the socket has been closed.
+     
      If you supply a non-nil `forceTimeout`, I wait at most that long (in seconds) for the server to close the socket. After the timeout expires, I close the socket and notify my delegate.
+     
      If you supply a zero (or negative) `forceTimeout`, I immediately close the socket (without sending a Close control frame) and notify my delegate.
+     
      - Parameter forceTimeout: Maximum time to wait for the server to close the socket.
      - Parameter closeCode: The code to send on disconnect. The default is the normal close code for cleanly disconnecting a webSocket.
      */
     public func disconnect(forceTimeout: TimeInterval? = nil, closeCode: UInt16 = CloseCode.normal.rawValue) {
         switch forceTimeout {
         case .some(let seconds) where seconds > 0:
-            callbackQueue.asyncAfter(deadline: DispatchTime.now() + Double(Int64(seconds * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)) { [weak self] in
+            let milliseconds = Int(seconds * 1_000)
+            callbackQueue.asyncAfter(deadline: .now() + .milliseconds(milliseconds)) { [weak self] in
                 self?.disconnectStream(nil)
             }
             fallthrough
@@ -212,8 +216,10 @@ public class WebSocket : NSObject, StreamDelegate {
     
     /**
      Write a string to the websocket. This sends it as a text frame.
+     
      If you supply a non-nil completion block, I will perform it when the write completes.
-     - parameter str:        The string to write.
+     
+     - parameter string:        The string to write.
      - parameter completion: The (optional) completion handler.
      */
     public func write(string: String, completion: (() -> ())? = nil) {
@@ -223,7 +229,9 @@ public class WebSocket : NSObject, StreamDelegate {
     
     /**
      Write binary data to the websocket. This sends it as a binary frame.
+     
      If you supply a non-nil completion block, I will perform it when the write completes.
+     
      - parameter data:       The data to write.
      - parameter completion: The (optional) completion handler.
      */
@@ -358,7 +366,7 @@ public class WebSocket : NSObject, StreamDelegate {
         self.mutex.unlock()
         
         let bytes = UnsafeRawPointer((data as NSData).bytes).assumingMemoryBound(to: UInt8.self)
-        var out = timeout * 1000000 // wait 5 seconds before giving up
+        var out = timeout * 1_000_000 // wait 5 seconds before giving up
         writeQueue.addOperation { [weak self] in
             while !outStream.hasSpaceAvailable {
                 usleep(100) // wait until the socket is ready
@@ -380,9 +388,9 @@ public class WebSocket : NSObject, StreamDelegate {
      */
     public func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
         if let sec = security, !certValidated && [.hasBytesAvailable, .hasSpaceAvailable].contains(eventCode) {
-            let trust = aStream.property(forKey: kCFStreamPropertySSLPeerTrust as Stream.PropertyKey) as AnyObject
+            let trust = aStream.property(forKey: kCFStreamPropertySSLPeerTrust as Stream.PropertyKey) as! SecTrust
             let domain = aStream.property(forKey: kCFStreamSSLPeerName as Stream.PropertyKey) as? String
-            if sec.isValid(trust as! SecTrust, domain: domain) {
+            if sec.isValid(trust, domain: domain) {
                 certValidated = true
             } else {
                 let error = errorWithDetail("Invalid SSL certificate", code: 1)
