@@ -17,5 +17,6 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/socketio/socket.io-client-swift.git", :tag => 'v8.0.2' }
   s.source_files  = "Source/**/*.swift"
   s.requires_arc = true
+  s.pod_target_xcconfig = {'SWIFT_MODULE' => '3.0'}
   # s.dependency 'Starscream', '~> 0.9' # currently this repo includes Starscream swift files
 end
