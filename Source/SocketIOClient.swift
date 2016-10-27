@@ -46,21 +46,22 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     public var reconnects = true
     public var reconnectWait = 10
 
-    private let ackQueue = DispatchQueue(label: "com.socketio.ackQueue", attributes: [])
-    private let emitQueue = DispatchQueue(label: "com.socketio.emitQueue", attributes: [])
     private let logType = "SocketIOClient"
-    private let parseQueue = DispatchQueue(label: "com.socketio.parseQueue", attributes: [])
+    private let parseQueue = DispatchQueue(label: "com.socketio.parseQueue")
 
     private var anyHandler: ((SocketAnyEvent) -> Void)?
     private var currentReconnectAttempt = 0
     private var handlers = [SocketEventHandler]()
-    private var ackHandlers = SocketAckManager()
     private var reconnecting = false
 
     private(set) var currentAck = -1
     private(set) var handleQueue = DispatchQueue.main
     private(set) var reconnectAttempts = -1
+    
+    let ackQueue = DispatchQueue(label: "com.socketio.ackQueue")
+    let emitQueue = DispatchQueue(label: "com.socketio.emitQueue")
 
+    var ackHandlers = SocketAckManager()
     var waitingPackets = [SocketPacket]()
     
     public var sid: String? {
@@ -148,7 +149,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         
         guard timeoutAfter != 0 else { return }
 
-        let time = DispatchTime.now() + Double(Int64(timeoutAfter) * Int64(NSEC_PER_SEC)) / Double(NSEC_PER_SEC)
+        let time = DispatchTime.now() + Double(UInt64(timeoutAfter) * NSEC_PER_SEC) / Double(NSEC_PER_SEC)
 
         handleQueue.asyncAfter(deadline: time) {[weak self] in
             guard let this = self, this.status != .connected && this.status != .disconnected else { return }
@@ -163,24 +164,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     private func createOnAck(_ items: [Any]) -> OnAckCallback {
         currentAck += 1
         
-        return {[weak self, ack = currentAck] timeout, callback in
-            guard let this = self else { return }
-
-            this.ackQueue.sync() {
-                this.ackHandlers.addAck(ack, callback: callback)
-            }
-            
-            
-            this._emit(items, ack: ack)
-            
-            if timeout != 0 {
-                let time = DispatchTime.now() + Double(Int64(timeout * NSEC_PER_SEC)) / Double(NSEC_PER_SEC)
-                
-                this.handleQueue.asyncAfter(deadline: time) {
-                    this.ackHandlers.timeoutAck(ack, onQueue: this.handleQueue)
-                }
-            }
-        }
+        return OnAckCallback(ackNumber: currentAck, items: items, socket: self)
     }
 
     func didConnect() {
@@ -238,7 +222,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         return createOnAck([event] + items)
     }
 
-    private func _emit(_ data: [Any], ack: Int? = nil) {
+    func _emit(_ data: [Any], ack: Int? = nil) {
         emitQueue.async {
             guard self.status == .connected else {
                 self.handleEvent("error", data: ["Tried emitting when not connected"], isInternalMessage: true)
@@ -269,7 +253,9 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     }
 
     public func engineDidClose(reason: String) {
-        waitingPackets.removeAll()
+        parseQueue.sync {
+            self.waitingPackets.removeAll()
+        }
         
         if status != .disconnected {
             status = .notConnected

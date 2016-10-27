@@ -25,20 +25,20 @@ class SocketSideEffectTest: XCTestCase {
     }
     
     func testFirstAck() {
-        socket.emitWithAck("test")(0) {data in}
+        socket.emitWithAck("test").timingOut(after: 0) {data in}
         XCTAssertEqual(socket.currentAck, 0)
     }
     
     func testSecondAck() {
-        socket.emitWithAck("test")(0) {data in}
-        socket.emitWithAck("test")(0) {data in}
+        socket.emitWithAck("test").timingOut(after: 0) {data in}
+        socket.emitWithAck("test").timingOut(after: 0) {data in}
         
         XCTAssertEqual(socket.currentAck, 1)
     }
     
     func testHandleAck() {
         let expect = expectation(description: "handled ack")
-        socket.emitWithAck("test")(0) {data in
+        socket.emitWithAck("test").timingOut(after: 0) {data in
             XCTAssertEqual(data[0] as? String, "hello world")
             expect.fulfill()
         }
@@ -49,7 +49,7 @@ class SocketSideEffectTest: XCTestCase {
     
     func testHandleAck2() {
         let expect = expectation(description: "handled ack2")
-        socket.emitWithAck("test")(0) {data in
+        socket.emitWithAck("test").timingOut(after: 0) {data in
             XCTAssertTrue(data.count == 2, "Wrong number of ack items")
             expect.fulfill()
         }

@@ -4,7 +4,7 @@
 //  Starscream
 //
 //  Created by Dalton Cherry on 5/16/15.
-//  Copyright (c) 2014-2015 Dalton Cherry.
+//  Copyright (c) 2014-2016 Dalton Cherry.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -19,11 +19,14 @@
 //  limitations under the License.
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
 import Foundation
 import Security
 
-public class SSLCert : NSObject {
+public protocol SSLTrustValidator {
+    func isValid(_ trust: SecTrust, domain: String?) -> Bool
+}
+
+open class SSLCert {
     var certData: Data?
     var key: SecKey?
     
@@ -50,7 +53,7 @@ public class SSLCert : NSObject {
     }
 }
 
-public class SSLSecurity : NSObject {
+open class SSLSecurity : SSLTrustValidator {
     public var validatedDN = true //should the domain name be validated?
     
     var isReady = false //is the key processing done?
@@ -82,15 +85,13 @@ public class SSLSecurity : NSObject {
     /**
      Designated init
      
-     - parameter keys: is the certificates or public keys to use
+     - parameter certs: is the certificates or public keys to use
      - parameter usePublicKeys: is to specific if the publicKeys or certificates should be used for SSL pinning validation
      
      - returns: a representation security object to be used with
      */
     public init(certs: [SSLCert], usePublicKeys: Bool) {
         self.usePublicKeys = usePublicKeys
-        
-        super.init()
         
         if self.usePublicKeys {
             DispatchQueue.global(qos: .default).async {
