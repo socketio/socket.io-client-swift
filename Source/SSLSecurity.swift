@@ -19,9 +19,12 @@
 //  limitations under the License.
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
 import Foundation
 import Security
+
+public protocol SSLTrustValidator {
+    func isValid(_ trust: SecTrust, domain: String?) -> Bool
+}
 
 open class SSLCert {
     var certData: Data?
@@ -50,7 +53,7 @@ open class SSLCert {
     }
 }
 
-open class SSLSecurity {
+open class SSLSecurity : SSLTrustValidator {
     public var validatedDN = true //should the domain name be validated?
     
     var isReady = false //is the key processing done?

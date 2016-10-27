@@ -18,7 +18,6 @@
 //  limitations under the License.
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
 import Foundation
 import CoreFoundation
 import Security
@@ -77,7 +76,6 @@ open class WebSocket : NSObject, StreamDelegate {
     var optionalProtocols: [String]?
     
     // MARK: - Constants
-    
     let headerWSUpgradeName     = "Upgrade"
     let headerWSUpgradeValue    = "websocket"
     let headerWSHostName        = "Host"
@@ -108,7 +106,6 @@ open class WebSocket : NSObject, StreamDelegate {
     }
     
     // MARK: - Delegates
-    
     /// Responds to callback about new messages coming in over the WebSocket
     /// and also connection/disconnect messages.
     public weak var delegate: WebSocketDelegate?
@@ -118,7 +115,6 @@ open class WebSocket : NSObject, StreamDelegate {
     
     
     // MARK: - Block based API.
-    
     public var onConnect: ((Void) -> Void)?
     public var onDisconnect: ((NSError?) -> Void)?
     public var onText: ((String) -> Void)?
@@ -128,7 +124,7 @@ open class WebSocket : NSObject, StreamDelegate {
     public var headers = [String: String]()
     public var voipEnabled = false
     public var disableSSLCertValidation = false
-    public var security: SSLSecurity?
+    public var security: SSLTrustValidator?
     public var enabledSSLCipherSuites: [SSLCipherSuite]?
     public var origin: String?
     public var timeout = 5
@@ -139,7 +135,6 @@ open class WebSocket : NSObject, StreamDelegate {
     public var currentURL: URL { return url }
     
     // MARK: - Private
-    
     private var url: URL
     private var inputStream: InputStream?
     private var outputStream: OutputStream?
@@ -190,11 +185,8 @@ open class WebSocket : NSObject, StreamDelegate {
     
     /**
      Disconnect from the server. I send a Close control frame to the server, then expect the server to respond with a Close control frame and close the socket from its end. I notify my delegate once the socket has been closed.
-     
      If you supply a non-nil `forceTimeout`, I wait at most that long (in seconds) for the server to close the socket. After the timeout expires, I close the socket and notify my delegate.
-     
      If you supply a zero (or negative) `forceTimeout`, I immediately close the socket (without sending a Close control frame) and notify my delegate.
-     
      - Parameter forceTimeout: Maximum time to wait for the server to close the socket.
      - Parameter closeCode: The code to send on disconnect. The default is the normal close code for cleanly disconnecting a webSocket.
      */
@@ -216,9 +208,7 @@ open class WebSocket : NSObject, StreamDelegate {
     
     /**
      Write a string to the websocket. This sends it as a text frame.
-     
      If you supply a non-nil completion block, I will perform it when the write completes.
-     
      - parameter string:        The string to write.
      - parameter completion: The (optional) completion handler.
      */
@@ -229,9 +219,7 @@ open class WebSocket : NSObject, StreamDelegate {
     
     /**
      Write binary data to the websocket. This sends it as a binary frame.
-     
      If you supply a non-nil completion block, I will perform it when the write completes.
-     
      - parameter data:       The data to write.
      - parameter completion: The (optional) completion handler.
      */
@@ -313,7 +301,6 @@ open class WebSocket : NSObject, StreamDelegate {
     private func initStreamsWithData(_ data: Data, _ port: Int) {
         //higher level API we will cut over to at some point
         //NSStream.getStreamsToHostWithName(url.host, port: url.port.integerValue, inputStream: &inputStream, outputStream: &outputStream)
-        
         var readStream: Unmanaged<CFReadStream>?
         var writeStream: Unmanaged<CFWriteStream>?
         let h = url.host! as NSString
@@ -326,34 +313,34 @@ open class WebSocket : NSObject, StreamDelegate {
         if supportedSSLSchemes.contains(url.scheme!) {
             inStream.setProperty(StreamSocketSecurityLevel.negotiatedSSL as AnyObject, forKey: Stream.PropertyKey.socketSecurityLevelKey)
             outStream.setProperty(StreamSocketSecurityLevel.negotiatedSSL as AnyObject, forKey: Stream.PropertyKey.socketSecurityLevelKey)
+            if disableSSLCertValidation {
+                let settings: [NSObject: NSObject] = [kCFStreamSSLValidatesCertificateChain: NSNumber(value: false), kCFStreamSSLPeerName: kCFNull]
+                inStream.setProperty(settings, forKey: kCFStreamPropertySSLSettings as Stream.PropertyKey)
+                outStream.setProperty(settings, forKey: kCFStreamPropertySSLSettings as Stream.PropertyKey)
+            }
+            if let cipherSuites = self.enabledSSLCipherSuites {
+                if let sslContextIn = CFReadStreamCopyProperty(inputStream, CFStreamPropertyKey(rawValue: kCFStreamPropertySSLContext)) as! SSLContext?,
+                    let sslContextOut = CFWriteStreamCopyProperty(outputStream, CFStreamPropertyKey(rawValue: kCFStreamPropertySSLContext)) as! SSLContext? {
+                    let resIn = SSLSetEnabledCiphers(sslContextIn, cipherSuites, cipherSuites.count)
+                    let resOut = SSLSetEnabledCiphers(sslContextOut, cipherSuites, cipherSuites.count)
+                    if resIn != errSecSuccess {
+                        let error = self.errorWithDetail("Error setting ingoing cypher suites", code: UInt16(resIn))
+                        disconnectStream(error)
+                        return
+                    }
+                    if resOut != errSecSuccess {
+                        let error = self.errorWithDetail("Error setting outgoing cypher suites", code: UInt16(resOut))
+                        disconnectStream(error)
+                        return
+                    }
+                }
+            }
         } else {
             certValidated = true //not a https session, so no need to check SSL pinning
         }
         if voipEnabled {
             inStream.setProperty(StreamNetworkServiceTypeValue.voIP as AnyObject, forKey: Stream.PropertyKey.networkServiceType)
             outStream.setProperty(StreamNetworkServiceTypeValue.voIP as AnyObject, forKey: Stream.PropertyKey.networkServiceType)
-        }
-        if disableSSLCertValidation {
-            let settings: [NSObject: NSObject] = [kCFStreamSSLValidatesCertificateChain: NSNumber(value: false), kCFStreamSSLPeerName: kCFNull]
-            inStream.setProperty(settings, forKey: kCFStreamPropertySSLSettings as Stream.PropertyKey)
-            outStream.setProperty(settings, forKey: kCFStreamPropertySSLSettings as Stream.PropertyKey)
-        }
-        if let cipherSuites = self.enabledSSLCipherSuites {
-            if let sslContextIn = CFReadStreamCopyProperty(inputStream, CFStreamPropertyKey(rawValue: kCFStreamPropertySSLContext)) as! SSLContext?,
-                let sslContextOut = CFWriteStreamCopyProperty(outputStream, CFStreamPropertyKey(rawValue: kCFStreamPropertySSLContext)) as! SSLContext? {
-                let resIn = SSLSetEnabledCiphers(sslContextIn, cipherSuites, cipherSuites.count)
-                let resOut = SSLSetEnabledCiphers(sslContextOut, cipherSuites, cipherSuites.count)
-                if resIn != errSecSuccess {
-                    let error = self.errorWithDetail("Error setting ingoing cypher suites", code: UInt16(resIn))
-                    disconnectStream(error)
-                    return
-                }
-                if resOut != errSecSuccess {
-                    let error = self.errorWithDetail("Error setting outgoing cypher suites", code: UInt16(resOut))
-                    disconnectStream(error)
-                    return
-                }
-            }
         }
         
         CFReadStreamSetDispatchQueue(inStream, WebSocket.sharedWorkQueue)
@@ -447,7 +434,6 @@ open class WebSocket : NSObject, StreamDelegate {
         let buf = NSMutableData(capacity: BUFFER_MAX)
         let buffer = UnsafeMutableRawPointer(mutating: buf!.bytes).assumingMemoryBound(to: UInt8.self)
         let length = inputStream!.read(buffer, maxLength: BUFFER_MAX)
-        
         guard length > 0 else { return }
         var process = false
         if inputQueue.count == 0 {
@@ -643,34 +629,22 @@ open class WebSocket : NSObject, StreamDelegate {
                 writeError(errCode)
                 return emptyBuffer
             }
+            var closeCode = CloseCode.normal.rawValue
             if receivedOpcode == .connectionClose {
-                var code = CloseCode.normal.rawValue
                 if payloadLen == 1 {
-                    code = CloseCode.protocolError.rawValue
+                    closeCode = CloseCode.protocolError.rawValue
                 } else if payloadLen > 1 {
-                    code = WebSocket.readUint16(baseAddress, offset: offset)
-                    if code < 1000 || (code > 1003 && code < 1007) || (code > 1011 && code < 3000) {
-                        code = CloseCode.protocolError.rawValue
-                    }
-                    offset += 2
-                }
-                var closeReason = "connection closed by server"
-                if payloadLen > 2 {
-                    let len = Int(payloadLen - 2)
-                    if len > 0 {
-                        let bytes = baseAddress + offset
-                        if let customCloseReason = String(data: Data(bytes: bytes, count: len), encoding: .utf8) {
-                            closeReason = customCloseReason
-                        } else {
-                            code = CloseCode.protocolError.rawValue
-                        }
+                    closeCode = WebSocket.readUint16(baseAddress, offset: offset)
+                    if closeCode < 1000 || (closeCode > 1003 && closeCode < 1007) || (closeCode > 1011 && closeCode < 3000) {
+                        closeCode = CloseCode.protocolError.rawValue
                     }
                 }
-                doDisconnect(errorWithDetail(closeReason, code: code))
-                writeError(code)
-                return emptyBuffer
-            }
-            if isControlFrame && payloadLen > 125 {
+                if payloadLen < 2 {
+                    doDisconnect(errorWithDetail("connection closed by server", code: closeCode))
+                    writeError(closeCode)
+                    return emptyBuffer
+                }
+            } else if isControlFrame && payloadLen > 125 {
                 writeError(CloseCode.protocolError.rawValue)
                 return emptyBuffer
             }
@@ -695,7 +669,23 @@ open class WebSocket : NSObject, StreamDelegate {
                 len = 0
                 data = Data()
             } else {
+                if receivedOpcode == .connectionClose && len > 0 {
+                    let size = MemoryLayout<UInt16>.size
+                    offset += size
+                    len -= UInt64(size)
+                }
                 data = Data(bytes: baseAddress+offset, count: Int(len))
+            }
+            if receivedOpcode == .connectionClose {
+                var closeReason = "connection closed by server"
+                if let customCloseReason = String(data: data, encoding: .utf8) {
+                    closeReason = customCloseReason
+                } else {
+                    closeCode = CloseCode.protocolError.rawValue
+                }
+                doDisconnect(errorWithDetail(closeReason, code: closeCode))
+                writeError(closeCode)
+                return emptyBuffer
             }
             if receivedOpcode == .pong {
                 if canDispatch {
@@ -910,7 +900,6 @@ open class WebSocket : NSObject, StreamDelegate {
     }
     
     // MARK: - Deinit
-    
     deinit {
         mutex.lock()
         readyToWrite = false
