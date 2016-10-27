@@ -39,7 +39,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 [socket on:@"currentAmount" callback:^(NSArray* data, SocketAckEmitter* ack) {
     double cur = [[data objectAtIndex:0] floatValue];
 
-    [socket emitWithAck:@"canUpdate" with:@[@(cur)]](0, ^(NSArray* data) {
+    [[socket emitWithAck:@"testAckEmit" with:@[@YES]] timingOutAfter:0 callback:^(NSArray* data) {
         [socket emit:@"update" withItems:@[@{@"amount": @(cur + 2.50)}]];
     }];
 
@@ -95,7 +95,7 @@ Carthage
 -----------------
 Add this line to your `Cartfile`:
 ```
-github "socketio/socket.io-client-swift" ~> 8.0.3 # Or latest version
+github "socketio/socket.io-client-swift" ~> 8.1.0 # Or latest version
 ```
 
 Run `carthage update --platform ios,macosx`.
@@ -108,7 +108,7 @@ Create `Podfile` and add `pod 'Socket.IO-Client-Swift'`:
 use_frameworks!
 
 target 'YourApp' do
-    pod 'Socket.IO-Client-Swift', '~> 8.0.3' # Or latest version
+    pod 'Socket.IO-Client-Swift', '~> 8.1.0' # Or latest version
 end
 ```
 
@@ -137,7 +137,7 @@ CocoaSeeds
 Add this line to your `Seedfile`:
 
 ```
-github "socketio/socket.io-client-swift", "v8.0.3", :files => "Source/*.swift" # Or latest version
+github "socketio/socket.io-client-swift", "v8.1.0", :files => "Source/*.swift" # Or latest version
 ```
 
 Run `seed install`.
