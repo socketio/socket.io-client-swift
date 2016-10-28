@@ -27,6 +27,10 @@ import Foundation
 public final class SocketAckEmitter : NSObject {
     let socket: SocketIOClient
     let ackNum: Int
+
+    public var expected: Bool {
+        return ackNum != -1
+    }
     
     init(socket: SocketIOClient, ackNum: Int) {
         self.socket = socket
@@ -45,9 +49,6 @@ public final class SocketAckEmitter : NSObject {
         socket.emitAck(ackNum, with: items)
     }
         
-    public func isExpected() -> Bool {
-        return ackNum != -1
-    }
 }
 
 public final class OnAckCallback : NSObject {
