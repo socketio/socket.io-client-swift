@@ -46,7 +46,7 @@ public final class SocketAckEmitter : NSObject {
     }
         
     public func isRequired() -> Bool {
-        return ackNum != -1;
+        return ackNum != -1
     }
 }
 
