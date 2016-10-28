@@ -44,6 +44,10 @@ public final class SocketAckEmitter : NSObject {
         
         socket.emitAck(ackNum, with: items)
     }
+        
+    public func isRequired() -> Bool {
+        return ackNum != -1;
+    }
 }
 
 public final class OnAckCallback : NSObject {
