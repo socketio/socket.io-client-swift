@@ -45,7 +45,7 @@ public final class SocketAckEmitter : NSObject {
         socket.emitAck(ackNum, with: items)
     }
         
-    public func isRequired() -> Bool {
+    public func isExpected() -> Bool {
         return ackNum != -1
     }
 }
