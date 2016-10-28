@@ -45,3 +45,38 @@ public final class SocketAckEmitter : NSObject {
         socket.emitAck(ackNum, with: items)
     }
 }
+
+public final class OnAckCallback : NSObject {
+    private let ackNumber: Int
+    private let items: [Any]
+    private weak var socket: SocketIOClient?
+    
+    init(ackNumber: Int, items: [Any], socket: SocketIOClient) {
+        self.ackNumber = ackNumber
+        self.items = items
+        self.socket = socket
+    }
+    
+    deinit {
+        DefaultSocketLogger.Logger.log("OnAckCallback for \(ackNumber) being released", type: "OnAckCallback")
+    }
+    
+    public func timingOut(after seconds: Int, callback: @escaping AckCallback) {
+        guard let socket = self.socket else { return }
+        
+        socket.ackQueue.sync() {
+            socket.ackHandlers.addAck(ackNumber, callback: callback)
+        }
+        
+        socket._emit(items, ack: ackNumber)
+        
+        guard seconds != 0 else { return }
+        
+        let time = DispatchTime.now() + Double(UInt64(seconds) * NSEC_PER_SEC) / Double(NSEC_PER_SEC)
+        
+        socket.handleQueue.asyncAfter(deadline: time) {
+            socket.ackHandlers.timeoutAck(self.ackNumber, onQueue: socket.handleQueue)
+        }
+    }
+    
+}

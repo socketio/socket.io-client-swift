@@ -87,25 +87,18 @@ struct SocketPacket {
     }
     
     private func completeMessage(_ message: String) -> String {
-        let restOfMessage: String
-        
         if data.count == 0 {
             return message + "[]"
         }
         
-        do {
-            let jsonSend = try data.toJSON()
-            guard let jsonString = String(data: jsonSend, encoding: .utf8) else { return message + "[]" }
-            
-            restOfMessage = jsonString
-        } catch {
+        guard let jsonSend = try? data.toJSON(), let jsonString = String(data: jsonSend, encoding: .utf8) else {
             DefaultSocketLogger.Logger.error("Error creating JSON object in SocketPacket.completeMessage",
-                type: SocketPacket.logType)
+                                             type: SocketPacket.logType)
             
-            restOfMessage = "[]"
+            return message + "[]"
         }
         
-        return message + restOfMessage
+        return message + jsonString
     }
     
     private func createPacketString() -> String {
@@ -133,11 +126,11 @@ struct SocketPacket {
     // binary data
     private func _fillInPlaceholders(_ object: Any) -> Any {
         switch object {
-        case let dict as [String: Any]:
+        case let dict as JSON:
             if dict["_placeholder"] as? Bool ?? false {
                 return binary[dict["num"] as! Int]
             } else {
-                return dict.reduce([String: Any](), {cur, keyValue in
+                return dict.reduce(JSON(), {cur, keyValue in
                     var cur = cur
                     
                     cur[keyValue.0] = _fillInPlaceholders(keyValue.1)
@@ -181,7 +174,7 @@ extension SocketPacket {
 private extension SocketPacket {
     // Recursive function that looks for NSData in collections
     static func shred(_ data: Any, binary: inout [Data]) -> Any {
-        let placeholder = ["_placeholder": true, "num": binary.count] as [String : Any]
+        let placeholder = ["_placeholder": true, "num": binary.count] as JSON
         
         switch data {
         case let bin as Data:
@@ -190,8 +183,8 @@ private extension SocketPacket {
             return placeholder
         case let arr as [Any]:
             return arr.map({shred($0, binary: &binary)})
-        case let dict as [String: Any]:
-            return dict.reduce([String: Any](), {cur, keyValue in
+        case let dict as JSON:
+            return dict.reduce(JSON(), {cur, keyValue in
                 var mutCur = cur
                 
                 mutCur[keyValue.0] = shred(keyValue.1, binary: &binary)
