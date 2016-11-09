@@ -241,7 +241,18 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     public func emitWithAck(_ event: String, with items: [Any]) -> OnAckCallback {
         return createOnAck([event] + items)
     }
-
+    
+    /// Sends a message to the server with non-array data, requesting an ack. Use the onAck method of SocketAckHandler to add
+    /// an ack.
+    public func emitWithAck(_ event: String, _ item: SocketData) -> OnAckCallback {
+        return emitWithAck(event, withItem: item)
+    }
+    
+    /// Same as emitWithAck for non-array data, but for Objective-C
+    public func emitWithAck(_ event: String, withItem item: Any) -> OnAckCallback {
+        return createOnAck([event, item])
+    }
+    
     func _emit(_ data: [Any], ack: Int? = nil) {
         emitQueue.async {
             guard self.status == .connected else {
