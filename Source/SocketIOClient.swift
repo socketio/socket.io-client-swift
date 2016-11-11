@@ -253,7 +253,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     }
 
     public func engineDidClose(reason: String) {
-        parseQueue.sync {
+        parseQueue.async {
             self.waitingPackets.removeAll()
         }
         
