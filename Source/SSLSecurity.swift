@@ -26,7 +26,7 @@ public protocol SSLTrustValidator {
     func isValid(_ trust: SecTrust, domain: String?) -> Bool
 }
 
-open class SSLCert {
+open class SSLCert : NSObject {
     var certData: Data?
     var key: SecKey?
     
