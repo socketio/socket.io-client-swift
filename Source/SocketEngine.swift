@@ -372,6 +372,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         
         self.sid = sid
         connected = true
+        pongsMissed = 0
         
         if let upgrades = json["upgrades"] as? [String] {
             upgradeWs = upgrades.contains("websocket")
@@ -523,7 +524,6 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
             connected = true
             probing = false
             polling = false
-            pongsMissed = 0
         }
     }
 
