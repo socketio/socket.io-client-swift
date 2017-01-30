@@ -25,7 +25,7 @@
 public struct SocketIOClientConfiguration : ExpressibleByArrayLiteral, Collection, MutableCollection {
     public typealias Element = SocketIOClientOption
     public typealias Index = Array<SocketIOClientOption>.Index
-    public typealias Generator = Array<SocketIOClientOption>.Generator
+    public typealias Generator = Array<SocketIOClientOption>.Iterator
     public typealias SubSequence =  Array<SocketIOClientOption>.SubSequence
     
     private var backingArray = [SocketIOClientOption]()
