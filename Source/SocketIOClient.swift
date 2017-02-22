@@ -286,7 +286,9 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
         DefaultSocketLogger.Logger.log("Handling ack: %@ with data: %@", type: logType, args: ack, data)
 
-        handleQueue.async() {
+        // No need to executeAck async because it is async internally, but dangerous because it's mutating
+        
+        handleQueue.sync() {
             self.ackHandlers.executeAck(ack, with: data, onQueue: self.handleQueue)
         }
     }
