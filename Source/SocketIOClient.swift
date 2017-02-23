@@ -54,6 +54,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     private var handlers = [SocketEventHandler]()
     private var reconnecting = false
 
+    private let semaphore = DispatchSemaphore(value: 1)
     private(set) var currentAck = -1
     private(set) var handleQueue = DispatchQueue.main
     private(set) var reconnectAttempts = -1
@@ -161,10 +162,15 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         }
     }
 
-    private func createOnAck(_ items: [Any]) -> OnAckCallback {
+    private func nextAck() -> Int {
+        semaphore.wait()
+        defer { semaphore.signal() }
         currentAck += 1
-        
-        return OnAckCallback(ackNumber: currentAck, items: items, socket: self)
+        return currentAck
+    }
+
+    private func createOnAck(_ items: [Any]) -> OnAckCallback {
+        return OnAckCallback(ackNumber: nextAck(), items: items, socket: self)
     }
 
     func didConnect() {
@@ -286,7 +292,9 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
 
         DefaultSocketLogger.Logger.log("Handling ack: %@ with data: %@", type: logType, args: ack, data)
 
-        handleQueue.async() {
+        // No need to executeAck async because it is async internally, but dangerous because it's mutating
+        
+        handleQueue.sync() {
             self.ackHandlers.executeAck(ack, with: data, onQueue: self.handleQueue)
         }
     }
