@@ -54,6 +54,7 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     private var handlers = [SocketEventHandler]()
     private var reconnecting = false
 
+    private let ackSemaphore = DispatchSemaphore(value: 1)
     private(set) var currentAck = -1
     private(set) var handleQueue = DispatchQueue.main
     private(set) var reconnectAttempts = -1
@@ -161,10 +162,15 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         }
     }
 
-    private func createOnAck(_ items: [Any]) -> OnAckCallback {
+    private func nextAck() -> Int {
+        ackSemaphore.wait()
+        defer { ackSemaphore.signal() }
         currentAck += 1
-        
-        return OnAckCallback(ackNumber: currentAck, items: items, socket: self)
+        return currentAck
+    }
+
+    private func createOnAck(_ items: [Any]) -> OnAckCallback {
+        return OnAckCallback(ackNumber: nextAck(), items: items, socket: self)
     }
 
     func didConnect() {
