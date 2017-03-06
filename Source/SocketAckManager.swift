@@ -51,6 +51,7 @@ private func ==(lhs: SocketAck, rhs: SocketAck) -> Bool {
 
 struct SocketAckManager {
     private var acks = Set<SocketAck>(minimumCapacity: 1)
+    private let ackSemaphore = DispatchSemaphore(value: 1)
     
     mutating func addAck(_ ack: Int, callback: @escaping AckCallback) {
         acks.insert(SocketAck(ack: ack, callback: callback))
@@ -58,6 +59,8 @@ struct SocketAckManager {
     
     /// Should be called on handle queue
     mutating func executeAck(_ ack: Int, with items: [Any], onQueue: DispatchQueue) {
+        ackSemaphore.wait()
+        defer { ackSemaphore.signal() }
         let ack = acks.remove(SocketAck(ack: ack))
         
         onQueue.async() { ack?.callback(items) }
@@ -65,8 +68,12 @@ struct SocketAckManager {
     
     /// Should be called on handle queue
     mutating func timeoutAck(_ ack: Int, onQueue: DispatchQueue) {
+        ackSemaphore.wait()
+        defer { ackSemaphore.signal() }
         let ack = acks.remove(SocketAck(ack: ack))
         
-        onQueue.async() { ack?.callback?(["NO ACK"]) }
+        onQueue.async() {
+            ack?.callback?(["NO ACK"])
+        }
     }
 }
