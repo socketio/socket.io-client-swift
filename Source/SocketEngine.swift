@@ -42,7 +42,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     public private(set) var closed = false
     public private(set) var connected = false
     public private(set) var cookies: [HTTPCookie]?
-    public private(set) var doubleEncodeUTF8 = true
+    public private(set) var doubleEncodeUTF8 = false
     public private(set) var extraHeaders: [String: String]?
     public private(set) var fastUpgrade = false
     public private(set) var forcePolling = false

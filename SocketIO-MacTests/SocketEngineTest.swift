@@ -82,8 +82,10 @@ class SocketEngineTest: XCTestCase {
             XCTAssertEqual(data[0] as? String, "lïne one\nlīne \rtwo", "Failed string test")
             expect.fulfill()
         }
-
+        
+        engine = SocketEngine(client: client, url: URL(string: "http://localhost")!, config: [.doubleEncodeUTF8(true)])
         engine.parsePollingMessage("41:42[\"stringTest\",\"lÃ¯ne one\\nlÄ«ne \\rtwo\"]")
+        
         waitForExpectations(timeout: 3, handler: nil)
     }
 
