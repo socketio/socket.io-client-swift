@@ -28,7 +28,7 @@ public final class SocketAnyEvent : NSObject {
     public let event: String
     public let items: [Any]?
     override public var description: String {
-        return "SocketAnyEvent: Event: \(event) items: \(items ?? nil)"
+        return "SocketAnyEvent: Event: \(event) items: \(String(describing: items))"
     }
     
     init(event: String, items: [Any]?) {
