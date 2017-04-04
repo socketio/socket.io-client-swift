@@ -1,9 +1,9 @@
 [![Build Status](https://travis-ci.org/socketio/socket.io-client-swift.svg?branch=master)](https://travis-ci.org/socketio/socket.io-client-swift)
 
-#Socket.IO-Client-Swift
+# Socket.IO-Client-Swift
 Socket.IO-client for iOS/OS X.
 
-##Example
+## Example
 ```swift
 import SocketIO
 
@@ -26,7 +26,7 @@ socket.on("currentAmount") {data, ack in
 socket.connect()
 ```
 
-##Objective-C Example
+## Objective-C Example
 ```objective-c
 @import SocketIO;
 NSURL* url = [[NSURL alloc] initWithString:@"http://localhost:8080"];
@@ -50,14 +50,14 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 
 ```
 
-##Features
+## Features
 - Supports socket.io 1.0+
 - Supports binary
 - Supports Polling and WebSockets
 - Supports TLS/SSL
 - Can be used from Objective-C
 
-##Installation
+## Installation
 Requires Swift 3/Xcode 8.x
 
 If you need swift 2.3 use the swift2.3 tag (Pre-Swift 3 support is no longer maintained)
@@ -143,15 +143,14 @@ github "socketio/socket.io-client-swift", "v8.3.3", :files => "Source/*.swift" #
 Run `seed install`.
 
 
-##API
-Constructors
------------
+## API
+
+### Constructors
 `init(var socketURL: NSURL, config: SocketIOClientConfiguration = [])` - Creates a new SocketIOClient. If your socket.io server is secure, you need to specify `https` in your socketURL.
 
 `convenience init(socketURL: NSURL, options: NSDictionary?)` - Same as above, but meant for Objective-C. See Options on how convert between SocketIOClientOptions and dictionary keys.
 
-Options
--------
+### Options
 All options are a case of SocketIOClientOption. To get the Objective-C Option, convert the name to lowerCamelCase.
 
 ```swift
@@ -176,8 +175,7 @@ case security(SSLSecurity) // Allows you to set which certs are valid. Useful fo
 case selfSigned(Bool) // Sets WebSocket.selfSignedSSL. Use this if you're using self-signed certs.
 case voipEnabled(Bool) // Only use this option if you're using the client with VoIP services. Changes the way the WebSocket is created. Default is false
 ```
-Methods
--------
+### Methods
 1. `on(_ event: String, callback: NormalCallback) -> NSUUID` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example. Returns a unique id for the handler.
 2. `once(_ event: String, callback: NormalCallback) -> NSUUID` - Adds a handler that will only be executed once. Returns a unique id for the handler.
 3. `onAny(callback:((event: String, items: AnyObject?)) -> Void)` - Adds a handler for all events. It will be called on any received event.
@@ -195,18 +193,17 @@ Methods
 15. `off(id id: NSUUID)` - Removes the event that corresponds to id.
 16. `removeAllHandlers()` - Removes all handlers.
 
-Client Events
-------
+### Client Events
 1. `connect` - Emitted when on a successful connection.
 2. `disconnect` - Emitted when the connection is closed.
 3. `error` - Emitted on an error.
 4. `reconnect` - Emitted when the connection is starting to reconnect.
 5. `reconnectAttempt` - Emitted when attempting to reconnect.
 
-##Detailed Example
+## Detailed Example
 A more detailed example can be found [here](https://github.com/nuclearace/socket.io-client-swift-example)
 
 An example using the Swift Package Manager can be found [here](https://github.com/nuclearace/socket.io-client-swift-spm-example)
 
-##License
+## License
 MIT
