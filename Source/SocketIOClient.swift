@@ -120,6 +120,10 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
     private func addEngine() -> SocketEngineSpec {
         DefaultSocketLogger.Logger.log("Adding engine", type: logType, args: "")
 
+        if let oldEngine = engine {
+            oldEngine.client = nil
+        }
+        
         engine = SocketEngine(client: self, url: socketURL, config: config)
 
         return engine!
