@@ -244,10 +244,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
 
     private func createWebsocketAndConnect() {
         
-        if let oldWs = ws {
-            oldWs.delegate = nil
-        }
-        
+        ws?.delegate = nil
         ws = WebSocket(url: urlWebSocketWithSid as URL)
 
         if cookies != nil {
