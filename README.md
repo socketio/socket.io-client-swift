@@ -1,9 +1,9 @@
 [![Build Status](https://travis-ci.org/socketio/socket.io-client-swift.svg?branch=master)](https://travis-ci.org/socketio/socket.io-client-swift)
 
-#Socket.IO-Client-Swift
+# Socket.IO-Client-Swift
 Socket.IO-client for iOS/OS X.
 
-##Example
+## Example
 ```swift
 import SocketIO
 
@@ -26,7 +26,7 @@ socket.on("currentAmount") {data, ack in
 socket.connect()
 ```
 
-##Objective-C Example
+## Objective-C Example
 ```objective-c
 @import SocketIO;
 NSURL* url = [[NSURL alloc] initWithString:@"http://localhost:8080"];
@@ -50,14 +50,14 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 
 ```
 
-##Features
+## Features
 - Supports socket.io 1.0+
 - Supports binary
 - Supports Polling and WebSockets
 - Supports TLS/SSL
 - Can be used from Objective-C
 
-##Installation
+## Installation
 Requires Swift 3/Xcode 8.x
 
 If you need swift 2.3 use the swift2.3 tag (Pre-Swift 3 support is no longer maintained)
@@ -143,7 +143,7 @@ github "socketio/socket.io-client-swift", "v8.3.3", :files => "Source/*.swift" #
 Run `seed install`.
 
 
-##API
+# API
 Constructors
 -----------
 `init(var socketURL: NSURL, config: SocketIOClientConfiguration = [])` - Creates a new SocketIOClient. If your socket.io server is secure, you need to specify `https` in your socketURL.
@@ -203,10 +203,10 @@ Client Events
 4. `reconnect` - Emitted when the connection is starting to reconnect.
 5. `reconnectAttempt` - Emitted when attempting to reconnect.
 
-##Detailed Example
+## Detailed Example
 A more detailed example can be found [here](https://github.com/nuclearace/socket.io-client-swift-example)
 
 An example using the Swift Package Manager can be found [here](https://github.com/nuclearace/socket.io-client-swift-spm-example)
 
-##License
+## License
 MIT
