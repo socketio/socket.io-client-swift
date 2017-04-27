@@ -275,6 +275,19 @@ public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable
         }
     }
 
+    ///ping & pong
+    public func engineDidSendPing() {
+        DefaultSocketLogger.Logger.log("%@", type: logType, args: "")
+        
+        handleEvent("sentPing", data: [""], isInternalMessage: true)
+    }
+    
+    public func engineDidReceivePong() {
+        DefaultSocketLogger.Logger.log("%@", type: logType, args: "")
+        
+        handleEvent("receivedPong", data: [""], isInternalMessage: true)
+    }
+
     /// error
     public func engineDidError(reason: String) {
         DefaultSocketLogger.Logger.error("%@", type: logType, args: reason)
