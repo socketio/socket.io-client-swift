@@ -194,6 +194,8 @@ case voipEnabled(Bool) // Only use this option if you're using the client with V
 3. `error` - Emitted on an error.
 4. `reconnect` - Emitted when the connection is starting to reconnect.
 5. `reconnectAttempt` - Emitted when attempting to reconnect.
+6. `sentPing` - Emitted when sends a ping to server.
+7. `receivedPong` - Emitted when receives a pong (in reply to ping) from server.
 
 ## Detailed Example
 A more detailed example can be found [here](https://github.com/nuclearace/socket.io-client-swift-example)
