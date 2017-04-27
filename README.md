@@ -70,13 +70,11 @@ If you need Swift 1.2 use v2.4.5 (Pre-Swift 2 support is no longer maintained)
 
 If you need Swift 1.1 use v1.5.2. (Pre-Swift 1.2 support is no longer maintained)
 
-Manually (iOS 7+)
------------------
+### Manually (iOS 7+)
 1. Copy the Source folder into your Xcode project. (Make sure you add the files to your target(s))
 2. If you plan on using this from Objective-C, read [this](https://developer.apple.com/library/ios/documentation/Swift/Conceptual/BuildingCocoaApps/MixandMatch.html) on exposing Swift code to Objective-C.
 
-Swift Package Manager
----------------------
+### Swift Package Manager
 Add the project as a dependency to your Package.swift:
 ```swift
 import PackageDescription
@@ -91,8 +89,7 @@ let package = Package(
 
 Then import `import SocketIO`.
 
-Carthage
------------------
+### Carthage
 Add this line to your `Cartfile`:
 ```
 github "socketio/socket.io-client-swift" ~> 8.3.3 # Or latest version
@@ -100,8 +97,7 @@ github "socketio/socket.io-client-swift" ~> 8.3.3 # Or latest version
 
 Run `carthage update --platform ios,macosx`.
 
-CocoaPods 1.0.0 or later
-------------------
+### CocoaPods 1.0.0 or later
 Create `Podfile` and add `pod 'Socket.IO-Client-Swift'`:
 
 ```ruby
@@ -131,8 +127,7 @@ Objective-C:
 @import SocketIO;
 ```
 
-CocoaSeeds
------------------
+### CocoaSeeds
 
 Add this line to your `Seedfile`:
 
@@ -143,15 +138,14 @@ github "socketio/socket.io-client-swift", "v8.3.3", :files => "Source/*.swift" #
 Run `seed install`.
 
 
-# API
-Constructors
------------
+## API
+
+### Constructors
 `init(var socketURL: NSURL, config: SocketIOClientConfiguration = [])` - Creates a new SocketIOClient. If your socket.io server is secure, you need to specify `https` in your socketURL.
 
 `convenience init(socketURL: NSURL, options: NSDictionary?)` - Same as above, but meant for Objective-C. See Options on how convert between SocketIOClientOptions and dictionary keys.
 
-Options
--------
+### Options
 All options are a case of SocketIOClientOption. To get the Objective-C Option, convert the name to lowerCamelCase.
 
 ```swift
@@ -176,8 +170,7 @@ case security(SSLSecurity) // Allows you to set which certs are valid. Useful fo
 case selfSigned(Bool) // Sets WebSocket.selfSignedSSL. Use this if you're using self-signed certs.
 case voipEnabled(Bool) // Only use this option if you're using the client with VoIP services. Changes the way the WebSocket is created. Default is false
 ```
-Methods
--------
+### Methods
 1. `on(_ event: String, callback: NormalCallback) -> NSUUID` - Adds a handler for an event. Items are passed by an array. `ack` can be used to send an ack when one is requested. See example. Returns a unique id for the handler.
 2. `once(_ event: String, callback: NormalCallback) -> NSUUID` - Adds a handler that will only be executed once. Returns a unique id for the handler.
 3. `onAny(callback:((event: String, items: AnyObject?)) -> Void)` - Adds a handler for all events. It will be called on any received event.
@@ -195,8 +188,7 @@ Methods
 15. `off(id id: NSUUID)` - Removes the event that corresponds to id.
 16. `removeAllHandlers()` - Removes all handlers.
 
-Client Events
-------
+### Client Events
 1. `connect` - Emitted when on a successful connection.
 2. `disconnect` - Emitted when the connection is closed.
 3. `error` - Emitted on an error.

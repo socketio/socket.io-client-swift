@@ -243,6 +243,8 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     }
 
     private func createWebsocketAndConnect() {
+        
+        ws?.delegate = nil
         ws = WebSocket(url: urlWebSocketWithSid as URL)
 
         if cookies != nil {
