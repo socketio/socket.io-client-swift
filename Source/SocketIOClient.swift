@@ -24,7 +24,7 @@
 
 import Foundation
 
-public final class SocketIOClient : NSObject, SocketEngineClient, SocketParsable {
+public final class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, SocketParsable {
     public let socketURL: URL
 
     public private(set) var engine: SocketEngineSpec?
