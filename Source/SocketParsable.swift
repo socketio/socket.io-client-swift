@@ -22,7 +22,7 @@
 
 import Foundation
 
-protocol SocketParsable : SocketIOClientSpec {
+protocol SocketParsable {
     func parseBinaryData(_ data: Data)
     func parseSocketMessage(_ message: String)
 }
