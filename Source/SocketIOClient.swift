@@ -78,6 +78,10 @@ public final class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineCl
             self.config.insert(.secure(true))
         }
         
+        if !socketURL.path.isEmpty {
+            self.nsp = socketURL.path
+        }
+
         for option in config {
             switch option {
             case let .reconnects(reconnects):
