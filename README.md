@@ -138,9 +138,9 @@ github "socketio/socket.io-client-swift", "v8.3.3", :files => "Source/*.swift" #
 Run `seed install`.
 
 
-## API
-
-### Constructors
+# API
+Constructors
+-----------
 `init(var socketURL: NSURL, config: SocketIOClientConfiguration = [])` - Creates a new SocketIOClient. If your socket.io server is secure, you need to specify `https` in your socketURL.
 
 `convenience init(socketURL: NSURL, options: NSDictionary?)` - Same as above, but meant for Objective-C. See Options on how convert between SocketIOClientOptions and dictionary keys.
