@@ -6,6 +6,7 @@ branches:
   only:
     - master
     - development
+    - refactor-engine
 before_install:
   - brew update
   - brew outdated xctool || brew upgrade xctool

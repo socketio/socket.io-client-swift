@@ -32,15 +32,13 @@ import Foundation
     var connectParams: [String: Any]? { get set }
     var doubleEncodeUTF8: Bool { get }
     var cookies: [HTTPCookie]? { get }
+    var engineQueue: DispatchQueue { get }
     var extraHeaders: [String: String]? { get }
     var fastUpgrade: Bool { get }
     var forcePolling: Bool { get }
     var forceWebsockets: Bool { get }
-    var parseQueue: DispatchQueue { get }
     var polling: Bool { get }
     var probing: Bool { get }
-    var emitQueue: DispatchQueue { get }
-    var handleQueue: DispatchQueue { get }
     var sid: String { get }
     var socketPath: String { get }
     var urlPolling: URL { get }
