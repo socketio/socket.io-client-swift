@@ -138,9 +138,9 @@ github "socketio/socket.io-client-swift", "v8.3.3", :files => "Source/*.swift" #
 Run `seed install`.
 
 
-# API
-Constructors
------------
+## API
+
+### Constructors
 `init(var socketURL: NSURL, config: SocketIOClientConfiguration = [])` - Creates a new SocketIOClient. If your socket.io server is secure, you need to specify `https` in your socketURL.
 
 `convenience init(socketURL: NSURL, options: NSDictionary?)` - Same as above, but meant for Objective-C. See Options on how convert between SocketIOClientOptions and dictionary keys.
@@ -194,6 +194,8 @@ case voipEnabled(Bool) // Only use this option if you're using the client with V
 3. `error` - Emitted on an error.
 4. `reconnect` - Emitted when the connection is starting to reconnect.
 5. `reconnectAttempt` - Emitted when attempting to reconnect.
+6. `sentPing` - Emitted when sends a ping to server.
+7. `receivedPong` - Emitted when receives a pong (in reply to ping) from server.
 
 ## Detailed Example
 A more detailed example can be found [here](https://github.com/nuclearace/socket.io-client-swift-example)

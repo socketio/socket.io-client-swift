@@ -408,6 +408,8 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         if message == "3probe" {
             upgradeTransport()
         }
+        
+        client?.engineDidReceivePong()
     }
 
     public func parseEngineData(_ data: Data) {
@@ -486,6 +488,8 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         
         let time = DispatchTime.now() + Double(Int64(pingInterval * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
         DispatchQueue.main.asyncAfter(deadline: time) {[weak self] in self?.sendPing() }
+        
+        client?.engineDidSendPing()
     }
 
     // Moves from long-polling to websockets
