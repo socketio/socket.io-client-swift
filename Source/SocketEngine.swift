@@ -191,7 +191,8 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
             return
         }
 
-        let reqPolling = NSMutableURLRequest(url: urlPolling)
+        var reqPolling = URLRequest(url: urlPolling, cachePolicy: .reloadIgnoringLocalCacheData,
+                                    timeoutInterval: 60.0)
 
         if cookies != nil {
             let headers = HTTPCookie.requestHeaderFields(with: cookies!)
@@ -204,7 +205,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
             }
         }
 
-        doLongPoll(for: reqPolling as URLRequest)
+        doLongPoll(for: reqPolling)
     }
 
     private func createURLs() -> (URL, URL) {
