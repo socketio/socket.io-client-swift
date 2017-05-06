@@ -25,38 +25,96 @@
 import Dispatch
 import Foundation
 
+/// The class that handles the engine.io protocol and transports.
+/// See `SocketEnginePollable` and `SocketEngineWebsocket` for transport specific methods.
 public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, SocketEngineWebsocket {
-    public let engineQueue = DispatchQueue(label: "com.socketio.engineHandleQueue", attributes: [])
+    // MARK: Properties
 
+    /// The queue that all engine actions take place on.
+    public let engineQueue = DispatchQueue(label: "com.socketio.engineHandleQueue")
+
+    /// The connect parameters sent during a connect.
     public var connectParams: [String: Any]? {
         didSet {
             (urlPolling, urlWebSocket) = createURLs()
         }
     }
 
+    /// A queue of engine.io messages waiting for POSTing
+    ///
+    /// **You should not touch this directly**
     public var postWait = [String]()
+
+    /// `true` if there is an outstanding poll. Trying to poll before the first is done will cause socket.io to
+    /// disconnect us.
+    ///
+    /// **Do not touch this directly**
     public var waitingForPoll = false
+
+    /// `true` if there is an outstanding post. Trying to post before the first is done will cause socket.io to
+    /// disconnect us.
+    ///
+    /// **Do not touch this directly**
     public var waitingForPost = false
 
+    /// `true` if this engine is closed.
     public private(set) var closed = false
+
+    /// `true` if this engine is connected. Connected means that the initial poll connect has succeeded.
     public private(set) var connected = false
+
+    /// An array of HTTPCookies that are sent during the connection.
     public private(set) var cookies: [HTTPCookie]?
+
+    /// Set to `true` if using the node.js version of socket.io. The node.js version of socket.io
+    /// handles utf8 incorrectly.
     public private(set) var doubleEncodeUTF8 = true
+
+    /// A dictionary of extra http headers that will be set during connection.
     public private(set) var extraHeaders: [String: String]?
+
+    /// When `true`, the engine is in the process of switching to WebSockets.
+    ///
+    /// **Do not touch this directly**
     public private(set) var fastUpgrade = false
+
+    /// When `true`, the engine will only use HTTP long-polling as a transport.
     public private(set) var forcePolling = false
+
+    /// When `true`, the engine will only use WebSockets as a transport.
     public private(set) var forceWebsockets = false
+
+    /// `true` If engine's session has been invalidated.
     public private(set) var invalidated = false
+
+    /// If `true`, the engine is currently in HTTP long-polling mode.
     public private(set) var polling = true
+
+    /// If `true`, the engine is currently seeing whether it can upgrade to WebSockets.
     public private(set) var probing = false
+
+    /// The URLSession that will be used for polling.
     public private(set) var session: URLSession?
+
+    /// The session id for this engine.
     public private(set) var sid = ""
+
+    /// The path to engine.io.
     public private(set) var socketPath = "/engine.io/"
+
+    /// The url for polling.
     public private(set) var urlPolling = URL(string: "http://localhost/")!
+
+    /// The url for WebSockets.
     public private(set) var urlWebSocket = URL(string: "http://localhost/")!
+
+    /// If `true`, then the engine is currently in WebSockets mode.
     public private(set) var websocket = false
+
+    /// The WebSocket for this engine.
     public private(set) var ws: WebSocket?
 
+    /// The client for this engine.
     public weak var client: SocketEngineClient?
 
     private weak var sessionDelegate: URLSessionDelegate?
@@ -79,6 +137,13 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     private var selfSigned = false
     private var voipEnabled = false
 
+    // MARK: Initializers
+
+    /// Creates a new engine.
+    ///
+    /// - parameter client: The client for this engine.
+    /// - parameter url: The url for this engine.
+    /// - parameter config: An array of configuration options for this engine.
     public init(client: SocketEngineClient, url: URL, config: SocketIOClientConfiguration) {
         self.client = client
         self.url = url
@@ -124,6 +189,11 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         (urlPolling, urlWebSocket) = createURLs()
     }
 
+    /// Creates a new engine.
+    ///
+    /// - parameter client: The client for this engine.
+    /// - parameter url: The url for this engine.
+    /// - parameter options: The options for this engine.
     public convenience init(client: SocketEngineClient, url: URL, options: NSDictionary?) {
         self.init(client: client, url: url, config: options?.toSocketConfiguration() ?? [])
     }
@@ -133,6 +203,8 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         closed = true
         stopPolling()
     }
+
+    // MARK: Methods
 
     private func checkAndHandleEngineError(_ msg: String) {
         do {
@@ -171,7 +243,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         client?.engineDidClose(reason: reason)
     }
 
-    /// Starts the connection to the server
+    /// Starts the connection to the server.
     public func connect() {
         engineQueue.async {
             self._connect()
@@ -273,12 +345,16 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         ws?.connect()
     }
 
+    /// Called when an error happens during execution. Causes a disconnection.
     public func didError(reason: String) {
         DefaultSocketLogger.Logger.error("%@", type: logType, args: reason)
         client?.engineDidError(reason: reason)
         disconnect(reason: reason)
     }
 
+    /// Disconnects from the server.
+    ///
+    /// - parameter reason: The reason for the disconnection. This is communicated up to the client.
     public func disconnect(reason: String) {
         engineQueue.async {
             self._disconnect(reason: reason)
@@ -311,6 +387,10 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         closeOutEngine(reason: reason)
     }
 
+    /// Called to switch from HTTP long-polling to WebSockets. After calling this method the engine will be in
+    /// WebSocket mode.
+    ///
+    /// **You shouldn't call this directly**
     public func doFastUpgrade() {
         if waitingForPoll {
             DefaultSocketLogger.Logger.error("Outstanding poll when switched to WebSockets," +
@@ -339,8 +419,10 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         }
     }
 
-    // We had packets waiting for send when we upgraded
-    // Send them raw
+    /// Causes any packets that were waiting for POSTing to be sent through the WebSocket. This happens because when
+    /// the engine is attempting to upgrade to WebSocket it does not do any POSTing.
+    ///
+    /// **You shouldn't call this directly**
     public func flushWaitingForPostToWebSocket() {
         guard let ws = self.ws else { return }
 
@@ -415,12 +497,20 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         }
     }
 
+    /// Parses raw binary received from engine.io.
+    ///
+    /// - parameter data: The data to parse.
     public func parseEngineData(_ data: Data) {
         DefaultSocketLogger.Logger.log("Got binary data: %@", type: "SocketEngine", args: data)
 
         client?.parseEngineBinaryData(data.subdata(in: 1..<data.endIndex))
     }
 
+    /// Parses a raw engine.io packet.
+    ///
+    /// - parameter message: The message to parse.
+    /// - parameter fromPolling: Whether this message is from long-polling.
+    ///                          If `true` we might have to fix utf8 encoding.
     public func parseEngineMessage(_ message: String, fromPolling: Bool) {
         DefaultSocketLogger.Logger.log("Got message: %@", type: logType, args: message)
 
@@ -506,7 +596,11 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         }
     }
 
-    /// Write a message, independent of transport.
+    /// Writes a message to engine.io, independent of transport.
+    ///
+    /// - parameter msg: The message to send.
+    /// - parameter withType: The type of this message.
+    /// - parameter withData: Any data that this message has.
     public func write(_ msg: String, withType type: SocketEnginePacketType, withData data: [Data]) {
         engineQueue.async {
             guard self.connected else { return }
@@ -525,7 +619,9 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         }
     }
 
-    // Delegate methods
+    // MARK: Starscream delegate conformance
+
+    /// Delegate method for connection.
     public func websocketDidConnect(socket: WebSocket) {
         if !forceWebsockets {
             probing = true
@@ -537,6 +633,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         }
     }
 
+    /// Delegate method for disconnection.
     public func websocketDidDisconnect(socket: WebSocket, error: NSError?) {
         probing = false
 
@@ -562,6 +659,9 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
 }
 
 extension SocketEngine {
+    // MARK: URLSessionDelegate methods
+
+    /// Delegate called when the session becomes invalid.
     public func URLSession(session: URLSession, didBecomeInvalidWithError error: NSError?) {
         DefaultSocketLogger.Logger.error("Engine URLSession became invalid", type: "SocketEngine")
 

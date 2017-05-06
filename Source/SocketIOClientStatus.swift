@@ -24,9 +24,17 @@
 
 import Foundation
 
-/// **NotConnected**: initial state
-///
-/// **Disconnected**: connected before
+/// Represents the state of the client.
 @objc public enum SocketIOClientStatus : Int {
-    case notConnected, disconnected, connecting, connected
+    /// The client has never been connected. Or the client has been reset.
+    case notConnected
+
+    /// The client was once connected, but not anymore.
+    case disconnected
+
+    /// The client is in the process of connecting.
+    case connecting
+
+    /// The client is currently connected.
+    case connected
 }

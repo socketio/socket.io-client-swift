@@ -32,6 +32,8 @@ public final class SocketAckEmitter : NSObject {
     let socket: SocketIOClient
     let ackNum: Int
 
+    // MARK: Properties
+
     /// If true, this handler is expecting to be acked. Call `with(_: SocketData...)` to ack.
     public var expected: Bool {
         return ackNum != -1
@@ -67,6 +69,7 @@ public final class SocketAckEmitter : NSObject {
 /// A class that represents an emit that will request an ack that has not yet been sent.
 /// Call `timingOut(after:callback:)` to complete the emit
 /// Example:
+///
 /// ```swift
 /// socket.emitWithAck("myEvent").timingOut(after: 1) {data in
 ///     ...

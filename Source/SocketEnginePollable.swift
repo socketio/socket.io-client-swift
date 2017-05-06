@@ -26,20 +26,46 @@ import Foundation
 
 /// Protocol that is used to implement socket.io polling support
 public protocol SocketEnginePollable : SocketEngineSpec {
+    /// MARK: Properties
+
+    /// `true` If engine's session has been invalidated.
     var invalidated: Bool { get }
-    /// Holds strings waiting to be sent over polling.
-    /// You shouldn't need to mess with this.
+
+    /// A queue of engine.io messages waiting for POSTing
+    ///
+    /// **You should not touch this directly**
     var postWait: [String] { get set }
+
+    /// The URLSession that will be used for polling.
     var session: URLSession? { get }
-    /// Because socket.io doesn't let you send two polling request at the same time
-    /// we have to keep track if there's an outstanding poll
+
+    /// `true` if there is an outstanding poll. Trying to poll before the first is done will cause socket.io to
+    /// disconnect us.
+    ///
+    /// **Do not touch this directly**
     var waitingForPoll: Bool { get set }
-    /// Because socket.io doesn't let you send two post request at the same time
-    /// we have to keep track if there's an outstanding post
+
+    /// `true` if there is an outstanding post. Trying to post before the first is done will cause socket.io to
+    /// disconnect us.
+    ///
+    /// **Do not touch this directly**
     var waitingForPost: Bool { get set }
 
+    /// Call to send a long-polling request.
+    ///
+    /// You shouldn't need to call this directly, the engine should automatically maintain a long-poll request.
     func doPoll()
+
+    /// Sends an engine.io message through the polling transport.
+    ///
+    /// You shouldn't call this directly, instead call the `write` method on `SocketEngine`.
+    ///
+    /// - parameter message: The message to send.
+    /// - parameter withType: The type of message to send.
+    /// - parameter withData: The data associated with this message.
     func sendPollMessage(_ message: String, withType type: SocketEnginePacketType, withData datas: [Data])
+
+    /// Call to stop polling and invalidate the URLSession.
     func stopPolling()
 }
 
@@ -89,6 +115,9 @@ extension SocketEnginePollable {
         return req
     }
 
+    /// Call to send a long-polling request.
+    ///
+    /// You shouldn't need to call this directly, the engine should automatically maintain a long-poll request.
     public func doPoll() {
         if websocket || waitingForPoll || !connected || closed {
             return
@@ -194,8 +223,13 @@ extension SocketEnginePollable {
         }
     }
 
-    /// Send polling message.
-    /// Only call on emitQueue
+    /// Sends an engine.io message through the polling transport.
+    ///
+    /// You shouldn't call this directly, instead call the `write` method on `SocketEngine`.
+    ///
+    /// - parameter message: The message to send.
+    /// - parameter withType: The type of message to send.
+    /// - parameter withData: The data associated with this message.
     public func sendPollMessage(_ message: String, withType type: SocketEnginePacketType, withData datas: [Data]) {
         DefaultSocketLogger.Logger.log("Sending poll: %@ as type: %@", type: "SocketEnginePolling", args: message, type.rawValue)
         let fixedMessage: String
@@ -219,6 +253,7 @@ extension SocketEnginePollable {
         }
     }
 
+    /// Call to stop polling and invalidate the URLSession.
     public func stopPolling() {
         waitingForPoll = false
         waitingForPost = false
