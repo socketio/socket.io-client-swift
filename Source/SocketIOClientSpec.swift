@@ -22,10 +22,13 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
+import Dispatch
+
 protocol SocketIOClientSpec : class {
+    var handleQueue: DispatchQueue { get set }
     var nsp: String { get set }
     var waitingPackets: [SocketPacket] { get set }
-    
+
     func didConnect()
     func didDisconnect(reason: String)
     func didError(reason: String)
@@ -37,7 +40,7 @@ protocol SocketIOClientSpec : class {
 extension SocketIOClientSpec {
     func didError(reason: String) {
         DefaultSocketLogger.Logger.error("%@", type: "SocketIOClient", args: reason)
-        
+
         handleEvent("error", data: [reason], isInternalMessage: true, withAck: -1)
     }
 }
