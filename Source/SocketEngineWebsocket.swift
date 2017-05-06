@@ -27,6 +27,13 @@ import Foundation
 
 /// Protocol that is used to implement socket.io WebSocket support
 public protocol SocketEngineWebsocket : SocketEngineSpec, WebSocketDelegate {
+    /// Sends an engine.io message through the WebSocket transport.
+    ///
+    /// You shouldn't call this directly, instead call the `write` method on `SocketEngine`.
+    ///
+    /// - parameter message: The message to send.
+    /// - parameter withType: The type of message to send.
+    /// - parameter withData: The data associated with this message.
     func sendWebSocketMessage(_ str: String, withType type: SocketEnginePacketType, withData datas: [Data])
 }
 
@@ -37,25 +44,34 @@ extension SocketEngineWebsocket {
             sendWebSocketMessage("probe", withType: .ping, withData: [])
         }
     }
-    
-    /// Send message on WebSockets
-    /// Only call on emitQueue
+
+    /// Sends an engine.io message through the WebSocket transport.
+    ///
+    /// You shouldn't call this directly, instead call the `write` method on `SocketEngine`.
+    ///
+    /// - parameter message: The message to send.
+    /// - parameter withType: The type of message to send.
+    /// - parameter withData: The data associated with this message.
     public func sendWebSocketMessage(_ str: String, withType type: SocketEnginePacketType, withData datas: [Data]) {
         DefaultSocketLogger.Logger.log("Sending ws: %@ as type: %@", type: "SocketEngine", args: str, type.rawValue)
-        
+
         ws?.write(string: "\(type.rawValue)\(str)")
-        
+
         for data in datas {
             if case let .left(bin) = createBinaryDataForSend(using: data) {
                 ws?.write(data: bin)
             }
         }
     }
-    
+
+    // MARK: Starscream delegate methods
+
+    /// Delegate method for when a message is received.
     public func websocketDidReceiveMessage(socket: WebSocket, text: String) {
         parseEngineMessage(text, fromPolling: false)
     }
-    
+
+    /// Delegate method for when binary is received.
     public func websocketDidReceiveData(socket: WebSocket, data: Data) {
         parseEngineData(data)
     }

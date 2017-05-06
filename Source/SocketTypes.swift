@@ -24,6 +24,7 @@
 
 import Foundation
 
+/// A marking protocol that says a type can be represented in a socket.io packet.
 public protocol SocketData {}
 
 extension Array : SocketData {}
@@ -39,7 +40,10 @@ extension NSString : SocketData {}
 extension NSNull : SocketData {}
 extension String : SocketData {}
 
+/// A typealias for an ack callback.
 public typealias AckCallback = ([Any]) -> Void
+
+/// A typealias for a normal callback.
 public typealias NormalCallback = ([Any], SocketAckEmitter) -> Void
 
 typealias JSON = [String: Any]
