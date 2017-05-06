@@ -234,7 +234,11 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     /// - parameter event: The event to send.
     /// - parameter items: The items to send with this event. May be left out.
     open func emit(_ event: String, _ items: SocketData...) {
-        emit(event, with: items)
+        do {
+            emit(event, with: try items.map({ try $0.socketRepresentation() }))
+        } catch {
+            fatalError("Error creating socketRepresentation for emit: \(event), \(items)")
+        }
     }
 
     /// Same as emit, but meant for Objective-C
@@ -267,7 +271,11 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     /// - parameter items: The items to send with this event. May be left out.
     /// - returns: An `OnAckCallback`. You must call the `timingOut(after:)` method before the event will be sent.
     open func emitWithAck(_ event: String, _ items: SocketData...) -> OnAckCallback {
-        return emitWithAck(event, with: items)
+        do {
+            return emitWithAck(event, with: try items.map({ try $0.socketRepresentation() }))
+        } catch {
+            fatalError("Error creating socketRepresentation for emit: \(event), \(items)")
+        }
     }
 
     /// Same as emitWithAck, but for Objective-C
