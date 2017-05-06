@@ -46,14 +46,14 @@ private struct SocketAck : Hashable {
         self.ack = ack
         self.callback = callback
     }
-}
 
-private func <(lhs: SocketAck, rhs: SocketAck) -> Bool {
-    return lhs.ack < rhs.ack
-}
+    fileprivate static func <(lhs: SocketAck, rhs: SocketAck) -> Bool {
+        return lhs.ack < rhs.ack
+    }
 
-private func ==(lhs: SocketAck, rhs: SocketAck) -> Bool {
-    return lhs.ack == rhs.ack
+    fileprivate static func ==(lhs: SocketAck, rhs: SocketAck) -> Bool {
+        return lhs.ack == rhs.ack
+    }
 }
 
 struct SocketAckManager {
