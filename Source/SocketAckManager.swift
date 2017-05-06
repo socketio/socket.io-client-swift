@@ -25,7 +25,9 @@
 import Dispatch
 import Foundation
 
+/// The status of an ack.
 public enum SocketAckStatus : String {
+    /// The ack timed out.
     case noAck = "NO ACK"
 }
 
