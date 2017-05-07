@@ -177,6 +177,50 @@ class SocketSideEffectTest: XCTestCase {
         waitForExpectations(timeout: 0.2)
     }
 
+    func testOnClientEvent() {
+        let expect = expectation(description: "The client should call client event handlers")
+        let event = SocketClientEvent.disconnect
+        let closeReason = "testing"
+
+        socket.on(clientEvent: event) {data, ack in
+            guard let reason = data[0] as? String else {
+                XCTFail("Client should pass data for client events")
+
+                return
+            }
+
+            XCTAssertEqual(closeReason, reason, "The data should be what was sent to handleClientEvent")
+
+            expect.fulfill()
+        }
+
+        socket.handleClientEvent(event, data: [closeReason])
+
+        waitForExpectations(timeout: 0.2)
+    }
+
+    func testClientEventsAreBackwardsCompatible() {
+        let expect = expectation(description: "The client should call old style client event handlers")
+        let event = SocketClientEvent.disconnect
+        let closeReason = "testing"
+
+        socket.on("disconnect") {data, ack in
+            guard let reason = data[0] as? String else {
+                XCTFail("Client should pass data for client events")
+
+                return
+            }
+
+            XCTAssertEqual(closeReason, reason, "The data should be what was sent to handleClientEvent")
+
+            expect.fulfill()
+        }
+
+        socket.handleClientEvent(event, data: [closeReason])
+
+        waitForExpectations(timeout: 0.2)
+    }
+
     let data = "test".data(using: String.Encoding.utf8)!
     let data2 = "test2".data(using: String.Encoding.utf8)!
     private var socket: SocketIOClient!

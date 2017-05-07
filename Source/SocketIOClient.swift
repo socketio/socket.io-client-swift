@@ -48,7 +48,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
                 break
             }
 
-            handleEvent("statusChange", data: [status], isInternalMessage: true)
+            handleClientEvent(.statusChange, data: [status])
         }
     }
 
@@ -204,11 +204,10 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
 
     func didConnect() {
         DefaultSocketLogger.Logger.log("Socket connected", type: logType)
+
         status = .connected
 
-        // Don't handle as internal because something crazy could happen where
-        // we disconnect before it's handled
-        handleEvent("connect", data: [], isInternalMessage: false)
+        handleClientEvent(.connect, data: [])
     }
 
     func didDisconnect(reason: String) {
@@ -221,7 +220,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
 
         // Make sure the engine is actually dead.
         engine?.disconnect(reason: reason)
-        handleEvent("disconnect", data: [reason], isInternalMessage: true)
+        handleClientEvent(.disconnect, data: [reason])
     }
 
     /// Disconnects the socket.
@@ -249,7 +248,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     /// - parameter with: The items to send with this event. May be left out.
     open func emit(_ event: String, with items: [Any]) {
         guard status == .connected else {
-            handleEvent("error", data: ["Tried emitting \(event) when not connected"], isInternalMessage: true)
+            handleClientEvent(.error, data: ["Tried emitting \(event) when not connected"])
             return
         }
 
@@ -302,7 +301,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
 
     func _emit(_ data: [Any], ack: Int? = nil) {
         guard status == .connected else {
-            handleEvent("error", data: ["Tried emitting when not connected"], isInternalMessage: true)
+            handleClientEvent(.error, data: ["Tried emitting when not connected"])
             return
         }
 
@@ -362,7 +361,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     private func _engineDidError(reason: String) {
         DefaultSocketLogger.Logger.error("%@", type: logType, args: reason)
 
-        handleEvent("error", data: [reason], isInternalMessage: true)
+        handleClientEvent(.error, data: [reason])
     }
 
     /// Called when the engine opens.
@@ -397,6 +396,10 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         for handler in handlers where handler.event == event {
             handler.executeCallback(with: data, withAck: ack, withSocket: self)
         }
+    }
+
+    func handleClientEvent(_ event: SocketClientEvent, data: [Any]) {
+        handleEvent(event.rawValue, data: data, isInternalMessage: true)
     }
 
     /// Leaves nsp and goes back to the default namespace.
@@ -457,6 +460,30 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
 
         return handler.id
     }
+
+    /// Adds a handler for a client event.
+    ///
+    /// Example:
+    ///
+    /// ```swift
+    /// socket.on(clientEvent: .connect) {data, ack in
+    ///     ...
+    /// }
+    /// ```
+    ///
+    /// - parameter event: The event for this handler.
+    /// - parameter callback: The callback that will execute when this event is received.
+    /// - returns: A unique id for the handler that can be used to remove it.
+    @discardableResult
+    open func on(clientEvent event: SocketClientEvent, callback: @escaping NormalCallback) -> UUID {
+        DefaultSocketLogger.Logger.log("Adding handler for event: %@", type: logType, args: event)
+
+        let handler = SocketEventHandler(event: event.rawValue, id: UUID(), callback: callback)
+        handlers.append(handler)
+
+        return handler.id
+    }
+
 
     /// Adds a single-use handler for an event.
     ///
@@ -522,7 +549,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         guard reconnecting else { return }
 
         DefaultSocketLogger.Logger.log("Starting reconnect", type: logType)
-        handleEvent("reconnect", data: [reason], isInternalMessage: true)
+        handleClientEvent(.reconnect, data: [reason])
 
         _tryReconnect()
     }
@@ -535,7 +562,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         }
 
         DefaultSocketLogger.Logger.log("Trying to reconnect", type: logType)
-        handleEvent("reconnectAttempt", data: [(reconnectAttempts - currentReconnectAttempt)], isInternalMessage: true)
+        handleClientEvent(.reconnectAttempt, data: [(reconnectAttempts - currentReconnectAttempt)])
 
         currentReconnectAttempt += 1
         connect()
