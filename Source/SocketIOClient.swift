@@ -426,7 +426,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
 
     /// Removes handler(s) based on an event name.
     ///
-    /// If you wish to remove a specific event, call the `off(if:)` with the UUID received from its `on` call.
+    /// If you wish to remove a specific event, call the `off(id:)` with the UUID received from its `on` call.
     ///
     /// - parameter event: The event to remove handlers for.
     open func off(_ event: String) {
