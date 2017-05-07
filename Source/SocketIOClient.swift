@@ -184,10 +184,8 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
 
         guard timeoutAfter != 0 else { return }
 
-        let time = DispatchTime.now() + Double(UInt64(timeoutAfter) * NSEC_PER_SEC) / Double(NSEC_PER_SEC)
-
-        handleQueue.asyncAfter(deadline: time) {[weak self] in
-            guard let this = self, this.status != .connected && this.status != .disconnected else { return }
+        handleQueue.asyncAfter(deadline: DispatchTime.now() + Double(timeoutAfter)) {[weak self] in
+            guard let this = self, this.status == .connecting || this.status == .notConnected else { return }
 
             this.status = .disconnected
             this.engine?.disconnect(reason: "Connect timeout")
@@ -555,9 +553,9 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     }
 
     private func _tryReconnect() {
-        guard reconnecting else { return }
+        guard reconnects && reconnecting && status != .disconnected else { return }
 
-        if reconnectAttempts != -1 && currentReconnectAttempt + 1 > reconnectAttempts || !reconnects {
+        if reconnectAttempts != -1 && currentReconnectAttempt + 1 > reconnectAttempts {
             return didDisconnect(reason: "Reconnect Failed")
         }
 
