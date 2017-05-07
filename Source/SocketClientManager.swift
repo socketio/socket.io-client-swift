@@ -78,6 +78,7 @@ open class SocketClientManager : NSObject {
     ///
     /// - parameter withLabel: The label of the socket to remove.
     /// - returns: The socket for the given label, if one was present.
+    @discardableResult
     open func removeSocket(withLabel label: String) -> SocketIOClient? {
         return sockets.removeValue(forKey: label)
     }
@@ -86,6 +87,7 @@ open class SocketClientManager : NSObject {
     ///
     /// - parameter socket: The socket to remove.
     /// - returns: The socket if it was in the manager.
+    @discardableResult
     open func removeSocket(_ socket: SocketIOClient) -> SocketIOClient? {
         var returnSocket: SocketIOClient?
 
