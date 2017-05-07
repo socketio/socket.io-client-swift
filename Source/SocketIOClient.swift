@@ -230,13 +230,19 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
 
     /// Send an event to the server, with optional data items.
     ///
+    /// If an error occurs trying to transform `items` into their socket representation, a `SocketClientEvent.error`
+    /// will be emitted. The structure of the error data is `[eventName, items, theError]`
+    ///
     /// - parameter event: The event to send.
     /// - parameter items: The items to send with this event. May be left out.
     open func emit(_ event: String, _ items: SocketData...) {
         do {
             emit(event, with: try items.map({ try $0.socketRepresentation() }))
-        } catch {
-            fatalError("Error creating socketRepresentation for emit: \(event), \(items)")
+        } catch let err {
+            DefaultSocketLogger.Logger.error("Error creating socketRepresentation for emit: \(event), \(items)",
+                                             type: logType)
+
+            handleClientEvent(.error, data: [event, items, err])
         }
     }
 
@@ -258,6 +264,9 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     /// **NOTE**: It is up to the server send an ack back, just calling this method does not mean the server will ack.
     /// Check that your server's api will ack the event being sent.
     ///
+    /// If an error occurs trying to transform `items` into their socket representation, a `SocketClientEvent.error`
+    /// will be emitted. The structure of the error data is `[eventName, items, theError]`
+    ///
     /// Example:
     ///
     /// ```swift
@@ -272,8 +281,13 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     open func emitWithAck(_ event: String, _ items: SocketData...) -> OnAckCallback {
         do {
             return emitWithAck(event, with: try items.map({ try $0.socketRepresentation() }))
-        } catch {
-            fatalError("Error creating socketRepresentation for emit: \(event), \(items)")
+        } catch let err {
+            DefaultSocketLogger.Logger.error("Error creating socketRepresentation for emit: \(event), \(items)",
+                                             type: logType)
+
+            handleClientEvent(.error, data: [event, items, err])
+
+            return OnAckCallback(ackNumber: -1, items: [], socket: self)
         }
     }
 
