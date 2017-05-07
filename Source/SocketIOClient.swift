@@ -47,6 +47,8 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
             default:
                 break
             }
+
+            handleEvent("statusChange", data: [status], isInternalMessage: true)
         }
     }
 
@@ -549,6 +551,10 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
 
     func setTestable() {
         status = .connected
+    }
+
+    func setTestStatus(_ status: SocketIOClientStatus) {
+        self.status = status
     }
 
     func setTestEngine(_ engine: SocketEngineSpec?) {
