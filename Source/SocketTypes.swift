@@ -24,22 +24,53 @@
 
 import Foundation
 
-public protocol SocketData {}
+/// A marking protocol that says a type can be represented in a socket.io packet.
+///
+/// Example:
+///
+/// ```swift
+/// struct CustomData : SocketData {
+///    let name: String
+///    let age: Int
+///
+///    func socketRepresentation() -> SocketData {
+///        return ["name": name, "age": age]
+///    }
+/// }
+///
+/// socket.emit("myEvent", CustomData(name: "Erik", age: 24))
+/// ```
+public protocol SocketData {
+    // MARK: Methods
 
-extension Array : SocketData {}
-extension Bool : SocketData {}
-extension Dictionary : SocketData {}
-extension Double : SocketData {}
-extension Int : SocketData {}
-extension NSArray : SocketData {}
-extension Data : SocketData {}
-extension NSData : SocketData {}
-extension NSDictionary : SocketData {}
-extension NSString : SocketData {}
-extension NSNull : SocketData {}
-extension String : SocketData {}
+    /// A representation of self that can sent over socket.io.
+    func socketRepresentation() throws -> SocketData
+}
 
+public extension SocketData {
+    /// Default implementation. Only works for native Swift types and a few Foundation types.
+    func socketRepresentation() -> SocketData {
+        return self
+    }
+}
+
+extension Array : SocketData { }
+extension Bool : SocketData { }
+extension Dictionary : SocketData { }
+extension Double : SocketData { }
+extension Int : SocketData { }
+extension NSArray : SocketData { }
+extension Data : SocketData { }
+extension NSData : SocketData { }
+extension NSDictionary : SocketData { }
+extension NSString : SocketData { }
+extension NSNull : SocketData { }
+extension String : SocketData { }
+
+/// A typealias for an ack callback.
 public typealias AckCallback = ([Any]) -> Void
+
+/// A typealias for a normal callback.
 public typealias NormalCallback = ([Any], SocketAckEmitter) -> Void
 
 typealias JSON = [String: Any]

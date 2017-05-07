@@ -25,6 +25,26 @@
 
 import Foundation
 
+/// Represents the type of engine.io packet types.
 @objc public enum SocketEnginePacketType : Int {
-    case open, close, ping, pong, message, upgrade, noop
+    /// Open message.
+    case open
+
+    /// Close message.
+    case close
+
+    /// Ping message.
+    case ping
+
+    /// Pong message.
+    case pong
+
+    /// Regular message.
+    case message
+
+    /// Upgrade message.
+    case upgrade
+
+    /// NOOP.
+    case noop
 }

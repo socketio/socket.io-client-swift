@@ -46,3 +46,7 @@ DerivedData
 *.xcuserstate
 
 Socket.IO-Test-Server/node_modules/*
+
+.idea/
+docs/docsets/
+docs/undocumented.json

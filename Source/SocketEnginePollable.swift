@@ -26,20 +26,46 @@ import Foundation
 
 /// Protocol that is used to implement socket.io polling support
 public protocol SocketEnginePollable : SocketEngineSpec {
+    /// MARK: Properties
+
+    /// `true` If engine's session has been invalidated.
     var invalidated: Bool { get }
-    /// Holds strings waiting to be sent over polling. 
-    /// You shouldn't need to mess with this.
+
+    /// A queue of engine.io messages waiting for POSTing
+    ///
+    /// **You should not touch this directly**
     var postWait: [String] { get set }
+
+    /// The URLSession that will be used for polling.
     var session: URLSession? { get }
-    /// Because socket.io doesn't let you send two polling request at the same time
-    /// we have to keep track if there's an outstanding poll
+
+    /// `true` if there is an outstanding poll. Trying to poll before the first is done will cause socket.io to
+    /// disconnect us.
+    ///
+    /// **Do not touch this directly**
     var waitingForPoll: Bool { get set }
-    /// Because socket.io doesn't let you send two post request at the same time
-    /// we have to keep track if there's an outstanding post
+
+    /// `true` if there is an outstanding post. Trying to post before the first is done will cause socket.io to
+    /// disconnect us.
+    ///
+    /// **Do not touch this directly**
     var waitingForPost: Bool { get set }
-    
+
+    /// Call to send a long-polling request.
+    ///
+    /// You shouldn't need to call this directly, the engine should automatically maintain a long-poll request.
     func doPoll()
+
+    /// Sends an engine.io message through the polling transport.
+    ///
+    /// You shouldn't call this directly, instead call the `write` method on `SocketEngine`.
+    ///
+    /// - parameter message: The message to send.
+    /// - parameter withType: The type of message to send.
+    /// - parameter withData: The data associated with this message.
     func sendPollMessage(_ message: String, withType type: SocketEnginePacketType, withData datas: [Data])
+
+    /// Call to stop polling and invalidate the URLSession.
     func stopPolling()
 }
 
@@ -47,95 +73,97 @@ public protocol SocketEnginePollable : SocketEngineSpec {
 extension SocketEnginePollable {
     private func addHeaders(for req: URLRequest) -> URLRequest {
         var req = req
-        
+
         if cookies != nil {
             let headers = HTTPCookie.requestHeaderFields(with: cookies!)
             req.allHTTPHeaderFields = headers
         }
-        
+
         if extraHeaders != nil {
             for (headerName, value) in extraHeaders! {
                 req.setValue(value, forHTTPHeaderField: headerName)
             }
         }
-        
+
         return req
     }
-    
+
     func createRequestForPostWithPostWait() -> URLRequest {
         defer { postWait.removeAll(keepingCapacity: true) }
 
         var postStr = ""
-        
+
         for packet in postWait {
             let len = packet.characters.count
-            
+
             postStr += "\(len):\(packet)"
         }
-        
+
         DefaultSocketLogger.Logger.log("Created POST string: %@", type: "SocketEnginePolling", args: postStr)
-        
+
         var req = URLRequest(url: urlPollingWithSid)
         let postData = postStr.data(using: .utf8, allowLossyConversion: false)!
-        
+
         req = addHeaders(for: req)
-        
+
         req.httpMethod = "POST"
         req.setValue("text/plain; charset=UTF-8", forHTTPHeaderField: "Content-Type")
 
         req.httpBody = postData
         req.setValue(String(postData.count), forHTTPHeaderField: "Content-Length")
-        
-        return req as URLRequest
+
+        return req
     }
-    
+
+    /// Call to send a long-polling request.
+    ///
+    /// You shouldn't need to call this directly, the engine should automatically maintain a long-poll request.
     public func doPoll() {
         if websocket || waitingForPoll || !connected || closed {
             return
         }
-        
-        waitingForPoll = true
-        
+
         var req = URLRequest(url: urlPollingWithSid)
-        
         req = addHeaders(for: req)
+
         doLongPoll(for: req )
     }
-    
+
     func doRequest(for req: URLRequest, callbackWith callback: @escaping (Data?, URLResponse?, Error?) -> Void) {
         if !polling || closed || invalidated || fastUpgrade {
             return
         }
-        
-        DefaultSocketLogger.Logger.log("Doing polling request", type: "SocketEnginePolling")
-        
+
+        DefaultSocketLogger.Logger.log("Doing polling %@ %@", type: "SocketEnginePolling",
+                                       args: req.httpMethod ?? "", req)
+
         session?.dataTask(with: req, completionHandler: callback).resume()
     }
-    
+
     func doLongPoll(for req: URLRequest) {
+        waitingForPoll = true
+
         doRequest(for: req) {[weak self] data, res, err in
             guard let this = self, this.polling else { return }
-            
+
             if err != nil || data == nil {
                 DefaultSocketLogger.Logger.error(err?.localizedDescription ?? "Error", type: "SocketEnginePolling")
-                
+
                 if this.polling {
                     this.didError(reason: err?.localizedDescription ?? "Error")
                 }
-                
+
                 return
             }
-            
+
             DefaultSocketLogger.Logger.log("Got polling response", type: "SocketEnginePolling")
-            
+
             if let str = String(data: data!, encoding: String.Encoding.utf8) {
-                this.parseQueue.async {
-                    this.parsePollingMessage(str)
-                }
+                this.parsePollingMessage(str)
             }
-            
+
             this.waitingForPoll = false
-            
+
             if this.fastUpgrade {
                 this.doFastUpgrade()
             } else if !this.closed && this.polling {
@@ -143,7 +171,7 @@ extension SocketEnginePollable {
             }
         }
     }
-    
+
     private func flushWaitingForPost() {
         if postWait.count == 0 || !connected {
             return
@@ -151,79 +179,81 @@ extension SocketEnginePollable {
             flushWaitingForPostToWebSocket()
             return
         }
-        
+
         let req = createRequestForPostWithPostWait()
-        
+
         waitingForPost = true
-        
+
         DefaultSocketLogger.Logger.log("POSTing", type: "SocketEnginePolling")
-        
+
         doRequest(for: req) {[weak self] data, res, err in
             guard let this = self else { return }
-            
+
             if err != nil {
                 DefaultSocketLogger.Logger.error(err?.localizedDescription ?? "Error", type: "SocketEnginePolling")
-                
+
                 if this.polling {
                     this.didError(reason: err?.localizedDescription ?? "Error")
                 }
-                
+
                 return
             }
-            
+
             this.waitingForPost = false
-            
-            this.emitQueue.async {
-                if !this.fastUpgrade {
-                    this.flushWaitingForPost()
-                    this.doPoll()
-                }
+
+            if !this.fastUpgrade {
+                this.flushWaitingForPost()
+                this.doPoll()
             }
         }
     }
-    
+
     func parsePollingMessage(_ str: String) {
         guard str.characters.count != 1 else { return }
-        
+
         var reader = SocketStringReader(message: str)
-        
+
         while reader.hasNext {
             if let n = Int(reader.readUntilOccurence(of: ":")) {
-                let str = reader.read(count: n)
-                
-                handleQueue.async { self.parseEngineMessage(str, fromPolling: true) }
+                parseEngineMessage(reader.read(count: n), fromPolling: true)
             } else {
-                handleQueue.async { self.parseEngineMessage(str, fromPolling: true) }
+                parseEngineMessage(str, fromPolling: true)
                 break
             }
         }
     }
-    
-    /// Send polling message.
-    /// Only call on emitQueue
+
+    /// Sends an engine.io message through the polling transport.
+    ///
+    /// You shouldn't call this directly, instead call the `write` method on `SocketEngine`.
+    ///
+    /// - parameter message: The message to send.
+    /// - parameter withType: The type of message to send.
+    /// - parameter withData: The data associated with this message.
     public func sendPollMessage(_ message: String, withType type: SocketEnginePacketType, withData datas: [Data]) {
         DefaultSocketLogger.Logger.log("Sending poll: %@ as type: %@", type: "SocketEnginePolling", args: message, type.rawValue)
         let fixedMessage: String
-        
+
         if doubleEncodeUTF8 {
             fixedMessage = doubleEncodeUTF8(message)
         } else {
             fixedMessage = message
         }
-        
+
         postWait.append(String(type.rawValue) + fixedMessage)
-        
+
         for data in datas {
             if case let .right(bin) = createBinaryDataForSend(using: data) {
                 postWait.append(bin)
             }
         }
-        
+
         if !waitingForPost {
             flushWaitingForPost()
         }
     }
-    
+
+    /// Call to stop polling and invalidate the URLSession.
     public func stopPolling() {
         waitingForPoll = false
         waitingForPost = false

@@ -26,14 +26,14 @@ import Foundation
 
 /**
  Experimental socket manager.
- 
+
  API subject to change.
- 
+
  Can be used to persist sockets across ViewControllers.
- 
+
  Sockets are strongly stored, so be sure to remove them once they are no
  longer needed.
- 
+
  Example usage:
  ```
  let manager = SocketClientManager.sharedManager
@@ -44,38 +44,61 @@ import Foundation
  ```
  */
 open class SocketClientManager : NSObject {
+    // MARK: Properties.
+
+    /// The shared manager.
     open static let sharedManager = SocketClientManager()
-    
+
     private var sockets = [String: SocketIOClient]()
-    
+
+    /// Gets a socket by its name.
+    ///
+    /// - returns: The socket, if one had the given name.
     open subscript(string: String) -> SocketIOClient? {
         get {
             return sockets[string]
         }
-        
+
         set(socket) {
             sockets[string] = socket
         }
     }
-    
+
+    // MARK: Methods.
+
+    /// Adds a socket.
+    ///
+    /// - parameter socket: The socket to add.
+    /// - parameter labeledAs: The label for this socket.
     open func addSocket(_ socket: SocketIOClient, labeledAs label: String) {
         sockets[label] = socket
     }
-    
+
+    /// Removes a socket by a given name.
+    ///
+    /// - parameter withLabel: The label of the socket to remove.
+    /// - returns: The socket for the given label, if one was present.
+    @discardableResult
     open func removeSocket(withLabel label: String) -> SocketIOClient? {
         return sockets.removeValue(forKey: label)
     }
 
+    /// Removes a socket.
+    ///
+    /// - parameter socket: The socket to remove.
+    /// - returns: The socket if it was in the manager.
+    @discardableResult
     open func removeSocket(_ socket: SocketIOClient) -> SocketIOClient? {
         var returnSocket: SocketIOClient?
-        
+
         for (label, dictSocket) in sockets where dictSocket === socket {
             returnSocket = sockets.removeValue(forKey: label)
         }
-        
+
         return returnSocket
     }
-    
+
+    /// Removes all the sockets in the manager.
     open func removeSockets() {
         sockets.removeAll()
     }

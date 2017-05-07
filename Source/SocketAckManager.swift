@@ -22,7 +22,14 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
+import Dispatch
 import Foundation
+
+/// The status of an ack.
+public enum SocketAckStatus : String {
+    /// The ack timed out.
+    case noAck = "NO ACK"
+}
 
 private struct SocketAck : Hashable {
     let ack: Int
@@ -30,50 +37,50 @@ private struct SocketAck : Hashable {
     var hashValue: Int {
         return ack.hashValue
     }
-    
+
     init(ack: Int) {
         self.ack = ack
     }
-    
+
     init(ack: Int, callback: @escaping AckCallback) {
         self.ack = ack
         self.callback = callback
     }
-}
 
-private func <(lhs: SocketAck, rhs: SocketAck) -> Bool {
-    return lhs.ack < rhs.ack
-}
+    fileprivate static func <(lhs: SocketAck, rhs: SocketAck) -> Bool {
+        return lhs.ack < rhs.ack
+    }
 
-private func ==(lhs: SocketAck, rhs: SocketAck) -> Bool {
-    return lhs.ack == rhs.ack
+    fileprivate static func ==(lhs: SocketAck, rhs: SocketAck) -> Bool {
+        return lhs.ack == rhs.ack
+    }
 }
 
 struct SocketAckManager {
     private var acks = Set<SocketAck>(minimumCapacity: 1)
     private let ackSemaphore = DispatchSemaphore(value: 1)
-    
+
     mutating func addAck(_ ack: Int, callback: @escaping AckCallback) {
         acks.insert(SocketAck(ack: ack, callback: callback))
     }
-    
+
     /// Should be called on handle queue
     mutating func executeAck(_ ack: Int, with items: [Any], onQueue: DispatchQueue) {
         ackSemaphore.wait()
         defer { ackSemaphore.signal() }
         let ack = acks.remove(SocketAck(ack: ack))
-        
+
         onQueue.async() { ack?.callback(items) }
     }
-    
+
     /// Should be called on handle queue
     mutating func timeoutAck(_ ack: Int, onQueue: DispatchQueue) {
         ackSemaphore.wait()
         defer { ackSemaphore.signal() }
         let ack = acks.remove(SocketAck(ack: ack))
-        
+
         onQueue.async() {
-            ack?.callback?(["NO ACK"])
+            ack?.callback?([SocketAckStatus.noAck.rawValue])
         }
     }
 }
