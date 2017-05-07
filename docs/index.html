@@ -253,7 +253,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 <span class="k">let</span> <span class="nv">package</span> <span class="o">=</span> <span class="kt">Package</span><span class="p">(</span>
     <span class="nv">name</span><span class="p">:</span> <span class="s">"YourSocketIOProject"</span><span class="p">,</span>
     <span class="nv">dependencies</span><span class="p">:</span> <span class="p">[</span>
-        <span class="o">.</span><span class="kt">Package</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="s">"https://github.com/socketio/socket.io-client-swift"</span><span class="p">,</span> <span class="nv">majorVersion</span><span class="p">:</span> <span class="mi">8</span><span class="p">)</span>
+        <span class="o">.</span><span class="kt">Package</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="s">"https://github.com/socketio/socket.io-client-swift"</span><span class="p">,</span> <span class="nv">majorVersion</span><span class="p">:</span> <span class="mi">9</span><span class="p">)</span>
     <span class="p">]</span>
 <span class="p">)</span>
 </code></pre>
@@ -262,7 +262,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 <h3 id='carthage' class='heading'>Carthage</h3>
 
 <p>Add this line to your <code>Cartfile</code>:</p>
-<pre class="highlight plaintext"><code>github "socketio/socket.io-client-swift" ~&gt; 8.3.3 # Or latest version
+<pre class="highlight plaintext"><code>github "socketio/socket.io-client-swift" ~&gt; 9.0.0 # Or latest version
 </code></pre>
 
 <p>Run <code>carthage update --platform ios,macosx</code>.</p>
@@ -272,7 +272,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 <pre class="highlight ruby"><code><span class="n">use_frameworks!</span>
 
 <span class="n">target</span> <span class="s1">'YourApp'</span> <span class="k">do</span>
-    <span class="n">pod</span> <span class="s1">'Socket.IO-Client-Swift'</span><span class="p">,</span> <span class="s1">'~&gt; 8.3.3'</span> <span class="c1"># Or latest version</span>
+    <span class="n">pod</span> <span class="s1">'Socket.IO-Client-Swift'</span><span class="p">,</span> <span class="s1">'~&gt; 9.0.0'</span> <span class="c1"># Or latest version</span>
 <span class="k">end</span>
 </code></pre>
 
@@ -292,69 +292,17 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 <h3 id='cocoaseeds' class='heading'>CocoaSeeds</h3>
 
 <p>Add this line to your <code>Seedfile</code>:</p>
-<pre class="highlight plaintext"><code>github "socketio/socket.io-client-swift", "v8.3.3", :files =&gt; "Source/*.swift" # Or latest version
+<pre class="highlight plaintext"><code>github "socketio/socket.io-client-swift", "v9.0.0", :files =&gt; "Source/*.swift" # Or latest version
 </code></pre>
 
 <p>Run <code>seed install</code>.</p>
-<h1 id='api' class='heading'>API</h1>
-<h2 id='constructors' class='heading'>Constructors</h2>
+<h1 id='a-href-https-nuclearace-github-io-socket-io-client-swift-index-html-docs-a' class='heading'><a href="https://nuclearace.github.io/Socket.IO-Client-Swift/index.html">Docs</a></h1>
 
-<p><code>init(var socketURL: NSURL, config: SocketIOClientConfiguration = [])</code> - Creates a new SocketIOClient. If your socket.io server is secure, you need to specify <code>https</code> in your socketURL.</p>
-
-<p><code>convenience init(socketURL: NSURL, options: NSDictionary?)</code> - Same as above, but meant for Objective-C. See Options on how convert between SocketIOClientOptions and dictionary keys.</p>
-<h3 id='options' class='heading'>Options</h3>
-
-<p>All options are a case of SocketIOClientOption. To get the Objective-C Option, convert the name to lowerCamelCase.</p>
-<pre class="highlight swift"><code><span class="k">case</span> <span class="nf">connectParams</span><span class="p">([</span><span class="kt">String</span><span class="p">:</span> <span class="kt">AnyObject</span><span class="p">])</span> <span class="c1">// Dictionary whose contents will be passed with the connection.</span>
-<span class="k">case</span> <span class="nf">cookies</span><span class="p">([</span><span class="kt">NSHTTPCookie</span><span class="p">])</span> <span class="c1">// An array of NSHTTPCookies. Passed during the handshake. Default is nil.</span>
-<span class="k">case</span> <span class="nf">doubleEncodeUTF8</span><span class="p">(</span><span class="kt">Bool</span><span class="p">)</span> <span class="c1">// Whether or not to double encode utf8. If using the node based server this should be true. Default is true.</span>
-<span class="k">case</span> <span class="nf">extraHeaders</span><span class="p">([</span><span class="kt">String</span><span class="p">:</span> <span class="kt">String</span><span class="p">])</span> <span class="c1">// Adds custom headers to the initial request. Default is nil.</span>
-<span class="k">case</span> <span class="nf">forcePolling</span><span class="p">(</span><span class="kt">Bool</span><span class="p">)</span> <span class="c1">// `true` forces the client to use xhr-polling. Default is `false`</span>
-<span class="k">case</span> <span class="nf">forceNew</span><span class="p">(</span><span class="kt">Bool</span><span class="p">)</span> <span class="c1">// Will a create a new engine for each connect. Useful if you find a bug in the engine related to reconnects</span>
-<span class="k">case</span> <span class="nf">forceWebsockets</span><span class="p">(</span><span class="kt">Bool</span><span class="p">)</span> <span class="c1">// `true` forces the client to use WebSockets. Default is `false`</span>
-<span class="k">case</span> <span class="nf">handleQueue</span><span class="p">(</span><span class="n">dispatch_queue_t</span><span class="p">)</span> <span class="c1">// The dispatch queue that handlers are run on. Default is the main queue.</span>
-<span class="k">case</span> <span class="nf">log</span><span class="p">(</span><span class="kt">Bool</span><span class="p">)</span> <span class="c1">// If `true` socket will log debug messages. Default is false.</span>
-<span class="k">case</span> <span class="nf">logger</span><span class="p">(</span><span class="kt">SocketLogger</span><span class="p">)</span> <span class="c1">// Custom logger that conforms to SocketLogger. Will use the default logging otherwise.</span>
-<span class="k">case</span> <span class="nf">nsp</span><span class="p">(</span><span class="kt">String</span><span class="p">)</span> <span class="c1">// The namespace to connect to. Must begin with /. Default is `/`</span>
-<span class="k">case</span> <span class="nf">path</span><span class="p">(</span><span class="kt">String</span><span class="p">)</span> <span class="c1">// If the server uses a custom path. ex: `"/swift/"`. Default is `""`</span>
-<span class="k">case</span> <span class="nf">reconnects</span><span class="p">(</span><span class="kt">Bool</span><span class="p">)</span> <span class="c1">// Whether to reconnect on server lose. Default is `true`</span>
-<span class="k">case</span> <span class="nf">reconnectAttempts</span><span class="p">(</span><span class="kt">Int</span><span class="p">)</span> <span class="c1">// How many times to reconnect. Default is `-1` (infinite tries)</span>
-<span class="k">case</span> <span class="nf">reconnectWait</span><span class="p">(</span><span class="kt">Int</span><span class="p">)</span> <span class="c1">// Amount of time to wait between reconnects. Default is `10`</span>
-<span class="k">case</span> <span class="nf">sessionDelegate</span><span class="p">(</span><span class="kt">NSURLSessionDelegate</span><span class="p">)</span> <span class="c1">// Sets an NSURLSessionDelegate for the underlying engine. Useful if you need to handle self-signed certs. Default is nil.</span>
-<span class="k">case</span> <span class="nf">secure</span><span class="p">(</span><span class="kt">Bool</span><span class="p">)</span> <span class="c1">// If the connection should use TLS. Default is false.</span>
-<span class="k">case</span> <span class="nf">security</span><span class="p">(</span><span class="kt">SSLSecurity</span><span class="p">)</span> <span class="c1">// Allows you to set which certs are valid. Useful for SSL pinning.</span>
-<span class="k">case</span> <span class="nf">selfSigned</span><span class="p">(</span><span class="kt">Bool</span><span class="p">)</span> <span class="c1">// Sets WebSocket.selfSignedSSL. Use this if you're using self-signed certs.</span>
-<span class="k">case</span> <span class="nf">voipEnabled</span><span class="p">(</span><span class="kt">Bool</span><span class="p">)</span> <span class="c1">// Only use this option if you're using the client with VoIP services. Changes the way the WebSocket is created. Default is false</span>
-</code></pre>
-<h3 id='methods' class='heading'>Methods</h3>
-
-<ol>
-<li><code>on(_ event: String, callback: NormalCallback) -&gt; NSUUID</code> - Adds a handler for an event. Items are passed by an array. <code>ack</code> can be used to send an ack when one is requested. See example. Returns a unique id for the handler.</li>
-<li><code>once(_ event: String, callback: NormalCallback) -&gt; NSUUID</code> - Adds a handler that will only be executed once. Returns a unique id for the handler.</li>
-<li><code>onAny(callback:((event: String, items: AnyObject?)) -&gt; Void)</code> - Adds a handler for all events. It will be called on any received event.</li>
-<li><code>emit(_ event: String, _ items: AnyObject...)</code> - Sends a message. Can send multiple items.</li>
-<li><code>emit(_ event: String, withItems items: [AnyObject])</code> - <code>emit</code> for Objective-C</li>
-<li><code>emitWithAck(_ event: String, _ items: AnyObject...) -&gt; OnAckCallback</code> - Sends a message that requests an acknowledgement from the server. Returns an object which you can use to add a handler. See example. Note: The message is not sent until you call timingOut(after:) on the returned object.</li>
-<li><code>emitWithAck(_ event: String, withItems items: [AnyObject]) -&gt; OnAckCallback</code> - <code>emitWithAck</code> for Objective-C. Note: The message is not sent until you call timingOutAfter on the returned object.</li>
-<li><code>connect()</code> - Establishes a connection to the server. A <q>connect</q> event is fired upon successful connection.</li>
-<li><code>connect(timeoutAfter timeoutAfter: Int, withTimeoutHandler handler: (() -&gt; Void)?)</code> - Connect to the server. If it isn&rsquo;t connected after timeoutAfter seconds, the handler is called.</li>
-<li><code>disconnect()</code> - Closes the socket. Reopening a disconnected socket is not fully tested.</li>
-<li><code>reconnect()</code> - Causes the client to reconnect to the server.</li>
-<li><code>joinNamespace(_ namespace: String)</code> - Causes the client to join namespace. Shouldn&rsquo;t need to be called unless you change namespaces manually.</li>
-<li><code>leaveNamespace()</code> - Causes the client to leave the nsp and go back to /</li>
-<li><code>off(_ event: String)</code> - Removes all event handlers for event.</li>
-<li><code>off(id id: NSUUID)</code> - Removes the event that corresponds to id.</li>
-<li><code>removeAllHandlers()</code> - Removes all handlers.</li>
-</ol>
-<h3 id='client-events' class='heading'>Client Events</h3>
-
-<ol>
-<li><code>connect</code> - Emitted when on a successful connection.</li>
-<li><code>disconnect</code> - Emitted when the connection is closed.</li>
-<li><code>error</code> - Emitted on an error.</li>
-<li><code>reconnect</code> - Emitted when the connection is starting to reconnect.</li>
-<li><code>reconnectAttempt</code> - Emitted when attempting to reconnect.</li>
-</ol>
+<ul>
+<li><a href="https://nuclearace.github.io/Socket.IO-Client-Swift/Classes/SocketIOClient.html">Client</a></li>
+<li><a href="https://nuclearace.github.io/Socket.IO-Client-Swift/Classes/SocketEngine.html">Engine</a></li>
+<li><a href="https://nuclearace.github.io/Socket.IO-Client-Swift/Enums/SocketIOClientOption.html">Options</a></li>
+</ul>
 <h2 id='detailed-example' class='heading'>Detailed Example</h2>
 
 <p>A more detailed example can be found <a href="https://github.com/nuclearace/socket.io-client-swift-example">here</a></p>
