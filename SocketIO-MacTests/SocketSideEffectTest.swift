@@ -221,6 +221,81 @@ class SocketSideEffectTest: XCTestCase {
         waitForExpectations(timeout: 0.2)
     }
 
+    func testConnectTimesOutIfNotConnected() {
+        let expect = expectation(description: "The client should call the timeout function")
+
+        socket.setTestStatus(.notConnected)
+
+        socket.connect(timeoutAfter: 1, withHandler: {
+            expect.fulfill()
+        })
+
+        waitForExpectations(timeout: 2)
+    }
+
+    func testConnectDoesNotTimeOutIfConnected() {
+        let expect = expectation(description: "The client should not call the timeout function")
+
+        socket.setTestStatus(.notConnected)
+
+        socket.connect(timeoutAfter: 1, withHandler: {
+            XCTFail("Should not call timeout handler if status is connected")
+        })
+
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.2) {
+            // Fake connecting
+            self.socket.setTestStatus(.connected)
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.1) {
+            expect.fulfill()
+        }
+
+        waitForExpectations(timeout: 2)
+    }
+
+    func testErrorInCustomSocketDataCallsErrorHandler() {
+        let expect = expectation(description: "The client should call the error handler for emit errors because of " +
+                                              "custom data")
+
+        socket.on(clientEvent: .error) {data, ack in
+            guard data.count == 3, data[0] as? String == "myEvent",
+                  data[2] is ThrowingData.ThrowingError else {
+                XCTFail("Incorrect error call")
+
+                return
+            }
+
+            expect.fulfill()
+        }
+
+        socket.emit("myEvent", ThrowingData())
+
+        waitForExpectations(timeout: 0.2)
+    }
+
+    func testErrorInCustomSocketDataCallsErrorHandler_ack() {
+        let expect = expectation(description: "The client should call the error handler for emit errors because of " +
+                                              "custom data")
+
+        socket.on(clientEvent: .error) {data, ack in
+            guard data.count == 3, data[0] as? String == "myEvent",
+                  data[2] is ThrowingData.ThrowingError else {
+                XCTFail("Incorrect error call")
+
+                return
+            }
+
+            expect.fulfill()
+        }
+
+        socket.emitWithAck("myEvent", ThrowingData()).timingOut(after: 1, callback: {_ in
+            XCTFail("Ack callback should not be called")
+        })
+
+        waitForExpectations(timeout: 0.2)
+    }
+
     let data = "test".data(using: String.Encoding.utf8)!
     let data2 = "test2".data(using: String.Encoding.utf8)!
     private var socket: SocketIOClient!
@@ -230,4 +305,15 @@ class SocketSideEffectTest: XCTestCase {
         socket = SocketIOClient(socketURL: URL(string: "http://localhost/")!)
         socket.setTestable()
     }
+}
+
+struct ThrowingData : SocketData {
+    enum ThrowingError : Error {
+        case error
+    }
+
+    func socketRepresentation() throws -> SocketData {
+        throw ThrowingError.error
+    }
+
 }
