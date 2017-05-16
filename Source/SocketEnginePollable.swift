@@ -71,9 +71,7 @@ public protocol SocketEnginePollable : SocketEngineSpec {
 
 // Default polling methods
 extension SocketEnginePollable {
-    private func addHeaders(for req: URLRequest) -> URLRequest {
-        var req = req
-
+    private func addHeaders(to req: inout URLRequest) {
         if cookies != nil {
             let headers = HTTPCookie.requestHeaderFields(with: cookies!)
             req.allHTTPHeaderFields = headers
@@ -84,8 +82,6 @@ extension SocketEnginePollable {
                 req.setValue(value, forHTTPHeaderField: headerName)
             }
         }
-
-        return req
     }
 
     func createRequestForPostWithPostWait() -> URLRequest {
@@ -104,11 +100,10 @@ extension SocketEnginePollable {
         var req = URLRequest(url: urlPollingWithSid)
         let postData = postStr.data(using: .utf8, allowLossyConversion: false)!
 
-        req = addHeaders(for: req)
+        addHeaders(to: &req)
 
         req.httpMethod = "POST"
         req.setValue("text/plain; charset=UTF-8", forHTTPHeaderField: "Content-Type")
-
         req.httpBody = postData
         req.setValue(String(postData.count), forHTTPHeaderField: "Content-Length")
 
@@ -124,9 +119,9 @@ extension SocketEnginePollable {
         }
 
         var req = URLRequest(url: urlPollingWithSid)
-        req = addHeaders(for: req)
+        addHeaders(to: &req)
 
-        doLongPoll(for: req )
+        doLongPoll(for: req)
     }
 
     func doRequest(for req: URLRequest, callbackWith callback: @escaping (Data?, URLResponse?, Error?) -> Void) {
