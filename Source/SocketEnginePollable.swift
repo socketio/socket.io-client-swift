@@ -114,9 +114,7 @@ extension SocketEnginePollable {
     ///
     /// You shouldn't need to call this directly, the engine should automatically maintain a long-poll request.
     public func doPoll() {
-        if websocket || waitingForPoll || !connected || closed {
-            return
-        }
+        guard !websocket && !waitingForPoll && connected && !closed else { return }
 
         var req = URLRequest(url: urlPollingWithSid)
         addHeaders(to: &req)
@@ -125,9 +123,7 @@ extension SocketEnginePollable {
     }
 
     func doRequest(for req: URLRequest, callbackWith callback: @escaping (Data?, URLResponse?, Error?) -> Void) {
-        if !polling || closed || invalidated || fastUpgrade {
-            return
-        }
+        guard polling && !closed && !invalidated && !fastUpgrade else { return }
 
         DefaultSocketLogger.Logger.log("Doing polling %@ %@", type: "SocketEnginePolling",
                                        args: req.httpMethod ?? "", req)
@@ -168,10 +164,10 @@ extension SocketEnginePollable {
     }
 
     private func flushWaitingForPost() {
-        if postWait.count == 0 || !connected {
-            return
-        } else if websocket {
+        guard postWait.count != 0 && connected else { return }
+        guard !websocket else {
             flushWaitingForPostToWebSocket()
+
             return
         }
 
