@@ -237,7 +237,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     /// - parameter items: The items to send with this event. May be left out.
     open func emit(_ event: String, _ items: SocketData...) {
         do {
-            emit(event, with: try items.map({ try $0.socketRepresentation() }))
+            try emit(event, with: items.map({ try $0.socketRepresentation() }))
         } catch let err {
             DefaultSocketLogger.Logger.error("Error creating socketRepresentation for emit: \(event), \(items)",
                                              type: logType)

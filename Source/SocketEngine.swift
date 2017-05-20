@@ -643,17 +643,19 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
             return
         }
 
-        if websocket {
-            connected = false
-            websocket = false
-
-            if let reason = error?.localizedDescription {
-                didError(reason: reason)
-            } else {
-                client?.engineDidClose(reason: "Socket Disconnected")
-            }
-        } else {
+        guard websocket else {
             flushProbeWait()
+
+            return
+        }
+
+        connected = false
+        websocket = false
+
+        if let reason = error?.localizedDescription {
+            didError(reason: reason)
+        } else {
+            client?.engineDidClose(reason: "Socket Disconnected")
         }
     }
 }
