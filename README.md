@@ -51,14 +51,11 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 ```
 
 ## Features
-- Supports socket.io 1.0+<sup>a</sup>
+- Supports socket.io 1.0+
 - Supports binary
 - Supports Polling and WebSockets
 - Supports TLS/SSL
 - Can be used from Objective-C
-
-_<sub>a: For socket.io 2.0+ servers, client versions less than v10.0 must pass .doubleEncodeUTF8(false) as a config, 
-otherwise unicode will become garbled</sub>_
 
 ## Installation
 Requires Swift 3/Xcode 8.x
