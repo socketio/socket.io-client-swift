@@ -29,9 +29,11 @@ public final class SocketAnyEvent : NSObject {
     // MARK: Properties
 
     /// The event name.
+    @objc
     public let event: String
 
     /// The data items for this event.
+    @objc
     public let items: [Any]?
 
     /// The description of this event.
