@@ -24,50 +24,50 @@
 
 struct SocketStringReader {
     let message: String
-    var currentIndex: String.Index
+    var currentIndex: String.UTF16View.Index
     var hasNext: Bool {
-        return currentIndex != message.endIndex
+        return currentIndex != message.utf16.endIndex
     }
-    
+
     var currentCharacter: String {
-        return String(message[currentIndex])
+        return String(UnicodeScalar(message.utf16[currentIndex])!)
     }
-    
+
     init(message: String) {
         self.message = message
-        currentIndex = message.startIndex
+        currentIndex = message.utf16.startIndex
     }
-    
+
     @discardableResult
-    mutating func advance(by: Int) -> String.Index {
-        currentIndex = message.characters.index(currentIndex, offsetBy: by)
-        
+    mutating func advance(by: Int) -> String.UTF16View.Index {
+        currentIndex = message.utf16.index(currentIndex, offsetBy: by)
+
         return currentIndex
     }
-    
+
     mutating func read(count: Int) -> String {
-        let readString = message[currentIndex..<message.characters.index(currentIndex, offsetBy: count)]
-        
+        let readString = String(message.utf16[currentIndex..<message.utf16.index(currentIndex, offsetBy: count)])!
+
         advance(by: count)
-        
+
         return readString
     }
-    
+
     mutating func readUntilOccurence(of string: String) -> String {
-        let substring = message[currentIndex..<message.endIndex]
-        
-        guard let foundRange = substring.range(of: string) else {
-            currentIndex = message.endIndex
-            
-            return substring
+        let substring = message.utf16[currentIndex..<message.utf16.endIndex]
+
+        guard let foundIndex = substring.index(of: string.utf16.first!) else {
+            currentIndex = message.utf16.endIndex
+
+            return String(substring)!
         }
-        
-        advance(by: message.characters.distance(from: message.characters.startIndex, to: foundRange.lowerBound) + 1)
-        
-        return substring.substring(to: foundRange.lowerBound)
+
+        advance(by: substring.distance(from: substring.startIndex, to: foundIndex) + 1)
+
+        return String(substring[substring.startIndex..<foundIndex])!
     }
-    
+
     mutating func readUntilEnd() -> String {
-        return read(count: message.characters.distance(from: currentIndex, to: message.endIndex))
+        return read(count: message.utf16.distance(from: currentIndex, to: message.utf16.endIndex))
     }
 }

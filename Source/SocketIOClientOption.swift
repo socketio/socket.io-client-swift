@@ -36,8 +36,8 @@ public enum SocketIOClientOption : ClientOption {
     /// An array of cookies that will be sent during the initial connection.
     case cookies([HTTPCookie])
 
-    /// The node.js socket.io currently does funky things to unicode when doing HTTP long-polling. Passing `true` in
-    /// this option causes the client to try and fix any bad unicode that might be sent.
+    /// Deprecated
+    @available(*, deprecated, message: "No longer needed in socket.io 2.0+")
     case doubleEncodeUTF8(Bool)
 
     /// Any extra HTTP headers that should be sent during the initial connection.

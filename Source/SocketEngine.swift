@@ -66,10 +66,6 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     /// An array of HTTPCookies that are sent during the connection.
     public private(set) var cookies: [HTTPCookie]?
 
-    /// Set to `true` if using the node.js version of socket.io. The node.js version of socket.io
-    /// handles utf8 incorrectly.
-    public private(set) var doubleEncodeUTF8 = true
-
     /// A dictionary of extra http headers that will be set during connection.
     public private(set) var extraHeaders: [String: String]?
 
@@ -153,8 +149,6 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
                 connectParams = params
             case let .cookies(cookies):
                 self.cookies = cookies
-            case let .doubleEncodeUTF8(encode):
-                doubleEncodeUTF8 = encode
             case let .extraHeaders(headers):
                 extraHeaders = headers
             case let .sessionDelegate(delegate):
@@ -227,8 +221,8 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         // binary in base64 string
         let noPrefix = message[message.index(message.startIndex, offsetBy: 2)..<message.endIndex]
 
-        if let data = NSData(base64Encoded: noPrefix, options: .ignoreUnknownCharacters) {
-            client?.parseEngineBinaryData(data as Data)
+        if let data = Data(base64Encoded: noPrefix, options: .ignoreUnknownCharacters) {
+            client?.parseEngineBinaryData(data)
         }
     }
 
@@ -511,11 +505,10 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     /// - parameter message: The message to parse.
     /// - parameter fromPolling: Whether this message is from long-polling.
     ///                          If `true` we might have to fix utf8 encoding.
-    public func parseEngineMessage(_ message: String, fromPolling: Bool) {
+    public func parseEngineMessage(_ message: String) {
         DefaultSocketLogger.Logger.log("Got message: %@", type: logType, args: message)
 
         let reader = SocketStringReader(message: message)
-        let fixedString: String
 
         if message.hasPrefix("b4") {
             return handleBase64(message: message)
@@ -527,23 +520,17 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
             return
         }
 
-        if fromPolling && type != .noop && doubleEncodeUTF8 {
-            fixedString = fixDoubleUTF8(message)
-        } else {
-            fixedString = message
-        }
-
         switch type {
         case .message:
-            handleMessage(String(fixedString.characters.dropFirst()))
+            handleMessage(String(message.characters.dropFirst()))
         case .noop:
             handleNOOP()
         case .pong:
-            handlePong(with: fixedString)
+            handlePong(with: message)
         case .open:
-            handleOpen(openData: String(fixedString.characters.dropFirst()))
+            handleOpen(openData: String(message.characters.dropFirst()))
         case .close:
-            handleClose(fixedString)
+            handleClose(message)
         default:
             DefaultSocketLogger.Logger.log("Got unknown packet type", type: logType)
         }
@@ -643,17 +630,19 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
             return
         }
 
-        if websocket {
-            connected = false
-            websocket = false
-
-            if let reason = error?.localizedDescription {
-                didError(reason: reason)
-            } else {
-                client?.engineDidClose(reason: "Socket Disconnected")
-            }
-        } else {
+        guard websocket else {
             flushProbeWait()
+
+            return
+        }
+
+        connected = false
+        websocket = false
+
+        if let reason = error?.localizedDescription {
+            didError(reason: reason)
+        } else {
+            client?.engineDidClose(reason: "Socket Disconnected")
         }
     }
 }

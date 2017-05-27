@@ -71,9 +71,7 @@ public protocol SocketEnginePollable : SocketEngineSpec {
 
 // Default polling methods
 extension SocketEnginePollable {
-    private func addHeaders(for req: URLRequest) -> URLRequest {
-        var req = req
-
+    private func addHeaders(to req: inout URLRequest) {
         if cookies != nil {
             let headers = HTTPCookie.requestHeaderFields(with: cookies!)
             req.allHTTPHeaderFields = headers
@@ -84,8 +82,6 @@ extension SocketEnginePollable {
                 req.setValue(value, forHTTPHeaderField: headerName)
             }
         }
-
-        return req
     }
 
     func createRequestForPostWithPostWait() -> URLRequest {
@@ -94,9 +90,7 @@ extension SocketEnginePollable {
         var postStr = ""
 
         for packet in postWait {
-            let len = packet.characters.count
-
-            postStr += "\(len):\(packet)"
+            postStr += "\(packet.utf16.count):\(packet)"
         }
 
         DefaultSocketLogger.Logger.log("Created POST string: %@", type: "SocketEnginePolling", args: postStr)
@@ -104,11 +98,10 @@ extension SocketEnginePollable {
         var req = URLRequest(url: urlPollingWithSid)
         let postData = postStr.data(using: .utf8, allowLossyConversion: false)!
 
-        req = addHeaders(for: req)
+        addHeaders(to: &req)
 
         req.httpMethod = "POST"
         req.setValue("text/plain; charset=UTF-8", forHTTPHeaderField: "Content-Type")
-
         req.httpBody = postData
         req.setValue(String(postData.count), forHTTPHeaderField: "Content-Length")
 
@@ -119,20 +112,16 @@ extension SocketEnginePollable {
     ///
     /// You shouldn't need to call this directly, the engine should automatically maintain a long-poll request.
     public func doPoll() {
-        if websocket || waitingForPoll || !connected || closed {
-            return
-        }
+        guard !websocket && !waitingForPoll && connected && !closed else { return }
 
         var req = URLRequest(url: urlPollingWithSid)
-        req = addHeaders(for: req)
+        addHeaders(to: &req)
 
-        doLongPoll(for: req )
+        doLongPoll(for: req)
     }
 
     func doRequest(for req: URLRequest, callbackWith callback: @escaping (Data?, URLResponse?, Error?) -> Void) {
-        if !polling || closed || invalidated || fastUpgrade {
-            return
-        }
+        guard polling && !closed && !invalidated && !fastUpgrade else { return }
 
         DefaultSocketLogger.Logger.log("Doing polling %@ %@", type: "SocketEnginePolling",
                                        args: req.httpMethod ?? "", req)
@@ -173,10 +162,10 @@ extension SocketEnginePollable {
     }
 
     private func flushWaitingForPost() {
-        if postWait.count == 0 || !connected {
-            return
-        } else if websocket {
+        guard postWait.count != 0 && connected else { return }
+        guard !websocket else {
             flushWaitingForPostToWebSocket()
+
             return
         }
 
@@ -211,13 +200,15 @@ extension SocketEnginePollable {
     func parsePollingMessage(_ str: String) {
         guard str.characters.count != 1 else { return }
 
+        DefaultSocketLogger.Logger.log("Got poll message: %@", type: "SocketEnginePolling", args: str)
+
         var reader = SocketStringReader(message: str)
 
         while reader.hasNext {
             if let n = Int(reader.readUntilOccurence(of: ":")) {
-                parseEngineMessage(reader.read(count: n), fromPolling: true)
+                parseEngineMessage(reader.read(count: n))
             } else {
-                parseEngineMessage(str, fromPolling: true)
+                parseEngineMessage(str)
                 break
             }
         }
@@ -232,15 +223,8 @@ extension SocketEnginePollable {
     /// - parameter withData: The data associated with this message.
     public func sendPollMessage(_ message: String, withType type: SocketEnginePacketType, withData datas: [Data]) {
         DefaultSocketLogger.Logger.log("Sending poll: %@ as type: %@", type: "SocketEnginePolling", args: message, type.rawValue)
-        let fixedMessage: String
 
-        if doubleEncodeUTF8 {
-            fixedMessage = doubleEncodeUTF8(message)
-        } else {
-            fixedMessage = message
-        }
-
-        postWait.append(String(type.rawValue) + fixedMessage)
+        postWait.append(String(type.rawValue) + message)
 
         for data in datas {
             if case let .right(bin) = createBinaryDataForSend(using: data) {
