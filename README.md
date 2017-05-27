@@ -51,7 +51,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 ```
 
 ## Features
-- Supports socket.io 1.0+
+- Supports socket.io 2.0+ (For socket.io 1.0 use v9.x)
 - Supports binary
 - Supports Polling and WebSockets
 - Supports TLS/SSL
