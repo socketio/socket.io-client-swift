@@ -48,8 +48,6 @@ extension NSDictionary {
             return .connectParams(params)
         case let ("cookies", cookies as [HTTPCookie]):
             return .cookies(cookies)
-        case let ("doubleEncodeUTF8", encode as Bool):
-            return .doubleEncodeUTF8(encode)
         case let ("extraHeaders", headers as [String: String]):
             return .extraHeaders(headers)
         case let ("forceNew", force as Bool):
