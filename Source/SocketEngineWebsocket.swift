@@ -68,7 +68,7 @@ extension SocketEngineWebsocket {
 
     /// Delegate method for when a message is received.
     public func websocketDidReceiveMessage(socket: WebSocket, text: String) {
-        parseEngineMessage(text, fromPolling: false)
+        parseEngineMessage(text)
     }
 
     /// Delegate method for when binary is received.

@@ -125,7 +125,7 @@ import Foundation
     /// - parameter message: The message to parse.
     /// - parameter fromPolling: Whether this message is from long-polling.
     ///                          If `true` we might have to fix utf8 encoding.
-    func parseEngineMessage(_ message: String, fromPolling: Bool)
+    func parseEngineMessage(_ message: String)
 
     /// Writes a message to engine.io, independent of transport.
     ///
@@ -162,24 +162,6 @@ extension SocketEngineSpec {
             let str = "b4" + data.base64EncodedString(options: Data.Base64EncodingOptions(rawValue: 0))
 
             return .right(str)
-        }
-    }
-
-    func doubleEncodeUTF8(_ string: String) -> String {
-        if let latin1 = string.data(using: String.Encoding.utf8),
-            let utf8 = NSString(data: latin1, encoding: String.Encoding.isoLatin1.rawValue) {
-                return utf8 as String
-        } else {
-            return string
-        }
-    }
-
-    func fixDoubleUTF8(_ string: String) -> String {
-        if let utf8 = string.data(using: String.Encoding.isoLatin1),
-            let latin1 = NSString(data: utf8, encoding: String.Encoding.utf8.rawValue) {
-                return latin1 as String
-        } else {
-            return string
         }
     }
 

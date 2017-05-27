@@ -511,11 +511,10 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     /// - parameter message: The message to parse.
     /// - parameter fromPolling: Whether this message is from long-polling.
     ///                          If `true` we might have to fix utf8 encoding.
-    public func parseEngineMessage(_ message: String, fromPolling: Bool) {
+    public func parseEngineMessage(_ message: String) {
         DefaultSocketLogger.Logger.log("Got message: %@", type: logType, args: message)
 
         let reader = SocketStringReader(message: message)
-        let fixedString: String
 
         if message.hasPrefix("b4") {
             return handleBase64(message: message)
@@ -527,23 +526,17 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
             return
         }
 
-        if fromPolling && type != .noop && doubleEncodeUTF8 {
-            fixedString = fixDoubleUTF8(message)
-        } else {
-            fixedString = message
-        }
-
         switch type {
         case .message:
-            handleMessage(String(fixedString.characters.dropFirst()))
+            handleMessage(String(message.characters.dropFirst()))
         case .noop:
             handleNOOP()
         case .pong:
-            handlePong(with: fixedString)
+            handlePong(with: message)
         case .open:
-            handleOpen(openData: String(fixedString.characters.dropFirst()))
+            handleOpen(openData: String(message.characters.dropFirst()))
         case .close:
-            handleClose(fixedString)
+            handleClose(message)
         default:
             DefaultSocketLogger.Logger.log("Got unknown packet type", type: logType)
         }

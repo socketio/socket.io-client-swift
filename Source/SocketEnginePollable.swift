@@ -90,9 +90,7 @@ extension SocketEnginePollable {
         var postStr = ""
 
         for packet in postWait {
-            let len = packet.characters.count
-
-            postStr += "\(len):\(packet)"
+            postStr += "\(packet.utf16.count):\(packet)"
         }
 
         DefaultSocketLogger.Logger.log("Created POST string: %@", type: "SocketEnginePolling", args: postStr)
@@ -202,13 +200,15 @@ extension SocketEnginePollable {
     func parsePollingMessage(_ str: String) {
         guard str.characters.count != 1 else { return }
 
+        DefaultSocketLogger.Logger.log("Got poll message: %@", type: "SocketEnginePolling", args: str)
+
         var reader = SocketStringReader(message: str)
 
         while reader.hasNext {
             if let n = Int(reader.readUntilOccurence(of: ":")) {
-                parseEngineMessage(reader.read(count: n), fromPolling: true)
+                parseEngineMessage(reader.read(count: n))
             } else {
-                parseEngineMessage(str, fromPolling: true)
+                parseEngineMessage(str)
                 break
             }
         }
@@ -223,15 +223,8 @@ extension SocketEnginePollable {
     /// - parameter withData: The data associated with this message.
     public func sendPollMessage(_ message: String, withType type: SocketEnginePacketType, withData datas: [Data]) {
         DefaultSocketLogger.Logger.log("Sending poll: %@ as type: %@", type: "SocketEnginePolling", args: message, type.rawValue)
-        let fixedMessage: String
 
-        if doubleEncodeUTF8 {
-            fixedMessage = doubleEncodeUTF8(message)
-        } else {
-            fixedMessage = message
-        }
-
-        postWait.append(String(type.rawValue) + fixedMessage)
+        postWait.append(String(type.rawValue) + message)
 
         for data in datas {
             if case let .right(bin) = createBinaryDataForSend(using: data) {
