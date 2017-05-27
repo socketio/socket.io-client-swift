@@ -39,10 +39,6 @@ import Foundation
     /// The connect parameters sent during a connect.
     var connectParams: [String: Any]? { get set }
 
-    /// Set to `true` if using the node.js version of socket.io. The node.js version of socket.io
-    /// handles utf8 incorrectly.
-    var doubleEncodeUTF8: Bool { get }
-
     /// An array of HTTPCookies that are sent during the connection.
     var cookies: [HTTPCookie]? { get }
 

@@ -66,10 +66,6 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     /// An array of HTTPCookies that are sent during the connection.
     public private(set) var cookies: [HTTPCookie]?
 
-    /// Set to `true` if using the node.js version of socket.io. The node.js version of socket.io
-    /// handles utf8 incorrectly.
-    public private(set) var doubleEncodeUTF8 = true
-
     /// A dictionary of extra http headers that will be set during connection.
     public private(set) var extraHeaders: [String: String]?
 
@@ -153,8 +149,6 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
                 connectParams = params
             case let .cookies(cookies):
                 self.cookies = cookies
-            case let .doubleEncodeUTF8(encode):
-                doubleEncodeUTF8 = encode
             case let .extraHeaders(headers):
                 extraHeaders = headers
             case let .sessionDelegate(delegate):
