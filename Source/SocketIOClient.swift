@@ -27,6 +27,8 @@ import Foundation
 
 /// The main class for SocketIOClientSwift.
 ///
+/// **NOTE**: The client is not thread/queue safe, all interaction with the socket should be done on the `handleQueue`
+///
 /// Represents a socket.io-client. Most interaction with socket.io will be through this class.
 open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, SocketParsable {
     // MARK: Properties
