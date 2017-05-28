@@ -147,7 +147,7 @@ extension SocketEnginePollable {
 
             DefaultSocketLogger.Logger.log("Got polling response", type: "SocketEnginePolling")
 
-            if let str = String(data: data!, encoding: String.Encoding.utf8) {
+            if let str = String(data: data!, encoding: .utf8) {
                 this.parsePollingMessage(str)
             }
 

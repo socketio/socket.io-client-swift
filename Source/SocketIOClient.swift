@@ -33,9 +33,6 @@ import Foundation
 open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, SocketParsable {
     // MARK: Properties
 
-    /// The URL of the socket.io server. This is set in the initializer.
-    public let socketURL: URL
-
     /// The engine for this client.
     public private(set) var engine: SocketEngineSpec?
 
@@ -78,18 +75,24 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         return engine?.sid
     }
 
+    /// The URL of the socket.io server.
+    ///
+    /// If changed after calling `init`, `forceNew` must be set to `true`, or it will only connect to the url set in the
+    /// init.
+    public var socketURL: URL
+
+    var ackHandlers = SocketAckManager()
+    var waitingPackets = [SocketPacket]()
+
+    private(set) var currentAck = -1
+    private(set) var reconnectAttempts = -1
+
     private let logType = "SocketIOClient"
 
     private var anyHandler: ((SocketAnyEvent) -> Void)?
     private var currentReconnectAttempt = 0
     private var handlers = [SocketEventHandler]()
     private var reconnecting = false
-
-    private(set) var currentAck = -1
-    private(set) var reconnectAttempts = -1
-
-    var ackHandlers = SocketAckManager()
-    var waitingPackets = [SocketPacket]()
 
     // MARK: Initializers
 
@@ -149,13 +152,11 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
 
     // MARK: Methods
 
-    private func addEngine() -> SocketEngineSpec {
+    private func addEngine() {
         DefaultSocketLogger.Logger.log("Adding engine", type: logType, args: "")
 
         engine?.client = nil
         engine = SocketEngine(client: self, url: socketURL, config: config)
-
-        return engine!
     }
 
     /// Connect to the server.
@@ -179,10 +180,10 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         status = .connecting
 
         if engine == nil || forceNew {
-            addEngine().connect()
-        } else {
-            engine?.connect()
+            addEngine()
         }
+
+        engine?.connect()
 
         guard timeoutAfter != 0 else { return }
 
