@@ -120,7 +120,7 @@ extension SocketEnginePollable {
         doLongPoll(for: req)
     }
 
-    func doRequest(for req: URLRequest, callbackWith callback: @escaping (Data?, URLResponse?, Error?) -> Void) {
+    func doRequest(for req: URLRequest, callbackWith callback: @escaping (Data?, URLResponse?, Error?) -> ()) {
         guard polling && !closed && !invalidated && !fastUpgrade else { return }
 
         DefaultSocketLogger.Logger.log("Doing polling %@ %@", type: "SocketEnginePolling",
