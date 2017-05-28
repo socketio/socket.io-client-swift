@@ -498,7 +498,6 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         return handler.id
     }
 
-
     /// Adds a single-use handler for an event.
     ///
     /// - parameter event: The event name for this handler.
