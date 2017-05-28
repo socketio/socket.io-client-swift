@@ -260,6 +260,26 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
 
         _emit([event] + items)
     }
+    
+    /// Send a message to the server with non-array data
+    public func emit(_ event: String, _ item: SocketData) {
+        guard status == .connected else {
+            handleEvent("error", data: ["Tried emitting \(event) when not connected"], isInternalMessage: true)
+            return
+        }
+        
+        _emit([event, item])
+    }
+    
+    /// Same as emit for non-array data, but meant for Objective-C
+    public func emit(_ event: String, _ item: Any) {
+        guard status == .connected else {
+            handleEvent("error", data: ["Tried emitting \(event) when not connected"], isInternalMessage: true)
+            return
+        }
+        
+        _emit([event, item])
+    }
 
     /// Sends a message to the server, requesting an ack.
     ///
@@ -312,7 +332,18 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     open func emitWithAck(_ event: String, with items: [Any]) -> OnAckCallback {
         return createOnAck([event] + items)
     }
-
+    
+    /// Sends a message to the server with non-array data, requesting an ack. Use the onAck method of SocketAckHandler to add
+    /// an ack.
+    public func emitWithAck(_ event: String, _ item: SocketData) -> OnAckCallback {
+        return emitWithAck(event, withItem: item)
+    }
+    
+    /// Same as emitWithAck for non-array data, but for Objective-C
+    public func emitWithAck(_ event: String, withItem item: Any) -> OnAckCallback {
+        return createOnAck([event, item])
+    }
+    
     func _emit(_ data: [Any], ack: Int? = nil) {
         guard status == .connected else {
             handleClientEvent(.error, data: ["Tried emitting when not connected"])
