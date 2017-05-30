@@ -617,6 +617,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
             connected = true
             probing = false
             polling = false
+            client?.parseEngineMessage("0")
         }
     }
 
