@@ -179,6 +179,8 @@
               </div>
             <p>The main class for SocketIOClientSwift.</p>
 
+<p><strong>NOTE</strong>: The client is not thread/queue safe, all interaction with the socket should be done on the <code>handleQueue</code></p>
+
 <p>Represents a socket.io-client. Most interaction with socket.io will be through this class.</p>
 
           </div>
@@ -195,33 +197,6 @@
                 </a>
               </div>
               <ul class="item-container">
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:vC8SocketIO14SocketIOClient9socketURLV10Foundation3URL"></a>
-                    <a name="//apple_ref/swift/Property/socketURL" class="dashAnchor"></a>
-                    <a class="token" href="#/s:vC8SocketIO14SocketIOClient9socketURLV10Foundation3URL">socketURL</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>The URL of the socket.io server. This is set in the initializer.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">socketURL</span><span class="p">:</span> <span class="kt">URL</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
                 <li class="item">
                   <div>
                     <code>
@@ -466,6 +441,36 @@ called on.</p>
                     </section>
                   </div>
                 </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vC8SocketIO14SocketIOClient9socketURLV10Foundation3URL"></a>
+                    <a name="//apple_ref/swift/Property/socketURL" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vC8SocketIO14SocketIOClient9socketURLV10Foundation3URL">socketURL</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The URL of the socket.io server.</p>
+
+<p>If changed after calling <code>init</code>, <code><a href="../Classes/SocketIOClient.html#/s:vC8SocketIO14SocketIOClient8forceNewSb">forceNew</a></code> must be set to <code>true</code>, or it will only connect to the url set in the
+init.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">socketURL</span><span class="p">:</span> <span class="kt">URL</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
               </ul>
             </div>
             <div class="task-group">
@@ -652,7 +657,7 @@ If using Swift it&rsquo;s recommended to use <code>init(socketURL: NSURL, option
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">connect</span><span class="p">(</span><span class="nv">timeoutAfter</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="n">withHandler</span> <span class="nv">handler</span><span class="p">:</span> <span class="p">(()</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)?)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">connect</span><span class="p">(</span><span class="nv">timeoutAfter</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="n">withHandler</span> <span class="nv">handler</span><span class="p">:</span> <span class="p">(()</span> <span class="o">-&gt;</span> <span class="p">())?)</span></code></pre>
 
                         </div>
                       </div>
@@ -1585,7 +1590,7 @@ Check that your server&rsquo;s api will ack the event being sent.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">onAny</span><span class="p">(</span><span class="n">_</span> <span class="nv">handler</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="kt"><a href="../Classes/SocketAnyEvent.html">SocketAnyEvent</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">onAny</span><span class="p">(</span><span class="n">_</span> <span class="nv">handler</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="kt"><a href="../Classes/SocketAnyEvent.html">SocketAnyEvent</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">())</span></code></pre>
 
                         </div>
                       </div>
@@ -1768,7 +1773,7 @@ Can be used after disconnecting to break any potential remaining retain cycles.<
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2017 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2017-05-27)</p>
+      <p>&copy; 2017 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2017-06-18)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.8.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
