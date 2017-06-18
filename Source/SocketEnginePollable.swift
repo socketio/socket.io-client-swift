@@ -120,7 +120,7 @@ extension SocketEnginePollable {
         doLongPoll(for: req)
     }
 
-    func doRequest(for req: URLRequest, callbackWith callback: @escaping (Data?, URLResponse?, Error?) -> Void) {
+    func doRequest(for req: URLRequest, callbackWith callback: @escaping (Data?, URLResponse?, Error?) -> ()) {
         guard polling && !closed && !invalidated && !fastUpgrade else { return }
 
         DefaultSocketLogger.Logger.log("Doing polling %@ %@", type: "SocketEnginePolling",
@@ -147,7 +147,7 @@ extension SocketEnginePollable {
 
             DefaultSocketLogger.Logger.log("Got polling response", type: "SocketEnginePolling")
 
-            if let str = String(data: data!, encoding: String.Encoding.utf8) {
+            if let str = String(data: data!, encoding: .utf8) {
                 this.parsePollingMessage(str)
             }
 

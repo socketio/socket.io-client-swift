@@ -27,12 +27,11 @@ import Foundation
 
 /// The main class for SocketIOClientSwift.
 ///
+/// **NOTE**: The client is not thread/queue safe, all interaction with the socket should be done on the `handleQueue`
+///
 /// Represents a socket.io-client. Most interaction with socket.io will be through this class.
 open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, SocketParsable {
     // MARK: Properties
-
-    /// The URL of the socket.io server. This is set in the initializer.
-    public let socketURL: URL
 
     /// The engine for this client.
     public private(set) var engine: SocketEngineSpec?
@@ -76,18 +75,24 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         return engine?.sid
     }
 
-    private let logType = "SocketIOClient"
+    /// The URL of the socket.io server.
+    ///
+    /// If changed after calling `init`, `forceNew` must be set to `true`, or it will only connect to the url set in the
+    /// init.
+    public var socketURL: URL
 
-    private var anyHandler: ((SocketAnyEvent) -> Void)?
-    private var currentReconnectAttempt = 0
-    private var handlers = [SocketEventHandler]()
-    private var reconnecting = false
+    var ackHandlers = SocketAckManager()
+    var waitingPackets = [SocketPacket]()
 
     private(set) var currentAck = -1
     private(set) var reconnectAttempts = -1
 
-    var ackHandlers = SocketAckManager()
-    var waitingPackets = [SocketPacket]()
+    private let logType = "SocketIOClient"
+
+    private var anyHandler: ((SocketAnyEvent) -> ())?
+    private var currentReconnectAttempt = 0
+    private var handlers = [SocketEventHandler]()
+    private var reconnecting = false
 
     // MARK: Initializers
 
@@ -147,13 +152,11 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
 
     // MARK: Methods
 
-    private func addEngine() -> SocketEngineSpec {
+    private func addEngine() {
         DefaultSocketLogger.Logger.log("Adding engine", type: logType, args: "")
 
         engine?.client = nil
         engine = SocketEngine(client: self, url: socketURL, config: config)
-
-        return engine!
     }
 
     /// Connect to the server.
@@ -166,7 +169,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     /// - parameter timeoutAfter: The number of seconds after which if we are not connected we assume the connection
     ///                           has failed. Pass 0 to never timeout.
     /// - parameter withHandler: The handler to call when the client fails to connect.
-    open func connect(timeoutAfter: Int, withHandler handler: (() -> Void)?) {
+    open func connect(timeoutAfter: Int, withHandler handler: (() -> ())?) {
         assert(timeoutAfter >= 0, "Invalid timeout: \(timeoutAfter)")
 
         guard status != .connected else {
@@ -177,10 +180,10 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         status = .connecting
 
         if engine == nil || forceNew {
-            addEngine().connect()
-        } else {
-            engine?.connect()
+            addEngine()
         }
+
+        engine?.connect()
 
         guard timeoutAfter != 0 else { return }
 
@@ -496,7 +499,6 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         return handler.id
     }
 
-
     /// Adds a single-use handler for an event.
     ///
     /// - parameter event: The event name for this handler.
@@ -522,7 +524,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     /// Adds a handler that will be called on every event.
     ///
     /// - parameter handler: The callback that will execute whenever an event is received.
-    open func onAny(_ handler: @escaping (SocketAnyEvent) -> Void) {
+    open func onAny(_ handler: @escaping (SocketAnyEvent) -> ()) {
         anyHandler = handler
     }
 
