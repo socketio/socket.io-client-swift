@@ -97,6 +97,7 @@ public enum SocketIOClientOption : ClientOption {
 
     /// If passed `true`, the WebSocket transport will try and use voip logic to keep network connections open in
     /// the background. **This option is experimental as socket.io shouldn't be used for background communication.**
+    @available(*, deprecated, message: "No longer has any effect, and will be removed in v11.0")
     case voipEnabled(Bool)
 
     // MARK: Properties
