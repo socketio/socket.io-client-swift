@@ -22,7 +22,7 @@
         <a class="header-link" href="index.html">
           SocketIO Docs
         </a>
-         (84% documented)
+         (77% documented)
       </p>
     
       <p class="header-col--secondary">
@@ -74,7 +74,16 @@
                 <a class="nav-group-task-link" href="Classes/WebSocket.html">WebSocket</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/WebSocket/OpCode.html">– OpCode</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/WebSocket/CloseCode.html">– CloseCode</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/WebSocket/WSResponse.html">– WSResponse</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/WebSocket/HTTPMethod.html">– HTTPMethod</a>
               </li>
             </ul>
           </li>
@@ -137,6 +146,9 @@
                 <a class="nav-group-task-link" href="Protocols/SocketLogger.html">SocketLogger</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/WebSocketAdvancedDelegate.html">WebSocketAdvancedDelegate</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/WebSocketDelegate.html">WebSocketDelegate</a>
               </li>
               <li class="nav-group-task">
@@ -177,7 +189,7 @@
 <h2 id='example' class='heading'>Example</h2>
 <pre class="highlight swift"><code><span class="kd">import</span> <span class="kt">SocketIO</span>
 
-<span class="k">let</span> <span class="nv">socket</span> <span class="o">=</span> <span class="kt">SocketIOClient</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">(</span><span class="nv">string</span><span class="p">:</span> <span class="s">"http://localhost:8080"</span><span class="p">)</span><span class="o">!</span><span class="p">,</span> <span class="nv">config</span><span class="p">:</span> <span class="p">[</span><span class="o">.</span><span class="nf">log</span><span class="p">(</span><span class="kc">true</span><span class="p">),</span> <span class="o">.</span><span class="nf">forcePolling</span><span class="p">(</span><span class="kc">true</span><span class="p">)])</span>
+<span class="k">let</span> <span class="nv">socket</span> <span class="o">=</span> <span class="kt">SocketIOClient</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">(</span><span class="nv">string</span><span class="p">:</span> <span class="s">"http://localhost:8080"</span><span class="p">)</span><span class="o">!</span><span class="p">,</span> <span class="nv">config</span><span class="p">:</span> <span class="p">[</span><span class="o">.</span><span class="nf">log</span><span class="p">(</span><span class="kc">true</span><span class="p">),</span> <span class="o">.</span><span class="n">compress</span><span class="p">])</span>
 
 <span class="n">socket</span><span class="o">.</span><span class="nf">on</span><span class="p">(</span><span class="nv">clientEvent</span><span class="p">:</span> <span class="o">.</span><span class="n">connect</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span><span class="p">,</span> <span class="n">ack</span> <span class="k">in</span>
     <span class="nf">print</span><span class="p">(</span><span class="s">"socket connected"</span><span class="p">)</span>
@@ -198,7 +210,7 @@
 <h2 id='objective-c-example' class='heading'>Objective-C Example</h2>
 <pre class="highlight plaintext"><code>@import SocketIO;
 NSURL* url = [[NSURL alloc] initWithString:@"http://localhost:8080"];
-SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{@"log": @YES, @"forcePolling": @YES}];
+SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{@"log": @YES, @"compress": @YES}];
 
 [socket on:@"connect" callback:^(NSArray* data, SocketAckEmitter* ack) {
     NSLog(@"socket connected");
@@ -262,7 +274,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 <h3 id='carthage' class='heading'>Carthage</h3>
 
 <p>Add this line to your <code>Cartfile</code>:</p>
-<pre class="highlight plaintext"><code>github "socketio/socket.io-client-swift" ~&gt; 10.0.1 # Or latest version
+<pre class="highlight plaintext"><code>github "socketio/socket.io-client-swift" ~&gt; 10.1.0 # Or latest version
 </code></pre>
 
 <p>Run <code>carthage update --platform ios,macosx</code>.</p>
@@ -272,7 +284,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 <pre class="highlight ruby"><code><span class="n">use_frameworks!</span>
 
 <span class="n">target</span> <span class="s1">'YourApp'</span> <span class="k">do</span>
-    <span class="n">pod</span> <span class="s1">'Socket.IO-Client-Swift'</span><span class="p">,</span> <span class="s1">'~&gt; 10.0.1'</span> <span class="c1"># Or latest version</span>
+    <span class="n">pod</span> <span class="s1">'Socket.IO-Client-Swift'</span><span class="p">,</span> <span class="s1">'~&gt; 10.1.0'</span> <span class="c1"># Or latest version</span>
 <span class="k">end</span>
 </code></pre>
 
@@ -292,7 +304,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 <h3 id='cocoaseeds' class='heading'>CocoaSeeds</h3>
 
 <p>Add this line to your <code>Seedfile</code>:</p>
-<pre class="highlight plaintext"><code>github "socketio/socket.io-client-swift", "v10.0.1", :files =&gt; "Source/*.swift" # Or latest version
+<pre class="highlight plaintext"><code>github "socketio/socket.io-client-swift", "v10.1.0", :files =&gt; "Source/*.swift" # Or latest version
 </code></pre>
 
 <p>Run <code>seed install</code>.</p>
@@ -319,7 +331,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2017 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2017-06-18)</p>
+      <p>&copy; 2017 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2017-07-02)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.8.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
