@@ -134,7 +134,6 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     private var secure = false
     private var security: SSLSecurity?
     private var selfSigned = false
-    private var voipEnabled = false
 
     // MARK: Initializers
 
@@ -166,8 +165,6 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
                 if !socketPath.hasSuffix("/") {
                     socketPath += "/"
                 }
-            case let .voipEnabled(enable):
-                voipEnabled = enable
             case let .secure(secure):
                 self.secure = secure
             case let .selfSigned(selfSigned):
