@@ -30,6 +30,9 @@ protocol ClientOption : CustomStringConvertible, Equatable {
 
 /// The options for a client.
 public enum SocketIOClientOption : ClientOption {
+    /// If given, the WebSocket transport will attempt to use compression.
+    case compress
+
     /// A dictionary of GET parameters that will be included in the connect url.
     case connectParams([String: Any])
 
@@ -103,6 +106,8 @@ public enum SocketIOClientOption : ClientOption {
         let description: String
 
         switch self {
+        case .compress:
+            description = "compress"
         case .connectParams:
             description = "connectParams"
         case .cookies:
@@ -152,6 +157,8 @@ public enum SocketIOClientOption : ClientOption {
         let value: Any
 
         switch self {
+        case .compress:
+            value = true
         case let .connectParams(params):
             value = params
         case let .cookies(cookies):

@@ -60,6 +60,9 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     /// `true` if this engine is closed.
     public private(set) var closed = false
 
+    /// If `true` the engine will attempt to use WebSocket compression.
+    public private(set) var compress = false
+
     /// `true` if this engine is connected. Connected means that the initial poll connect has succeeded.
     public private(set) var connected = false
 
@@ -171,6 +174,8 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
                 self.selfSigned = selfSigned
             case let .security(security):
                 self.security = security
+            case .compress:
+                self.compress = true
             default:
                 continue
             }
@@ -331,6 +336,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         }
 
         ws?.callbackQueue = engineQueue
+        ws?.enableCompression = compress
         ws?.delegate = self
         ws?.disableSSLCertValidation = selfSigned
         ws?.security = security
