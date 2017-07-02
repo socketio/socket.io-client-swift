@@ -331,7 +331,6 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         }
 
         ws?.callbackQueue = engineQueue
-        ws?.voipEnabled = voipEnabled
         ws?.delegate = self
         ws?.disableSSLCertValidation = selfSigned
         ws?.security = security
