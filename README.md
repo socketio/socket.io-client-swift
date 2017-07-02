@@ -7,7 +7,7 @@ Socket.IO-client for iOS/OS X.
 ```swift
 import SocketIO
 
-let socket = SocketIOClient(socketURL: URL(string: "http://localhost:8080")!, config: [.log(true), .forcePolling(true)])
+let socket = SocketIOClient(socketURL: URL(string: "http://localhost:8080")!, config: [.log(true), .compress])
 
 socket.on(clientEvent: .connect) {data, ack in
     print("socket connected")
@@ -30,7 +30,7 @@ socket.connect()
 ```objective-c
 @import SocketIO;
 NSURL* url = [[NSURL alloc] initWithString:@"http://localhost:8080"];
-SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{@"log": @YES, @"forcePolling": @YES}];
+SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{@"log": @YES, @"compress": @YES}];
 
 [socket on:@"connect" callback:^(NSArray* data, SocketAckEmitter* ack) {
     NSLog(@"socket connected");
@@ -92,7 +92,7 @@ Then import `import SocketIO`.
 ### Carthage
 Add this line to your `Cartfile`:
 ```
-github "socketio/socket.io-client-swift" ~> 10.0.1 # Or latest version
+github "socketio/socket.io-client-swift" ~> 10.1.0 # Or latest version
 ```
 
 Run `carthage update --platform ios,macosx`.
@@ -104,7 +104,7 @@ Create `Podfile` and add `pod 'Socket.IO-Client-Swift'`:
 use_frameworks!
 
 target 'YourApp' do
-    pod 'Socket.IO-Client-Swift', '~> 10.0.1' # Or latest version
+    pod 'Socket.IO-Client-Swift', '~> 10.1.0' # Or latest version
 end
 ```
 
@@ -132,7 +132,7 @@ Objective-C:
 Add this line to your `Seedfile`:
 
 ```
-github "socketio/socket.io-client-swift", "v10.0.1", :files => "Source/*.swift" # Or latest version
+github "socketio/socket.io-client-swift", "v10.1.0", :files => "Source/*.swift" # Or latest version
 ```
 
 Run `seed install`.

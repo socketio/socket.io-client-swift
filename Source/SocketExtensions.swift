@@ -80,8 +80,8 @@ extension NSDictionary {
             return .selfSigned(selfSigned)
         case let ("sessionDelegate", delegate as URLSessionDelegate):
             return .sessionDelegate(delegate)
-        case let ("voipEnabled", enable as Bool):
-            return .voipEnabled(enable)
+        case let ("compress", compress as Bool):
+            return compress ? .compress : nil
         default:
             return nil
         }
