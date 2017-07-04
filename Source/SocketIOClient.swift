@@ -203,12 +203,12 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         return OnAckCallback(ackNumber: currentAck, items: items, socket: self)
     }
 
-    func didConnect() {
+    func didConnect(toNamespace namespace: String) {
         DefaultSocketLogger.Logger.log("Socket connected", type: logType)
 
         status = .connected
 
-        handleClientEvent(.connect, data: [])
+        handleClientEvent(.connect, data: [namespace])
     }
 
     func didDisconnect(reason: String) {

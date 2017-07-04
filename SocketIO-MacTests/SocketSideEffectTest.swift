@@ -226,11 +226,11 @@ class SocketSideEffectTest: XCTestCase {
 
         socket.setTestStatus(.notConnected)
 
-        socket.connect(timeoutAfter: 1, withHandler: {
+        socket.connect(timeoutAfter: 0.5, withHandler: {
             expect.fulfill()
         })
 
-        waitForExpectations(timeout: 2)
+        waitForExpectations(timeout: 0.8)
     }
 
     func testConnectDoesNotTimeOutIfConnected() {
@@ -238,17 +238,47 @@ class SocketSideEffectTest: XCTestCase {
 
         socket.setTestStatus(.notConnected)
 
-        socket.connect(timeoutAfter: 1, withHandler: {
+        socket.connect(timeoutAfter: 0.5, withHandler: {
             XCTFail("Should not call timeout handler if status is connected")
         })
 
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.2) {
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1) {
             // Fake connecting
             self.socket.setTestStatus(.connected)
         }
 
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.1) {
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.7) {
             expect.fulfill()
+        }
+
+        waitForExpectations(timeout: 2)
+    }
+
+    func testConnectIsCalledWithNamepsace() {
+        let expect = expectation(description: "The client should not call the timeout function")
+        let nspString = "/swift"
+
+        socket.setTestStatus(.notConnected)
+
+        socket.on(clientEvent: .connect) {data, ack in
+            guard let nsp = data[0] as? String else {
+                XCTFail("Connect should be called with a namespace")
+
+                return
+            }
+
+            XCTAssertEqual(nspString, nsp, "It should connect with the correct namespace")
+
+            expect.fulfill()
+        }
+
+        socket.connect(timeoutAfter: 0.3, withHandler: {
+            XCTFail("Should not call timeout handler if status is connected")
+        })
+
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1) {
+            // Fake connecting
+            self.socket.parseEngineMessage("0/swift")
         }
 
         waitForExpectations(timeout: 2)
@@ -289,7 +319,7 @@ class SocketSideEffectTest: XCTestCase {
             expect.fulfill()
         }
 
-        socket.emitWithAck("myEvent", ThrowingData()).timingOut(after: 1, callback: {_ in
+        socket.emitWithAck("myEvent", ThrowingData()).timingOut(after: 0.8, callback: {_ in
             XCTFail("Ack callback should not be called")
         })
 
