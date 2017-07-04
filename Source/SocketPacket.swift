@@ -161,10 +161,9 @@ extension SocketPacket {
 
     static func packetFromEmit(_ items: [Any], id: Int, nsp: String, ack: Bool) -> SocketPacket {
         let (parsedData, binary) = deconstructData(items)
-        let packet = SocketPacket(type: findType(binary.count, ack: ack), data: parsedData,
-            id: id, nsp: nsp, binary: binary)
 
-        return packet
+        return SocketPacket(type: findType(binary.count, ack: ack), data: parsedData, id: id, nsp: nsp,
+                            binary: binary)
     }
 }
 
@@ -198,6 +197,6 @@ private extension SocketPacket {
     static func deconstructData(_ data: [Any]) -> ([Any], [Data]) {
         var binary = [Data]()
 
-        return (data.map({shred($0, binary: &binary)}), binary)
+        return (data.map({ shred($0, binary: &binary) }), binary)
     }
 }
