@@ -226,11 +226,11 @@ class SocketSideEffectTest: XCTestCase {
 
         socket.setTestStatus(.notConnected)
 
-        socket.connect(timeoutAfter: 0.2, withHandler: {
+        socket.connect(timeoutAfter: 0.5, withHandler: {
             expect.fulfill()
         })
 
-        waitForExpectations(timeout: 0.4)
+        waitForExpectations(timeout: 0.8)
     }
 
     func testConnectDoesNotTimeOutIfConnected() {
@@ -238,7 +238,7 @@ class SocketSideEffectTest: XCTestCase {
 
         socket.setTestStatus(.notConnected)
 
-        socket.connect(timeoutAfter: 0.3, withHandler: {
+        socket.connect(timeoutAfter: 0.5, withHandler: {
             XCTFail("Should not call timeout handler if status is connected")
         })
 
@@ -247,7 +247,7 @@ class SocketSideEffectTest: XCTestCase {
             self.socket.setTestStatus(.connected)
         }
 
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.7) {
             expect.fulfill()
         }
 
