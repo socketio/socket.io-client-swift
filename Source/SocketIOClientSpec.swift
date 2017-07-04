@@ -29,7 +29,7 @@ protocol SocketIOClientSpec : class {
     var nsp: String { get set }
     var waitingPackets: [SocketPacket] { get set }
 
-    func didConnect()
+    func didConnect(toNamespace namespace: String)
     func didDisconnect(reason: String)
     func didError(reason: String)
     func handleAck(_ ack: Int, data: [Any])
