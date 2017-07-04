@@ -319,7 +319,7 @@ class SocketSideEffectTest: XCTestCase {
             expect.fulfill()
         }
 
-        socket.emitWithAck("myEvent", ThrowingData()).timingOut(after: 1, callback: {_ in
+        socket.emitWithAck("myEvent", ThrowingData()).timingOut(after: 0.8, callback: {_ in
             XCTFail("Ack callback should not be called")
         })
 
