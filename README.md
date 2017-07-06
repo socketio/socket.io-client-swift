@@ -70,10 +70,6 @@ If you need Swift 1.2 use v2.4.5 (Pre-Swift 2 support is no longer maintained)
 
 If you need Swift 1.1 use v1.5.2. (Pre-Swift 1.2 support is no longer maintained)
 
-### Manually (iOS 7+)
-1. Copy the Source folder into your Xcode project. (Make sure you add the files to your target(s))
-2. If you plan on using this from Objective-C, read [this](https://developer.apple.com/library/ios/documentation/Swift/Conceptual/BuildingCocoaApps/MixandMatch.html) on exposing Swift code to Objective-C.
-
 ### Swift Package Manager
 Add the project as a dependency to your Package.swift:
 ```swift
