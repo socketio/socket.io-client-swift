@@ -21,5 +21,5 @@ Pod::Spec.new do |s|
     :submodules => true
   }
   s.source_files  = "Source/*.swift"
-  s.dependency "StarscreamSocketIO", "~> 8.0.0"
+  s.dependency "StarscreamSocketIO", "~> 8.0.1"
 end
