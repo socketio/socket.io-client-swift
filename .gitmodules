@@ -1,0 +1,4 @@
+[submodule "Source/Starscream"]
+	path = Source/Starscream
+	url = https://github.com/nuclearace/Starscream
+	branch = socket.io
