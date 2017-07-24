@@ -238,23 +238,23 @@ class SocketSideEffectTest: XCTestCase {
 
         socket.setTestStatus(.notConnected)
 
+        socket.on(clientEvent: .connect) {data, ack in
+            expect.fulfill()
+        }
+
         socket.connect(timeoutAfter: 0.5, withHandler: {
             XCTFail("Should not call timeout handler if status is connected")
         })
 
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1) {
             // Fake connecting
-            self.socket.setTestStatus(.connected)
-        }
-
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.7) {
-            expect.fulfill()
+            self.socket.parseEngineMessage("0/")
         }
 
         waitForExpectations(timeout: 2)
     }
 
-    func testConnectIsCalledWithNamepsace() {
+    func testConnectIsCalledWithNamespace() {
         let expect = expectation(description: "The client should not call the timeout function")
         let nspString = "/swift"
 
