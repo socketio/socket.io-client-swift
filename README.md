@@ -78,7 +78,7 @@ import PackageDescription
 let package = Package(
     name: "YourSocketIOProject",
     dependencies: [
-        .Package(url: "https://github.com/socketio/socket.io-client-swift", majorVersion: 10)
+        .Package(url: "https://github.com/socketio/socket.io-client-swift", majorVersion: 11)
     ]
 )
 ```
@@ -88,7 +88,7 @@ Then import `import SocketIO`.
 ### Carthage
 Add this line to your `Cartfile`:
 ```
-github "socketio/socket.io-client-swift" ~> 10.2.0 # Or latest version
+github "socketio/socket.io-client-swift" ~> 11.0.0 # Or latest version
 ```
 
 Run `carthage update --platform ios,macosx`.
@@ -100,7 +100,7 @@ Create `Podfile` and add `pod 'Socket.IO-Client-Swift'`:
 use_frameworks!
 
 target 'YourApp' do
-    pod 'Socket.IO-Client-Swift', '~> 10.2.0' # Or latest version
+    pod 'Socket.IO-Client-Swift', '~> 11.0.0' # Or latest version
 end
 ```
 
@@ -128,7 +128,7 @@ Objective-C:
 Add this line to your `Seedfile`:
 
 ```
-github "socketio/socket.io-client-swift", "v10.2.0", :files => "Source/*.swift" # Or latest version
+github "socketio/socket.io-client-swift", "v11.0.0", :files => "Source/*.swift" # Or latest version
 ```
 
 Run `seed install`.
