@@ -86,7 +86,7 @@ let package = Package(
 Then import `import SocketIO`.
 
 ### Carthage
-Add this line to your `Cartfile`:
+Add these line to your `Cartfile`:
 ```
 github "nuclearace/Starscream" ~> 8.0.1
 github "socketio/socket.io-client-swift" ~> 11.0.0 # Or latest version
