@@ -40,7 +40,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
     double cur = [[data objectAtIndex:0] floatValue];
 
     [[socket emitWithAck:@"canUpdate" with:@[@(cur)]] timingOutAfter:0 callback:^(NSArray* data) {
-        [socket emit:@"update" withItems:@[@{@"amount": @(cur + 2.50)}]];
+        [socket emit:@"update" with:@[@{@"amount": @(cur + 2.50)}]];
     }];
 
     [ack with:@[@"Got your currentAmount, ", @"dude"]];
