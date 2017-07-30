@@ -68,10 +68,10 @@ extension NSNull : SocketData { }
 extension String : SocketData { }
 
 /// A typealias for an ack callback.
-public typealias AckCallback = ([Any]) -> ()
+public typealias AckCallback = ([Any]) -> Void
 
 /// A typealias for a normal callback.
-public typealias NormalCallback = ([Any], SocketAckEmitter) -> ()
+public typealias NormalCallback = ([Any], SocketAckEmitter) -> Void
 
 typealias JSON = [String: Any]
 typealias Probe = (msg: String, type: SocketEnginePacketType, data: [Data])
