@@ -11,6 +11,7 @@
 @import Foundation;
 @import XCTest;
 @import SocketIO;
+@import StarscreamSocketIO;
 
 @interface SocketObjectiveCTest : XCTestCase
 
@@ -28,7 +29,7 @@
 
 - (void)testProperties {
     NSURL* url = nil;
-    
+
     url = self.socket.socketURL;
     self.socket.forceNew = false;
     self.socket.handleQueue = dispatch_get_main_queue();
@@ -67,7 +68,7 @@
     [self.socket onAny:^(SocketAnyEvent* any) {
         NSString* event = any.event;
         NSArray* data = any.items;
-        
+
         [self.socket emit:event with:data];
     }];
 }
@@ -96,6 +97,11 @@
     SocketClientManager* manager = [SocketClientManager sharedManager];
     [manager addSocket:self.socket labeledAs:@"test"];
     [manager removeSocketWithLabel:@"test"];
+}
+
+- (void)testSSLSecurity {
+    SSLSecurity* sec = [[SSLSecurity alloc] initWithUsePublicKeys:0];
+    sec.isReady = 0;
 }
 
 @end
