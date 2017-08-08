@@ -36,6 +36,8 @@
     self.socket.nsp = @"/objective-c";
     self.socket.reconnects = false;
     self.socket.reconnectWait = 1;
+    if (self.socket.status == SocketIOClientStatusConnected) { }
+    if (self.socket.engine == NULL) { }
 }
 
 - (void)testOnSyntax {

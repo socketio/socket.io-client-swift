@@ -36,9 +36,11 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     private static let logType = "SocketIOClient"
 
     /// The engine for this client.
+    @objc
     public private(set) var engine: SocketEngineSpec?
 
     /// The status of this client.
+    @objc
     public private(set) var status = SocketIOClientStatus.notConnected {
         didSet {
             switch status {
