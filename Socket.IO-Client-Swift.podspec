@@ -20,6 +20,9 @@ Pod::Spec.new do |s|
     :tag => 'v11.0.1',
     :submodules => true
   }
+  s.pod_target_xcconfig = {
+      'SWIFT_VERSION' => '3.1'
+  }
   s.source_files  = "Source/*.swift"
   s.dependency "StarscreamSocketIO", "~> 8.0.2"
 end
