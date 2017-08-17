@@ -85,11 +85,19 @@ class SocketSideEffectTest: XCTestCase {
 
     func testOffWithEvent() {
         socket.on("test") {data, ack in }
-        XCTAssertEqual(socket.testHandlers.count, 1)
         socket.on("test") {data, ack in }
         XCTAssertEqual(socket.testHandlers.count, 2)
         socket.off("test")
         XCTAssertEqual(socket.testHandlers.count, 0)
+    }
+
+    func testOffClientEvent() {
+        socket.on(clientEvent: .connect) {data, ack in }
+        socket.on(clientEvent: .disconnect) {data, ack in }
+        XCTAssertEqual(socket.testHandlers.count, 2)
+        socket.off(clientEvent: .disconnect)
+        XCTAssertEqual(socket.testHandlers.count, 1)
+        XCTAssertTrue(socket.testHandlers.contains(where: { $0.event == "connect" }))
     }
 
     func testOffWithId() {
