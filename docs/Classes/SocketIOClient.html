@@ -1250,6 +1250,54 @@ Check that your server&rsquo;s api will ack the event being sent.</p>
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/s:FC8SocketIO14SocketIOClient3offFT11clientEventOS_17SocketClientEvent_T_"></a>
+                    <a name="//apple_ref/swift/Method/off(clientEvent:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8SocketIO14SocketIOClient3offFT11clientEventOS_17SocketClientEvent_T_">off(clientEvent:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Removes handler(s) for a client event.</p>
+
+<p>If you wish to remove a client event handler, call the <code><a href="../Classes/SocketIOClient.html#/s:FC8SocketIO14SocketIOClient3offFT2idV10Foundation4UUID_T_">off(id:)</a></code> with the UUID received from its <code>on</code> call.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">off</span><span class="p">(</span><span class="n">clientEvent</span> <span class="nv">event</span><span class="p">:</span> <span class="kt"><a href="../Enums/SocketClientEvent.html">SocketClientEvent</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>clientEvent</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The event to remove handlers for.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/s:FC8SocketIO14SocketIOClient3offFSST_"></a>
                     <a name="//apple_ref/swift/Method/off(_:)" class="dashAnchor"></a>
                     <a class="token" href="#/s:FC8SocketIO14SocketIOClient3offFSST_">off(_:)</a>
@@ -1443,6 +1491,68 @@ Check that your server&rsquo;s api will ack the event being sent.</p>
                               <td>
                                 <code>
                                 <em>event</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The event for this handler.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>callback</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The callback that will execute when this event is received.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>A unique id for the handler that can be used to remove it.</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8SocketIO14SocketIOClient4onceFT11clientEventOS_17SocketClientEvent8callbackFTGSaP__CS_16SocketAckEmitter_T__V10Foundation4UUID"></a>
+                    <a name="//apple_ref/swift/Method/once(clientEvent:callback:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8SocketIO14SocketIOClient4onceFT11clientEventOS_17SocketClientEvent8callbackFTGSaP__CS_16SocketAckEmitter_T__V10Foundation4UUID">once(clientEvent:callback:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Adds a single-use handler for a client event.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">once</span><span class="p">(</span><span class="n">clientEvent</span> <span class="nv">event</span><span class="p">:</span> <span class="kt"><a href="../Enums/SocketClientEvent.html">SocketClientEvent</a></span><span class="p">,</span> <span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="kt"><a href="../Typealiases.html#/s:8SocketIO14NormalCallback">NormalCallback</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">UUID</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>clientEvent</em>
                                 </code>
                               </td>
                               <td>
@@ -1738,8 +1848,8 @@ Can be used after disconnecting to break any potential remaining retain cycles.<
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2017 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2017-08-08)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.8.3</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2017 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2017-08-17)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.8.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>
