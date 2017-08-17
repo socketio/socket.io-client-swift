@@ -57,6 +57,9 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 - Supports TLS/SSL
 - Can be used from Objective-C
 
+## FAQS
+Checkout the [FAQs](https://nuclearace.github.io/Socket.IO-Client-Swift/FAQS.html) for commonly asked questions.
+
 ## Installation
 Requires Swift 3/Xcode 8.x
 
