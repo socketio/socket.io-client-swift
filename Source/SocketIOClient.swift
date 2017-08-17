@@ -439,6 +439,15 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         }
     }
 
+    /// Removes handler(s) for a client event.
+    ///
+    /// If you wish to remove a client event handler, call the `off(id:)` with the UUID received from its `on` call.
+    ///
+    /// - parameter clientEvent: The event to remove handlers for.
+    open func off(clientEvent event: SocketClientEvent) {
+        off(event.rawValue)
+    }
+
     /// Removes handler(s) based on an event name.
     ///
     /// If you wish to remove a specific event, call the `off(id:)` with the UUID received from its `on` call.
@@ -497,6 +506,16 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         handlers.append(handler)
 
         return handler.id
+    }
+
+    /// Adds a single-use handler for a client event.
+    ///
+    /// - parameter clientEvent: The event for this handler.
+    /// - parameter callback: The callback that will execute when this event is received.
+    /// - returns: A unique id for the handler that can be used to remove it.
+    @discardableResult
+    open func once(clientEvent event: SocketClientEvent, callback: @escaping NormalCallback) -> UUID {
+        return once(event.rawValue, callback: callback)
     }
 
     /// Adds a single-use handler for an event.

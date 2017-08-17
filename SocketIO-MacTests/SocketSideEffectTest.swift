@@ -83,13 +83,37 @@ class SocketSideEffectTest: XCTestCase {
         waitForExpectations(timeout: 3, handler: nil)
     }
 
+    func testHandleOnceClientEvent() {
+        let expect = expectation(description: "handled event")
+
+        socket.once(clientEvent: .connect) {data, ack in
+            XCTAssertEqual(self.socket.testHandlers.count, 0)
+            expect.fulfill()
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1) {
+            // Fake connecting
+            self.socket.parseEngineMessage("0/")
+        }
+
+        waitForExpectations(timeout: 3, handler: nil)
+    }
+
     func testOffWithEvent() {
         socket.on("test") {data, ack in }
-        XCTAssertEqual(socket.testHandlers.count, 1)
         socket.on("test") {data, ack in }
         XCTAssertEqual(socket.testHandlers.count, 2)
         socket.off("test")
         XCTAssertEqual(socket.testHandlers.count, 0)
+    }
+
+    func testOffClientEvent() {
+        socket.on(clientEvent: .connect) {data, ack in }
+        socket.on(clientEvent: .disconnect) {data, ack in }
+        XCTAssertEqual(socket.testHandlers.count, 2)
+        socket.off(clientEvent: .disconnect)
+        XCTAssertEqual(socket.testHandlers.count, 1)
+        XCTAssertTrue(socket.testHandlers.contains(where: { $0.event == "connect" }))
     }
 
     func testOffWithId() {
