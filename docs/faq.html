@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Typealiases  Reference</title>
+    <title>FAQ  Reference</title>
     <link rel="stylesheet" type="text/css" href="css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="css/highlight.css" />
     <meta charset="utf-8">
@@ -15,7 +15,7 @@
   <body>
 
 
-    <a title="Typealiases  Reference"></a>
+    <a title="FAQ  Reference"></a>
 
     <header class="header">
       <p class="header-col header-col--primary">
@@ -37,7 +37,7 @@
     <p class="breadcrumbs">
       <a class="breadcrumb" href="index.html">SocketIO Reference</a>
       <img class="carat" src="img/carat.png" />
-      Typealiases  Reference
+      FAQ  Reference
     </p>
 
     <div class="content-wrapper">
@@ -142,74 +142,50 @@
 
         <section class="section">
           <div class="section-content">
-            <h1>Typealiases</h1>
-            <p>The following typealiases are available globally.</p>
+            
+            <h2 id='how-do-i-connect-to-my-websocket-server' class='heading'>How do I connect to my WebSocket server?</h2>
+
+<p>This library is <strong>NOT</strong> a WebSockets library. This library is only for servers that implement the socket.io protocol, 
+such as <a href="https://socket.io/">socket.io</a>. If you need a plain WebSockets client check out 
+<a href="https://github.com/daltoniam/Starscream">Starscream</a> for Swift and <a href="https://github.com/acmacalister/jetfire">JetFire</a>
+for Objective-C.</p>
+<h2 id='why-isn-39-t-my-event-handler-being-called' class='heading'>Why isn&rsquo;t my event handler being called?</h2>
+
+<p>One of the most common reasons your event might not be called is if the client is released by 
+<a href="https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/AutomaticReferenceCounting.html">ARC</a>.</p>
+
+<p>Take this code for example:</p>
+<pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">SocketManager</span> <span class="p">{</span>
+    <span class="kd">func</span> <span class="nf">addHandlers</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="nv">socket</span> <span class="o">=</span> <span class="kt">SocketIOClient</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="s">"http://somesocketioserver.com"</span><span class="p">)</span>
+
+        <span class="n">socket</span><span class="o">.</span><span class="nf">on</span><span class="p">(</span><span class="s">"myEvent"</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span><span class="p">,</span> <span class="n">ack</span> <span class="k">in</span>
+            <span class="nf">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+<span class="p">}</span>
+</code></pre>
+
+<p>This code is <strong>incorrect</strong>, and the event handler will never be called. Because as soon as this method is called <code>socket</code>
+will be released and its memory reclaimed.</p>
+
+<p>A correct way would be:</p>
+<pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">SocketManager</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="nv">socket</span> <span class="o">=</span> <span class="kt">SocketIOClient</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="s">"http://somesocketioserver.com"</span><span class="p">)</span>
+
+    <span class="kd">func</span> <span class="nf">addHandlers</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">socket</span><span class="o">.</span><span class="nf">on</span><span class="p">(</span><span class="s">"myEvent"</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span><span class="p">,</span> <span class="n">ack</span> <span class="k">in</span>
+            <span class="nf">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+</code></pre>
 
           </div>
         </section>
 
-        <section class="section">
-          <div class="section-content">
-            <div class="task-group">
-              <ul class="item-container">
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8SocketIO11AckCallback"></a>
-                    <a name="//apple_ref/swift/Alias/AckCallback" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO11AckCallback">AckCallback</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>A typealias for an ack callback.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">typealias</span> <span class="kt">AckCallback</span> <span class="o">=</span> <span class="p">([</span><span class="kt">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="p">()</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8SocketIO14NormalCallback"></a>
-                    <a name="//apple_ref/swift/Alias/NormalCallback" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO14NormalCallback">NormalCallback</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>A typealias for a normal callback.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">typealias</span> <span class="kt">NormalCallback</span> <span class="o">=</span> <span class="p">([</span><span class="kt">Any</span><span class="p">],</span> <span class="kt"><a href="Classes/SocketAckEmitter.html">SocketAckEmitter</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">()</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </section>
 
       </article>
     </div>

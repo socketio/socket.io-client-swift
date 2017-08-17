@@ -58,7 +58,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 - Can be used from Objective-C
 
 ## FAQS
-Checkout the [FAQs](https://nuclearace.github.io/Socket.IO-Client-Swift/FAQS.html) for commonly asked questions.
+Checkout the [FAQs](https://nuclearace.github.io/Socket.IO-Client-Swift/faq.html) for commonly asked questions.
 
 ## Installation
 Requires Swift 3/Xcode 8.x
