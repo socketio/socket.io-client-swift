@@ -83,6 +83,22 @@ class SocketSideEffectTest: XCTestCase {
         waitForExpectations(timeout: 3, handler: nil)
     }
 
+    func testHandleOnceClientEvent() {
+        let expect = expectation(description: "handled event")
+
+        socket.once(clientEvent: .connect) {data, ack in
+            XCTAssertEqual(self.socket.testHandlers.count, 0)
+            expect.fulfill()
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1) {
+            // Fake connecting
+            self.socket.parseEngineMessage("0/")
+        }
+
+        waitForExpectations(timeout: 3, handler: nil)
+    }
+
     func testOffWithEvent() {
         socket.on("test") {data, ack in }
         socket.on("test") {data, ack in }

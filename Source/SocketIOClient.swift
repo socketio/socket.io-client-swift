@@ -508,6 +508,16 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         return handler.id
     }
 
+    /// Adds a single-use handler for a client event.
+    ///
+    /// - parameter clientEvent: The event for this handler.
+    /// - parameter callback: The callback that will execute when this event is received.
+    /// - returns: A unique id for the handler that can be used to remove it.
+    @discardableResult
+    open func once(clientEvent event: SocketClientEvent, callback: @escaping NormalCallback) -> UUID {
+        return once(event.rawValue, callback: callback)
+    }
+
     /// Adds a single-use handler for an event.
     ///
     /// - parameter event: The event name for this handler.
