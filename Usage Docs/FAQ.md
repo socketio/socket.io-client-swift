@@ -15,7 +15,7 @@ Take this code for example:
 ```swift
 class SocketManager {
     func addHandlers() {
-        let socket = SocketIOClient(socketURL: "http://somesocketioserver.com")
+        let socket = SocketIOClient(socketURL: URL(string: "http://somesocketioserver.com")!)
         
         socket.on("myEvent") {data, ack in
             print(data)
@@ -32,7 +32,7 @@ A correct way would be:
 
 ```swift
 class SocketManager {
-    let socket = SocketIOClient(socketURL: "http://somesocketioserver.com")
+    let socket = SocketIOClient(socketURL: URL(string: "http://somesocketioserver.com")!)
     
     func addHandlers() {
         socket.on("myEvent") {data, ack in

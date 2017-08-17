@@ -157,7 +157,7 @@ for Objective-C.</p>
 <p>Take this code for example:</p>
 <pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">SocketManager</span> <span class="p">{</span>
     <span class="kd">func</span> <span class="nf">addHandlers</span><span class="p">()</span> <span class="p">{</span>
-        <span class="k">let</span> <span class="nv">socket</span> <span class="o">=</span> <span class="kt">SocketIOClient</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="s">"http://somesocketioserver.com"</span><span class="p">)</span>
+        <span class="k">let</span> <span class="nv">socket</span> <span class="o">=</span> <span class="kt">SocketIOClient</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">(</span><span class="nv">string</span><span class="p">:</span> <span class="s">"http://somesocketioserver.com"</span><span class="p">)</span><span class="o">!</span><span class="p">)</span>
 
         <span class="n">socket</span><span class="o">.</span><span class="nf">on</span><span class="p">(</span><span class="s">"myEvent"</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span><span class="p">,</span> <span class="n">ack</span> <span class="k">in</span>
             <span class="nf">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -172,7 +172,7 @@ will be released and its memory reclaimed.</p>
 
 <p>A correct way would be:</p>
 <pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">SocketManager</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="nv">socket</span> <span class="o">=</span> <span class="kt">SocketIOClient</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="s">"http://somesocketioserver.com"</span><span class="p">)</span>
+    <span class="k">let</span> <span class="nv">socket</span> <span class="o">=</span> <span class="kt">SocketIOClient</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">(</span><span class="nv">string</span><span class="p">:</span> <span class="s">"http://somesocketioserver.com"</span><span class="p">)</span><span class="o">!</span><span class="p">)</span>
 
     <span class="kd">func</span> <span class="nf">addHandlers</span><span class="p">()</span> <span class="p">{</span>
         <span class="n">socket</span><span class="o">.</span><span class="nf">on</span><span class="p">(</span><span class="s">"myEvent"</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span><span class="p">,</span> <span class="n">ack</span> <span class="k">in</span>
