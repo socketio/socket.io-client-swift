@@ -232,7 +232,6 @@
 		DD52B8048FA04DB8B1C59BA1 /* SocketStringReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketStringReader.swift; path = Source/SocketIOClient/Util/SocketStringReader.swift; sourceTree = "<group>"; };
 		DD52B86BED22C2564C502A49 /* SocketAnyEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketAnyEvent.swift; path = Source/SocketIOClient/Client/SocketAnyEvent.swift; sourceTree = "<group>"; };
 		DD52B9B72ABE4ED21E7CCDFA /* SocketAckEmitter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketAckEmitter.swift; path = Source/SocketIOClient/Ack/SocketAckEmitter.swift; sourceTree = "<group>"; };
-		DD52BA265A22022906AF006D /* FAQ.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = FAQ.md; path = "Usage Docs/FAQ.md"; sourceTree = "<group>"; };
 		DD52BA4D3948F71C4C15D8D0 /* SocketIOClientSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketIOClientSpec.swift; path = Source/SocketIOClient/Client/SocketIOClientSpec.swift; sourceTree = "<group>"; };
 		DD52BB363E4613D1526E668A /* SocketClientManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketClientManager.swift; path = Source/SocketIOClient/Util/SocketClientManager.swift; sourceTree = "<group>"; };
 		DD52BBFB48D49A3BC85F97C8 /* SocketExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SocketExtensions.swift; path = Source/SocketIOClient/Util/SocketExtensions.swift; sourceTree = "<group>"; };
@@ -310,7 +309,6 @@
 				572EF2391B51F18A00EEBB58 /* SocketIO-Mac */,
 				572EF2461B51F18A00EEBB58 /* SocketIO-MacTests */,
 				5764DF7B1B51F24A004FF46E /* Source */,
-				DD52BA265A22022906AF006D /* FAQ.md */,
 			);
 			sourceTree = "<group>";
 		};
