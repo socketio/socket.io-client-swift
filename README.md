@@ -91,7 +91,7 @@ Then import `import SocketIO`.
 ### Carthage
 Add these line to your `Cartfile`:
 ```
-github "nuclearace/Starscream" ~> 8.0.2
+github "nuclearace/Starscream" ~> 8.0.3
 github "socketio/socket.io-client-swift" ~> 11.1.0 # Or latest version
 ```
 
