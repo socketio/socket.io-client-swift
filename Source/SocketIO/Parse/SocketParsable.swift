@@ -67,7 +67,7 @@ extension SocketParsable where Self: SocketIOClientSpec {
         }
     }
 
-    /// Parses a messsage from the engine. Returning either a string error or a complete SocketPacket
+    /// Parses a messsage from the engine, returning complete SocketPacket or throwing.
     func parseString(_ message: String) throws -> SocketPacket {
         var reader = SocketStringReader(message: message)
 
