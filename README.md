@@ -65,13 +65,13 @@ Requires Swift 3/Xcode 8.x
 
 If you need swift 2.3 use the swift2.3 tag (Pre-Swift 3 support is no longer maintained)
 
-If you need swift 2.2 use 7.x (Pre-Swift 3 support is no longer maintained)
+If you need swift 2.2 use 7.x.
 
-If you need Swift 2.1 use v5.5.0 (Pre-Swift 2.2 support is no longer maintained)
+If you need Swift 2.1 use v5.5.0.
 
-If you need Swift 1.2 use v2.4.5 (Pre-Swift 2 support is no longer maintained)
+If you need Swift 1.2 use v2.4.5.
 
-If you need Swift 1.1 use v1.5.2. (Pre-Swift 1.2 support is no longer maintained)
+If you need Swift 1.1 use v1.5.2.
 
 ### Swift Package Manager
 Add the project as a dependency to your Package.swift:
