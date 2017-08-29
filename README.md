@@ -91,8 +91,8 @@ Then import `import SocketIO`.
 ### Carthage
 Add these line to your `Cartfile`:
 ```
-github "nuclearace/Starscream" ~> 8.0.4
-github "socketio/socket.io-client-swift" ~> 11.1.1 # Or latest version
+github "nuclearace/Starscream" ~> 8.0.5
+github "socketio/socket.io-client-swift" ~> 11.1.2 # Or latest version
 ```
 
 Run `carthage update --platform ios,macosx`.
@@ -104,7 +104,7 @@ Create `Podfile` and add `pod 'Socket.IO-Client-Swift'`:
 use_frameworks!
 
 target 'YourApp' do
-    pod 'Socket.IO-Client-Swift', '~> 11.1.1' # Or latest version
+    pod 'Socket.IO-Client-Swift', '~> 11.1.2' # Or latest version
 end
 ```
 
@@ -126,16 +126,6 @@ Objective-C:
 ```Objective-C
 @import SocketIO;
 ```
-
-### CocoaSeeds
-
-Add this line to your `Seedfile`:
-
-```
-github "socketio/socket.io-client-swift", "v11.1.1", :files => "Source/*.swift" # Or latest version
-```
-
-Run `seed install`.
 
 
 # [Docs](https://nuclearace.github.io/Socket.IO-Client-Swift/index.html)
