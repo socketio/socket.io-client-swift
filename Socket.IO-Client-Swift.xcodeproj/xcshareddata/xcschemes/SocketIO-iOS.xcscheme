@@ -16,7 +16,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "572EF2181B51F16C00EEBB58"
                BuildableName = "SocketIO.framework"
-               BlueprintName = "SocketIO-iOS"
+               BlueprintName = "SocketIO"
                ReferencedContainer = "container:Socket.IO-Client-Swift.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -29,8 +29,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "572EF2231B51F16C00EEBB58"
-               BuildableName = "SocketIO-iOSTests.xctest"
-               BlueprintName = "SocketIO-iOSTests"
+               BuildableName = "SocketIOTests.xctest"
+               BlueprintName = "SocketIOTests"
                ReferencedContainer = "container:Socket.IO-Client-Swift.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -40,6 +40,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      language = ""
       shouldUseLaunchSchemeArgsEnv = "YES"
       codeCoverageEnabled = "YES">
       <Testables>
@@ -48,8 +49,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "572EF2231B51F16C00EEBB58"
-               BuildableName = "SocketIO-iOSTests.xctest"
-               BlueprintName = "SocketIO-iOSTests"
+               BuildableName = "SocketIOTests.xctest"
+               BlueprintName = "SocketIOTests"
                ReferencedContainer = "container:Socket.IO-Client-Swift.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -59,7 +60,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "572EF2181B51F16C00EEBB58"
             BuildableName = "SocketIO.framework"
-            BlueprintName = "SocketIO-iOS"
+            BlueprintName = "SocketIO"
             ReferencedContainer = "container:Socket.IO-Client-Swift.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -70,6 +71,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      language = ""
       launchStyle = "0"
       useCustomWorkingDirectory = "NO"
       ignoresPersistentStateOnLaunch = "NO"
@@ -81,7 +83,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "572EF2181B51F16C00EEBB58"
             BuildableName = "SocketIO.framework"
-            BlueprintName = "SocketIO-iOS"
+            BlueprintName = "SocketIO"
             ReferencedContainer = "container:Socket.IO-Client-Swift.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -99,7 +101,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "572EF2181B51F16C00EEBB58"
             BuildableName = "SocketIO.framework"
-            BlueprintName = "SocketIO-iOS"
+            BlueprintName = "SocketIO"
             ReferencedContainer = "container:Socket.IO-Client-Swift.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
