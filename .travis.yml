@@ -1,11 +1,12 @@
 language: objective-c
 xcode_project: Socket.IO-Client-Swift.xcodeproj # path to your xcodeproj folder
 xcode_scheme: SocketIO-iOS
-osx_image: xcode8.3
+osx_image: xcode9
 branches:
   only:
     - master
     - development
+    - swift4.0
 before_install:
   - brew update
   - brew outdated xctool || brew upgrade xctool
