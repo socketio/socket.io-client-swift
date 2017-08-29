@@ -24,7 +24,7 @@
 
 import Dispatch
 import Foundation
-import StarscreamSocketIO
+import Starscream
 
 /// The class that handles the engine.io protocol and transports.
 /// See `SocketEnginePollable` and `SocketEngineWebsocket` for transport specific methods.
