@@ -27,6 +27,12 @@ protocol SocketParsable {
     func parseSocketMessage(_ message: String)
 }
 
+enum SocketParsableError : Error {
+    case invalidDataArray
+    case invalidPacket
+    case invalidPacketType
+}
+
 extension SocketParsable where Self: SocketIOClientSpec {
     private func isCorrectNamespace(_ nsp: String) -> Bool {
         return nsp == self.nsp
@@ -61,16 +67,16 @@ extension SocketParsable where Self: SocketIOClientSpec {
         }
     }
 
-    /// Parses a messsage from the engine. Returning either a string error or a complete SocketPacket
-    func parseString(_ message: String) -> Either<String, SocketPacket> {
+    /// Parses a messsage from the engine, returning a complete SocketPacket or throwing.
+    func parseString(_ message: String) throws -> SocketPacket {
         var reader = SocketStringReader(message: message)
 
 		guard let type = Int(reader.read(count: 1)).flatMap({ SocketPacket.PacketType(rawValue: $0) }) else {
-            return .left("Invalid packet type")
+            throw SocketParsableError.invalidPacketType
         }
 
         if !reader.hasNext {
-            return .right(SocketPacket(type: type, nsp: "/"))
+            return SocketPacket(type: type, nsp: "/")
         }
 
         var namespace = "/"
@@ -80,7 +86,7 @@ extension SocketParsable where Self: SocketIOClientSpec {
             if let holders = Int(reader.readUntilOccurence(of: "-")) {
                 placeholders = holders
             } else {
-                return .left("Invalid packet")
+                throw SocketParsableError.invalidPacket
             }
         }
 
@@ -89,7 +95,7 @@ extension SocketParsable where Self: SocketIOClientSpec {
         }
 
         if !reader.hasNext {
-            return .right(SocketPacket(type: type, nsp: namespace, placeholders: placeholders))
+            return SocketPacket(type: type, nsp: namespace, placeholders: placeholders)
         }
 
         var idString = ""
@@ -113,21 +119,17 @@ extension SocketParsable where Self: SocketIOClientSpec {
             dataArray = "[" + dataArray + "]"
         }
 
-        switch parseData(dataArray) {
-        case let .left(err):
-            return .left(err)
-        case let .right(data):
-            return .right(SocketPacket(type: type, data: data, id: Int(idString) ?? -1,
-                nsp: namespace, placeholders: placeholders))
-        }
+        let data = try parseData(dataArray)
+
+        return SocketPacket(type: type, data: data, id: Int(idString) ?? -1, nsp: namespace, placeholders: placeholders)
     }
 
     // Parses data for events
-    private func parseData(_ data: String) -> Either<String, [Any]> {
+    private func parseData(_ data: String) throws -> [Any] {
         do {
-            return .right(try data.toArray())
+            return try data.toArray()
         } catch {
-            return .left("Error parsing data for packet")
+            throw SocketParsableError.invalidDataArray
         }
     }
 
@@ -137,12 +139,14 @@ extension SocketParsable where Self: SocketIOClientSpec {
 
         DefaultSocketLogger.Logger.log("Parsing %@", type: "SocketParser", args: message)
 
-        switch parseString(message) {
-        case let .left(err):
-            DefaultSocketLogger.Logger.error("\(err): %@", type: "SocketParser", args: message)
-        case let .right(pack):
-            DefaultSocketLogger.Logger.log("Decoded packet as: %@", type: "SocketParser", args: pack.description)
-            handlePacket(pack)
+        do {
+            let packet = try parseString(message)
+
+            DefaultSocketLogger.Logger.log("Decoded packet as: %@", type: "SocketParser", args: packet.description)
+
+            handlePacket(packet)
+        } catch {
+            DefaultSocketLogger.Logger.error("\(error): %@", type: "SocketParser", args: message)
         }
     }
 
