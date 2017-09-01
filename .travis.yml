@@ -11,7 +11,7 @@ before_install:
   - brew update
   - brew outdated xctool || brew upgrade xctool
 script:
-  - xcodebuild -project Socket.IO-Client-Swift.xcodeproj -scheme SocketIO-Mac build test
+  - xcodebuild -project Socket.IO-Client-Swift.xcodeproj -scheme SocketIO-Mac build test -quiet
 #  - xcodebuild -project Socket.IO-Client-Swift.xcodeproj -scheme SocketIO-Mac build-for-testing -quiet
 #  - xctool -project Socket.IO-Client-Swift.xcodeproj -scheme SocketIO-Mac run-tests --parallelize
 #  - swift build
