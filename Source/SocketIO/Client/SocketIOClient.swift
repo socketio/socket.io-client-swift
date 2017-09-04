@@ -155,7 +155,10 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     private func addEngine() {
         DefaultSocketLogger.Logger.log("Adding engine", type: logType, args: "")
 
-        engine?.client = nil
+        engine?.engineQueue.sync {
+            self.engine?.client = nil
+        }
+
         engine = SocketEngine(client: self, url: socketURL, config: config)
     }
 
