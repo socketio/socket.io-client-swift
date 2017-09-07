@@ -263,7 +263,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         if forceWebsockets {
             polling = false
             websocket = true
-            createWebsocketAndConnect()
+            createWebSocketAndConnect()
             return
         }
 
@@ -318,9 +318,9 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         return (urlPolling.url!, urlWebSocket.url!)
     }
 
-    private func createWebsocketAndConnect() {
-        ws?.delegate = nil
-        ws = WebSocket(url: urlWebSocketWithSid as URL)
+    private func createWebSocketAndConnect() {
+        ws?.delegate = nil // TODO this seems a bit defensive, is this really needed?
+        ws = WebSocket(url: urlWebSocketWithSid)
 
         if cookies != nil {
             let headers = HTTPCookie.requestHeaderFields(with: cookies!)
@@ -475,7 +475,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         }
 
         if !forcePolling && !forceWebsockets && upgradeWs {
-            createWebsocketAndConnect()
+            createWebSocketAndConnect()
         }
 
         sendPing()
