@@ -24,10 +24,22 @@
 //
 
 import Foundation
+#if !os(Linux)
 import StarscreamSocketIO
+#else
+import WebSockets
+import Sockets
+import TLS
+#endif
 
 /// Protocol that is used to implement socket.io WebSocket support
 public protocol SocketEngineWebsocket : SocketEngineSpec, WebSocketDelegate {
+    /// Called when a successful WebSocket connection is made.
+    func handleWSConnect()
+
+    /// Called when the WebSocket disconnects.
+    func handleWSDisconnect(error: NSError?)
+
     /// Sends an engine.io message through the WebSocket transport.
     ///
     /// You shouldn't call this directly, instead call the `write` method on `SocketEngine`.
@@ -40,6 +52,74 @@ public protocol SocketEngineWebsocket : SocketEngineSpec, WebSocketDelegate {
 
 // WebSocket methods
 extension SocketEngineWebsocket {
+    #if os(Linux)
+    func attachWebSocketHandlers() {
+        ws?.onText = {[weak self] ws, text in
+            guard let this = self else { return }
+
+            this.parseEngineMessage(text)
+        }
+
+        ws?.onBinary = {[weak self] ws, bin in
+            guard let this = self else { return }
+
+            this.parseEngineData(Data(bytes: bin))
+        }
+
+        ws?.onClose = {[weak self] _, _, reason, clean in
+            guard let this = self else { return }
+
+            this.handleWSDisconnect(error: nil)
+        }
+    }
+    #endif
+
+    func createWebSocketAndConnect() {
+        #if !os(Linux)
+        ws?.delegate = nil // TODO this seems a bit defensive, is this really needed?
+        ws = WebSocket(url: urlWebSocketWithSid)
+
+        if cookies != nil {
+            let headers = HTTPCookie.requestHeaderFields(with: cookies!)
+            for (key, value) in headers {
+                ws?.headers[key] = value
+            }
+        }
+
+        if extraHeaders != nil {
+            for (headerName, value) in extraHeaders! {
+                ws?.headers[headerName] = value
+            }
+        }
+
+        ws?.callbackQueue = engineQueue
+        ws?.enableCompression = compress
+        ws?.delegate = self
+        ws?.disableSSLCertValidation = selfSigned
+        ws?.security = security
+
+        ws?.connect()
+        #else
+        let url = urlWebSocketWithSid
+        do {
+            let socket = try TCPInternetSocket(scheme: url.scheme ?? "http",
+                                               hostname: url.host ?? "localhost",
+                                               port: Port(url.port ?? 80))
+            let stream = secure ? try TLS.InternetSocket(socket, TLS.Context(.client)) : socket
+            try WebSocket.background(to: connectURL, using: stream) {[weak self] ws in
+                guard let this = self else { return }
+
+                this.ws = ws
+
+                this.attachWebSocketHandlers()
+                this.handleWSConnect()
+            }
+        } catch {
+            DefaultSocketLogger.Logger.error("Error connecting socket", type: "SocketEngineWebsocket")
+        }
+        #endif
+    }
+
     func probeWebSocket() {
         if ws?.isConnected ?? false {
             sendWebSocketMessage("probe", withType: .ping, withData: [])
@@ -67,6 +147,7 @@ extension SocketEngineWebsocket {
 
     // MARK: Starscream delegate methods
 
+    #if !os(Linux)
     /// Delegate method for when a message is received.
     public func websocketDidReceiveMessage(socket: WebSocket, text: String) {
         parseEngineMessage(text)
@@ -76,4 +157,16 @@ extension SocketEngineWebsocket {
     public func websocketDidReceiveData(socket: WebSocket, data: Data) {
         parseEngineData(data)
     }
+    #endif
 }
+
+#if os(Linux)
+/// SSLSecurity does nothing on Linux.
+public final class SSLSecurity { }
+
+extension WebSocket {
+    var isConnected: Bool {
+        return state == .open
+    }
+}
+#endif

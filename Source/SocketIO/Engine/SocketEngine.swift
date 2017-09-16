@@ -24,7 +24,11 @@
 
 import Dispatch
 import Foundation
+#if !os(Linux)
 import StarscreamSocketIO
+#else
+import WebSockets
+#endif
 
 /// The class that handles the engine.io protocol and transports.
 /// See `SocketEnginePollable` and `SocketEngineWebsocket` for transport specific methods.
@@ -59,6 +63,9 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     ///
     /// **Do not touch this directly**
     public var waitingForPost = false
+
+    /// The WebSocket for this engine.
+    public var ws: WebSocket?
 
     /// `true` if this engine is closed.
     public private(set) var closed = false
@@ -95,6 +102,17 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     /// If `true`, the engine is currently seeing whether it can upgrade to WebSockets.
     public private(set) var probing = false
 
+    /// Whether or not this engine uses secure transports
+    public private(set) var secure = false
+
+    #if !os(Linux)
+    /// A custom security validator for Starscream. Useful for SSL pinning.
+    public private(set) var security: SSLSecurity?
+    #endif
+
+    /// Whether or not to allow self signed certificates.
+    public private(set) var selfSigned = false
+
     /// The URLSession that will be used for polling.
     public private(set) var session: URLSession?
 
@@ -113,9 +131,6 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     /// If `true`, then the engine is currently in WebSockets mode.
     public private(set) var websocket = false
 
-    /// The WebSocket for this engine.
-    public private(set) var ws: WebSocket?
-
     /// The client for this engine.
     public weak var client: SocketEngineClient?
 
@@ -133,9 +148,6 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     private var pongsMissed = 0
     private var pongsMissedMax = 0
     private var probeWait = ProbeWaitQueue()
-    private var secure = false
-    private var security: SSLSecurity?
-    private var selfSigned = false
 
     // MARK: Initializers
 
@@ -308,32 +320,6 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         return (urlPolling.url!, urlWebSocket.url!)
     }
 
-    private func createWebSocketAndConnect() {
-        ws?.delegate = nil // TODO this seems a bit defensive, is this really needed?
-        ws = WebSocket(url: urlWebSocketWithSid)
-
-        if cookies != nil {
-            let headers = HTTPCookie.requestHeaderFields(with: cookies!)
-            for (key, value) in headers {
-                ws?.headers[key] = value
-            }
-        }
-
-        if extraHeaders != nil {
-            for (headerName, value) in extraHeaders! {
-                ws?.headers[headerName] = value
-            }
-        }
-
-        ws?.callbackQueue = engineQueue
-        ws?.enableCompression = compress
-        ws?.delegate = self
-        ws?.disableSSLCertValidation = selfSigned
-        ws?.security = security
-
-        ws?.connect()
-    }
-
     /// Called when an error happens during execution. Causes a disconnection.
     public func didError(reason: String) {
         DefaultSocketLogger.Logger.error("%@", type: SocketEngine.logType, args: reason)
@@ -486,6 +472,44 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         }
     }
 
+    /// Called when a successful WebSocket connection is made.
+    public func handleWSConnect() {
+        if !forceWebsockets {
+            probing = true
+            probeWebSocket()
+        } else {
+            connected = true
+            probing = false
+            polling = false
+        }
+    }
+
+    /// Called when the WebSocket disconnects.
+    public func handleWSDisconnect(error: NSError?) {
+        probing = false
+
+        if closed {
+            client?.engineDidClose(reason: "Disconnect")
+
+            return
+        }
+
+        guard websocket else {
+            flushProbeWait()
+
+            return
+        }
+
+        connected = false
+        websocket = false
+
+        if let reason = error?.localizedDescription {
+            didError(reason: reason)
+        } else {
+            client?.engineDidClose(reason: "Socket Disconnected")
+        }
+    }
+
     /// Parses raw binary received from engine.io.
     ///
     /// - parameter data: The data to parse.
@@ -601,45 +625,19 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         }
     }
 
+    #if !os(Linux)
     // MARK: Starscream delegate conformance
 
     /// Delegate method for connection.
     public func websocketDidConnect(socket: WebSocket) {
-        if !forceWebsockets {
-            probing = true
-            probeWebSocket()
-        } else {
-            connected = true
-            probing = false
-            polling = false
-        }
+        handleWSConnect()
     }
 
     /// Delegate method for disconnection.
     public func websocketDidDisconnect(socket: WebSocket, error: NSError?) {
-        probing = false
-
-        if closed {
-            client?.engineDidClose(reason: "Disconnect")
-
-            return
-        }
-
-        guard websocket else {
-            flushProbeWait()
-
-            return
-        }
-
-        connected = false
-        websocket = false
-
-        if let reason = error?.localizedDescription {
-            didError(reason: reason)
-        } else {
-            client?.engineDidClose(reason: "Socket Disconnected")
-        }
+        handleWSDisconnect(error: error)
     }
+    #endif
 }
 
 extension SocketEngine {

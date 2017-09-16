@@ -24,7 +24,11 @@
 //
 
 import Foundation
+#if !os(Linux)
 import StarscreamSocketIO
+#else
+import WebSockets
+#endif
 
 /// Specifies a SocketEngine.
 @objc public protocol SocketEngineSpec {
@@ -39,6 +43,9 @@ import StarscreamSocketIO
 
     /// The connect parameters sent during a connect.
     var connectParams: [String: Any]? { get set }
+
+    /// Whether or not to use WebSocket compression.
+    var compress: Bool { get }
 
     /// An array of HTTPCookies that are sent during the connection.
     var cookies: [HTTPCookie]? { get }
@@ -64,6 +71,14 @@ import StarscreamSocketIO
     /// If `true`, the engine is currently seeing whether it can upgrade to WebSockets.
     var probing: Bool { get }
 
+    /// Whether or not this engine uses secure transports
+    var secure: Bool { get }
+
+    var security: SSLSecurity? { get }
+
+    /// Whether or not to allow self signed certificates.
+    var selfSigned: Bool { get }
+
     /// The session id for this engine.
     var sid: String { get }
 
@@ -80,7 +95,7 @@ import StarscreamSocketIO
     var websocket: Bool { get }
 
     /// The WebSocket for this engine.
-    var ws: WebSocket? { get }
+    var ws: WebSocket? { get set }
 
     /// Creates a new engine.
     ///
