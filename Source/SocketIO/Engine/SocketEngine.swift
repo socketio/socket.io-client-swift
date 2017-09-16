@@ -105,10 +105,8 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     /// Whether or not this engine uses secure transports
     public private(set) var secure = false
 
-    #if !os(Linux)
     /// A custom security validator for Starscream. Useful for SSL pinning.
     public private(set) var security: SSLSecurity?
-    #endif
 
     /// Whether or not to allow self signed certificates.
     public private(set) var selfSigned = false

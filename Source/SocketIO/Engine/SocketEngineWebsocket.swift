@@ -145,9 +145,9 @@ extension SocketEngineWebsocket {
         }
     }
 
+    #if !os(Linux)
     // MARK: Starscream delegate methods
 
-    #if !os(Linux)
     /// Delegate method for when a message is received.
     public func websocketDidReceiveMessage(socket: WebSocket, text: String) {
         parseEngineMessage(text)
@@ -167,6 +167,24 @@ public final class SSLSecurity { }
 extension WebSocket {
     var isConnected: Bool {
         return state == .open
+    }
+
+    func write(string: String) {
+        do {
+            try ws?.send(string)
+        } catch {
+            DefaultSocketLogger.Logger.error("Error sending string", type: "SocketEngineWebsocket", args: string)
+        }
+    }
+
+    func write(data: Data) {
+        do {
+            try data.withUnsafeBytes {(bytes: UnsafePointer<UInt8>) in
+                try ws?.send(Array(UnsafeBufferPointer(start: bytes, count: data.count)))
+            }
+        } catch {
+            DefaultSocketLogger.Logger.error("Error sending data", type: "SocketEngineWebsocket", args: data)
+        }
     }
 }
 #endif
