@@ -161,6 +161,8 @@ extension SocketEngineWebsocket {
 }
 
 #if os(Linux)
+protocol WebSocketDelegate { }
+
 /// SSLSecurity does nothing on Linux.
 public final class SSLSecurity { }
 
