@@ -29,7 +29,7 @@ import StarscreamSocketIO
 /// Specifies a SocketEngine.
 @objc public protocol SocketEngineSpec {
     /// The client for this engine.
-    weak var client: SocketEngineClient? { get set }
+    var client: SocketEngineClient? { get set }
 
     /// `true` if this engine is closed.
     var closed: Bool { get }
