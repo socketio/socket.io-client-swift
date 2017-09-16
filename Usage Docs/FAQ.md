@@ -50,5 +50,5 @@ Another case where this might happen is if you use namespaces in your socket.io 
 In the JavaScript client a url that looks like `http://somesocketioserver.com/client` would be done with the `nsp` config.
 
 ```swift
-let socket = SocketIOClient(socketURL: URL(string: "http://somesocketioserver.com/client")!, config: [.nsp("/client")])
+let socket = SocketIOClient(socketURL: URL(string: "http://somesocketioserver.com")!, config: [.nsp("/client")])
 ```
