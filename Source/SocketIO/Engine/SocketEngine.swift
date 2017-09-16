@@ -269,17 +269,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
 
         var reqPolling = URLRequest(url: urlPolling, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 60.0)
 
-        if cookies != nil {
-            let headers = HTTPCookie.requestHeaderFields(with: cookies!)
-            reqPolling.allHTTPHeaderFields = headers
-        }
-
-        if let extraHeaders = extraHeaders {
-            for (headerName, value) in extraHeaders {
-                reqPolling.setValue(value, forHTTPHeaderField: headerName)
-            }
-        }
-
+        addHeaders(to: &reqPolling)
         doLongPoll(for: reqPolling)
     }
 
@@ -303,9 +293,9 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
             urlWebSocket.scheme = "ws"
         }
 
-        if connectParams != nil {
-            for (key, value) in connectParams! {
-                let keyEsc   = key.urlEncode()!
+        if let connectParams = self.connectParams {
+            for (key, value) in connectParams {
+                let keyEsc = key.urlEncode()!
                 let valueEsc = "\(value)".urlEncode()!
 
                 queryString += "&\(keyEsc)=\(valueEsc)"

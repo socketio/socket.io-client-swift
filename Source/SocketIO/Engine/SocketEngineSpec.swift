@@ -147,6 +147,18 @@ extension SocketEngineSpec {
         return com.url!
     }
 
+    func addHeaders(to req: inout URLRequest) {
+        if let cookies = cookies {
+            req.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+        }
+
+        if let extraHeaders = extraHeaders {
+            for (headerName, value) in extraHeaders {
+                req.setValue(value, forHTTPHeaderField: headerName)
+            }
+        }
+    }
+
     func createBinaryDataForSend(using data: Data) -> Either<Data, String> {
         if websocket {
             var byteArray = [UInt8](repeating: 0x4, count: 1)

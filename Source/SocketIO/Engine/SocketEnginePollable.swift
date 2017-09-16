@@ -71,19 +71,6 @@ public protocol SocketEnginePollable : SocketEngineSpec {
 
 // Default polling methods
 extension SocketEnginePollable {
-    private func addHeaders(to req: inout URLRequest) {
-        if cookies != nil {
-            let headers = HTTPCookie.requestHeaderFields(with: cookies!)
-            req.allHTTPHeaderFields = headers
-        }
-
-        if extraHeaders != nil {
-            for (headerName, value) in extraHeaders! {
-                req.setValue(value, forHTTPHeaderField: headerName)
-            }
-        }
-    }
-
     func createRequestForPostWithPostWait() -> URLRequest {
         defer { postWait.removeAll(keepingCapacity: true) }
 
