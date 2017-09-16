@@ -123,10 +123,10 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
 
     private let url: URL
 
-    private var pingInterval: Double?
-    private var pingTimeout = 0.0 {
+    private var pingInterval: Int?
+    private var pingTimeout = 0 {
         didSet {
-            pongsMissedMax = Int(pingTimeout / (pingInterval ?? 25))
+            pongsMissedMax = Int(pingTimeout / (pingInterval ?? 25000))
         }
     }
 
@@ -459,9 +459,9 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
             upgradeWs = false
         }
 
-        if let pingInterval = json["pingInterval"] as? Double, let pingTimeout = json["pingTimeout"] as? Double {
-            self.pingInterval = pingInterval / 1000.0
-            self.pingTimeout = pingTimeout / 1000.0
+        if let pingInterval = json["pingInterval"] as? Int, let pingTimeout = json["pingTimeout"] as? Int {
+            self.pingInterval = pingInterval
+            self.pingTimeout = pingTimeout
         }
 
         if !forcePolling && !forceWebsockets && upgradeWs {
@@ -550,7 +550,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     }
 
     private func sendPing() {
-        guard connected else { return }
+        guard connected, let pingInterval = pingInterval else { return }
 
         // Server is not responding
         if pongsMissed > pongsMissedMax {
@@ -559,12 +559,12 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
             return
         }
 
-        guard let pingInterval = pingInterval else { return }
-
         pongsMissed += 1
         write("", withType: .ping, withData: [])
 
-        engineQueue.asyncAfter(deadline: DispatchTime.now() + Double(pingInterval)) {[weak self] in self?.sendPing() }
+        engineQueue.asyncAfter(deadline: DispatchTime.now() + .milliseconds(pingInterval)) {[weak self] in
+            self?.sendPing()
+        }
     }
 
     // Moves from long-polling to websockets
