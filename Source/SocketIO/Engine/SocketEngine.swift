@@ -216,7 +216,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
 
     private func checkAndHandleEngineError(_ msg: String) {
         do {
-            let dict = try msg.toNSDictionary()
+            let dict = try msg.toDictionary()
             guard let error = dict["message"] as? String else { return }
 
             /*
@@ -419,7 +419,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     }
 
     private func handleOpen(openData: String) {
-        guard let json = try? openData.toNSDictionary() else {
+        guard let json = try? openData.toDictionary() else {
             didError(reason: "Error parsing open packet")
 
             return
