@@ -296,12 +296,11 @@ extension SocketEngineSpec {
 
     func createBinaryDataForSend(using data: Data) -> Either<Data, String> {
         if websocket {
-            var byteArray = [UInt8](repeating: 0x4, count: 1)
-            let mutData = NSMutableData(bytes: &byteArray, length: 1)
+            var mutData = Data(bytes: [UInt8](repeating: 0x4, count: 1))
 
             mutData.append(data)
 
-            return .left(mutData as Data)
+            return .left(mutData)
         } else {
             return .right("b4" + data.base64EncodedString(options: Data.Base64EncodingOptions(rawValue: 0)))
         }

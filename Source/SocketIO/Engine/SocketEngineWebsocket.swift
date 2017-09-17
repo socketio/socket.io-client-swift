@@ -174,7 +174,7 @@ extension WebSocket {
 
     func write(string: String) {
         do {
-            try ws?.send(string)
+            try send(string)
         } catch {
             DefaultSocketLogger.Logger.error("Error sending string", type: "SocketEngineWebsocket", args: string)
         }
@@ -183,7 +183,7 @@ extension WebSocket {
     func write(data: Data) {
         do {
             try data.withUnsafeBytes {(bytes: UnsafePointer<UInt8>) in
-                try ws?.send(Array(UnsafeBufferPointer(start: bytes, count: data.count)))
+                try self.send(Array(UnsafeBufferPointer(start: bytes, count: data.count)))
             }
         } catch {
             DefaultSocketLogger.Logger.error("Error sending data", type: "SocketEngineWebsocket", args: data)
