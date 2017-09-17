@@ -106,7 +106,7 @@ extension SocketEngineWebsocket {
                                                hostname: url.host ?? "localhost",
                                                port: Port(url.port ?? 80))
             let stream: ClientStream = secure ? try TLS.InternetSocket(socket, TLS.Context(.client)) : socket
-            try WebSocket.background(to: url, using: stream) {[weak self] ws in
+            try WebSocket.background(to: urlWebSocketWithSid.absoluteString, using: stream) {[weak self] ws in
                 guard let this = self else { return }
 
                 this.ws = ws
@@ -170,6 +170,14 @@ public final class SSLSecurity { }
 extension WebSocket {
     var isConnected: Bool {
         return state == .open
+    }
+
+    func disconnect() {
+        do {
+            try close()
+        } catch {
+            DefaultSocketLogger.Logger.error("Error closing ws", type: "SocketEngineWebsocket", args: string)
+        }
     }
 
     func write(string: String) {
