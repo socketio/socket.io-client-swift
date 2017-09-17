@@ -100,13 +100,6 @@ extension SocketEngineWebsocket {
 
         ws?.connect()
         #else
-        func onConnect(ws: WebSocket) {
-            self.ws = ws
-
-            attachWebSocketHandlers()
-            handleWSConnect()
-        }
-
         let url = urlWebSocketWithSid
         do {
             let socket = try TCPInternetSocket(scheme: url.scheme ?? "http",
@@ -118,13 +111,13 @@ extension SocketEngineWebsocket {
                 try WebSocket.background(to: urlWebSocketWithSid.absoluteString, using: stream) {[weak self] ws in
                     guard let this = self else { return }
 
-                    onConnect(ws: ws)
+                    this.onConnect(ws: ws)
                 }
             } else {
                 try WebSocket.background(to: urlWebSocketWithSid.absoluteString, using: socket) {[weak self] ws in
                     guard let this = self else { return }
 
-                    onConnect(ws: ws)
+                    this.onConnect(ws: ws)
                 }
             }
         } catch {
@@ -132,6 +125,15 @@ extension SocketEngineWebsocket {
         }
         #endif
     }
+
+    #if os(Linux)
+    func onConnect(ws: WebSocket) {
+        self.ws = ws
+
+        attachWebSocketHandlers()
+        handleWSConnect()
+    }
+    #endif
 
     func probeWebSocket() {
         if ws?.isConnected ?? false {
