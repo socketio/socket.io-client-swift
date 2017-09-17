@@ -136,6 +136,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         super.init()
     }
 
+    #if !os(Linux)
     /// Not so type safe way to create a SocketIOClient, meant for Objective-C compatiblity.
     /// If using Swift it's recommended to use `init(socketURL: NSURL, options: Set<SocketIOClientOption>)`
     ///
@@ -144,6 +145,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     public convenience init(socketURL: NSURL, config: NSDictionary?) {
         self.init(socketURL: socketURL as URL, config: config?.toSocketConfiguration() ?? [])
     }
+    #endif
 
     deinit {
         DefaultSocketLogger.Logger.log("Client is being released", type: SocketIOClient.logType)
