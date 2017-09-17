@@ -25,6 +25,7 @@
 
 import Foundation
 
+#if !os(Linux)
 /// Declares that a type will be a delegate to an engine.
 @objc public protocol SocketEngineClient {
     // MARK: Methods
@@ -54,3 +55,34 @@ import Foundation
     /// - parameter data: The data the engine received.
     func parseEngineBinaryData(_ data: Data)
 }
+#else
+/// Declares that a type will be a delegate to an engine.
+public protocol SocketEngineClient : class {
+    // MARK: Methods
+
+    /// Called when the engine errors.
+    ///
+    /// - parameter reason: The reason the engine errored.
+    func engineDidError(reason: String)
+
+    /// Called when the engine closes.
+    ///
+    /// - parameter reason: The reason that the engine closed.
+    func engineDidClose(reason: String)
+
+    /// Called when the engine opens.
+    ///
+    /// - parameter reason: The reason the engine opened.
+    func engineDidOpen(reason: String)
+
+    /// Called when the engine has a message that must be parsed.
+    ///
+    /// - parameter msg: The message that needs parsing.
+    func parseEngineMessage(_ msg: String)
+
+    /// Called when the engine receives binary data.
+    ///
+    /// - parameter data: The data the engine received.
+    func parseEngineBinaryData(_ data: Data)
+}
+#endif
