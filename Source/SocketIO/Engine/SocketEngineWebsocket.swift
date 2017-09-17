@@ -100,19 +100,32 @@ extension SocketEngineWebsocket {
 
         ws?.connect()
         #else
+        func onConnect(ws: Websocket) {
+            self.ws = ws
+
+            attachWebSocketHandlers()
+            handleWSConnect()
+        }
+
         let url = urlWebSocketWithSid
         do {
             let socket = try TCPInternetSocket(scheme: url.scheme ?? "http",
                                                hostname: url.host ?? "localhost",
                                                port: Port(url.port ?? 80))
-            let stream: ClientStream = secure ? try TLS.InternetSocket(socket, TLS.Context(.client)) : socket
-            try WebSocket.background(to: urlWebSocketWithSid.absoluteString, using: stream) {[weak self] ws in
-                guard let this = self else { return }
 
-                this.ws = ws
+            if secure {
+                let stream = try TLS.InternetSocket(socket, TLS.Context(.client))
+                try WebSocket.background(to: urlWebSocketWithSid.absoluteString, using: stream) {[weak self] ws in
+                    guard let this = self else { return }
 
-                this.attachWebSocketHandlers()
-                this.handleWSConnect()
+                    onConnect(ws: ws)
+                }
+            } else {
+                try WebSocket.background(to: urlWebSocketWithSid.absoluteString, using: socket) {[weak self] ws in
+                    guard let this = self else { return }
+
+                    onConnect(ws: ws)
+                }
             }
         } catch {
             DefaultSocketLogger.Logger.error("Error connecting socket", type: "SocketEngineWebsocket")
