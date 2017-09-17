@@ -92,7 +92,7 @@ Then import `import SocketIO`.
 Add these line to your `Cartfile`:
 ```
 github "nuclearace/Starscream" ~> 8.0.5
-github "socketio/socket.io-client-swift" ~> 11.1.2 # Or latest version
+github "socketio/socket.io-client-swift" ~> 11.1.3 # Or latest version
 ```
 
 Run `carthage update --platform ios,macosx`.
@@ -104,7 +104,7 @@ Create `Podfile` and add `pod 'Socket.IO-Client-Swift'`:
 use_frameworks!
 
 target 'YourApp' do
-    pod 'Socket.IO-Client-Swift', '~> 11.1.2' # Or latest version
+    pod 'Socket.IO-Client-Swift', '~> 11.1.3' # Or latest version
 end
 ```
 
