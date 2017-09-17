@@ -105,8 +105,8 @@ extension SocketEngineWebsocket {
             let socket = try TCPInternetSocket(scheme: url.scheme ?? "http",
                                                hostname: url.host ?? "localhost",
                                                port: Port(url.port ?? 80))
-            let stream = secure ? try TLS.InternetSocket(socket, TLS.Context(.client)) : socket
-            try WebSocket.background(to: connectURL, using: stream) {[weak self] ws in
+            let stream: ClientStream = secure ? try TLS.InternetSocket(socket, TLS.Context(.client)) : socket
+            try WebSocket.background(to: url, using: stream) {[weak self] ws in
                 guard let this = self else { return }
 
                 this.ws = ws
