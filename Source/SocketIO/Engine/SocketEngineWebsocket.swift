@@ -100,7 +100,7 @@ extension SocketEngineWebsocket {
 
         ws?.connect()
         #else
-        func onConnect(ws: Websocket) {
+        func onConnect(ws: WebSocket) {
             self.ws = ws
 
             attachWebSocketHandlers()
@@ -189,7 +189,7 @@ extension WebSocket {
         do {
             try close()
         } catch {
-            DefaultSocketLogger.Logger.error("Error closing ws", type: "SocketEngineWebsocket", args: string)
+            DefaultSocketLogger.Logger.error("Error closing ws", type: "SocketEngineWebsocket")
         }
     }
 
