@@ -29,7 +29,7 @@ import StarscreamSocketIO
 /// Specifies a SocketEngine.
 @objc public protocol SocketEngineSpec {
     /// The client for this engine.
-    weak var client: SocketEngineClient? { get set }
+    var client: SocketEngineClient? { get set }
 
     /// `true` if this engine is closed.
     var closed: Bool { get }
@@ -145,6 +145,18 @@ extension SocketEngineSpec {
         com.percentEncodedQuery = com.percentEncodedQuery! + (sid == "" ? "" : "&sid=\(sid.urlEncode()!)")
 
         return com.url!
+    }
+
+    func addHeaders(to req: inout URLRequest) {
+        if let cookies = cookies {
+            req.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+        }
+
+        if let extraHeaders = extraHeaders {
+            for (headerName, value) in extraHeaders {
+                req.setValue(value, forHTTPHeaderField: headerName)
+            }
+        }
     }
 
     func createBinaryDataForSend(using data: Data) -> Either<Data, String> {
