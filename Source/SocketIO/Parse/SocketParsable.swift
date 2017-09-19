@@ -63,7 +63,7 @@ extension SocketParsable where Self: SocketIOClientSpec {
         case .error:
             handleEvent("error", data: pack.data, isInternalMessage: true, withAck: pack.id)
         default:
-            DefaultSocketLogger.Logger.log("Got invalid packet: %@", type: "SocketParser", args: pack.description)
+            DefaultSocketLogger.Logger.log("Got invalid packet: \(pack.description)", type: "SocketParser")
         }
     }
 
@@ -137,16 +137,16 @@ extension SocketParsable where Self: SocketIOClientSpec {
     func parseSocketMessage(_ message: String) {
         guard !message.isEmpty else { return }
 
-        DefaultSocketLogger.Logger.log("Parsing %@", type: "SocketParser", args: message)
+        DefaultSocketLogger.Logger.log("Parsing \(message)", type: "SocketParser")
 
         do {
             let packet = try parseString(message)
 
-            DefaultSocketLogger.Logger.log("Decoded packet as: %@", type: "SocketParser", args: packet.description)
+            DefaultSocketLogger.Logger.log("Decoded packet as: \(packet.description)", type: "SocketParser")
 
             handlePacket(packet)
         } catch {
-            DefaultSocketLogger.Logger.error("\(error): %@", type: "SocketParser", args: message)
+            DefaultSocketLogger.Logger.error("\(error): \(message)", type: "SocketParser")
         }
     }
 
