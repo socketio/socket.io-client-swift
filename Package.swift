@@ -5,7 +5,9 @@ import PackageDescription
 let package = Package(
     name: "SocketIO",
     dependencies: [
-        .Package(url: "https://github.com/nuclearace/Starscream", majorVersion: 8),
+        .package(url: "https://github.com/nuclearace/Starscream", from: "8.0.0"),
     ],
-    exclude: ["Source/Starscream"]
+    targets: [
+        .target(name: "SocketIO", exclude: ["Sources/Starscream"])
+    ]
 )
