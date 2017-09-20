@@ -40,7 +40,7 @@ protocol SocketIOClientSpec : class {
 
 extension SocketIOClientSpec {
     func didError(reason: String) {
-        DefaultSocketLogger.Logger.error("%@", type: "SocketIOClient", args: reason)
+        DefaultSocketLogger.Logger.error("\(reason)", type: "SocketIOClient")
 
         handleClientEvent(.error, data: [reason])
     }

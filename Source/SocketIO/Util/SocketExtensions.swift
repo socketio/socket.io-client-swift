@@ -111,9 +111,9 @@ extension String {
         return array
     }
 
-    func toNSDictionary() throws -> NSDictionary {
+    func toDictionary() throws -> [String: Any] {
         guard let binData = data(using: .utf16, allowLossyConversion: false) else { return [:] }
-        guard let json = try JSONSerialization.jsonObject(with: binData, options: .allowFragments) as? NSDictionary else {
+        guard let json = try JSONSerialization.jsonObject(with: binData, options: .allowFragments) as? [String: Any] else {
             throw JSONError.notNSDictionary
         }
 

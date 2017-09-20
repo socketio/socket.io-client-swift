@@ -47,6 +47,7 @@ open class SocketClientManager : NSObject {
     // MARK: Properties.
 
     /// The shared manager.
+    @objc
     open static let sharedManager = SocketClientManager()
 
     private var sockets = [String: SocketIOClient]()
@@ -70,6 +71,7 @@ open class SocketClientManager : NSObject {
     ///
     /// - parameter socket: The socket to add.
     /// - parameter labeledAs: The label for this socket.
+    @objc
     open func addSocket(_ socket: SocketIOClient, labeledAs label: String) {
         sockets[label] = socket
     }
@@ -78,6 +80,7 @@ open class SocketClientManager : NSObject {
     ///
     /// - parameter withLabel: The label of the socket to remove.
     /// - returns: The socket for the given label, if one was present.
+    @objc
     @discardableResult
     open func removeSocket(withLabel label: String) -> SocketIOClient? {
         return sockets.removeValue(forKey: label)
@@ -87,6 +90,7 @@ open class SocketClientManager : NSObject {
     ///
     /// - parameter socket: The socket to remove.
     /// - returns: The socket if it was in the manager.
+    @objc
     @discardableResult
     open func removeSocket(_ socket: SocketIOClient) -> SocketIOClient? {
         var returnSocket: SocketIOClient?
@@ -99,6 +103,7 @@ open class SocketClientManager : NSObject {
     }
 
     /// Removes all the sockets in the manager.
+    @objc
     open func removeSockets() {
         sockets.removeAll()
     }
