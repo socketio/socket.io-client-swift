@@ -54,18 +54,24 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     ///
     /// **This cannot be set after calling one of the connect methods**.
     public var config: SocketIOClientConfiguration {
-        didSet {
+        get {
+            return _config
+        }
+
+        set {
             guard status == .notConnected else {
                 DefaultSocketLogger.Logger.error("Tried setting config after calling connect",
                                                  type: SocketIOClient.logType)
                 return
             }
 
+            _config = newValue
+
             if socketURL.absoluteString.hasPrefix("https://") {
-                config.insert(.secure(true))
+                _config.insert(.secure(true))
             }
 
-            config.insert(.path("/socket.io/"), replacing: false)
+            _config.insert(.path("/socket.io/"), replacing: false)
             setConfigs()
         }
     }
@@ -130,6 +136,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     private(set) var currentAck = -1
     private(set) var reconnectAttempts = -1
 
+    private var _config: SocketIOClientConfiguration
     private var currentReconnectAttempt = 0
     private var reconnecting = false
 
@@ -140,14 +147,14 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     /// - parameter socketURL: The url of the socket.io server.
     /// - parameter config: The config for this socket.
     public init(socketURL: URL, config: SocketIOClientConfiguration = []) {
-        self.config = config
+        self._config = config
         self.socketURL = socketURL
 
         if socketURL.absoluteString.hasPrefix("https://") {
-            self.config.insert(.secure(true))
+            self._config.insert(.secure(true))
         }
 
-        self.config.insert(.path("/socket.io/"), replacing: false)
+        self._config.insert(.path("/socket.io/"), replacing: false)
 
         super.init()
 
