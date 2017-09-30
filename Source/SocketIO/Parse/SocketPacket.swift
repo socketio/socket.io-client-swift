@@ -25,22 +25,39 @@
 
 import Foundation
 
-struct SocketPacket {
-    enum PacketType: Int {
+/// A struct that represents a socket.io packet.
+public struct SocketPacket : CustomStringConvertible {
+    // MARK: PacketType enum
+
+    /// The type of packets.
+    public enum PacketType: Int {
         case connect, disconnect, event, ack, error, binaryEvent, binaryAck
     }
 
-    private let placeholders: Int
+    // MARK: Properties
 
     private static let logType = "SocketPacket"
 
-    let nsp: String
-    let id: Int
-    let type: PacketType
+    /// The namespace for this packet.
+    public let nsp: String
 
-    var binary: [Data]
-    var data: [Any]
-    var args: [Any] {
+    /// If > 0 then this packet is using acking.
+    public let id: Int
+
+    /// The type of this packet.
+    public let type: PacketType
+
+    /// An array of binary data for this packet.
+    public internal(set) var binary: [Data]
+
+    /// The data for this event.
+    ///
+    /// Note: This includes all data inside of the socket.io packet payload array, which includes the event name for
+    /// event type packets.
+    public internal(set) var data: [Any]
+
+    /// Returns the payload for this packet, minus the event name if this is an event or binaryEvent type packet.
+    public var args: [Any] {
         if type == .event || type == .binaryEvent && data.count != 0 {
             return Array(data.dropFirst())
         } else {
@@ -48,16 +65,21 @@ struct SocketPacket {
         }
     }
 
-    var description: String {
+    private let placeholders: Int
+
+    /// A string representation of this packet.
+    public var description: String {
         return "SocketPacket {type: \(String(type.rawValue)); data: " +
             "\(String(describing: data)); id: \(id); placeholders: \(placeholders); nsp: \(nsp)}"
     }
 
-    var event: String {
+    /// The event name for this packet.
+    public var event: String {
         return String(describing: data[0])
     }
 
-    var packetString: String {
+    /// A string representation of this packet.
+    public var packetString: String {
         return createPacketString()
     }
 

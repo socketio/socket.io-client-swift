@@ -126,68 +126,40 @@
 			remoteGlobalIDString = 576349FA1BD9B46A00E19CD7;
 			remoteInfo = "SocketIO-tvOS";
 		};
-		745225EC1F1BA89E007EA874 /* PBXContainerItemProxy */ = {
+		74B3C8391F7F3ECE007D96C8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 74638B5A1F111CD000F5E1FF /* Starscream.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 33CCF0921F5DDC030099B092;
+			remoteInfo = StarscreamSocketIO;
+		};
+		74B3C83B1F7F3ECE007D96C8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 74638B5A1F111CD000F5E1FF /* Starscream.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 335FA2021F5DF71D00F6D2EC;
+			remoteInfo = "Starscream Tests";
+		};
+		74B3C8411F7F3F93007D96C8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 74638B5A1F111CD000F5E1FF /* Starscream.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 6B3E79E519D48B7F006071F7;
-			remoteInfo = "Starscream iOS";
+			remoteGlobalIDString = 33CCF0841F5DDC030099B092;
+			remoteInfo = StarscreamSocketIO;
 		};
-		74638B631F111CD000F5E1FF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 74638B5A1F111CD000F5E1FF /* Starscream.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 6B3E79E619D48B7F006071F7;
-			remoteInfo = "Starscream iOS";
-		};
-		74638B651F111CD000F5E1FF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 74638B5A1F111CD000F5E1FF /* Starscream.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 6B3E79F119D48B7F006071F7;
-			remoteInfo = "Starscream iOSTests";
-		};
-		74638B671F111CD000F5E1FF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 74638B5A1F111CD000F5E1FF /* Starscream.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = D9C3E35F19E48FF1009FC285;
-			remoteInfo = "Starscream OSX";
-		};
-		74638B691F111CD000F5E1FF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 74638B5A1F111CD000F5E1FF /* Starscream.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = D9C3E36919E48FF1009FC285;
-			remoteInfo = "Starscream OSXTests";
-		};
-		74638B6B1F111CD000F5E1FF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 74638B5A1F111CD000F5E1FF /* Starscream.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 091277971BD673A70003036D;
-			remoteInfo = "Starscream tvOS";
-		};
-		74638B6D1F111CD000F5E1FF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 74638B5A1F111CD000F5E1FF /* Starscream.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 091277A01BD673A70003036D;
-			remoteInfo = "Starscream tvOSTests";
-		};
-		74638B711F111CF100F5E1FF /* PBXContainerItemProxy */ = {
+		74B3C8431F7F3F98007D96C8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 74638B5A1F111CD000F5E1FF /* Starscream.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = D9C3E35E19E48FF1009FC285;
-			remoteInfo = "Starscream OSX";
+			remoteGlobalIDString = 33CCF0841F5DDC030099B092;
+			remoteInfo = StarscreamSocketIO;
 		};
-		74638B731F111CF600F5E1FF /* PBXContainerItemProxy */ = {
+		74B3C8451F7F3F9C007D96C8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 74638B5A1F111CD000F5E1FF /* Starscream.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 091277961BD673A70003036D;
-			remoteInfo = "Starscream tvOS";
+			remoteGlobalIDString = 33CCF0841F5DDC030099B092;
+			remoteInfo = StarscreamSocketIO;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -436,12 +408,8 @@
 		74638B5B1F111CD000F5E1FF /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				74638B641F111CD000F5E1FF /* StarscreamSocketIO.framework */,
-				74638B661F111CD000F5E1FF /* Starscream iOSTests.xctest */,
-				74638B681F111CD000F5E1FF /* StarscreamSocketIO.framework */,
-				74638B6A1F111CD000F5E1FF /* Starscream OSXTests.xctest */,
-				74638B6C1F111CD000F5E1FF /* StarscreamSocketIO.framework */,
-				74638B6E1F111CD000F5E1FF /* Starscream tvOSTests.xctest */,
+				74B3C83A1F7F3ECE007D96C8 /* StarscreamSocketIO.framework */,
+				74B3C83C1F7F3ECE007D96C8 /* Starscream Tests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -550,7 +518,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				745225ED1F1BA89E007EA874 /* PBXTargetDependency */,
+				74B3C8461F7F3F9C007D96C8 /* PBXTargetDependency */,
 			);
 			name = "SocketIO-iOS";
 			productName = "SocketIO-iOS";
@@ -587,7 +555,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				74638B721F111CF100F5E1FF /* PBXTargetDependency */,
+				74B3C8441F7F3F98007D96C8 /* PBXTargetDependency */,
 			);
 			name = "SocketIO-Mac";
 			productName = "SocketIO-Mac";
@@ -624,7 +592,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				74638B741F111CF600F5E1FF /* PBXTargetDependency */,
+				74B3C8421F7F3F93007D96C8 /* PBXTargetDependency */,
 			);
 			name = "SocketIO-tvOS";
 			productName = "SocketIO-iOS";
@@ -704,46 +672,18 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		74638B641F111CD000F5E1FF /* StarscreamSocketIO.framework */ = {
+		74B3C83A1F7F3ECE007D96C8 /* StarscreamSocketIO.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = StarscreamSocketIO.framework;
-			remoteRef = 74638B631F111CD000F5E1FF /* PBXContainerItemProxy */;
+			remoteRef = 74B3C8391F7F3ECE007D96C8 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		74638B661F111CD000F5E1FF /* Starscream iOSTests.xctest */ = {
+		74B3C83C1F7F3ECE007D96C8 /* Starscream Tests.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
-			path = "Starscream iOSTests.xctest";
-			remoteRef = 74638B651F111CD000F5E1FF /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		74638B681F111CD000F5E1FF /* StarscreamSocketIO.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = StarscreamSocketIO.framework;
-			remoteRef = 74638B671F111CD000F5E1FF /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		74638B6A1F111CD000F5E1FF /* Starscream OSXTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = "Starscream OSXTests.xctest";
-			remoteRef = 74638B691F111CD000F5E1FF /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		74638B6C1F111CD000F5E1FF /* StarscreamSocketIO.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = StarscreamSocketIO.framework;
-			remoteRef = 74638B6B1F111CD000F5E1FF /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		74638B6E1F111CD000F5E1FF /* Starscream tvOSTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = "Starscream tvOSTests.xctest";
-			remoteRef = 74638B6D1F111CD000F5E1FF /* PBXContainerItemProxy */;
+			path = "Starscream Tests.xctest";
+			remoteRef = 74B3C83B1F7F3ECE007D96C8 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -936,20 +876,20 @@
 			target = 576349FA1BD9B46A00E19CD7 /* SocketIO-tvOS */;
 			targetProxy = 57634A3D1BD9B4B800E19CD7 /* PBXContainerItemProxy */;
 		};
-		745225ED1F1BA89E007EA874 /* PBXTargetDependency */ = {
+		74B3C8421F7F3F93007D96C8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = "Starscream iOS";
-			targetProxy = 745225EC1F1BA89E007EA874 /* PBXContainerItemProxy */;
+			name = StarscreamSocketIO;
+			targetProxy = 74B3C8411F7F3F93007D96C8 /* PBXContainerItemProxy */;
 		};
-		74638B721F111CF100F5E1FF /* PBXTargetDependency */ = {
+		74B3C8441F7F3F98007D96C8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = "Starscream OSX";
-			targetProxy = 74638B711F111CF100F5E1FF /* PBXContainerItemProxy */;
+			name = StarscreamSocketIO;
+			targetProxy = 74B3C8431F7F3F98007D96C8 /* PBXContainerItemProxy */;
 		};
-		74638B741F111CF600F5E1FF /* PBXTargetDependency */ = {
+		74B3C8461F7F3F9C007D96C8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = "Starscream tvOS";
-			targetProxy = 74638B731F111CF600F5E1FF /* PBXContainerItemProxy */;
+			name = StarscreamSocketIO;
+			targetProxy = 74B3C8451F7F3F9C007D96C8 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -990,7 +930,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = SocketIO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 				TVOS_DEPLOYMENT_TARGET = 9.0;
 				WATCHOS_DEPLOYMENT_TARGET = 2.0;
 			};
@@ -1029,7 +969,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_NAME = SocketIO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 				TVOS_DEPLOYMENT_TARGET = 9.0;
 				WATCHOS_DEPLOYMENT_TARGET = 2.0;
 			};
@@ -1087,6 +1027,7 @@
 				SKIP_INSTALL = YES;
 				SWIFT_INCLUDE_PATHS = $SRCROOT/zlib;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1139,6 +1080,7 @@
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_INCLUDE_PATHS = $SRCROOT/zlib;
+				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
@@ -1303,7 +1245,7 @@
 				SKIP_INSTALL = YES;
 				SWIFT_INCLUDE_PATHS = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 4.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -1361,7 +1303,7 @@
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SWIFT_INCLUDE_PATHS = "";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 4.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -1423,7 +1365,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
@@ -1475,7 +1417,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "io.socket.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
