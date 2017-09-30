@@ -23,7 +23,19 @@
 import Foundation
 
 /// Defines that a type will be able to parse socket.io-protocol messages.
-protocol SocketParsable {
+public protocol SocketParsable : class {
+    // MARK: Properties
+
+    /// A list of packets that are waiting for binary data.
+    ///
+    /// The way that socket.io works all data should be sent directly after each packet.
+    /// So this should ideally be an array of one packet waiting for data.
+    ///
+    /// **This should not be modified directly.**
+    var waitingPackets: [SocketPacket] { get set }
+
+    // MARK: Methods
+
     /// Called when the engine has received some binary data that should be attached to a packet.
     ///
     /// Packets binary data should be sent directly after the packet that expects it, so there's confusion over
@@ -39,18 +51,28 @@ protocol SocketParsable {
     func parseSocketMessage(_ message: String)
 }
 
-enum SocketParsableError : Error {
+/// Errors that can be thrown during parsing.
+public enum SocketParsableError : Error {
+    // MARK: Cases
+
+    /// Thrown when a packet received has an invalid data array, or is missing the data array.
     case invalidDataArray
+
+    /// Thrown when an malformed packet is received.
     case invalidPacket
+
+    /// Thrown when the parser receives an unknown packet type.
     case invalidPacketType
 }
 
-extension SocketParsable where Self: SocketIOClientSpec {
+public extension SocketParsable where Self: SocketIOClientSpec {
     private func isCorrectNamespace(_ nsp: String) -> Bool {
         return nsp == self.nsp
     }
 
     private func handleConnect(_ packetNamespace: String) {
+        // If we connected with a namespace, check if we've joined the default namespace first, then switch to the
+        // other namespace
         if packetNamespace == "/" && nsp != "/" {
             joinNamespace(nsp)
         } else {
@@ -79,8 +101,11 @@ extension SocketParsable where Self: SocketIOClientSpec {
         }
     }
 
-    /// Parses a messsage from the engine, returning a complete SocketPacket or throwing.
-    func parseString(_ message: String) throws -> SocketPacket {
+    /// Parses a message from the engine, returning a complete SocketPacket or throwing.
+    ///
+    /// - parameter message: The message to parse.
+    /// - returns: A completed packet, or throwing.
+    internal func parseString(_ message: String) throws -> SocketPacket {
         var reader = SocketStringReader(message: message)
 
 		guard let type = Int(reader.read(count: 1)).flatMap({ SocketPacket.PacketType(rawValue: $0) }) else {
@@ -148,7 +173,7 @@ extension SocketParsable where Self: SocketIOClientSpec {
     /// Called when the engine has received a string that should be parsed into a socket.io packet.
     ///
     /// - parameter message: The string that needs parsing.
-    func parseSocketMessage(_ message: String) {
+    public func parseSocketMessage(_ message: String) {
         guard !message.isEmpty else { return }
 
         DefaultSocketLogger.Logger.log("Parsing \(message)", type: "SocketParser")
@@ -171,7 +196,7 @@ extension SocketParsable where Self: SocketIOClientSpec {
     /// into the correct placeholder.
     ///
     /// - parameter data: The data that should be attached to a packet.
-    func parseBinaryData(_ data: Data) {
+    public func parseBinaryData(_ data: Data) {
         guard !waitingPackets.isEmpty else {
             DefaultSocketLogger.Logger.error("Got data when not remaking packet", type: "SocketParser")
             return

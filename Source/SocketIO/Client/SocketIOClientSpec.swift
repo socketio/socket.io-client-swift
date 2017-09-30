@@ -23,41 +23,118 @@
 //  THE SOFTWARE.
 
 import Dispatch
-
+import Foundation
 
 /// Defines the interface for a SocketIOClient.
-protocol SocketIOClientSpec : class {
+public protocol SocketIOClientSpec : class {
+    // MARK: Properties
+
+    /// A handler that will be called on any event.
+    var anyHandler: ((SocketAnyEvent) -> ())? { get }
+
     /// The queue that all interaction with the client must be on.
     var handleQueue: DispatchQueue { get set }
+
+    /// The array of handlers for this socket.
+    var handlers: [SocketEventHandler] { get }
 
     /// The namespace that this socket is currently connected to.
     ///
     /// **Must** start with a `/`.
     var nsp: String { get set }
 
-    /// A list of packets that are waiting for binary data.
+    /// The status of this client.
+    var status: SocketIOClientStatus { get }
+
+    // MARK: Methods
+
+    /// Connect to the server. The same as calling `connect(timeoutAfter:withHandler:)` with a timeout of 0.
     ///
-    /// The way that socket.io works all data should be sent directly after each packet.
-    /// So this should ideally be an array of one packet waiting for data.
-    var waitingPackets: [SocketPacket] { get set }
+    /// Only call after adding your event listeners, unless you know what you're doing.
+    func connect()
+
+    /// Connect to the server. If we aren't connected after `timeoutAfter` seconds, then `withHandler` is called.
+    ///
+    /// Only call after adding your event listeners, unless you know what you're doing.
+    ///
+    /// - parameter timeoutAfter: The number of seconds after which if we are not connected we assume the connection
+    ///                           has failed. Pass 0 to never timeout.
+    /// - parameter withHandler: The handler to call when the client fails to connect.
+    func connect(timeoutAfter: Double, withHandler handler: (() -> ())?)
 
     /// Called when the client connects to a namespace. If the client was created with a namespace upfront,
     /// then this is only called when the client connects to that namespace.
+    ///
+    /// - parameter toNamespace: The namespace that was connected to.
     func didConnect(toNamespace namespace: String)
 
     /// Called when the client has disconnected from socket.io.
+    ///
+    /// - parameter reason: The reason for the disconnection.
     func didDisconnect(reason: String)
 
     /// Called when the client encounters an error.
+    ///
+    /// - parameter reason: The reason for the disconnection.
     func didError(reason: String)
 
+    /// Disconnects the socket.
+    func disconnect()
+
+    /// Send an event to the server, with optional data items.
+    ///
+    /// If an error occurs trying to transform `items` into their socket representation, a `SocketClientEvent.error`
+    /// will be emitted. The structure of the error data is `[eventName, items, theError]`
+    ///
+    /// - parameter event: The event to send.
+    /// - parameter items: The items to send with this event. May be left out.
+    func emit(_ event: String, _ items: SocketData...)
+
+    /// Call when you wish to tell the server that you've received the event for `ack`.
+    ///
+    /// - parameter ack: The ack number.
+    /// - parameter with: The data for this ack.
+    func emitAck(_ ack: Int, with items: [Any])
+
+    /// Sends a message to the server, requesting an ack.
+    ///
+    /// **NOTE**: It is up to the server send an ack back, just calling this method does not mean the server will ack.
+    /// Check that your server's api will ack the event being sent.
+    ///
+    /// If an error occurs trying to transform `items` into their socket representation, a `SocketClientEvent.error`
+    /// will be emitted. The structure of the error data is `[eventName, items, theError]`
+    ///
+    /// Example:
+    ///
+    /// ```swift
+    /// socket.emitWithAck("myEvent", 1).timingOut(after: 1) {data in
+    ///     ...
+    /// }
+    /// ```
+    ///
+    /// - parameter event: The event to send.
+    /// - parameter items: The items to send with this event. May be left out.
+    /// - returns: An `OnAckCallback`. You must call the `timingOut(after:)` method before the event will be sent.
+    func emitWithAck(_ event: String, _ items: SocketData...) -> OnAckCallback
+
     /// Called when socket.io has acked one of our emits. Causes the corresponding ack callback to be called.
+    ///
+    /// - parameter ack: The number for this ack.
+    /// - parameter data: The data sent back with this ack.
     func handleAck(_ ack: Int, data: [Any])
 
     /// Called when we get an event from socket.io.
+    ///
+    /// - parameter event: The name of the event.
+    /// - parameter data: The data that was sent with this event.
+    /// - parameter isInternalMessage: Whether this event was sent internally. If `true` it is always sent to handlers.
+    /// - parameter withAck: If > 0 then this event expects to get an ack back from the client.
     func handleEvent(_ event: String, data: [Any], isInternalMessage: Bool, withAck ack: Int)
 
-    /// Called on socket.io events.
+    /// Called on socket.io specific events.
+    ///
+    /// - parameter event: The `SocketClientEvent`.
+    /// - parameter data: The data for this event.
     func handleClientEvent(_ event: SocketClientEvent, data: [Any])
 
     /// Call when you wish to leave a namespace and return to the default namespace.
@@ -69,11 +146,81 @@ protocol SocketIOClientSpec : class {
     ///
     /// - parameter namespace: The namespace to join.
     func joinNamespace(_ namespace: String)
+
+    /// Removes handler(s) for a client event.
+    ///
+    /// If you wish to remove a client event handler, call the `off(id:)` with the UUID received from its `on` call.
+    ///
+    /// - parameter clientEvent: The event to remove handlers for.
+    func off(clientEvent event: SocketClientEvent)
+
+    /// Removes handler(s) based on an event name.
+    ///
+    /// If you wish to remove a specific event, call the `off(id:)` with the UUID received from its `on` call.
+    ///
+    /// - parameter event: The event to remove handlers for.
+    func off(_ event: String)
+
+    /// Removes a handler with the specified UUID gotten from an `on` or `once`
+    ///
+    /// If you want to remove all events for an event, call the off `off(_:)` method with the event name.
+    ///
+    /// - parameter id: The UUID of the handler you wish to remove.
+    func off(id: UUID)
+
+    /// Adds a handler for an event.
+    ///
+    /// - parameter event: The event name for this handler.
+    /// - parameter callback: The callback that will execute when this event is received.
+    /// - returns: A unique id for the handler that can be used to remove it.
+    func on(_ event: String, callback: @escaping NormalCallback) -> UUID
+
+    /// Adds a handler for a client event.
+    ///
+    /// Example:
+    ///
+    /// ```swift
+    /// socket.on(clientEvent: .connect) {data, ack in
+    ///     ...
+    /// }
+    /// ```
+    ///
+    /// - parameter event: The event for this handler.
+    /// - parameter callback: The callback that will execute when this event is received.
+    /// - returns: A unique id for the handler that can be used to remove it.
+    func on(clientEvent event: SocketClientEvent, callback: @escaping NormalCallback) -> UUID
+
+    /// Adds a single-use handler for a client event.
+    ///
+    /// - parameter clientEvent: The event for this handler.
+    /// - parameter callback: The callback that will execute when this event is received.
+    /// - returns: A unique id for the handler that can be used to remove it.
+    func once(clientEvent event: SocketClientEvent, callback: @escaping NormalCallback) -> UUID
+
+    /// Adds a single-use handler for an event.
+    ///
+    /// - parameter event: The event name for this handler.
+    /// - parameter callback: The callback that will execute when this event is received.
+    /// - returns: A unique id for the handler that can be used to remove it.
+    func once(_ event: String, callback: @escaping NormalCallback) -> UUID
+
+    /// Adds a handler that will be called on every event.
+    ///
+    /// - parameter handler: The callback that will execute whenever an event is received.
+    func onAny(_ handler: @escaping (SocketAnyEvent) -> ())
+
+    /// Tries to reconnect to the server.
+    func reconnect()
+
+    /// Removes all handlers.
+    ///
+    /// Can be used after disconnecting to break any potential remaining retain cycles.
+    func removeAllHandlers()
 }
 
-extension SocketIOClientSpec {
+public extension SocketIOClientSpec {
     /// Default implementation.
-    func didError(reason: String) {
+    public func didError(reason: String) {
         DefaultSocketLogger.Logger.error("\(reason)", type: "SocketIOClient")
 
         handleClientEvent(.error, data: [reason])
@@ -82,6 +229,8 @@ extension SocketIOClientSpec {
 
 /// The set of events that are generated by the client.
 public enum SocketClientEvent : String {
+    // MARK: Cases
+
     /// Emitted when the client connects. This is also called on a successful reconnection. A connect event gets one
     /// data item: the namespace that was connected to.
     ///

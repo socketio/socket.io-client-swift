@@ -39,7 +39,13 @@ public final class SocketAckEmitter : NSObject {
         return ackNum != -1
     }
 
-    init(socket: SocketIOClient, ackNum: Int) {
+    // MARK: Initializers
+
+    /// Creates a new `SocketAckEmitter`.
+    ///
+    /// - parameter socket: The socket for this emitter.
+    /// - parameter ackNum: The ack number for this emitter.
+    public init(socket: SocketIOClient, ackNum: Int) {
         self.socket = socket
         self.ackNum = ackNum
     }

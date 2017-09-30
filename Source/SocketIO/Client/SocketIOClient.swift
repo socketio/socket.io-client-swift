@@ -35,26 +35,6 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
 
     private static let logType = "SocketIOClient"
 
-    /// The engine for this client.
-    @objc
-    public private(set) var engine: SocketEngineSpec?
-
-    /// The status of this client.
-    @objc
-    public private(set) var status = SocketIOClientStatus.notConnected {
-        didSet {
-            switch status {
-            case .connected:
-                reconnecting = false
-                currentReconnectAttempt = 0
-            default:
-                break
-            }
-
-            handleClientEvent(.statusChange, data: [status])
-        }
-    }
-
     /// If `true` then every time `connect` is called, a new engine will be created.
     @objc
     public var forceNew = false
@@ -94,20 +74,46 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     @objc
     public var socketURL: URL
 
-    var ackHandlers = SocketAckManager()
-
     /// A list of packets that are waiting for binary data.
     ///
     /// The way that socket.io works all data should be sent directly after each packet.
     /// So this should ideally be an array of one packet waiting for data.
-    var waitingPackets = [SocketPacket]()
+    ///
+    /// **This should not be modified directly.**
+    public var waitingPackets = [SocketPacket]()
+
+    /// A handler that will be called on any event.
+    public private(set) var anyHandler: ((SocketAnyEvent) -> ())?
+
+    /// The engine for this client.
+    @objc
+    public private(set) var engine: SocketEngineSpec?
+
+    /// The array of handlers for this socket.
+    public private(set) var handlers = [SocketEventHandler]()
+
+    /// The status of this client.
+    @objc
+    public private(set) var status = SocketIOClientStatus.notConnected {
+        didSet {
+            switch status {
+            case .connected:
+                reconnecting = false
+                currentReconnectAttempt = 0
+            default:
+                break
+            }
+
+            handleClientEvent(.statusChange, data: [status])
+        }
+    }
+
+    var ackHandlers = SocketAckManager()
 
     private(set) var currentAck = -1
     private(set) var reconnectAttempts = -1
 
-    private var anyHandler: ((SocketAnyEvent) -> ())?
     private var currentReconnectAttempt = 0
-    private var handlers = [SocketEventHandler]()
     private var reconnecting = false
 
     // MARK: Initializers
@@ -232,7 +238,9 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
 
     /// Called when the client connects to a namespace. If the client was created with a namespace upfront,
     /// then this is only called when the client connects to that namespace.
-    func didConnect(toNamespace namespace: String) {
+    ///
+    /// - parameter toNamespace: The namespace that was connected to.
+    open func didConnect(toNamespace namespace: String) {
         DefaultSocketLogger.Logger.log("Socket connected", type: SocketIOClient.logType)
 
         status = .connected
@@ -241,7 +249,9 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     }
 
     /// Called when the client has disconnected from socket.io.
-    func didDisconnect(reason: String) {
+    ///
+    /// - parameter reason: The reason for the disconnection.
+    open func didDisconnect(reason: String) {
         guard status != .disconnected else { return }
 
         DefaultSocketLogger.Logger.log("Disconnected: \(reason)", type: SocketIOClient.logType)
@@ -361,8 +371,13 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         engine?.send(str, withData: packet.binary)
     }
 
-    // If the server wants to know that the client received data
-    func emitAck(_ ack: Int, with items: [Any]) {
+    /// Call when you wish to tell the server that you've received the event for `ack`.
+    ///
+    /// **You shouldn't need to call this directly.** Instead use an `SocketAckEmitter` that comes in an event callback.
+    ///
+    /// - parameter ack: The ack number.
+    /// - parameter with: The data for this ack.
+    open func emitAck(_ ack: Int, with items: [Any]) {
         guard status == .connected else { return }
 
         let packet = SocketPacket.packetFromEmit(items, id: ack, nsp: nsp, ack: true)
@@ -419,8 +434,12 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         DefaultSocketLogger.Logger.log(reason, type: SocketIOClient.logType)
     }
 
-    // Called when the socket gets an ack for something it sent
-    func handleAck(_ ack: Int, data: [Any]) {
+    /// Called when socket.io has acked one of our emits. Causes the corresponding ack callback to be called.
+    ///
+    /// - parameter ack: The number for this ack.
+    /// - parameter data: The data sent back with this ack.
+    @objc
+    open func handleAck(_ ack: Int, data: [Any]) {
         guard status == .connected else { return }
 
         DefaultSocketLogger.Logger.log("Handling ack: \(ack) with data: \(data)", type: SocketIOClient.logType)
@@ -428,12 +447,12 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         ackHandlers.executeAck(ack, with: data, onQueue: handleQueue)
     }
 
-    /// Causes an event to be handled, and any event handlers for that event to be called.
+    /// Called when we get an event from socket.io.
     ///
-    /// - parameter event: The event that is to be handled.
-    /// - parameter data: the data associated with this event.
-    /// - parameter isInternalMessage: If `true` event handlers for this event will be called regardless of status.
-    /// - parameter withAck: The ack number for this event. May be left out.
+    /// - parameter event: The name of the event.
+    /// - parameter data: The data that was sent with this event.
+    /// - parameter isInternalMessage: Whether this event was sent internally. If `true` it is always sent to handlers.
+    /// - parameter withAck: If > 0 then this event expects to get an ack back from the client.
     @objc
     open func handleEvent(_ event: String, data: [Any], isInternalMessage: Bool, withAck ack: Int = -1) {
         guard status == .connected || isInternalMessage else { return }
@@ -447,7 +466,11 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         }
     }
 
-    func handleClientEvent(_ event: SocketClientEvent, data: [Any]) {
+    /// Called on socket.io specific events.
+    ///
+    /// - parameter event: The `SocketClientEvent`.
+    /// - parameter data: The data for this event.
+    open func handleClientEvent(_ event: SocketClientEvent, data: [Any]) {
         handleEvent(event.rawValue, data: data, isInternalMessage: true)
     }
 
@@ -615,6 +638,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     }
 
     /// Removes all handlers.
+    ///
     /// Can be used after disconnecting to break any potential remaining retain cycles.
     @objc
     open func removeAllHandlers() {
