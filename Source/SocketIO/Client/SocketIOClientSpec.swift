@@ -24,6 +24,8 @@
 
 import Dispatch
 
+
+/// Defines the interface for a SocketIOClient.
 protocol SocketIOClientSpec : class {
     /// The queue that all interaction with the client must be on.
     var handleQueue: DispatchQueue { get set }

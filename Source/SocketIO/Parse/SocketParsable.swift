@@ -22,8 +22,20 @@
 
 import Foundation
 
+/// Defines that a type will be able to parse socket.io-protocol messages.
 protocol SocketParsable {
+    /// Called when the engine has received some binary data that should be attached to a packet.
+    ///
+    /// Packets binary data should be sent directly after the packet that expects it, so there's confusion over
+    /// where the data should go. Data should be received in the order it is sent, so that the correct data is put
+    /// into the correct placeholder.
+    ///
+    /// - parameter data: The data that should be attached to a packet.
     func parseBinaryData(_ data: Data)
+
+    /// Called when the engine has received a string that should be parsed into a socket.io packet.
+    ///
+    /// - parameter message: The string that needs parsing.
     func parseSocketMessage(_ message: String)
 }
 
@@ -133,7 +145,9 @@ extension SocketParsable where Self: SocketIOClientSpec {
         }
     }
 
-    // Parses messages recieved
+    /// Called when the engine has received a string that should be parsed into a socket.io packet.
+    ///
+    /// - parameter message: The string that needs parsing.
     func parseSocketMessage(_ message: String) {
         guard !message.isEmpty else { return }
 
@@ -150,6 +164,13 @@ extension SocketParsable where Self: SocketIOClientSpec {
         }
     }
 
+    /// Called when the engine has received some binary data that should be attached to a packet.
+    ///
+    /// Packets binary data should be sent directly after the packet that expects it, so there's confusion over
+    /// where the data should go. Data should be received in the order it is sent, so that the correct data is put
+    /// into the correct placeholder.
+    ///
+    /// - parameter data: The data that should be attached to a packet.
     func parseBinaryData(_ data: Data) {
         guard !waitingPackets.isEmpty else {
             DefaultSocketLogger.Logger.error("Got data when not remaking packet", type: "SocketParser")
