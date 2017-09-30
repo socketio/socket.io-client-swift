@@ -64,7 +64,9 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     @objc
     public var handleQueue = DispatchQueue.main
 
-    /// The namespace for this client.
+    /// The namespace that this socket is currently connected to.
+    ///
+    /// **Must** start with a `/`.
     @objc
     public var nsp = "/"
 
@@ -93,6 +95,11 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     public var socketURL: URL
 
     var ackHandlers = SocketAckManager()
+
+    /// A list of packets that are waiting for binary data.
+    ///
+    /// The way that socket.io works all data should be sent directly after each packet.
+    /// So this should ideally be an array of one packet waiting for data.
     var waitingPackets = [SocketPacket]()
 
     private(set) var currentAck = -1
@@ -172,13 +179,17 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         engine = SocketEngine(client: self, url: socketURL, config: config)
     }
 
-    /// Connect to the server.
+    /// Connect to the server. The same as calling `connect(timeoutAfter:withHandler:)` with a timeout of 0.
+    ///
+    /// Only call after adding your event listeners, unless you know what you're doing.
     @objc
     open func connect() {
         connect(timeoutAfter: 0, withHandler: nil)
     }
 
     /// Connect to the server. If we aren't connected after `timeoutAfter` seconds, then `withHandler` is called.
+    ///
+    /// Only call after adding your event listeners, unless you know what you're doing.
     ///
     /// - parameter timeoutAfter: The number of seconds after which if we are not connected we assume the connection
     ///                           has failed. Pass 0 to never timeout.
@@ -219,6 +230,8 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         return OnAckCallback(ackNumber: currentAck, items: items, socket: self)
     }
 
+    /// Called when the client connects to a namespace. If the client was created with a namespace upfront,
+    /// then this is only called when the client connects to that namespace.
     func didConnect(toNamespace namespace: String) {
         DefaultSocketLogger.Logger.log("Socket connected", type: SocketIOClient.logType)
 
@@ -227,6 +240,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         handleClientEvent(.connect, data: [namespace])
     }
 
+    /// Called when the client has disconnected from socket.io.
     func didDisconnect(reason: String) {
         guard status != .disconnected else { return }
 
@@ -437,7 +451,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         handleEvent(event.rawValue, data: data, isInternalMessage: true)
     }
 
-    /// Leaves nsp and goes back to the default namespace.
+    /// Call when you wish to leave a namespace and return to the default namespace.
     @objc
     open func leaveNamespace() {
         if nsp != "/" {

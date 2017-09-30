@@ -25,20 +25,52 @@
 import Dispatch
 
 protocol SocketIOClientSpec : class {
+    /// The queue that all interaction with the client must be on.
     var handleQueue: DispatchQueue { get set }
+
+    /// The namespace that this socket is currently connected to.
+    ///
+    /// **Must** start with a `/`.
     var nsp: String { get set }
+
+    /// A list of packets that are waiting for binary data.
+    ///
+    /// The way that socket.io works all data should be sent directly after each packet.
+    /// So this should ideally be an array of one packet waiting for data.
     var waitingPackets: [SocketPacket] { get set }
 
+    /// Called when the client connects to a namespace. If the client was created with a namespace upfront,
+    /// then this is only called when the client connects to that namespace.
     func didConnect(toNamespace namespace: String)
+
+    /// Called when the client has disconnected from socket.io.
     func didDisconnect(reason: String)
+
+    /// Called when the client encounters an error.
     func didError(reason: String)
+
+    /// Called when socket.io has acked one of our emits. Causes the corresponding ack callback to be called.
     func handleAck(_ ack: Int, data: [Any])
+
+    /// Called when we get an event from socket.io.
     func handleEvent(_ event: String, data: [Any], isInternalMessage: Bool, withAck ack: Int)
+
+    /// Called on socket.io events.
     func handleClientEvent(_ event: SocketClientEvent, data: [Any])
+
+    /// Call when you wish to leave a namespace and return to the default namespace.
+    func leaveNamespace()
+
+    /// Joins `namespace`.
+    ///
+    /// **Do not use this to join the default namespace.** Instead call `leaveNamespace`.
+    ///
+    /// - parameter namespace: The namespace to join.
     func joinNamespace(_ namespace: String)
 }
 
 extension SocketIOClientSpec {
+    /// Default implementation.
     func didError(reason: String) {
         DefaultSocketLogger.Logger.error("\(reason)", type: "SocketIOClient")
 
