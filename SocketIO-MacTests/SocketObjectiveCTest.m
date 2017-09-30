@@ -11,7 +11,6 @@
 @import Foundation;
 @import XCTest;
 @import SocketIO;
-@import StarscreamSocketIO;
 
 @interface SocketObjectiveCTest : XCTestCase
 

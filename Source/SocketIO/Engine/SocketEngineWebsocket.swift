@@ -68,12 +68,12 @@ extension SocketEngineWebsocket {
     // MARK: Starscream delegate methods
 
     /// Delegate method for when a message is received.
-    public func websocketDidReceiveMessage(socket: WebSocketClient, text: String) {
+    public func websocketDidReceiveMessage(socket: WebSocket, text: String) {
         parseEngineMessage(text)
     }
 
     /// Delegate method for when binary is received.
-    public func websocketDidReceiveData(socket: WebSocketClient, data: Data) {
+    public func websocketDidReceiveData(socket: WebSocket, data: Data) {
         parseEngineData(data)
     }
 }

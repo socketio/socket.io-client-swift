@@ -30,13 +30,19 @@
 		7472C65F1BCAC46E003CA70D /* SocketSideEffectTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7472C65E1BCAC46E003CA70D /* SocketSideEffectTest.swift */; };
 		7472C6601BCAC46E003CA70D /* SocketSideEffectTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7472C65E1BCAC46E003CA70D /* SocketSideEffectTest.swift */; };
 		747BC59F1D5F9BA200CA5FA4 /* SocketIOClientConfigurationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747BC59E1D5F9BA200CA5FA4 /* SocketIOClientConfigurationTest.swift */; };
+		749FA1961F811190002FBB30 /* SocketAckManagerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74321DC91C2D939A00CF6F43 /* SocketAckManagerTest.swift */; };
+		749FA1971F811190002FBB30 /* SocketIOClientConfigurationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747BC59E1D5F9BA200CA5FA4 /* SocketIOClientConfigurationTest.swift */; };
+		749FA1981F811190002FBB30 /* SocketObjectiveCTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 742D150B1CA5794B00BD987D /* SocketObjectiveCTest.m */; };
+		749FA1991F811190002FBB30 /* SocketParserTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74321DCA1C2D939A00CF6F43 /* SocketParserTest.swift */; };
+		749FA1A61F81152B002FBB30 /* Starscream.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9432E00B1F77F883006AF628 /* Starscream.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		74D0F58E1F804FED0037C4DC /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 74D0F58D1F804FED0037C4DC /* libz.tbd */; };
+		74D0F5961F8053950037C4DC /* Starscream.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9432E00B1F77F883006AF628 /* Starscream.framework */; };
 		74DA21741F09440F009C19EE /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 74DA21731F09440F009C19EE /* libz.tbd */; };
 		74DA217C1F09457B009C19EE /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 74DA21731F09440F009C19EE /* libz.tbd */; };
 		74F124F01BC574CF002966F4 /* SocketBasicPacketTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74F124EF1BC574CF002966F4 /* SocketBasicPacketTest.swift */; };
 		74F124F11BC574CF002966F4 /* SocketBasicPacketTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74F124EF1BC574CF002966F4 /* SocketBasicPacketTest.swift */; };
 		9432E0071F77F7CA006AF628 /* SSLSecurity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9432E0061F77F7CA006AF628 /* SSLSecurity.swift */; };
 		9432E00A1F77F87D006AF628 /* Starscream.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9432E0091F77F87D006AF628 /* Starscream.framework */; };
-		9432E00C1F77F883006AF628 /* Starscream.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9432E00B1F77F883006AF628 /* Starscream.framework */; };
 		9432E00E1F77F889006AF628 /* Starscream.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9432E00D1F77F889006AF628 /* Starscream.framework */; };
 		9432E00F1F77F8C4006AF628 /* SSLSecurity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9432E0061F77F7CA006AF628 /* SSLSecurity.swift */; };
 		9432E0101F77F8C4006AF628 /* SSLSecurity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9432E0061F77F7CA006AF628 /* SSLSecurity.swift */; };
@@ -132,6 +138,19 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		749FA1A51F811521002FBB30 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				749FA1A61F81152B002FBB30 /* Starscream.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		572EF2191B51F16C00EEBB58 /* SocketIO.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SocketIO.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		572EF21D1B51F16C00EEBB58 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -154,6 +173,9 @@
 		7472C65B1BCAB53E003CA70D /* SocketNamespacePacketTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketNamespacePacketTest.swift; sourceTree = "<group>"; };
 		7472C65E1BCAC46E003CA70D /* SocketSideEffectTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketSideEffectTest.swift; sourceTree = "<group>"; };
 		747BC59E1D5F9BA200CA5FA4 /* SocketIOClientConfigurationTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketIOClientConfigurationTest.swift; sourceTree = "<group>"; };
+		749FA19F1F8112E7002FBB30 /* Starscream.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = Starscream.framework.dSYM; path = Carthage/Build/Mac/Starscream.framework.dSYM; sourceTree = "<group>"; };
+		749FA1A11F811408002FBB30 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		74D0F58D1F804FED0037C4DC /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.0.sdk/usr/lib/libz.tbd; sourceTree = DEVELOPER_DIR; };
 		74DA21731F09440F009C19EE /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		74DA217D1F0945E9009C19EE /* libcommonCrypto.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libcommonCrypto.tbd; path = usr/lib/system/libcommonCrypto.tbd; sourceTree = SDKROOT; };
 		74F124EF1BC574CF002966F4 /* SocketBasicPacketTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketBasicPacketTest.swift; sourceTree = "<group>"; };
@@ -190,6 +212,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				74D0F58E1F804FED0037C4DC /* libz.tbd in Frameworks */,
 				6CA08A961D615C040061FD2A /* Security.framework in Frameworks */,
 				9432E00A1F77F87D006AF628 /* Starscream.framework in Frameworks */,
 			);
@@ -209,7 +232,7 @@
 			files = (
 				74DA21741F09440F009C19EE /* libz.tbd in Frameworks */,
 				6CA08A981D615C0B0061FD2A /* Security.framework in Frameworks */,
-				9432E00C1F77F883006AF628 /* Starscream.framework in Frameworks */,
+				74D0F5961F8053950037C4DC /* Starscream.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -340,6 +363,9 @@
 		6CA08A9B1D615C190061FD2A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				749FA1A11F811408002FBB30 /* Foundation.framework */,
+				749FA19F1F8112E7002FBB30 /* Starscream.framework.dSYM */,
+				74D0F58D1F804FED0037C4DC /* libz.tbd */,
 				9432E0091F77F87D006AF628 /* Starscream.framework */,
 				9432E00B1F77F883006AF628 /* Starscream.framework */,
 				9432E00D1F77F889006AF628 /* Starscream.framework */,
@@ -494,6 +520,7 @@
 				572EF2201B51F16C00EEBB58 /* Sources */,
 				572EF2211B51F16C00EEBB58 /* Frameworks */,
 				572EF2221B51F16C00EEBB58 /* Resources */,
+				749FA19A1F8111A6002FBB30 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -530,6 +557,7 @@
 				572EF23E1B51F18A00EEBB58 /* Sources */,
 				572EF23F1B51F18A00EEBB58 /* Frameworks */,
 				572EF2401B51F18A00EEBB58 /* Resources */,
+				749FA1A51F811521002FBB30 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -670,6 +698,24 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		749FA19A1F8111A6002FBB30 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Carthage/Build/iOS/Starscream.framework",
+			);
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Starscream.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/usr/local/bin/carthage copy-frameworks";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		572EF2141B51F16C00EEBB58 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -705,6 +751,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				749FA1961F811190002FBB30 /* SocketAckManagerTest.swift in Sources */,
+				749FA1971F811190002FBB30 /* SocketIOClientConfigurationTest.swift in Sources */,
+				749FA1981F811190002FBB30 /* SocketObjectiveCTest.m in Sources */,
+				749FA1991F811190002FBB30 /* SocketParserTest.swift in Sources */,
 				7472C65F1BCAC46E003CA70D /* SocketSideEffectTest.swift in Sources */,
 				741F39EE1BD025D80026C9CC /* SocketEngineTest.swift in Sources */,
 				74F124F01BC574CF002966F4 /* SocketBasicPacketTest.swift in Sources */,
@@ -1180,7 +1230,7 @@
 				SKIP_INSTALL = YES;
 				SWIFT_INCLUDE_PATHS = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 4.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -1242,7 +1292,7 @@
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SWIFT_INCLUDE_PATHS = "";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 4.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -1275,6 +1325,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
 					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/Mac",
 				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -1304,7 +1355,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
@@ -1336,6 +1387,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
 					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/Mac",
 				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -1356,7 +1408,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "io.socket.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 4.0;
 			};
 			name = Release;

@@ -5,6 +5,7 @@
 //  Created by Lukas Schmidt on 24.09.17.
 //
 
+import Foundation
 import Starscream
 
 public class SSLSecurity: NSObject {
@@ -14,6 +15,7 @@ public class SSLSecurity: NSObject {
         self.security = security
     }
 
+    @objc
     public convenience init(usePublicKeys: Bool = true) {
         let security = Starscream.SSLSecurity(usePublicKeys: usePublicKeys)
         self.init(security: security)
