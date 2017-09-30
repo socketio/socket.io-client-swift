@@ -351,6 +351,25 @@ class SocketSideEffectTest: XCTestCase {
         waitForExpectations(timeout: 0.2)
     }
 
+    func testSettingConfigAfterInit() {
+        socket.setTestStatus(.notConnected)
+        socket.config.insert(.log(true))
+
+        XCTAssertTrue(DefaultSocketLogger.Logger.log, "It should set logging to true after creation")
+
+        socket.config = [.log(false), .nsp("/test")]
+
+        XCTAssertFalse(DefaultSocketLogger.Logger.log, "It should set logging to false after creation")
+        XCTAssertEqual(socket.nsp, "/test", "It should set the namespace after creation")
+    }
+
+    func testSettingConfigAfterInitWhenConnectedIgnoresChanges() {
+        socket.config = [.log(true), .nsp("/test")]
+
+        XCTAssertFalse(DefaultSocketLogger.Logger.log, "It should set logging to false after creation")
+        XCTAssertEqual(socket.nsp, "/", "It should set the namespace after creation")
+    }
+
     let data = "test".data(using: String.Encoding.utf8)!
     let data2 = "test2".data(using: String.Encoding.utf8)!
     private var socket: SocketIOClient!

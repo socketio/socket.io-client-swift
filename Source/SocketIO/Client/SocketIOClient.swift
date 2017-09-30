@@ -51,7 +51,24 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     public var nsp = "/"
 
     /// The configuration for this client.
-    public var config: SocketIOClientConfiguration
+    ///
+    /// **This cannot be set after calling one of the connect methods**.
+    public var config: SocketIOClientConfiguration {
+        didSet {
+            guard status == .notConnected else {
+                DefaultSocketLogger.Logger.error("Tried setting config after calling connect",
+                                                 type: SocketIOClient.logType)
+                return
+            }
+
+            if socketURL.absoluteString.hasPrefix("https://") {
+                config.insert(.secure(true))
+            }
+
+            config.insert(.path("/socket.io/"), replacing: false)
+            setConfigs()
+        }
+    }
 
     /// If `true`, this client will try and reconnect on any disconnects.
     @objc
@@ -130,32 +147,11 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
             self.config.insert(.secure(true))
         }
 
-        for option in config {
-            switch option {
-            case let .reconnects(reconnects):
-                self.reconnects = reconnects
-            case let .reconnectAttempts(attempts):
-                reconnectAttempts = attempts
-            case let .reconnectWait(wait):
-                reconnectWait = abs(wait)
-            case let .nsp(nsp):
-                self.nsp = nsp
-            case let .log(log):
-                DefaultSocketLogger.Logger.log = log
-            case let .logger(logger):
-                DefaultSocketLogger.Logger = logger
-            case let .handleQueue(queue):
-                handleQueue = queue
-            case let .forceNew(force):
-                forceNew = force
-            default:
-                continue
-            }
-        }
-
         self.config.insert(.path("/socket.io/"), replacing: false)
 
         super.init()
+
+        setConfigs()
     }
 
     /// Not so type safe way to create a SocketIOClient, meant for Objective-C compatiblity.
@@ -668,6 +664,31 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         connect()
 
         handleQueue.asyncAfter(deadline: DispatchTime.now() + Double(reconnectWait), execute: _tryReconnect)
+    }
+
+    private func setConfigs() {
+        for option in config {
+            switch option {
+            case let .reconnects(reconnects):
+                self.reconnects = reconnects
+            case let .reconnectAttempts(attempts):
+                reconnectAttempts = attempts
+            case let .reconnectWait(wait):
+                reconnectWait = abs(wait)
+            case let .nsp(nsp):
+                self.nsp = nsp
+            case let .log(log):
+                DefaultSocketLogger.Logger.log = log
+            case let .logger(logger):
+                DefaultSocketLogger.Logger = logger
+            case let .handleQueue(queue):
+                handleQueue = queue
+            case let .forceNew(force):
+                forceNew = force
+            default:
+                continue
+            }
+        }
     }
 
     // Test properties

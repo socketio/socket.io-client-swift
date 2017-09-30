@@ -32,6 +32,9 @@ public protocol SocketIOClientSpec : class {
     /// A handler that will be called on any event.
     var anyHandler: ((SocketAnyEvent) -> ())? { get }
 
+    /// The configuration for this client.
+    var config: SocketIOClientConfiguration { get set }
+
     /// The queue that all interaction with the client must be on.
     var handleQueue: DispatchQueue { get set }
 
