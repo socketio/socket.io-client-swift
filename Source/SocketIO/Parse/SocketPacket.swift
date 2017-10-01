@@ -27,13 +27,6 @@ import Foundation
 
 /// A struct that represents a socket.io packet.
 public struct SocketPacket : CustomStringConvertible {
-    // MARK: PacketType enum
-
-    /// The type of packets.
-    public enum PacketType: Int {
-        case connect, disconnect, event, ack, error, binaryEvent, binaryAck
-    }
-
     // MARK: Properties
 
     private static let logType = "SocketPacket"
@@ -162,6 +155,36 @@ public struct SocketPacket : CustomStringConvertible {
         default:
             return object
         }
+    }
+}
+
+public extension SocketPacket {
+    // MARK: PacketType enum
+
+    /// The type of packets.
+    public enum PacketType: Int {
+        // MARK: Cases
+
+        /// Connect: 0
+        case connect
+
+        /// Disconnect: 1
+        case disconnect
+
+        /// Event: 2
+        case event
+
+        /// Ack: 3
+        case ack
+
+        /// Error: 4
+        case error
+
+        /// Binary Event: 5
+        case binaryEvent
+
+        /// Binary Ack: 6
+        case binaryAck
     }
 }
 
