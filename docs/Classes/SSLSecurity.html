@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>SocketClientManager Class Reference</title>
+    <title>SSLSecurity Class Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset="utf-8">
@@ -14,9 +14,9 @@
   </head>
   <body>
 
-    <a name="//apple_ref/swift/Class/SocketClientManager" class="dashAnchor"></a>
+    <a name="//apple_ref/swift/Class/SSLSecurity" class="dashAnchor"></a>
 
-    <a title="SocketClientManager Class Reference"></a>
+    <a title="SSLSecurity Class Reference"></a>
 
     <header class="header">
       <p class="header-col header-col--primary">
@@ -38,7 +38,7 @@
     <p class="breadcrumbs">
       <a class="breadcrumb" href="../index.html">SocketIO Reference</a>
       <img class="carat" src="../img/carat.png" />
-      SocketClientManager Class Reference
+      SSLSecurity Class Reference
     </p>
 
     <div class="content-wrapper">
@@ -164,29 +164,14 @@
 
         <section class="section">
           <div class="section-content">
-            <h1>SocketClientManager</h1>
+            <h1>SSLSecurity</h1>
               <div class="declaration">
                 <div class="language">
-                  <pre class="highlight"><code><span class="n">open</span> <span class="kd">class</span> <span class="kt">SocketClientManager</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
+                  <pre class="highlight"><code><span class="n">open</span> <span class="kd">class</span> <span class="kt">SSLSecurity</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
 
                 </div>
               </div>
-            <p>Experimental socket manager.</p>
-
-<p>API subject to change.</p>
-
-<p>Can be used to persist sockets across ViewControllers.</p>
-
-<p>Sockets are strongly stored, so be sure to remove them once they are no
-longer needed.</p>
-
-<p>Example usage:</p>
-<pre class="highlight plaintext"><code>let manager = SocketClientManager.sharedManager
-manager["room1"] = socket1
-manager["room2"] = socket2
-manager.removeSocket(socket: socket2)
-manager["room1"]?.emit("hello")
-</code></pre>
+            <p>A wrapper around Starscream&rsquo;s SSLSecurity that provides a minimal Objective-C interface.</p>
 
           </div>
         </section>
@@ -194,20 +179,13 @@ manager["room1"]?.emit("hello")
         <section class="section">
           <div class="section-content">
             <div class="task-group">
-              <div class="task-name-container">
-                <a name="/Properties."></a>
-                <a name="//apple_ref/swift/Section/Properties." class="dashAnchor"></a>
-                <a href="#/Properties.">
-                  <h3 class="section-name">Properties.</h3>
-                </a>
-              </div>
               <ul class="item-container">
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketClientManager(cpy)sharedManager"></a>
-                    <a name="//apple_ref/swift/Variable/sharedManager" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketClientManager(cpy)sharedManager">sharedManager</a>
+                    <a name="/s:8SocketIO11SSLSecurityC8security10StarscreamABCv"></a>
+                    <a name="//apple_ref/swift/Property/security" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO11SSLSecurityC8security10StarscreamABCv">security</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -215,14 +193,14 @@ manager["room1"]?.emit("hello")
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The shared manager.</p>
+                        <p>The internal Starscream SSLSecurity.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">static</span> <span class="k">let</span> <span class="nv">sharedManager</span> <span class="o">=</span> <span class="kt">SocketClientManager</span><span class="p">()</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">security</span><span class="p">:</span> <span class="kt">Starscream</span><span class="o">.</span><span class="kt">SSLSecurity</span></code></pre>
 
                         </div>
                       </div>
@@ -232,9 +210,9 @@ manager["room1"]?.emit("hello")
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8SocketIO0A13ClientManagerC9subscriptAA0A8IOClientCSgSSci"></a>
-                    <a name="//apple_ref/swift/Method/subscript(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A13ClientManagerC9subscriptAA0A8IOClientCSgSSci">subscript(_:)</a>
+                    <a name="/c:@M@SocketIO@objc(cs)SSLSecurity(im)initWithUsePublicKeys:"></a>
+                    <a name="//apple_ref/swift/Method/init(usePublicKeys:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SSLSecurity(im)initWithUsePublicKeys:">init(usePublicKeys:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -242,56 +220,15 @@ manager["room1"]?.emit("hello")
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Gets a socket by its name.</p>
+                        <p>Creates a new SSLSecurity that specifies whether to use publicKeys or certificates should be used for SSL
+pinning validation</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="n">open</span> <span class="nf">subscript</span><span class="p">(</span><span class="nv">string</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/SocketIOClient.html">SocketIOClient</a></span><span class="p">?</span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Return Value</h4>
-                        <p>The socket, if one had the given name.</p>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <div class="task-name-container">
-                <a name="/Methods."></a>
-                <a name="//apple_ref/swift/Section/Methods." class="dashAnchor"></a>
-                <a href="#/Methods.">
-                  <h3 class="section-name">Methods.</h3>
-                </a>
-              </div>
-              <ul class="item-container">
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketClientManager(im)addSocket:labeledAs:"></a>
-                    <a name="//apple_ref/swift/Method/addSocket(_:labeledAs:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketClientManager(im)addSocket:labeledAs:">addSocket(_:labeledAs:)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Adds a socket.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">addSocket</span><span class="p">(</span><span class="n">_</span> <span class="nv">socket</span><span class="p">:</span> <span class="kt"><a href="../Classes/SocketIOClient.html">SocketIOClient</a></span><span class="p">,</span> <span class="n">labeledAs</span> <span class="nv">label</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="n">convenience</span> <span class="nf">init</span><span class="p">(</span><span class="nv">usePublicKeys</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">true</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -302,24 +239,13 @@ manager["room1"]?.emit("hello")
                             <tr>
                               <td>
                                 <code>
-                                <em>socket</em>
+                                <em>usePublicKeys</em>
                                 </code>
                               </td>
                               <td>
                                 <div>
-                                  <p>The socket to add.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>labeledAs</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The label for this socket.</p>
+                                  <p>is to specific if the publicKeys or certificates should be used for SSL pinning
+validation</p>
                                 </div>
                               </td>
                             </tr>
@@ -332,9 +258,9 @@ manager["room1"]?.emit("hello")
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketClientManager(im)removeSocketWithLabel:"></a>
-                    <a name="//apple_ref/swift/Method/removeSocket(withLabel:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketClientManager(im)removeSocketWithLabel:">removeSocket(withLabel:)</a>
+                    <a name="/s:8SocketIO11SSLSecurityCACSay10Starscream7SSLCertCG5certs_Sb13usePublicKeystcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(certs:usePublicKeys:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO11SSLSecurityCACSay10Starscream7SSLCertCG5certs_Sb13usePublicKeystcfc">init(certs:usePublicKeys:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -342,14 +268,14 @@ manager["room1"]?.emit("hello")
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Removes a socket by a given name.</p>
+                        <p>Designated init</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">removeSocket</span><span class="p">(</span><span class="n">withLabel</span> <span class="nv">label</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/SocketIOClient.html">SocketIOClient</a></span><span class="p">?</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="n">convenience</span> <span class="nf">init</span><span class="p">(</span><span class="nv">certs</span><span class="p">:</span> <span class="p">[</span><span class="kt">SSLCert</span><span class="p">],</span> <span class="nv">usePublicKeys</span><span class="p">:</span> <span class="kt">Bool</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -360,12 +286,25 @@ manager["room1"]?.emit("hello")
                             <tr>
                               <td>
                                 <code>
-                                <em>withLabel</em>
+                                <em>certs</em>
                                 </code>
                               </td>
                               <td>
                                 <div>
-                                  <p>The label of the socket to remove.</p>
+                                  <p>is the certificates or public keys to use</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>usePublicKeys</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>is to specific if the publicKeys or certificates should be used for SSL pinning
+validation</p>
                                 </div>
                               </td>
                             </tr>
@@ -374,7 +313,7 @@ manager["room1"]?.emit("hello")
                       </div>
                       <div>
                         <h4>Return Value</h4>
-                        <p>The socket for the given label, if one was present.</p>
+                        <p>a representation security object to be used with</p>
                       </div>
                     </section>
                   </div>
@@ -382,9 +321,9 @@ manager["room1"]?.emit("hello")
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketClientManager(im)removeSocket:"></a>
-                    <a name="//apple_ref/swift/Method/removeSocket(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketClientManager(im)removeSocket:">removeSocket(_:)</a>
+                    <a name="/s:8SocketIO11SSLSecurityC7isValidSbSo8SecTrustC_SSSg6domaintF"></a>
+                    <a name="//apple_ref/swift/Method/isValid(_:domain:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO11SSLSecurityC7isValidSbSo8SecTrustC_SSSg6domaintF">isValid(_:domain:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -392,14 +331,14 @@ manager["room1"]?.emit("hello")
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Removes a socket.</p>
+                        <p>Returns whether or not the given trust is valid.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">removeSocket</span><span class="p">(</span><span class="n">_</span> <span class="nv">socket</span><span class="p">:</span> <span class="kt"><a href="../Classes/SocketIOClient.html">SocketIOClient</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/SocketIOClient.html">SocketIOClient</a></span><span class="p">?</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">_</span> <span class="nv">trust</span><span class="p">:</span> <span class="kt">SecTrust</span><span class="p">,</span> <span class="nv">domain</span><span class="p">:</span> <span class="kt">String</span><span class="p">?)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
 
                         </div>
                       </div>
@@ -410,12 +349,24 @@ manager["room1"]?.emit("hello")
                             <tr>
                               <td>
                                 <code>
-                                <em>socket</em>
+                                <em>trust</em>
                                 </code>
                               </td>
                               <td>
                                 <div>
-                                  <p>The socket to remove.</p>
+                                  <p>The trust to validate.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>domain</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The CN domain to validate.</p>
                                 </div>
                               </td>
                             </tr>
@@ -424,34 +375,7 @@ manager["room1"]?.emit("hello")
                       </div>
                       <div>
                         <h4>Return Value</h4>
-                        <p>The socket if it was in the manager.</p>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketClientManager(im)removeSockets"></a>
-                    <a name="//apple_ref/swift/Method/removeSockets()" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketClientManager(im)removeSockets">removeSockets()</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Removes all the sockets in the manager.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">removeSockets</span><span class="p">()</span></code></pre>
-
-                        </div>
+                        <p>Whether or not this is valid.</p>
                       </div>
                     </section>
                   </div>
