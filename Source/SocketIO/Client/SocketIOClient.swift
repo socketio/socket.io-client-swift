@@ -304,7 +304,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
             return
         }
 
-        _emit([event] + items)
+        emit([event] + items)
     }
 
     /// Sends a message to the server, requesting an ack.
@@ -360,7 +360,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         return createOnAck([event] + items)
     }
 
-    func _emit(_ data: [Any], ack: Int? = nil) {
+    func emit(_ data: [Any], ack: Int? = nil) {
         guard status == .connected else {
             handleClientEvent(.error, data: ["Tried emitting when not connected"])
             return
@@ -717,6 +717,6 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     }
 
     func emitTest(event: String, _ data: Any...) {
-        _emit([event] + data)
+        emit([event] + data)
     }
 }

@@ -116,7 +116,7 @@ public final class OnAckCallback : NSObject {
         guard let socket = self.socket, ackNumber != -1 else { return }
 
         socket.ackHandlers.addAck(ackNumber, callback: callback)
-        socket._emit(items, ack: ackNumber)
+        socket.emit(items, ack: ackNumber)
 
         guard seconds != 0 else { return }
 
