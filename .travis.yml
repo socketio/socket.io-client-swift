@@ -10,7 +10,7 @@ before_install:
   - brew update
   # - brew outdated xctool || brew upgrade xctool
   - brew outdated carthage || brew upgrade carthage
-  - carthage update
+  - carthage update --platform macosx
 script:
   - xcodebuild -project Socket.IO-Client-Swift.xcodeproj -scheme SocketIO-Mac build test -quiet
 #  - xcodebuild -project Socket.IO-Client-Swift.xcodeproj -scheme SocketIO-Mac build-for-testing -quiet
