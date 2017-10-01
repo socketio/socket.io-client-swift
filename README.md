@@ -85,13 +85,14 @@ let package = Package(
 Then import `import SocketIO`.
 
 ### Carthage
-Add these line to your `Cartfile`:
+Add this line to your `Cartfile`:
 ```
-github "nuclearace/Starscream" ~> 8.0.7
-github "socketio/socket.io-client-swift" ~> 12.0.0 # Or latest version
+github "socketio/socket.io-client-swift" ~> 12.1.0 # Or latest version
 ```
 
 Run `carthage update --platform ios,macosx`.
+
+Add the `Starscream` and `SocketIO` frameworks to your projects and follow the usual Carthage process.
 
 ### CocoaPods 1.0.0 or later
 Create `Podfile` and add `pod 'Socket.IO-Client-Swift'`:
@@ -100,7 +101,7 @@ Create `Podfile` and add `pod 'Socket.IO-Client-Swift'`:
 use_frameworks!
 
 target 'YourApp' do
-    pod 'Socket.IO-Client-Swift', '~> 12.0.0' # Or latest version
+    pod 'Socket.IO-Client-Swift', '~> 12.1.0' # Or latest version
 end
 ```
 

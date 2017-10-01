@@ -11,7 +11,6 @@
 @import Foundation;
 @import XCTest;
 @import SocketIO;
-@import StarscreamSocketIO;
 
 @interface SocketObjectiveCTest : XCTestCase
 
@@ -103,7 +102,7 @@
 
 - (void)testSSLSecurity {
     SSLSecurity* sec = [[SSLSecurity alloc] initWithUsePublicKeys:0];
-    sec.isReady = 0;
+    sec = nil;
 }
 
 @end

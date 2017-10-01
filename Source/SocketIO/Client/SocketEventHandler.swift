@@ -24,12 +24,27 @@
 
 import Foundation
 
-struct SocketEventHandler {
-    let event: String
-    let id: UUID
-    let callback: NormalCallback
-    
-    func executeCallback(with items: [Any], withAck ack: Int, withSocket socket: SocketIOClient) {
+/// A wrapper around a handler.
+public struct SocketEventHandler {
+    // MARK: Properties
+
+    /// The event for this handler.
+    public let event: String
+
+    /// A unique identifier for this handler.
+    public let id: UUID
+
+    /// The actual handler function.
+    public let callback: NormalCallback
+
+    // MARK: Methods
+
+    /// Causes this handler to be executed.
+    ///
+    /// - parameter with: The data that this handler should be called with.
+    /// - parameter withAck: The ack number that this event expects. Pass -1 to say this event doesn't expect an ack.
+    /// - parameter withSocket: The socket that is calling this event.
+    public func executeCallback(with items: [Any], withAck ack: Int, withSocket socket: SocketIOClient) {
         callback(items, SocketAckEmitter(socket: socket, ackNum: ack))
     }
 }
