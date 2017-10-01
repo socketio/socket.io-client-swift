@@ -1,16 +1,17 @@
 language: objective-c
 xcode_project: Socket.IO-Client-Swift.xcodeproj # path to your xcodeproj folder
-xcode_scheme: SocketIO-iOS
+xcode_scheme: SocketIO-Mac
 osx_image: xcode9
 branches:
   only:
     - master
     - development
-    - swift4.0
 before_install:
   - brew update
   - brew outdated xctool || brew upgrade xctool
+  - brew outdated carthage || brew upgrade carthage
 script:
+  - carthage update
   - xcodebuild -project Socket.IO-Client-Swift.xcodeproj -scheme SocketIO-Mac build test -quiet
 #  - xcodebuild -project Socket.IO-Client-Swift.xcodeproj -scheme SocketIO-Mac build-for-testing -quiet
 #  - xctool -project Socket.IO-Client-Swift.xcodeproj -scheme SocketIO-Mac run-tests --parallelize
