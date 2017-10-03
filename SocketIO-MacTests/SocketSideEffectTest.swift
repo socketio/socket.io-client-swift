@@ -8,6 +8,7 @@
 
 import XCTest
 @testable import SocketIO
+import Starscream
 
 class SocketSideEffectTest: XCTestCase {
     func testInitialCurrentAck() {
@@ -85,6 +86,8 @@ class SocketSideEffectTest: XCTestCase {
 
     func testHandleOnceClientEvent() {
         let expect = expectation(description: "handled event")
+
+        socket.setTestStatus(.connecting)
 
         socket.once(clientEvent: .connect) {data, ack in
             XCTAssertEqual(self.socket.testHandlers.count, 0)
@@ -249,6 +252,7 @@ class SocketSideEffectTest: XCTestCase {
         let expect = expectation(description: "The client should call the timeout function")
 
         socket.setTestStatus(.notConnected)
+        socket.engine = TestEngine(client: socket, url: socket.socketURL, options: nil)
 
         socket.connect(timeoutAfter: 0.5, withHandler: {
             expect.fulfill()
@@ -261,6 +265,7 @@ class SocketSideEffectTest: XCTestCase {
         let expect = expectation(description: "The client should not call the timeout function")
 
         socket.setTestStatus(.notConnected)
+        socket.engine = TestEngine(client: socket, url: socket.socketURL, options: nil)
 
         socket.on(clientEvent: .connect) {data, ack in
             expect.fulfill()
@@ -283,6 +288,8 @@ class SocketSideEffectTest: XCTestCase {
         let nspString = "/swift"
 
         socket.setTestStatus(.notConnected)
+        socket.nsp = nspString
+        socket.engine = TestEngine(client: socket, url: socket.socketURL, options: nil)
 
         socket.on(clientEvent: .connect) {data, ack in
             guard let nsp = data[0] as? String else {
@@ -389,4 +396,36 @@ struct ThrowingData : SocketData {
         throw ThrowingError.error
     }
 
+}
+
+class TestEngine : SocketEngineSpec {
+    var client: SocketEngineClient? = nil
+    private(set) var closed = false
+    private(set) var connected = false
+    var connectParams: [String: Any]? = nil
+    private(set) var cookies: [HTTPCookie]? = nil
+    private(set) var engineQueue = DispatchQueue.main
+    private(set) var extraHeaders: [String: String]? = nil
+    private(set) var fastUpgrade = false
+    private(set) var forcePolling = false
+    private(set) var forceWebsockets = false
+    private(set) var polling = false
+    private(set) var probing = false
+    private(set) var sid = ""
+    private(set) var socketPath = ""
+    private(set) var urlPolling = URL(string: "http://localhost/")!
+    private(set) var urlWebSocket = URL(string: "http://localhost/")!
+    private(set) var websocket = false
+    private(set) var ws: WebSocket? = nil
+
+    required init(client: SocketEngineClient, url: URL, options: NSDictionary?) { }
+
+    func connect() { }
+    func didError(reason: String) { }
+    func disconnect(reason: String) { }
+    func doFastUpgrade() { }
+    func flushWaitingForPostToWebSocket() { }
+    func parseEngineData(_ data: Data) { }
+    func parseEngineMessage(_ message: String) { }
+    func write(_ msg: String, withType type: SocketEnginePacketType, withData data: [Data]) { }
 }
