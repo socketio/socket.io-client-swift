@@ -71,13 +71,9 @@ public extension SocketParsable where Self: SocketIOClientSpec {
     }
 
     private func handleConnect(_ packetNamespace: String) {
-        // If we connected with a namespace, check if we've joined the default namespace first, then switch to the
-        // other namespace
-        if packetNamespace == "/" && nsp != "/" {
-            joinNamespace(nsp)
-        } else {
-            didConnect(toNamespace: packetNamespace)
-        }
+        guard packetNamespace == nsp else { return }
+
+        didConnect(toNamespace: packetNamespace)
     }
 
     private func handlePacket(_ pack: SocketPacket) {

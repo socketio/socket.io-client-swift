@@ -110,7 +110,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
 
     /// The engine for this client.
     @objc
-    public private(set) var engine: SocketEngineSpec?
+    public internal(set) var engine: SocketEngineSpec?
 
     /// The array of handlers for this socket.
     public private(set) var handlers = [SocketEventHandler]()
@@ -244,6 +244,8 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     ///
     /// - parameter toNamespace: The namespace that was connected to.
     open func didConnect(toNamespace namespace: String) {
+        guard status != .connected else { return }
+
         DefaultSocketLogger.Logger.log("Socket connected", type: SocketIOClient.logType)
 
         status = .connected
@@ -434,7 +436,21 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     ///
     /// - parameter reason: The reason the engine opened.
     open func engineDidOpen(reason: String) {
-        DefaultSocketLogger.Logger.log(reason, type: SocketIOClient.logType)
+        handleQueue.async {
+            self._engineDidOpen(reason: reason)
+        }
+    }
+
+    private func _engineDidOpen(reason: String) {
+        DefaultSocketLogger.Logger.log("Engine opened \(reason)", type: SocketIOClient.logType)
+
+        guard nsp != "/" else {
+            didConnect(toNamespace: "/")
+
+            return
+        }
+
+        joinNamespace(nsp)
     }
 
     /// Called when socket.io has acked one of our emits. Causes the corresponding ack callback to be called.
@@ -480,10 +496,10 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     /// Call when you wish to leave a namespace and return to the default namespace.
     @objc
     open func leaveNamespace() {
-        if nsp != "/" {
-            engine?.send("1\(nsp)", withData: [])
-            nsp = "/"
-        }
+        guard nsp != "/" else { return }
+
+        engine?.send("1\(nsp)", withData: [])
+        nsp = "/"
     }
 
     /// Joins `namespace`.
@@ -493,12 +509,12 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     /// - parameter namespace: The namespace to join.
     @objc
     open func joinNamespace(_ namespace: String) {
-        nsp = namespace
+        guard namespace != "/" else { return }
 
-        if nsp != "/" {
-            DefaultSocketLogger.Logger.log("Joining namespace", type: SocketIOClient.logType)
-            engine?.send("0\(nsp)", withData: [])
-        }
+        DefaultSocketLogger.Logger.log("Joining namespace \(namespace)", type: SocketIOClient.logType)
+
+        nsp = namespace
+        engine?.send("0\(nsp)", withData: [])
     }
 
     /// Removes handler(s) for a client event.
