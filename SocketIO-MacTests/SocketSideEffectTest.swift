@@ -252,6 +252,7 @@ class SocketSideEffectTest: XCTestCase {
         let expect = expectation(description: "The client should call the timeout function")
 
         socket.setTestStatus(.notConnected)
+        socket.nsp = "/someNamespace"
         socket.engine = TestEngine(client: socket, url: socket.socketURL, options: nil)
 
         socket.connect(timeoutAfter: 0.5, withHandler: {
@@ -279,6 +280,23 @@ class SocketSideEffectTest: XCTestCase {
             // Fake connecting
             self.socket.parseEngineMessage("0/")
         }
+
+        waitForExpectations(timeout: 2)
+    }
+
+    func testClientCallsConnectOnEngineOpen() {
+        let expect = expectation(description: "The client call the connect handler")
+
+        socket.setTestStatus(.notConnected)
+        socket.engine = TestEngine(client: socket, url: socket.socketURL, options: nil)
+
+        socket.on(clientEvent: .connect) {data, ack in
+            expect.fulfill()
+        }
+
+        socket.connect(timeoutAfter: 0.5, withHandler: {
+            XCTFail("Should not call timeout handler if status is connected")
+        })
 
         waitForExpectations(timeout: 2)
     }
@@ -399,7 +417,7 @@ struct ThrowingData : SocketData {
 }
 
 class TestEngine : SocketEngineSpec {
-    var client: SocketEngineClient? = nil
+    weak var client: SocketEngineClient?
     private(set) var closed = false
     private(set) var connected = false
     var connectParams: [String: Any]? = nil
@@ -418,9 +436,14 @@ class TestEngine : SocketEngineSpec {
     private(set) var websocket = false
     private(set) var ws: WebSocket? = nil
 
-    required init(client: SocketEngineClient, url: URL, options: NSDictionary?) { }
+    required init(client: SocketEngineClient, url: URL, options: NSDictionary?) {
+        self.client = client
+    }
 
-    func connect() { }
+    func connect() {
+        client?.engineDidOpen(reason: "Connect")
+    }
+
     func didError(reason: String) { }
     func disconnect(reason: String) { }
     func doFastUpgrade() { }
