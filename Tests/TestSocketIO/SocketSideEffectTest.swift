@@ -387,6 +387,24 @@ class SocketSideEffectTest: XCTestCase {
         XCTAssertEqual(socket.nsp, "/test", "It should set the namespace after creation")
     }
 
+    func testSettingExtraHeadersAfterInit() {
+        socket.setTestStatus(.notConnected)
+        socket.config = [.extraHeaders(["new": "value"])]
+        socket.config.insert(.extraHeaders(["hello": "world"]), replacing: true)
+
+        for config in socket.config {
+            switch config {
+            case let .extraHeaders(headers):
+                XCTAssertTrue(headers.keys.contains("hello"), "It should contain hello header key")
+                XCTAssertFalse(headers.keys.contains("new"), "It should not contain old data")
+            case .path:
+                continue
+            default:
+                XCTFail("It should only have two configs")
+            }
+        }
+    }
+
     func testSettingConfigAfterInitWhenConnectedIgnoresChanges() {
         socket.config = [.log(true), .nsp("/test")]
 

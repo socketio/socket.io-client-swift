@@ -11,6 +11,7 @@ let package = Package(
         .package(url: "https://github.com/daltoniam/Starscream", .upToNextMajor(from: "2.1.1")),
     ],
     targets: [
-        .target(name: "SocketIO", dependencies: ["Starscream"])
+        .target(name: "SocketIO", dependencies: ["Starscream"]),
+        .testTarget(name: "TestSocketIO", dependencies: ["SocketIO"]),
     ]
 )
