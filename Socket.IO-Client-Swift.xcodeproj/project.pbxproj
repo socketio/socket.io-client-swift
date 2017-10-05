@@ -28,9 +28,9 @@
 		1C686BEE1F869B02007D8627 /* SocketAckManagerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C686BD61F869AF1007D8627 /* SocketAckManagerTest.swift */; };
 		1C686BEF1F869B02007D8627 /* SocketParserTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C686BD71F869AF1007D8627 /* SocketParserTest.swift */; };
 		1C686BF01F869B02007D8627 /* SocketNamespacePacketTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C686BD81F869AF1007D8627 /* SocketNamespacePacketTest.swift */; };
-		1C686BF51F869CC9007D8627 /* SocketObjectiveCTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C686BF41F869CA9007D8627 /* SocketObjectiveCTest.m */; };
-		1C686BF61F869D54007D8627 /* SocketObjectiveCTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C686BF41F869CA9007D8627 /* SocketObjectiveCTest.m */; };
-		1C686BF71F869D5A007D8627 /* SocketObjectiveCTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C686BF41F869CA9007D8627 /* SocketObjectiveCTest.m */; };
+		1C686BFF1F869EA9007D8627 /* SocketObjectiveCTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C686BFE1F869E9D007D8627 /* SocketObjectiveCTest.m */; };
+		1C686C001F869EAE007D8627 /* SocketObjectiveCTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C686BFE1F869E9D007D8627 /* SocketObjectiveCTest.m */; };
+		1C686C011F869EB6007D8627 /* SocketObjectiveCTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C686BFE1F869E9D007D8627 /* SocketObjectiveCTest.m */; };
 		572EF21F1B51F16C00EEBB58 /* SocketIO.h in Headers */ = {isa = PBXBuildFile; fileRef = 572EF21E1B51F16C00EEBB58 /* SocketIO.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		572EF2251B51F16C00EEBB58 /* SocketIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 572EF2191B51F16C00EEBB58 /* SocketIO.framework */; };
 		572EF23D1B51F18A00EEBB58 /* SocketIO-Mac.h in Headers */ = {isa = PBXBuildFile; fileRef = 572EF23C1B51F18A00EEBB58 /* SocketIO-Mac.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -163,7 +163,7 @@
 		1C686BD61F869AF1007D8627 /* SocketAckManagerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketAckManagerTest.swift; sourceTree = "<group>"; };
 		1C686BD71F869AF1007D8627 /* SocketParserTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketParserTest.swift; sourceTree = "<group>"; };
 		1C686BD81F869AF1007D8627 /* SocketNamespacePacketTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketNamespacePacketTest.swift; sourceTree = "<group>"; };
-		1C686BF41F869CA9007D8627 /* SocketObjectiveCTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SocketObjectiveCTest.m; sourceTree = "<group>"; };
+		1C686BFE1F869E9D007D8627 /* SocketObjectiveCTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SocketObjectiveCTest.m; sourceTree = "<group>"; };
 		572EF2191B51F16C00EEBB58 /* SocketIO.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SocketIO.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		572EF21D1B51F16C00EEBB58 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		572EF21E1B51F16C00EEBB58 /* SocketIO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SocketIO.h; sourceTree = "<group>"; };
@@ -172,7 +172,6 @@
 		572EF23B1B51F18A00EEBB58 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		572EF23C1B51F18A00EEBB58 /* SocketIO-Mac.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SocketIO-Mac.h"; sourceTree = "<group>"; };
 		572EF2421B51F18A00EEBB58 /* SocketIO-MacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SocketIO-MacTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		572EF2481B51F18A00EEBB58 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		57634A161BD9B46A00E19CD7 /* SocketIO.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SocketIO.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		57634A3B1BD9B46D00E19CD7 /* SocketIO-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SocketIO-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6CA08A951D615C040061FD2A /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS9.3.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
@@ -284,15 +283,24 @@
 			path = Tests/TestSocketIO;
 			sourceTree = "<group>";
 		};
+		1C686BFD1F869E9D007D8627 /* TestSocketIOObjc */ = {
+			isa = PBXGroup;
+			children = (
+				1C686BFE1F869E9D007D8627 /* SocketObjectiveCTest.m */,
+			);
+			name = TestSocketIOObjc;
+			path = Tests/TestSocketIOObjc;
+			sourceTree = "<group>";
+		};
 		572EF20D1B51F12F00EEBB58 = {
 			isa = PBXGroup;
 			children = (
 				1C686BD11F869AF1007D8627 /* TestSocketIO */,
+				1C686BFD1F869E9D007D8627 /* TestSocketIOObjc */,
 				6CA08A9B1D615C190061FD2A /* Frameworks */,
 				572EF21A1B51F16C00EEBB58 /* Products */,
 				572EF21B1B51F16C00EEBB58 /* SocketIO-iOS */,
 				572EF2391B51F18A00EEBB58 /* SocketIO-Mac */,
-				572EF2461B51F18A00EEBB58 /* SocketIO-MacTests */,
 				5764DF7B1B51F24A004FF46E /* Source */,
 			);
 			sourceTree = "<group>";
@@ -340,23 +348,6 @@
 			isa = PBXGroup;
 			children = (
 				572EF23B1B51F18A00EEBB58 /* Info.plist */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		572EF2461B51F18A00EEBB58 /* SocketIO-MacTests */ = {
-			isa = PBXGroup;
-			children = (
-				1C686BF41F869CA9007D8627 /* SocketObjectiveCTest.m */,
-				572EF2471B51F18A00EEBB58 /* Supporting Files */,
-			);
-			path = "SocketIO-MacTests";
-			sourceTree = "<group>";
-		};
-		572EF2471B51F18A00EEBB58 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				572EF2481B51F18A00EEBB58 /* Info.plist */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -768,7 +759,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1C686BF61F869D54007D8627 /* SocketObjectiveCTest.m in Sources */,
+				1C686BFF1F869EA9007D8627 /* SocketObjectiveCTest.m in Sources */,
 				1C686BEA1F869B02007D8627 /* SocketIOClientConfigurationTest.swift in Sources */,
 				1C686BEB1F869B02007D8627 /* SocketEngineTest.swift in Sources */,
 				1C686BEC1F869B02007D8627 /* SocketSideEffectTest.swift in Sources */,
@@ -813,7 +804,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1C686BF51F869CC9007D8627 /* SocketObjectiveCTest.m in Sources */,
+				1C686C001F869EAE007D8627 /* SocketObjectiveCTest.m in Sources */,
 				1C686BE21F869AFD007D8627 /* SocketIOClientConfigurationTest.swift in Sources */,
 				1C686BE31F869AFD007D8627 /* SocketEngineTest.swift in Sources */,
 				1C686BE41F869AFD007D8627 /* SocketSideEffectTest.swift in Sources */,
@@ -858,7 +849,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1C686BF71F869D5A007D8627 /* SocketObjectiveCTest.m in Sources */,
+				1C686C011F869EB6007D8627 /* SocketObjectiveCTest.m in Sources */,
 				1C686BDA1F869AF9007D8627 /* SocketIOClientConfigurationTest.swift in Sources */,
 				1C686BDB1F869AF9007D8627 /* SocketEngineTest.swift in Sources */,
 				1C686BDC1F869AF9007D8627 /* SocketSideEffectTest.swift in Sources */,
@@ -1364,7 +1355,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = "SocketIO-MacTests/Info.plist";
+				INFOPLIST_FILE = "SocketIO-Mac/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1419,7 +1410,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = "SocketIO-MacTests/Info.plist";
+				INFOPLIST_FILE = "SocketIO-Mac/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
