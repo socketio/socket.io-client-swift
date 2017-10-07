@@ -15,9 +15,9 @@
 		1C686BE71F869AFD007D8627 /* SocketParserTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C686BD71F869AF1007D8627 /* SocketParserTest.swift */; };
 		1C686BE81F869AFD007D8627 /* SocketNamespacePacketTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C686BD81F869AF1007D8627 /* SocketNamespacePacketTest.swift */; };
 		1C686C001F869EAE007D8627 /* SocketObjectiveCTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C686BFE1F869E9D007D8627 /* SocketObjectiveCTest.m */; };
-		572EF23D1B51F18A00EEBB58 /* SocketIO-Mac.h in Headers */ = {isa = PBXBuildFile; fileRef = 572EF23C1B51F18A00EEBB58 /* SocketIO-Mac.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		572EF2431B51F18A00EEBB58 /* SocketIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 572EF2381B51F18A00EEBB58 /* SocketIO.framework */; };
 		6CA08A981D615C0B0061FD2A /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6CA08A971D615C0B0061FD2A /* Security.framework */; };
+		74BF53581F894326004972D8 /* SocketIO.h in Headers */ = {isa = PBXBuildFile; fileRef = 572EF23C1B51F18A00EEBB58 /* SocketIO.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		74D0F5961F8053950037C4DC /* Starscream.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9432E00B1F77F883006AF628 /* Starscream.framework */; };
 		74DA21741F09440F009C19EE /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 74DA21731F09440F009C19EE /* libz.tbd */; };
 		74DA217C1F09457B009C19EE /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 74DA21731F09440F009C19EE /* libz.tbd */; };
@@ -67,7 +67,7 @@
 		1C686BFE1F869E9D007D8627 /* SocketObjectiveCTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SocketObjectiveCTest.m; sourceTree = "<group>"; };
 		572EF2381B51F18A00EEBB58 /* SocketIO.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SocketIO.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		572EF23B1B51F18A00EEBB58 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		572EF23C1B51F18A00EEBB58 /* SocketIO-Mac.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SocketIO-Mac.h"; sourceTree = "<group>"; };
+		572EF23C1B51F18A00EEBB58 /* SocketIO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SocketIO.h; sourceTree = "<group>"; };
 		572EF2421B51F18A00EEBB58 /* SocketIO-Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SocketIO-Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6CA08A951D615C040061FD2A /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS9.3.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		6CA08A971D615C0B0061FD2A /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
@@ -176,7 +176,7 @@
 		572EF2391B51F18A00EEBB58 /* SocketIO */ = {
 			isa = PBXGroup;
 			children = (
-				572EF23C1B51F18A00EEBB58 /* SocketIO-Mac.h */,
+				572EF23C1B51F18A00EEBB58 /* SocketIO.h */,
 				572EF23A1B51F18A00EEBB58 /* Supporting Files */,
 			);
 			path = SocketIO;
@@ -314,7 +314,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				572EF23D1B51F18A00EEBB58 /* SocketIO-Mac.h in Headers */,
+				74BF53581F894326004972D8 /* SocketIO.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -553,7 +553,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
 				TVOS_DEPLOYMENT_TARGET = 9.0;
-				VALID_ARCHS = "i386 x86_64 armv7 armv7s arm64";
+				VALID_ARCHS = "i386 x86_64 armv7 armv7s arm64 armv7k";
 				WATCHOS_DEPLOYMENT_TARGET = 2.0;
 			};
 			name = Debug;
@@ -622,7 +622,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 3.0;
 				TVOS_DEPLOYMENT_TARGET = 9.0;
-				VALID_ARCHS = "i386 x86_64 armv7 armv7s arm64";
+				VALID_ARCHS = "i386 x86_64 armv7 armv7s arm64 armv7k";
 				WATCHOS_DEPLOYMENT_TARGET = 2.0;
 			};
 			name = Release;
