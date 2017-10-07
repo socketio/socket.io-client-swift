@@ -177,8 +177,6 @@
 		6CA08A951D615C040061FD2A /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS9.3.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		6CA08A971D615C0B0061FD2A /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		6CA08A991D615C140061FD2A /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS9.2.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
-		742EAA351F8925F0006D5900 /* SocketIO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SocketIO.h; sourceTree = "<group>"; };
-		742EAA361F8925F0006D5900 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		749FA19F1F8112E7002FBB30 /* Starscream.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = Starscream.framework.dSYM; path = Carthage/Build/Mac/Starscream.framework.dSYM; sourceTree = "<group>"; };
 		749FA1A11F811408002FBB30 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		74D0F58D1F804FED0037C4DC /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.0.sdk/usr/lib/libz.tbd; sourceTree = DEVELOPER_DIR; };
@@ -299,7 +297,6 @@
 			children = (
 				1C686BD11F869AF1007D8627 /* TestSocketIO */,
 				1C686BFD1F869E9D007D8627 /* TestSocketIOObjc */,
-				742EAA341F8925F0006D5900 /* SocketIO */,
 				6CA08A9B1D615C190061FD2A /* Frameworks */,
 				572EF21A1B51F16C00EEBB58 /* Products */,
 				572EF21B1B51F16C00EEBB58 /* SocketIO-iOS */,
@@ -407,15 +404,6 @@
 				6CA08A991D615C140061FD2A /* Security.framework */,
 			);
 			name = tvOS;
-			sourceTree = "<group>";
-		};
-		742EAA341F8925F0006D5900 /* SocketIO */ = {
-			isa = PBXGroup;
-			children = (
-				742EAA351F8925F0006D5900 /* SocketIO.h */,
-				742EAA361F8925F0006D5900 /* Info.plist */,
-			);
-			path = SocketIO;
 			sourceTree = "<group>";
 		};
 		DD52B1D10D761CEF3944A6BC /* Util */ = {
