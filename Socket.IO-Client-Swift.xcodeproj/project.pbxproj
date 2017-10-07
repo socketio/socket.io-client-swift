@@ -425,7 +425,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "for path in $FRAMEWORK_SEARCH_PATHS\ndo\n    echo \"bob\"\n    echo \"${path}/Starscream.framework\"\n    if [ -d \"${path}/Starscream.framework\" ] && [[ $path == *\"Carthage\"* ]]; then\n        export SCRIPT_INPUT_FILE_COUNT=1\n        export SCRIPT_INPUT_FILE_0=\"${path}/Starscream.framework\"\n        /usr/local/bin/carthage copy-frameworks\n        break\n    fi\ndone";
+			shellScript = "for path in $FRAMEWORK_SEARCH_PATHS\ndo\n    if [ -d \"${path}/Starscream.framework\" ] && [[ $path == *\"Carthage\"* ]]; then\n        export SCRIPT_INPUT_FILE_COUNT=1\n        export SCRIPT_INPUT_FILE_0=\"${path}/Starscream.framework\"\n        /usr/local/bin/carthage copy-frameworks\n        break\n    fi\ndone";
 		};
 /* End PBXShellScriptBuildPhase section */
 
