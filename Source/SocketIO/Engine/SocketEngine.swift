@@ -310,22 +310,22 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
 
     private func createWebSocketAndConnect() {
         ws?.delegate = nil // TODO this seems a bit defensive, is this really needed?
-        ws = WebSocket(url: urlWebSocketWithSid)
+        var req = URLRequest(url: urlWebSocketWithSid)
 
         if cookies != nil {
             let headers = HTTPCookie.requestHeaderFields(with: cookies!)
-            for (key, value) in headers {
-                ws?.headers[key] = value
+            for (headerName, value) in headers {
+                req.setValue(value, forHTTPHeaderField: headerName)
             }
         }
 
         if extraHeaders != nil {
             for (headerName, value) in extraHeaders! {
-                ws?.headers[headerName] = value
+                req.setValue(value, forHTTPHeaderField: headerName)
             }
         }
 
-        
+        ws = WebSocket(request: req)
         ws?.callbackQueue = engineQueue
         ws?.enableCompression = compress
         ws?.delegate = self
@@ -605,7 +605,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     // MARK: Starscream delegate conformance
 
     /// Delegate method for connection.
-    public func websocketDidConnect(socket: WebSocket) {
+    public func websocketDidConnect(socket: WebSocketClient) {
         if !forceWebsockets {
             probing = true
             probeWebSocket()
@@ -617,7 +617,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     }
 
     /// Delegate method for disconnection.
-    public func websocketDidDisconnect(socket: WebSocket, error: NSError?) {
+    public func websocketDidDisconnect(socket: WebSocketClient, error: Error?) {
         probing = false
 
         if closed {
