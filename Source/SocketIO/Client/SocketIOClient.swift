@@ -41,6 +41,8 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
 
     /// The queue that all interaction with the client should occur on. This is the queue that event handlers are
     /// called on.
+    ///
+    /// **This should be a serial queue! Concurrent queues are not supported and might cause crashes and races**.
     @objc
     public var handleQueue = DispatchQueue.main
 
