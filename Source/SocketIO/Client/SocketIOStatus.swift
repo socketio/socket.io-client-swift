@@ -1,5 +1,5 @@
 //
-//  SocketIOClientStatus.swift
+//  SocketIOStatus.swift
 //  Socket.IO-Client-Swift
 //
 //  Created by Erik Little on 8/14/15.
@@ -24,17 +24,36 @@
 
 import Foundation
 
-/// Represents the state of the client.
-@objc public enum SocketIOClientStatus : Int {
-    /// The client has never been connected. Or the client has been reset.
+/// Represents state of a manager or client.
+@objc
+public enum SocketIOStatus : Int, CustomStringConvertible {
+    // MARK: Cases
+
+    /// The client/manager has never been connected. Or the client has been reset.
     case notConnected
 
-    /// The client was once connected, but not anymore.
+    /// The client/manager was once connected, but not anymore.
     case disconnected
 
-    /// The client is in the process of connecting.
+    /// The client/manager is in the process of connecting.
     case connecting
 
-    /// The client is currently connected.
+    /// The client/manager is currently connected.
     case connected
+
+    // MARK: Properties
+
+    /// - returns: True if this client/manager is connected/connecting to a server.
+    public var active: Bool {
+        return self == .connected || self == .connecting
+    }
+
+    public var description: String {
+        switch self {
+        case .connected:    return "connected"
+        case .connecting:   return "connecting"
+        case .disconnected: return "disconnected"
+        case .notConnected: return "notConnected"
+        }
+    }
 }

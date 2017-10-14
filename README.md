@@ -7,20 +7,21 @@ Socket.IO-client for iOS/OS X.
 ```swift
 import SocketIO
 
-let socket = SocketIOClient(socketURL: URL(string: "http://localhost:8080")!, config: [.log(true), .compress])
+let manager = SocketManager(socketURL: URL(string: "http://localhost:8080")!, config: [.log(true), .compress])
+let socket = manager.defaultSocket
 
 socket.on(clientEvent: .connect) {data, ack in
     print("socket connected")
 }
 
 socket.on("currentAmount") {data, ack in
-    if let cur = data[0] as? Double {
-        socket.emitWithAck("canUpdate", cur).timingOut(after: 0) {data in
-            socket.emit("update", ["amount": cur + 2.50])
-        }
-
-        ack.with("Got your currentAmount", "dude")
+    guard let cur = data[0] as? Double else { return }
+    
+    socket.emitWithAck("canUpdate", cur).timingOut(after: 0) {data in
+        socket.emit("update", ["amount": cur + 2.50])
     }
+
+    ack.with("Got your currentAmount", "dude")
 }
 
 socket.connect()
@@ -29,8 +30,10 @@ socket.connect()
 ## Objective-C Example
 ```objective-c
 @import SocketIO;
+
 NSURL* url = [[NSURL alloc] initWithString:@"http://localhost:8080"];
-SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{@"log": @YES, @"compress": @YES}];
+SocketManager* manager = [[SocketManager alloc] initWithSocketURL:url config:@{@"log": @YES, @"compress": @YES}];
+SocketIOClient* socket = manager.defaultSocket;
 
 [socket on:@"connect" callback:^(NSArray* data, SocketAckEmitter* ack) {
     NSLog(@"socket connected");
@@ -134,6 +137,7 @@ Objective-C:
 # [Docs](https://nuclearace.github.io/Socket.IO-Client-Swift/index.html)
 
 - [Client](https://nuclearace.github.io/Socket.IO-Client-Swift/Classes/SocketIOClient.html)
+- [Manager](https://nuclearace.github.io/Socket.IO-Client-Swift/Classes/SocketManager.html)
 - [Engine](https://nuclearace.github.io/Socket.IO-Client-Swift/Classes/SocketEngine.html)
 - [Options](https://nuclearace.github.io/Socket.IO-Client-Swift/Enums/SocketIOClientOption.html)
 

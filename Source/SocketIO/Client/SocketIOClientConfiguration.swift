@@ -125,5 +125,12 @@ public struct SocketIOClientConfiguration : ExpressibleByArrayLiteral, Collectio
 
         backingArray.append(element)
     }
+}
 
+/// Declares that a type can set configs from a `SocketIOClientConfiguration`.
+public protocol ConfigSettable {
+    /// Called when an `ConfigSettable` should set/update its configs from a given configuration.
+    ///
+    /// - parameter config: The `SocketIOClientConfiguration` that should be used to set/update configs.
+    mutating func setConfigs(_ config: SocketIOClientConfiguration)
 }
