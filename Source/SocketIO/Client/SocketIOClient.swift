@@ -583,12 +583,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     /// - returns: A unique id for the handler that can be used to remove it.
     @discardableResult
     open func on(clientEvent event: SocketClientEvent, callback: @escaping NormalCallback) -> UUID {
-        DefaultSocketLogger.Logger.log("Adding handler for event: \(event)", type: SocketIOClient.logType)
-
-        let handler = SocketEventHandler(event: event.rawValue, id: UUID(), callback: callback)
-        handlers.append(handler)
-
-        return handler.id
+        return on(event.rawValue, callback: callback)
     }
 
     /// Adds a single-use handler for a client event.
