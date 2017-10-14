@@ -463,7 +463,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     }
 
     private func _engineDidReceivePong() {
-        handleClientEvent(.gotPong, data: [])
+        handleClientEvent(.pong, data: [])
     }
 
     /// Called when the sends a ping to the server.
@@ -474,7 +474,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
     }
 
     private func _engineDidSendPing() {
-        handleClientEvent(.sentPing, data: [])
+        handleClientEvent(.ping, data: [])
     }
 
     /// Called when socket.io has acked one of our emits. Causes the corresponding ack callback to be called.

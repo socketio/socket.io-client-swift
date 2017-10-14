@@ -413,9 +413,9 @@ class SocketSideEffectTest: XCTestCase {
     }
 
     func testClientCallsSentPingHandler() {
-        let expect = expectation(description: "The client should emit a sentPing event")
+        let expect = expectation(description: "The client should emit a ping event")
 
-        socket.on(clientEvent: .sentPing) {data, ack in
+        socket.on(clientEvent: .ping) {data, ack in
             expect.fulfill()
         }
 
@@ -425,9 +425,9 @@ class SocketSideEffectTest: XCTestCase {
     }
 
     func testClientCallsGotPongHandler() {
-        let expect = expectation(description: "The client should emit a gotPong event")
+        let expect = expectation(description: "The client should emit a pong event")
 
-        socket.on(clientEvent: .gotPong) {data, ack in
+        socket.on(clientEvent: .pong) {data, ack in
             expect.fulfill()
         }
 

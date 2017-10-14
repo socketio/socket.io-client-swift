@@ -267,16 +267,27 @@ public enum SocketClientEvent : String {
     /// ```
     case error
 
+    /// Emitted whenever the engine sends a ping.
+    ///
+    /// Usage:
+    ///
+    /// ```swift
+    /// socket.on(clientEvent: .ping) {_, _ in
+    ///   // Maybe keep track of latency?
+    /// }
+    /// ```
+    case ping
+
     /// Emitted whenever the engine gets a pong.
     ///
     /// Usage:
     ///
     /// ```swift
-    /// socket.on(clientEvent: .gotPong) {_, _ in
+    /// socket.on(clientEvent: .pong) {_, _ in
     ///   // Maybe keep track of latency?
     /// }
     /// ```
-    case gotPong
+    case pong
 
     /// Emitted when the client begins the reconnection process.
     ///
@@ -299,17 +310,6 @@ public enum SocketClientEvent : String {
     /// }
     /// ```
     case reconnectAttempt
-
-    /// Emitted whenever the engine sends a ping.
-    ///
-    /// Usage:
-    ///
-    /// ```swift
-    /// socket.on(clientEvent: .sentPing) {_, _ in
-    ///   // Maybe keep track of latency?
-    /// }
-    /// ```
-    case sentPing
 
     /// Emitted every time there is a change in the client's status.
     ///
