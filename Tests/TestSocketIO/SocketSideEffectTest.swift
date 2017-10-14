@@ -412,6 +412,30 @@ class SocketSideEffectTest: XCTestCase {
         XCTAssertEqual(socket.nsp, "/", "It should set the namespace after creation")
     }
 
+    func testClientCallsSentPingHandler() {
+        let expect = expectation(description: "The client should emit a sentPing event")
+
+        socket.on(clientEvent: .sentPing) {data, ack in
+            expect.fulfill()
+        }
+
+        socket.engineDidSendPing()
+
+        waitForExpectations(timeout: 0.2)
+    }
+
+    func testClientCallsGotPongHandler() {
+        let expect = expectation(description: "The client should emit a gotPong event")
+
+        socket.on(clientEvent: .gotPong) {data, ack in
+            expect.fulfill()
+        }
+
+        socket.engineDidReceivePong()
+
+        waitForExpectations(timeout: 0.2)
+    }
+
     let data = "test".data(using: String.Encoding.utf8)!
     let data2 = "test2".data(using: String.Encoding.utf8)!
     private var socket: SocketIOClient!

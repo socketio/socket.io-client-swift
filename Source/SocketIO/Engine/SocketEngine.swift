@@ -485,6 +485,8 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         if message == "3probe" {
             upgradeTransport()
         }
+
+        client?.engineDidReceivePong()
     }
 
     /// Parses raw binary received from engine.io.
@@ -566,6 +568,8 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         engineQueue.asyncAfter(deadline: DispatchTime.now() + .milliseconds(pingInterval)) {[weak self] in
             self?.sendPing()
         }
+
+        client?.engineDidSendPing()
     }
 
     // Moves from long-polling to websockets

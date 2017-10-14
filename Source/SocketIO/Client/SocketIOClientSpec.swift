@@ -245,18 +245,80 @@ public enum SocketClientEvent : String {
     /// ```
     case connect
 
-    /// Called when the socket has disconnected and will not attempt to try to reconnect.
+    /// Emitted when the socket has disconnected and will not attempt to try to reconnect.
+    ///
+    /// Usage:
+    ///
+    /// ```swift
+    /// socket.on(clientEvent: .disconnect) {data, ack in
+    ///     // Some cleanup logic
+    /// }
+    /// ```
     case disconnect
 
-    /// Called when an error occurs.
+    /// Emitted when an error occurs.
+    ///
+    /// Usage:
+    ///
+    /// ```swift
+    /// socket.on(clientEvent: .error) {data, ack in
+    ///     // Some logging
+    /// }
+    /// ```
     case error
 
-    /// Called when the client begins the reconnection process.
+    /// Emitted whenever the engine gets a pong.
+    ///
+    /// Usage:
+    ///
+    /// ```swift
+    /// socket.on(clientEvent: .gotPong) {_, _ in
+    ///   // Maybe keep track of latency?
+    /// }
+    /// ```
+    case gotPong
+
+    /// Emitted when the client begins the reconnection process.
+    ///
+    /// Usage:
+    ///
+    /// ```swift
+    /// socket.on(clientEvent: .reconnect) {data, ack in
+    ///     // Some reconnect event logic
+    /// }
+    /// ```
     case reconnect
 
-    /// Called each time the client tries to reconnect to the server.
+    /// Emitted each time the client tries to reconnect to the server.
+    ///
+    /// Usage:
+    ///
+    /// ```swift
+    /// socket.on(clientEvent: .reconnectAttempt) {data, ack in
+    ///     // Some reconnect attempt logging
+    /// }
+    /// ```
     case reconnectAttempt
 
-    /// Called every time there is a change in the client's status.
+    /// Emitted whenever the engine sends a ping.
+    ///
+    /// Usage:
+    ///
+    /// ```swift
+    /// socket.on(clientEvent: .sentPing) {_, _ in
+    ///   // Maybe keep track of latency?
+    /// }
+    /// ```
+    case sentPing
+
+    /// Emitted every time there is a change in the client's status.
+    ///
+    /// Usage:
+    ///
+    /// ```swift
+    /// socket.on(clientEvent: .statusChange) {data, ack in
+    ///     // Some status changing logging
+    /// }
+    /// ```
     case statusChange
 }

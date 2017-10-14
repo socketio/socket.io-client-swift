@@ -455,6 +455,28 @@ open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, So
         joinNamespace(nsp)
     }
 
+    /// Called when the engine receives a pong message.
+    open func engineDidReceivePong() {
+        handleQueue.async {
+            self._engineDidReceivePong()
+        }
+    }
+
+    private func _engineDidReceivePong() {
+        handleClientEvent(.gotPong, data: [])
+    }
+
+    /// Called when the sends a ping to the server.
+    open func engineDidSendPing() {
+        handleQueue.async {
+            self._engineDidSendPing()
+        }
+    }
+
+    private func _engineDidSendPing() {
+        handleClientEvent(.sentPing, data: [])
+    }
+
     /// Called when socket.io has acked one of our emits. Causes the corresponding ack callback to be called.
     ///
     /// - parameter ack: The number for this ack.
