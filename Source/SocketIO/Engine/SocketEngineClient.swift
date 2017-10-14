@@ -47,7 +47,7 @@ import Foundation
     /// Called when the engine receives a pong message.
     func engineDidReceivePong()
 
-    /// Called when the sends a ping to the server.
+    /// Called when the engine sends a ping to the server.
     func engineDidSendPing()
 
     /// Called when the engine has a message that must be parsed.
