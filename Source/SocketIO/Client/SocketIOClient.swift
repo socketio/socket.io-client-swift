@@ -47,7 +47,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     ///
     /// **Must** start with a `/`.
     @objc
-    public var nsp = "/"
+    public let nsp: String
 
     /// The session id of this client.
     @objc

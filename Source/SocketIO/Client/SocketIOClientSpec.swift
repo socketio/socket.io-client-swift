@@ -41,7 +41,7 @@ public protocol SocketIOClientSpec : class {
     /// The namespace that this socket is currently connected to.
     ///
     /// **Must** start with a `/`.
-    var nsp: String { get set }
+    var nsp: String { get }
 
     /// The status of this client.
     var status: SocketIOStatus { get }
