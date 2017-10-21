@@ -3,7 +3,7 @@
 What's new:
 ---
 
--Adds a new `SocketManager` class that multiplexes multiple namespaces through a single engine. 
+- Adds a new `SocketManager` class that multiplexes multiple namespaces through a single engine. 
 - Adds `.sentPing` and `.gotPong` client events for tracking ping/pongs.
 - watchOS support.
 
