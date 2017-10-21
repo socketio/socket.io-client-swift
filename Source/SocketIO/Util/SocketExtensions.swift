@@ -63,8 +63,6 @@ extension NSDictionary {
             return .log(log)
         case let ("logger", logger as SocketLogger):
             return .logger(logger)
-        case let ("nsp", nsp as String):
-            return .nsp(nsp)
         case let ("path", path as String):
             return .path(path)
         case let ("reconnects", reconnects as Bool):

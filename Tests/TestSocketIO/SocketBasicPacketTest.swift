@@ -150,10 +150,9 @@ class SocketBasicPacketTest: XCTestCase {
 
     func testBinaryStringPlaceholderInMessage() {
         let engineString = "52-[\"test\",\"~~0\",{\"num\":0,\"_placeholder\":true},{\"_placeholder\":true,\"num\":1}]"
-        let socket = SocketIOClient(socketURL: URL(string: "http://localhost/")!)
-        socket.setTestable()
+        let manager = SocketManager(socketURL: URL(string: "http://localhost/")!)
 
-        var packet = try! socket.parseString(engineString)
+        var packet = try! manager.parseString(engineString)
 
         XCTAssertEqual(packet.event, "test")
         _ = packet.addData(data)

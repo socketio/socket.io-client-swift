@@ -10,20 +10,9 @@ import XCTest
 @testable import SocketIO
 
 class SocketEngineTest: XCTestCase {
-    var client: SocketIOClient!
-    var engine: SocketEngine!
-
-    override func setUp() {
-        super.setUp()
-        client = SocketIOClient(socketURL: URL(string: "http://localhost")!)
-        engine = SocketEngine(client: client, url: URL(string: "http://localhost")!, options: nil)
-
-        client.setTestable()
-    }
-
     func testBasicPollingMessage() {
         let expect = expectation(description: "Basic polling test")
-        client.on("blankTest") {data, ack in
+        socket.on("blankTest") {data, ack in
             expect.fulfill()
         }
 
@@ -35,11 +24,11 @@ class SocketEngineTest: XCTestCase {
         let finalExpectation = expectation(description: "Final packet in poll test")
         var gotBlank = false
 
-        client.on("blankTest") {data, ack in
+        socket.on("blankTest") {data, ack in
             gotBlank = true
         }
 
-        client.on("stringTest") {data, ack in
+        socket.on("stringTest") {data, ack in
             if let str = data[0] as? String, gotBlank {
                 if str == "hello" {
                     finalExpectation.fulfill()
@@ -54,7 +43,7 @@ class SocketEngineTest: XCTestCase {
     func testEngineDoesErrorOnUnknownTransport() {
         let finalExpectation = expectation(description: "Unknown Transport")
 
-        client.on("error") {data, ack in
+        socket.on("error") {data, ack in
             if let error = data[0] as? String, error == "Unknown transport" {
                 finalExpectation.fulfill()
             }
@@ -67,7 +56,7 @@ class SocketEngineTest: XCTestCase {
     func testEngineDoesErrorOnUnknownMessage() {
         let finalExpectation = expectation(description: "Engine Errors")
 
-        client.on("error") {data, ack in
+        socket.on("error") {data, ack in
             finalExpectation.fulfill()
         }
 
@@ -78,7 +67,7 @@ class SocketEngineTest: XCTestCase {
     func testEngineDecodesUTF8Properly() {
         let expect = expectation(description: "Engine Decodes utf8")
 
-        client.on("stringTest") {data, ack in
+        socket.on("stringTest") {data, ack in
             XCTAssertEqual(data[0] as? String, "lïne one\nlīne \rtwo𦅙𦅛", "Failed string test")
             expect.fulfill()
         }
@@ -110,7 +99,7 @@ class SocketEngineTest: XCTestCase {
         let b64String = "b4aGVsbG8NCg=="
         let packetString = "451-[\"test\",{\"test\":{\"_placeholder\":true,\"num\":0}}]"
 
-        client.on("test") {data, ack in
+        socket.on("test") {data, ack in
             if let data = data[0] as? Data, let string = String(data: data, encoding: .utf8) {
                 XCTAssertEqual(string, "hello")
             }
@@ -122,5 +111,98 @@ class SocketEngineTest: XCTestCase {
         engine.parseEngineMessage(b64String)
 
         waitForExpectations(timeout: 3, handler: nil)
+    }
+
+    func testSettingExtraHeadersBeforeConnectSetsEngineExtraHeaders() {
+        let newValue = ["hello": "world"]
+
+        manager.engine = engine
+        manager.setTestStatus(.notConnected)
+        manager.config = [.extraHeaders(["new": "value"])]
+        manager.config.insert(.extraHeaders(newValue), replacing: true)
+
+        XCTAssertEqual(2, manager.config.count)
+        XCTAssertEqual(manager.engine!.extraHeaders!, newValue)
+
+        for config in manager.config {
+            switch config {
+            case let .extraHeaders(headers):
+                XCTAssertTrue(headers.keys.contains("hello"), "It should contain hello header key")
+                XCTAssertFalse(headers.keys.contains("new"), "It should not contain old data")
+            case .path:
+                continue
+            default:
+                XCTFail("It should only have two configs")
+            }
+        }
+    }
+
+    func testSettingExtraHeadersAfterConnectDoesNotIgnoreChanges() {
+        let newValue = ["hello": "world"]
+
+        manager.engine = engine
+        manager.setTestStatus(.connected)
+        engine.setConnected(true)
+        manager.config = [.extraHeaders(["new": "value"])]
+        manager.config.insert(.extraHeaders(["hello": "world"]), replacing: true)
+
+        XCTAssertEqual(2, manager.config.count)
+        XCTAssertEqual(manager.engine!.extraHeaders!, newValue)
+    }
+
+    func testSettingPathAfterConnectDoesNotIgnoreChanges() {
+        let newValue = "/newpath/"
+
+        manager.engine = engine
+        manager.setTestStatus(.connected)
+        engine.setConnected(true)
+        manager.config.insert(.path(newValue))
+
+        XCTAssertEqual(1, manager.config.count)
+        XCTAssertEqual(manager.engine!.socketPath, newValue)
+    }
+
+    func testSettingCompressAfterConnectDoesNotIgnoreChanges() {
+        manager.engine = engine
+        manager.setTestStatus(.connected)
+        engine.setConnected(true)
+        manager.config.insert(.compress)
+
+        XCTAssertEqual(2, manager.config.count)
+        XCTAssertTrue(manager.engine!.compress)
+    }
+
+    func testSettingForcePollingAfterConnectDoesNotIgnoreChanges() {
+        manager.engine = engine
+        manager.setTestStatus(.connected)
+        engine.setConnected(true)
+        manager.config.insert(.forcePolling(true))
+
+        XCTAssertEqual(2, manager.config.count)
+        XCTAssertTrue(manager.engine!.forcePolling)
+    }
+
+    func testSettingForceWebSocketsAfterConnectDoesNotIgnoreChanges() {
+        manager.engine = engine
+        manager.setTestStatus(.connected)
+        engine.setConnected(true)
+        manager.config.insert(.forceWebsockets(true))
+
+        XCTAssertEqual(2, manager.config.count)
+        XCTAssertTrue(manager.engine!.forceWebsockets)
+    }
+
+    var manager: SocketManager!
+    var socket: SocketIOClient!
+    var engine: SocketEngine!
+
+    override func setUp() {
+        super.setUp()
+
+        manager = SocketManager(socketURL: URL(string: "http://localhost")!)
+        socket = manager.defaultSocket
+        engine = SocketEngine(client: manager, url: URL(string: "http://localhost")!, options: nil)
+
+        socket.setTestable()
     }
 }

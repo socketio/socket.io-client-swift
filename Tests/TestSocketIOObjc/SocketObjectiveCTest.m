@@ -7,36 +7,20 @@
 //  Merely tests whether the Objective-C api breaks
 //
 
+#import "SocketObjectiveCTest.h"
+
 @import Dispatch;
 @import Foundation;
 @import XCTest;
 @import SocketIO;
 
-@interface SocketObjectiveCTest : XCTestCase
-
-@property SocketIOClient* socket;
-
-@end
+// TODO Manager interface tests
 
 @implementation SocketObjectiveCTest
 
-- (void)setUp {
-    [super setUp];
-    NSURL* url = [[NSURL alloc] initWithString:@"http://localhost"];
-    self.socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{@"log": @NO, @"forcePolling": @YES}];
-}
-
 - (void)testProperties {
-    NSURL* url = nil;
-
-    url = self.socket.socketURL;
-    self.socket.forceNew = false;
-    self.socket.handleQueue = dispatch_get_main_queue();
     self.socket.nsp = @"/objective-c";
-    self.socket.reconnects = false;
-    self.socket.reconnectWait = 1;
-    if (self.socket.status == SocketIOClientStatusConnected) { }
-    if (self.socket.engine == NULL) { }
+    if (self.socket.status == SocketIOStatusConnected) { }
 }
 
 - (void)testOnSyntax {
@@ -62,7 +46,7 @@
 }
 
 - (void)testJoinNamespaceSyntax {
-    [self.socket joinNamespace:@"/objective-c"];
+    [self.socket joinNamespace];
 }
 
 - (void)testOnAnySyntax {
@@ -72,10 +56,6 @@
 
         [self.socket emit:event with:data];
     }];
-}
-
-- (void)testReconnectSyntax {
-    [self.socket reconnect];
 }
 
 - (void)testRemoveAllHandlersSyntax {
@@ -94,15 +74,16 @@
     [self.socket off:@"test"];
 }
 
-- (void)testSocketManager {
-    SocketClientManager* manager = [SocketClientManager sharedManager];
-    [manager addSocket:self.socket labeledAs:@"test"];
-    [manager removeSocketWithLabel:@"test"];
-}
-
 - (void)testSSLSecurity {
     SSLSecurity* sec = [[SSLSecurity alloc] initWithUsePublicKeys:0];
     sec = nil;
+}
+
+- (void)setUp {
+    [super setUp];
+    NSURL* url = [[NSURL alloc] initWithString:@"http://localhost"];
+    self.manager = [[SocketManager alloc] initWithSocketURL:url config:nil];
+    self.socket = [self.manager defaultSocket];
 }
 
 @end

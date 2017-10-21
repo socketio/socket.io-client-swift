@@ -34,7 +34,7 @@ class SocketSideEffectTest: XCTestCase {
             expect.fulfill()
         }
 
-        socket.parseSocketMessage("30[\"hello world\"]")
+        manager.parseEngineMessage("30[\"hello world\"]")
         waitForExpectations(timeout: 3, handler: nil)
     }
 
@@ -45,8 +45,8 @@ class SocketSideEffectTest: XCTestCase {
             expect.fulfill()
         }
 
-        socket.parseSocketMessage("61-0[{\"_placeholder\":true,\"num\":0},{\"test\":true}]")
-        socket.parseBinaryData(Data())
+        manager.parseEngineMessage("61-0[{\"_placeholder\":true,\"num\":0},{\"test\":true}]")
+        manager.parseEngineBinaryData(Data())
         waitForExpectations(timeout: 3, handler: nil)
     }
 
@@ -57,7 +57,7 @@ class SocketSideEffectTest: XCTestCase {
             expect.fulfill()
         }
 
-        socket.parseSocketMessage("2[\"test\",\"hello world\"]")
+        manager.parseEngineMessage("2[\"test\",\"hello world\"]")
         waitForExpectations(timeout: 3, handler: nil)
     }
 
@@ -68,7 +68,7 @@ class SocketSideEffectTest: XCTestCase {
             expect.fulfill()
         }
 
-        socket.parseSocketMessage("2[\"test\",\"\\\"hello world\\\"\"]")
+        manager.parseEngineMessage("2[\"test\",\"\\\"hello world\\\"\"]")
         waitForExpectations(timeout: 3, handler: nil)
     }
 
@@ -80,7 +80,7 @@ class SocketSideEffectTest: XCTestCase {
             expect.fulfill()
         }
 
-        socket.parseSocketMessage("2[\"test\",\"hello world\"]")
+        manager.parseEngineMessage("2[\"test\",\"hello world\"]")
         waitForExpectations(timeout: 3, handler: nil)
     }
 
@@ -96,7 +96,7 @@ class SocketSideEffectTest: XCTestCase {
 
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1) {
             // Fake connecting
-            self.socket.parseEngineMessage("0/")
+            self.manager.parseEngineMessage("0/")
         }
 
         waitForExpectations(timeout: 3, handler: nil)
@@ -136,59 +136,47 @@ class SocketSideEffectTest: XCTestCase {
             }
         }
 
-        socket.parseSocketMessage("4\"test error\"")
+        manager.parseEngineMessage("4\"test error\"")
         waitForExpectations(timeout: 3, handler: nil)
     }
 
     func testHandleBinaryEvent() {
         let expect = expectation(description: "handled binary event")
         socket.on("test") {data, ack in
-            if let dict = data[0] as? NSDictionary, let data = dict["test"] as? NSData {
+            if let dict = data[0] as? [String: Any], let data = dict["test"] as? Data {
                 XCTAssertEqual(data as Data, self.data)
                 expect.fulfill()
             }
         }
 
-        socket.parseSocketMessage("51-[\"test\",{\"test\":{\"_placeholder\":true,\"num\":0}}]")
-        socket.parseBinaryData(data)
+        manager.parseEngineMessage("51-[\"test\",{\"test\":{\"_placeholder\":true,\"num\":0}}]")
+        manager.parseEngineBinaryData(data)
         waitForExpectations(timeout: 3, handler: nil)
     }
 
     func testHandleMultipleBinaryEvent() {
         let expect = expectation(description: "handled multiple binary event")
         socket.on("test") {data, ack in
-            if let dict = data[0] as? NSDictionary, let data = dict["test"] as? NSData,
-                let data2 = dict["test2"] as? NSData {
-                    XCTAssertEqual(data as Data, self.data)
-                    XCTAssertEqual(data2 as Data, self.data2)
-                    expect.fulfill()
+            if let dict = data[0] as? [String: Any], let data = dict["test"] as? Data,
+               let data2 = dict["test2"] as? Data {
+                XCTAssertEqual(data as Data, self.data)
+                XCTAssertEqual(data2 as Data, self.data2)
+                expect.fulfill()
             }
         }
 
-        socket.parseSocketMessage("52-[\"test\",{\"test\":{\"_placeholder\":true,\"num\":0},\"test2\":{\"_placeholder\":true,\"num\":1}}]")
-        socket.parseBinaryData(data)
-        socket.parseBinaryData(data2)
+        manager.parseEngineMessage("52-[\"test\",{\"test\":{\"_placeholder\":true,\"num\":0},\"test2\":{\"_placeholder\":true,\"num\":1}}]")
+        manager.parseEngineBinaryData(data)
+        manager.parseEngineBinaryData(data2)
         waitForExpectations(timeout: 3, handler: nil)
-    }
-
-    func testSocketManager() {
-        let manager = SocketClientManager.sharedManager
-        manager["test"] = socket
-
-        XCTAssert(manager["test"] === socket, "failed to get socket")
-
-        manager["test"] = nil
-
-        XCTAssert(manager["test"] == nil, "socket not removed")
-
     }
 
     func testChangingStatusCallsStatusChangeHandler() {
         let expect = expectation(description: "The client should announce when the status changes")
-        let statusChange = SocketIOClientStatus.connecting
+        let statusChange = SocketIOStatus.connecting
 
         socket.on("statusChange") {data, ack in
-            guard let status = data[0] as? SocketIOClientStatus else {
+            guard let status = data[0] as? SocketIOStatus else {
                 XCTFail("Status should be one of the defined statuses")
 
                 return
@@ -251,9 +239,9 @@ class SocketSideEffectTest: XCTestCase {
     func testConnectTimesOutIfNotConnected() {
         let expect = expectation(description: "The client should call the timeout function")
 
+        socket = manager.socket(forNamespace: "/someNamespace")
         socket.setTestStatus(.notConnected)
-        socket.nsp = "/someNamespace"
-        socket.engine = TestEngine(client: socket, url: socket.socketURL, options: nil)
+        manager.engine = TestEngine(client: manager, url: manager.socketURL, options: nil)
 
         socket.connect(timeoutAfter: 0.5, withHandler: {
             expect.fulfill()
@@ -266,7 +254,7 @@ class SocketSideEffectTest: XCTestCase {
         let expect = expectation(description: "The client should not call the timeout function")
 
         socket.setTestStatus(.notConnected)
-        socket.engine = TestEngine(client: socket, url: socket.socketURL, options: nil)
+        manager.engine = TestEngine(client: manager, url: manager.socketURL, options: nil)
 
         socket.on(clientEvent: .connect) {data, ack in
             expect.fulfill()
@@ -278,7 +266,7 @@ class SocketSideEffectTest: XCTestCase {
 
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1) {
             // Fake connecting
-            self.socket.parseEngineMessage("0/")
+            self.manager.parseEngineMessage("0/")
         }
 
         waitForExpectations(timeout: 2)
@@ -288,7 +276,7 @@ class SocketSideEffectTest: XCTestCase {
         let expect = expectation(description: "The client call the connect handler")
 
         socket.setTestStatus(.notConnected)
-        socket.engine = TestEngine(client: socket, url: socket.socketURL, options: nil)
+        manager.engine = TestEngine(client: manager, url: manager.socketURL, options: nil)
 
         socket.on(clientEvent: .connect) {data, ack in
             expect.fulfill()
@@ -305,9 +293,9 @@ class SocketSideEffectTest: XCTestCase {
         let expect = expectation(description: "The client should not call the timeout function")
         let nspString = "/swift"
 
+        socket = manager.socket(forNamespace: "/swift")
         socket.setTestStatus(.notConnected)
-        socket.nsp = nspString
-        socket.engine = TestEngine(client: socket, url: socket.socketURL, options: nil)
+        manager.engine = TestEngine(client: manager, url: manager.socketURL, options: nil)
 
         socket.on(clientEvent: .connect) {data, ack in
             guard let nsp = data[0] as? String else {
@@ -327,7 +315,7 @@ class SocketSideEffectTest: XCTestCase {
 
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1) {
             // Fake connecting
-            self.socket.parseEngineMessage("0/swift")
+            self.manager.parseEngineMessage("0/swift")
         }
 
         waitForExpectations(timeout: 2)
@@ -377,39 +365,31 @@ class SocketSideEffectTest: XCTestCase {
 
     func testSettingConfigAfterInit() {
         socket.setTestStatus(.notConnected)
-        socket.config.insert(.log(true))
+        manager.config.insert(.log(true))
 
         XCTAssertTrue(DefaultSocketLogger.Logger.log, "It should set logging to true after creation")
 
-        socket.config = [.log(false), .nsp("/test")]
+        manager.config = [.log(false)]
 
         XCTAssertFalse(DefaultSocketLogger.Logger.log, "It should set logging to false after creation")
-        XCTAssertEqual(socket.nsp, "/test", "It should set the namespace after creation")
     }
 
-    func testSettingExtraHeadersAfterInit() {
-        socket.setTestStatus(.notConnected)
-        socket.config = [.extraHeaders(["new": "value"])]
-        socket.config.insert(.extraHeaders(["hello": "world"]), replacing: true)
+    func testSettingConfigAfterDisconnect() {
+        socket.setTestStatus(.disconnected)
+        manager.config.insert(.log(true))
 
-        for config in socket.config {
-            switch config {
-            case let .extraHeaders(headers):
-                XCTAssertTrue(headers.keys.contains("hello"), "It should contain hello header key")
-                XCTAssertFalse(headers.keys.contains("new"), "It should not contain old data")
-            case .path:
-                continue
-            default:
-                XCTFail("It should only have two configs")
-            }
-        }
-    }
+        XCTAssertTrue(DefaultSocketLogger.Logger.log, "It should set logging to true after creation")
 
-    func testSettingConfigAfterInitWhenConnectedIgnoresChanges() {
-        socket.config = [.log(true), .nsp("/test")]
+        manager.config = [.log(false)]
 
         XCTAssertFalse(DefaultSocketLogger.Logger.log, "It should set logging to false after creation")
-        XCTAssertEqual(socket.nsp, "/", "It should set the namespace after creation")
+    }
+
+    func testSettingConfigAfterInitWhenConnectedDoesNotIgnoreChanges() {
+        manager.connect()
+        manager.config = [.log(true)]
+
+        XCTAssertTrue(DefaultSocketLogger.Logger.log, "It should set logging to false after creation")
     }
 
     func testClientCallsSentPingHandler() {
@@ -419,7 +399,7 @@ class SocketSideEffectTest: XCTestCase {
             expect.fulfill()
         }
 
-        socket.engineDidSendPing()
+        manager.engineDidSendPing()
 
         waitForExpectations(timeout: 0.2)
     }
@@ -431,18 +411,22 @@ class SocketSideEffectTest: XCTestCase {
             expect.fulfill()
         }
 
-        socket.engineDidReceivePong()
+        manager.engineDidReceivePong()
 
         waitForExpectations(timeout: 0.2)
     }
 
     let data = "test".data(using: String.Encoding.utf8)!
     let data2 = "test2".data(using: String.Encoding.utf8)!
+
+    private var manager: SocketManager!
     private var socket: SocketIOClient!
 
     override func setUp() {
         super.setUp()
-        socket = SocketIOClient(socketURL: URL(string: "http://localhost/")!)
+
+        manager = SocketManager(socketURL: URL(string: "http://localhost/")!)
+        socket = manager.defaultSocket
         socket.setTestable()
     }
 }
@@ -461,6 +445,7 @@ struct ThrowingData : SocketData {
 class TestEngine : SocketEngineSpec {
     weak var client: SocketEngineClient?
     private(set) var closed = false
+    private(set) var compress = false
     private(set) var connected = false
     var connectParams: [String: Any]? = nil
     private(set) var cookies: [HTTPCookie]? = nil
