@@ -19,8 +19,8 @@
 @implementation SocketObjectiveCTest
 
 - (void)testProperties {
-    self.socket.nsp = @"/objective-c";
-    if (self.socket.status == SocketIOStatusConnected) { }
+    XCTAssertTrue([self.socket.nsp isEqualToString:@"/"]);
+    XCTAssertEqual(self.socket.status, SocketIOStatusNotConnected);
 }
 
 - (void)testOnSyntax {
