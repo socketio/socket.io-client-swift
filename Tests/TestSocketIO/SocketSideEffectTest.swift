@@ -463,7 +463,7 @@ class TestEngine : SocketEngineSpec {
     private(set) var websocket = false
     private(set) var ws: WebSocket? = nil
 
-    required init(client: SocketEngineClient, url: URL, options: NSDictionary?) {
+    required init(client: SocketEngineClient, url: URL, options: [String: Any]?) {
         self.client = client
     }
 

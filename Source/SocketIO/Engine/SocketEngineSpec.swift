@@ -90,7 +90,7 @@ import Starscream
     /// - parameter client: The client for this engine.
     /// - parameter url: The url for this engine.
     /// - parameter options: The options for this engine.
-    init(client: SocketEngineClient, url: URL, options: NSDictionary?)
+    init(client: SocketEngineClient, url: URL, options: [String: Any]?)
 
     /// Starts the connection to the server.
     func connect()

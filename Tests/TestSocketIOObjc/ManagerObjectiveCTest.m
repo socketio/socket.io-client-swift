@@ -11,6 +11,13 @@
 
 @implementation ManagerObjectiveCTest
 
+- (void)testSettingConfig {
+    NSURL* url = [[NSURL alloc] initWithString:@"http://localhost"];
+    self.manager = [[TestManager alloc] initWithSocketURL:url config:@{@"forceNew": @YES}];
+
+    XCTAssertTrue(self.manager.forceNew);
+}
+
 - (void)testManagerProperties {
     XCTAssertNotNil(self.manager.defaultSocket);
     XCTAssertNil(self.manager.engine);
