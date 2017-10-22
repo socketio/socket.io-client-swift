@@ -7,9 +7,9 @@ branches:
     - master
     - development
 before_install:
-  - brew update
+  # - brew update
   # - brew outdated xctool || brew upgrade xctool
-  - brew outdated carthage || brew upgrade carthage
+  # - brew outdated carthage || brew upgrade carthage
   - carthage update --platform macosx
 script:
   - xcodebuild -project Socket.IO-Client-Swift.xcodeproj -scheme SocketIO build test -quiet
