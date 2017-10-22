@@ -114,7 +114,7 @@
 - (void)setUp {
     [super setUp];
     NSURL* url = [[NSURL alloc] initWithString:@"http://localhost"];
-    self.manager = [[TestManager alloc] initWithSocketURL:url config:nil];
+    self.manager = [[TestManager alloc] initWithSocketURL:url config:@{@"log": @NO}];
     self.socket = nil;
     self.socket2 = nil;
 }

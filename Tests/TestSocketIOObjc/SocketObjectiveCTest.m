@@ -82,7 +82,7 @@
 - (void)setUp {
     [super setUp];
     NSURL* url = [[NSURL alloc] initWithString:@"http://localhost"];
-    self.manager = [[SocketManager alloc] initWithSocketURL:url config:nil];
+    self.manager = [[SocketManager alloc] initWithSocketURL:url config:@{@"log": @NO}];
     self.socket = [self.manager defaultSocket];
 }
 

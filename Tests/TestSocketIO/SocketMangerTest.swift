@@ -84,7 +84,7 @@ class SocketMangerTest : XCTestCase {
     override func setUp() {
         super.setUp()
 
-        manager = TestManager(socketURL: URL(string: "http://localhost/")!)
+        manager = TestManager(socketURL: URL(string: "http://localhost/")!, config: [.log(false)])
         socket = nil
         socket2 = nil
     }

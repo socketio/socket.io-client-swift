@@ -386,7 +386,7 @@ class SocketSideEffectTest: XCTestCase {
     }
 
     func testSettingConfigAfterInitWhenConnectedDoesNotIgnoreChanges() {
-        manager.connect()
+        manager.setTestStatus(.connected)
         manager.config = [.log(true)]
 
         XCTAssertTrue(DefaultSocketLogger.Logger.log, "It should set logging to false after creation")
@@ -425,7 +425,7 @@ class SocketSideEffectTest: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        manager = SocketManager(socketURL: URL(string: "http://localhost/")!)
+        manager = SocketManager(socketURL: URL(string: "http://localhost/")!, config: [.log(false)])
         socket = manager.defaultSocket
         socket.setTestable()
     }
