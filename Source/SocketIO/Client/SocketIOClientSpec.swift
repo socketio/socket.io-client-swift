@@ -140,8 +140,8 @@ public protocol SocketIOClientSpec : class {
     /// Causes a client to handle a socket.io packet. The namespace for the packet must match the namespace of the
     /// socket.
     ///
-    /// - parameter pack: The packet to handle.
-    func handlePacket(_ pack: SocketPacket)
+    /// - parameter packet: The packet to handle.
+    func handlePacket(_ packet: SocketPacket)
 
     /// Call when you wish to leave a namespace and disconnect this socket.
     func leaveNamespace()

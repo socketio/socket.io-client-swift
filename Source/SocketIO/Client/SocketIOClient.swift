@@ -345,25 +345,21 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     /// Causes a client to handle a socket.io packet. The namespace for the packet must match the namespace of the
     /// socket.
     ///
-    /// - parameter pack: The packet to handle.
-    open func handlePacket(_ pack: SocketPacket) {
-        func handleConnect(_ packetNamespace: String) {
-            guard packetNamespace == nsp else { return }
+    /// - parameter packet: The packet to handle.
+    open func handlePacket(_ packet: SocketPacket) {
+        guard packet.nsp == nsp else { return }
 
-            didConnect(toNamespace: packetNamespace)
-        }
-
-        switch pack.type {
+        switch packet.type {
         case .event, .binaryEvent:
-            handleEvent(pack.event, data: pack.args, isInternalMessage: false, withAck: pack.id)
+            handleEvent(packet.event, data: packet.args, isInternalMessage: false, withAck: packet.id)
         case .ack, .binaryAck:
-            handleAck(pack.id, data: pack.data)
+            handleAck(packet.id, data: packet.data)
         case .connect:
-            handleConnect(pack.nsp)
+            didConnect(toNamespace: nsp)
         case .disconnect:
             didDisconnect(reason: "Got Disconnect")
         case .error:
-            handleEvent("error", data: pack.data, isInternalMessage: true, withAck: pack.id)
+            handleEvent("error", data: packet.data, isInternalMessage: true, withAck: packet.id)
         }
     }
 
