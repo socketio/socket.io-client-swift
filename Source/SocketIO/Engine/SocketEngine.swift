@@ -536,8 +536,11 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         pongsMissed += 1
         write("", withType: .ping, withData: [])
 
-        engineQueue.asyncAfter(deadline: DispatchTime.now() + .milliseconds(pingInterval)) {[weak self] in
-            self?.sendPing()
+        engineQueue.asyncAfter(deadline: DispatchTime.now() + .milliseconds(pingInterval)) {[weak self, id = self.sid] in
+            // Make sure not to ping old connections
+            guard let this = self, this.sid == id else { return }
+
+            this.sendPing()
         }
 
         client?.engineDidSendPing()
