@@ -63,6 +63,9 @@ SocketIOClient* socket = manager.defaultSocket;
 ## FAQS
 Checkout the [FAQs](https://nuclearace.github.io/Socket.IO-Client-Swift/faq.html) for commonly asked questions.
 
+Checkout the [12to13](https://nuclearace.github.io/Socket.IO-Client-Swift/12to13.html) guide for migrating to v13.
+
+
 ## Installation
 Requires Swift 4/Xcode 9.x
 
