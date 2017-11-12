@@ -48,6 +48,9 @@
             <a class="nav-group-name-link" href="../Guides.html">Guides</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../12to13.html">12to13</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../faq.html">FAQ</a>
               </li>
             </ul>
@@ -68,13 +71,13 @@
                 <a class="nav-group-task-link" href="../Classes/SocketAnyEvent.html">SocketAnyEvent</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Classes/SocketClientManager.html">SocketClientManager</a>
-              </li>
-              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/SocketEngine.html">SocketEngine</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/SocketIOClient.html">SocketIOClient</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/SocketManager.html">SocketManager</a>
               </li>
             </ul>
           </li>
@@ -94,7 +97,7 @@
                 <a class="nav-group-task-link" href="../Enums/SocketIOClientOption.html">SocketIOClientOption</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Enums/SocketIOClientStatus.html">SocketIOClientStatus</a>
+                <a class="nav-group-task-link" href="../Enums/SocketIOStatus.html">SocketIOStatus</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Enums/SocketParsableError.html">SocketParsableError</a>
@@ -105,7 +108,13 @@
             <a class="nav-group-name-link" href="../Protocols.html">Protocols</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/ConfigSettable.html">ConfigSettable</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Protocols/SocketData.html">SocketData</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/SocketDataBufferable.html">SocketDataBufferable</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Protocols/SocketEngineClient.html">SocketEngineClient</a>
@@ -124,6 +133,9 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Protocols/SocketLogger.html">SocketLogger</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/SocketManagerSpec.html">SocketManagerSpec</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Protocols/SocketParsable.html">SocketParsable</a>
@@ -230,7 +242,13 @@ data item: the namespace that was connected to.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Called when the socket has disconnected and will not attempt to try to reconnect.</p>
+                        <p>Emitted when the socket has disconnected and will not attempt to try to reconnect.</p>
+
+<p>Usage:</p>
+<pre class="highlight swift"><code><span class="n">socket</span><span class="o">.</span><span class="nf">on</span><span class="p">(</span><span class="nv">clientEvent</span><span class="p">:</span> <span class="o">.</span><span class="n">disconnect</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span><span class="p">,</span> <span class="n">ack</span> <span class="k">in</span>
+    <span class="c1">// Some cleanup logic</span>
+<span class="p">}</span>
+</code></pre>
 
                       </div>
                       <div class="declaration">
@@ -261,7 +279,13 @@ data item: the namespace that was connected to.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Called when an error occurs.</p>
+                        <p>Emitted when an error occurs.</p>
+
+<p>Usage:</p>
+<pre class="highlight swift"><code><span class="n">socket</span><span class="o">.</span><span class="nf">on</span><span class="p">(</span><span class="nv">clientEvent</span><span class="p">:</span> <span class="o">.</span><span class="n">error</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span><span class="p">,</span> <span class="n">ack</span> <span class="k">in</span>
+    <span class="c1">// Some logging</span>
+<span class="p">}</span>
+</code></pre>
 
                       </div>
                       <div class="declaration">
@@ -269,6 +293,80 @@ data item: the namespace that was connected to.</p>
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight"><code><span class="k">case</span> <span class="n">error</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8SocketIO0A11ClientEventO4pingA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/ping" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A11ClientEventO4pingA2CmF">ping</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Emitted whenever the engine sends a ping.</p>
+
+<p>Usage:</p>
+<pre class="highlight swift"><code><span class="n">socket</span><span class="o">.</span><span class="nf">on</span><span class="p">(</span><span class="nv">clientEvent</span><span class="p">:</span> <span class="o">.</span><span class="n">ping</span><span class="p">)</span> <span class="p">{</span><span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="k">in</span>
+  <span class="c1">// Maybe keep track of latency?</span>
+<span class="p">}</span>
+</code></pre>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="n">ping</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8SocketIO0A11ClientEventO4pongA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/pong" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A11ClientEventO4pongA2CmF">pong</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Emitted whenever the engine gets a pong.</p>
+
+<p>Usage:</p>
+<pre class="highlight swift"><code><span class="n">socket</span><span class="o">.</span><span class="nf">on</span><span class="p">(</span><span class="nv">clientEvent</span><span class="p">:</span> <span class="o">.</span><span class="n">pong</span><span class="p">)</span> <span class="p">{</span><span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="k">in</span>
+  <span class="c1">// Maybe keep track of latency?</span>
+<span class="p">}</span>
+</code></pre>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="n">pong</span></code></pre>
 
                         </div>
                       </div>
@@ -292,7 +390,13 @@ data item: the namespace that was connected to.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Called when the client begins the reconnection process.</p>
+                        <p>Emitted when the client begins the reconnection process.</p>
+
+<p>Usage:</p>
+<pre class="highlight swift"><code><span class="n">socket</span><span class="o">.</span><span class="nf">on</span><span class="p">(</span><span class="nv">clientEvent</span><span class="p">:</span> <span class="o">.</span><span class="n">reconnect</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span><span class="p">,</span> <span class="n">ack</span> <span class="k">in</span>
+    <span class="c1">// Some reconnect event logic</span>
+<span class="p">}</span>
+</code></pre>
 
                       </div>
                       <div class="declaration">
@@ -323,7 +427,13 @@ data item: the namespace that was connected to.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Called each time the client tries to reconnect to the server.</p>
+                        <p>Emitted each time the client tries to reconnect to the server.</p>
+
+<p>Usage:</p>
+<pre class="highlight swift"><code><span class="n">socket</span><span class="o">.</span><span class="nf">on</span><span class="p">(</span><span class="nv">clientEvent</span><span class="p">:</span> <span class="o">.</span><span class="n">reconnectAttempt</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span><span class="p">,</span> <span class="n">ack</span> <span class="k">in</span>
+    <span class="c1">// Some reconnect attempt logging</span>
+<span class="p">}</span>
+</code></pre>
 
                       </div>
                       <div class="declaration">
@@ -354,7 +464,13 @@ data item: the namespace that was connected to.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Called every time there is a change in the client&rsquo;s status.</p>
+                        <p>Emitted every time there is a change in the client&rsquo;s status.</p>
+
+<p>Usage:</p>
+<pre class="highlight swift"><code><span class="n">socket</span><span class="o">.</span><span class="nf">on</span><span class="p">(</span><span class="nv">clientEvent</span><span class="p">:</span> <span class="o">.</span><span class="n">statusChange</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span><span class="p">,</span> <span class="n">ack</span> <span class="k">in</span>
+    <span class="c1">// Some status changing logging</span>
+<span class="p">}</span>
+</code></pre>
 
                       </div>
                       <div class="declaration">
@@ -376,8 +492,8 @@ data item: the namespace that was connected to.</p>
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2017 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2017-10-05)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.8.4</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2017 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2017-11-12)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>

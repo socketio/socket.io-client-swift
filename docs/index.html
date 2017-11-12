@@ -47,6 +47,9 @@
             <a class="nav-group-name-link" href="Guides.html">Guides</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="12to13.html">12to13</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="faq.html">FAQ</a>
               </li>
             </ul>
@@ -67,13 +70,13 @@
                 <a class="nav-group-task-link" href="Classes/SocketAnyEvent.html">SocketAnyEvent</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Classes/SocketClientManager.html">SocketClientManager</a>
-              </li>
-              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/SocketEngine.html">SocketEngine</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/SocketIOClient.html">SocketIOClient</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SocketManager.html">SocketManager</a>
               </li>
             </ul>
           </li>
@@ -93,7 +96,7 @@
                 <a class="nav-group-task-link" href="Enums/SocketIOClientOption.html">SocketIOClientOption</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Enums/SocketIOClientStatus.html">SocketIOClientStatus</a>
+                <a class="nav-group-task-link" href="Enums/SocketIOStatus.html">SocketIOStatus</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Enums/SocketParsableError.html">SocketParsableError</a>
@@ -104,7 +107,13 @@
             <a class="nav-group-name-link" href="Protocols.html">Protocols</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/ConfigSettable.html">ConfigSettable</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/SocketData.html">SocketData</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketDataBufferable.html">SocketDataBufferable</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/SocketEngineClient.html">SocketEngineClient</a>
@@ -123,6 +132,9 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/SocketLogger.html">SocketLogger</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketManagerSpec.html">SocketManagerSpec</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/SocketParsable.html">SocketParsable</a>
@@ -171,28 +183,31 @@
 <h2 id='example' class='heading'>Example</h2>
 <pre class="highlight swift"><code><span class="kd">import</span> <span class="kt">SocketIO</span>
 
-<span class="k">let</span> <span class="nv">socket</span> <span class="o">=</span> <span class="kt">SocketIOClient</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">(</span><span class="nv">string</span><span class="p">:</span> <span class="s">"http://localhost:8080"</span><span class="p">)</span><span class="o">!</span><span class="p">,</span> <span class="nv">config</span><span class="p">:</span> <span class="p">[</span><span class="o">.</span><span class="nf">log</span><span class="p">(</span><span class="kc">true</span><span class="p">),</span> <span class="o">.</span><span class="n">compress</span><span class="p">])</span>
+<span class="k">let</span> <span class="nv">manager</span> <span class="o">=</span> <span class="kt">SocketManager</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">(</span><span class="nv">string</span><span class="p">:</span> <span class="s">"http://localhost:8080"</span><span class="p">)</span><span class="o">!</span><span class="p">,</span> <span class="nv">config</span><span class="p">:</span> <span class="p">[</span><span class="o">.</span><span class="nf">log</span><span class="p">(</span><span class="kc">true</span><span class="p">),</span> <span class="o">.</span><span class="n">compress</span><span class="p">])</span>
+<span class="k">let</span> <span class="nv">socket</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">defaultSocket</span>
 
 <span class="n">socket</span><span class="o">.</span><span class="nf">on</span><span class="p">(</span><span class="nv">clientEvent</span><span class="p">:</span> <span class="o">.</span><span class="n">connect</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span><span class="p">,</span> <span class="n">ack</span> <span class="k">in</span>
     <span class="nf">print</span><span class="p">(</span><span class="s">"socket connected"</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="n">socket</span><span class="o">.</span><span class="nf">on</span><span class="p">(</span><span class="s">"currentAmount"</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span><span class="p">,</span> <span class="n">ack</span> <span class="k">in</span>
-    <span class="k">if</span> <span class="k">let</span> <span class="nv">cur</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">as?</span> <span class="kt">Double</span> <span class="p">{</span>
-        <span class="n">socket</span><span class="o">.</span><span class="nf">emitWithAck</span><span class="p">(</span><span class="s">"canUpdate"</span><span class="p">,</span> <span class="n">cur</span><span class="p">)</span><span class="o">.</span><span class="nf">timingOut</span><span class="p">(</span><span class="nv">after</span><span class="p">:</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span> <span class="k">in</span>
-            <span class="n">socket</span><span class="o">.</span><span class="nf">emit</span><span class="p">(</span><span class="s">"update"</span><span class="p">,</span> <span class="p">[</span><span class="s">"amount"</span><span class="p">:</span> <span class="n">cur</span> <span class="o">+</span> <span class="mf">2.50</span><span class="p">])</span>
-        <span class="p">}</span>
+    <span class="k">guard</span> <span class="k">let</span> <span class="nv">cur</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">as?</span> <span class="kt">Double</span> <span class="k">else</span> <span class="p">{</span> <span class="k">return</span> <span class="p">}</span>
 
-        <span class="n">ack</span><span class="o">.</span><span class="nf">with</span><span class="p">(</span><span class="s">"Got your currentAmount"</span><span class="p">,</span> <span class="s">"dude"</span><span class="p">)</span>
+    <span class="n">socket</span><span class="o">.</span><span class="nf">emitWithAck</span><span class="p">(</span><span class="s">"canUpdate"</span><span class="p">,</span> <span class="n">cur</span><span class="p">)</span><span class="o">.</span><span class="nf">timingOut</span><span class="p">(</span><span class="nv">after</span><span class="p">:</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span> <span class="k">in</span>
+        <span class="n">socket</span><span class="o">.</span><span class="nf">emit</span><span class="p">(</span><span class="s">"update"</span><span class="p">,</span> <span class="p">[</span><span class="s">"amount"</span><span class="p">:</span> <span class="n">cur</span> <span class="o">+</span> <span class="mf">2.50</span><span class="p">])</span>
     <span class="p">}</span>
+
+    <span class="n">ack</span><span class="o">.</span><span class="nf">with</span><span class="p">(</span><span class="s">"Got your currentAmount"</span><span class="p">,</span> <span class="s">"dude"</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="n">socket</span><span class="o">.</span><span class="nf">connect</span><span class="p">()</span>
 </code></pre>
 <h2 id='objective-c-example' class='heading'>Objective-C Example</h2>
 <pre class="highlight plaintext"><code>@import SocketIO;
+
 NSURL* url = [[NSURL alloc] initWithString:@"http://localhost:8080"];
-SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{@"log": @YES, @"compress": @YES}];
+SocketManager* manager = [[SocketManager alloc] initWithSocketURL:url config:@{@"log": @YES, @"compress": @YES}];
+SocketIOClient* socket = manager.defaultSocket;
 
 [socket on:@"connect" callback:^(NSArray* data, SocketAckEmitter* ack) {
     NSLog(@"socket connected");
@@ -223,6 +238,8 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 <h2 id='faqs' class='heading'>FAQS</h2>
 
 <p>Checkout the <a href="https://nuclearace.github.io/Socket.IO-Client-Swift/faq.html">FAQs</a> for commonly asked questions.</p>
+
+<p>Checkout the <a href="https://nuclearace.github.io/Socket.IO-Client-Swift/12to13.html">12to13</a> guide for migrating to v13.</p>
 <h2 id='installation' class='heading'>Installation</h2>
 
 <p>Requires Swift 4/Xcode 9.x</p>
@@ -243,7 +260,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
         <span class="o">.</span><span class="nf">executable</span><span class="p">(</span><span class="nv">name</span><span class="p">:</span> <span class="s">"socket.io-test"</span><span class="p">,</span> <span class="nv">targets</span><span class="p">:</span> <span class="p">[</span><span class="s">"YourTargetName"</span><span class="p">])</span>
     <span class="p">],</span>
     <span class="nv">dependencies</span><span class="p">:</span> <span class="p">[</span>
-        <span class="o">.</span><span class="nf">package</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="s">"https://github.com/socketio/socket.io-client-swift"</span><span class="p">,</span> <span class="o">.</span><span class="nf">upToNextMajor</span><span class="p">(</span><span class="nv">from</span><span class="p">:</span> <span class="s">"12.1.0"</span><span class="p">))</span>
+        <span class="o">.</span><span class="nf">package</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="s">"https://github.com/socketio/socket.io-client-swift"</span><span class="p">,</span> <span class="o">.</span><span class="nf">upToNextMinor</span><span class="p">(</span><span class="nv">from</span><span class="p">:</span> <span class="s">"13.0.0"</span><span class="p">))</span>
     <span class="p">],</span>
     <span class="nv">targets</span><span class="p">:</span> <span class="p">[</span>
         <span class="o">.</span><span class="nf">target</span><span class="p">(</span><span class="nv">name</span><span class="p">:</span> <span class="s">"YourTargetName"</span><span class="p">,</span> <span class="nv">dependencies</span><span class="p">:</span> <span class="p">[</span><span class="s">"SocketIO"</span><span class="p">],</span> <span class="nv">path</span><span class="p">:</span> <span class="s">"./Path/To/Your/Sources"</span><span class="p">)</span>
@@ -255,7 +272,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 <h3 id='carthage' class='heading'>Carthage</h3>
 
 <p>Add this line to your <code>Cartfile</code>:</p>
-<pre class="highlight plaintext"><code>github "socketio/socket.io-client-swift" ~&gt; 12.1.2 # Or latest version
+<pre class="highlight plaintext"><code>github "socketio/socket.io-client-swift" ~&gt; 13.0.0 # Or latest version
 </code></pre>
 
 <p>Run <code>carthage update --platform ios,macosx</code>.</p>
@@ -267,7 +284,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 <pre class="highlight ruby"><code><span class="n">use_frameworks!</span>
 
 <span class="n">target</span> <span class="s1">'YourApp'</span> <span class="k">do</span>
-    <span class="n">pod</span> <span class="s1">'Socket.IO-Client-Swift'</span><span class="p">,</span> <span class="s1">'~&gt; 12.1.2'</span> <span class="c1"># Or latest version</span>
+    <span class="n">pod</span> <span class="s1">'Socket.IO-Client-Swift'</span><span class="p">,</span> <span class="s1">'~&gt; 13.0.0'</span> <span class="c1"># Or latest version</span>
 <span class="k">end</span>
 </code></pre>
 
@@ -288,6 +305,7 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
 
 <ul>
 <li><a href="https://nuclearace.github.io/Socket.IO-Client-Swift/Classes/SocketIOClient.html">Client</a></li>
+<li><a href="https://nuclearace.github.io/Socket.IO-Client-Swift/Classes/SocketManager.html">Manager</a></li>
 <li><a href="https://nuclearace.github.io/Socket.IO-Client-Swift/Classes/SocketEngine.html">Engine</a></li>
 <li><a href="https://nuclearace.github.io/Socket.IO-Client-Swift/Enums/SocketIOClientOption.html">Options</a></li>
 </ul>
@@ -307,8 +325,8 @@ SocketIOClient* socket = [[SocketIOClient alloc] initWithSocketURL:url config:@{
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2017 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2017-10-05)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.8.4</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2017 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2017-11-12)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>

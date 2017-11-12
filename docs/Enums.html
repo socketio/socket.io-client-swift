@@ -47,6 +47,9 @@
             <a class="nav-group-name-link" href="Guides.html">Guides</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="12to13.html">12to13</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="faq.html">FAQ</a>
               </li>
             </ul>
@@ -67,13 +70,13 @@
                 <a class="nav-group-task-link" href="Classes/SocketAnyEvent.html">SocketAnyEvent</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Classes/SocketClientManager.html">SocketClientManager</a>
-              </li>
-              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/SocketEngine.html">SocketEngine</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/SocketIOClient.html">SocketIOClient</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SocketManager.html">SocketManager</a>
               </li>
             </ul>
           </li>
@@ -93,7 +96,7 @@
                 <a class="nav-group-task-link" href="Enums/SocketIOClientOption.html">SocketIOClientOption</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Enums/SocketIOClientStatus.html">SocketIOClientStatus</a>
+                <a class="nav-group-task-link" href="Enums/SocketIOStatus.html">SocketIOStatus</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Enums/SocketParsableError.html">SocketParsableError</a>
@@ -104,7 +107,13 @@
             <a class="nav-group-name-link" href="Protocols.html">Protocols</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/ConfigSettable.html">ConfigSettable</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/SocketData.html">SocketData</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketDataBufferable.html">SocketDataBufferable</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/SocketEngineClient.html">SocketEngineClient</a>
@@ -123,6 +132,9 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/SocketLogger.html">SocketLogger</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketManagerSpec.html">SocketManagerSpec</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/SocketParsable.html">SocketParsable</a>
@@ -304,9 +316,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@E@SocketIOClientStatus"></a>
-                    <a name="//apple_ref/swift/Enum/SocketIOClientStatus" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@E@SocketIOClientStatus">SocketIOClientStatus</a>
+                    <a name="/c:@M@SocketIO@E@SocketIOStatus"></a>
+                    <a name="//apple_ref/swift/Enum/SocketIOStatus" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@E@SocketIOStatus">SocketIOStatus</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -314,15 +326,15 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Represents the state of the client.</p>
+                        <p>Represents state of a manager or client.</p>
 
-                        <a href="Enums/SocketIOClientStatus.html" class="slightly-smaller">See more</a>
+                        <a href="Enums/SocketIOStatus.html" class="slightly-smaller">See more</a>
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">@objc</span> <span class="kd">public</span> <span class="kd">enum</span> <span class="kt">SocketIOClientStatus</span> <span class="p">:</span> <span class="kt">Int</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">SocketIOStatus</span> <span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="kt">CustomStringConvertible</span></code></pre>
 
                         </div>
                       </div>
@@ -369,8 +381,8 @@
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2017 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2017-10-05)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.8.4</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2017 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2017-11-12)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>

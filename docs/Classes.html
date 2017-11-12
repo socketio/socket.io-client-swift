@@ -47,6 +47,9 @@
             <a class="nav-group-name-link" href="Guides.html">Guides</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="12to13.html">12to13</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="faq.html">FAQ</a>
               </li>
             </ul>
@@ -67,13 +70,13 @@
                 <a class="nav-group-task-link" href="Classes/SocketAnyEvent.html">SocketAnyEvent</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Classes/SocketClientManager.html">SocketClientManager</a>
-              </li>
-              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/SocketEngine.html">SocketEngine</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/SocketIOClient.html">SocketIOClient</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SocketManager.html">SocketManager</a>
               </li>
             </ul>
           </li>
@@ -93,7 +96,7 @@
                 <a class="nav-group-task-link" href="Enums/SocketIOClientOption.html">SocketIOClientOption</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Enums/SocketIOClientStatus.html">SocketIOClientStatus</a>
+                <a class="nav-group-task-link" href="Enums/SocketIOStatus.html">SocketIOStatus</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Enums/SocketParsableError.html">SocketParsableError</a>
@@ -104,7 +107,13 @@
             <a class="nav-group-name-link" href="Protocols.html">Protocols</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/ConfigSettable.html">ConfigSettable</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/SocketData.html">SocketData</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketDataBufferable.html">SocketDataBufferable</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/SocketEngineClient.html">SocketEngineClient</a>
@@ -123,6 +132,9 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/SocketLogger.html">SocketLogger</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketManagerSpec.html">SocketManagerSpec</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/SocketParsable.html">SocketParsable</a>
@@ -195,7 +207,8 @@ See <code><a href="Protocols/SocketEnginePollable.html">SocketEnginePollable</a>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">SocketEngine</span> <span class="p">:</span> <span class="kt">NSObject</span><span class="p">,</span> <span class="kt">URLSessionDelegate</span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketEnginePollable.html">SocketEnginePollable</a></span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketEngineWebsocket.html">SocketEngineWebsocket</a></span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">SocketEngine</span> <span class="p">:</span> <span class="kt">NSObject</span><span class="p">,</span> <span class="kt">URLSessionDelegate</span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketEnginePollable.html">SocketEnginePollable</a></span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketEngineWebsocket.html">SocketEngineWebsocket</a></span><span class="p">,</span>
+                                  <span class="kt"><a href="Protocols/ConfigSettable.html">ConfigSettable</a></span></code></pre>
 
                         </div>
                       </div>
@@ -319,11 +332,18 @@ Example:</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The main class for SocketIOClientSwift.</p>
+                        <p>Represents a socket.io-client.</p>
 
-<p><strong>NOTE</strong>: The client is not thread/queue safe, all interaction with the socket should be done on the <code>handleQueue</code></p>
+<p>Clients are created through a <code><a href="Classes/SocketManager.html">SocketManager</a></code>, which owns the <code><a href="Protocols/SocketEngineSpec.html">SocketEngineSpec</a></code> that controls the connection to the server.</p>
 
-<p>Represents a socket.io-client. Most interaction with socket.io will be through this class.</p>
+<p>For example:</p>
+<pre class="highlight swift"><code><span class="c1">// Create a socket for the /swift namespace</span>
+<span class="k">let</span> <span class="nv">socket</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="nf">socket</span><span class="p">(</span><span class="nv">forNamespace</span><span class="p">:</span> <span class="s">"/swift"</span><span class="p">)</span>
+
+<span class="c1">// Add some handlers and connect</span>
+</code></pre>
+
+<p><strong>NOTE</strong>: The client is not thread/queue safe, all interaction with the socket should be done on the <code>manager.handleQueue</code></p>
 
                         <a href="Classes/SocketIOClient.html" class="slightly-smaller">See more</a>
                       </div>
@@ -331,7 +351,7 @@ Example:</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">class</span> <span class="kt">SocketIOClient</span> <span class="p">:</span> <span class="kt">NSObject</span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketIOClientSpec.html">SocketIOClientSpec</a></span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketEngineClient.html">SocketEngineClient</a></span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketParsable.html">SocketParsable</a></span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">class</span> <span class="kt">SocketIOClient</span> <span class="p">:</span> <span class="kt">NSObject</span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketIOClientSpec.html">SocketIOClientSpec</a></span></code></pre>
 
                         </div>
                       </div>
@@ -377,9 +397,9 @@ Example:</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketClientManager"></a>
-                    <a name="//apple_ref/swift/Class/SocketClientManager" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketClientManager">SocketClientManager</a>
+                    <a name="/c:@M@SocketIO@objc(cs)SocketManager"></a>
+                    <a name="//apple_ref/swift/Class/SocketManager" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager">SocketManager</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -387,30 +407,31 @@ Example:</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Experimental socket manager.</p>
+                        <p>A manager for a socket.io connection.</p>
 
-<p>API subject to change.</p>
+<p>A <code>SocketManager</code> is responsible for multiplexing multiple namespaces through a single <code><a href="Protocols/SocketEngineSpec.html">SocketEngineSpec</a></code>.</p>
 
-<p>Can be used to persist sockets across ViewControllers.</p>
+<p>Example:</p>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">manager</span> <span class="o">=</span> <span class="kt">SocketManager</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">(</span><span class="nv">string</span><span class="p">:</span><span class="s">"http://localhost:8080/"</span><span class="p">)</span><span class="o">!</span><span class="p">)</span>
+<span class="k">let</span> <span class="nv">defaultNamespaceSocket</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">defaultSocket</span>
+<span class="k">let</span> <span class="nv">swiftSocket</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="nf">socket</span><span class="p">(</span><span class="nv">forNamespace</span><span class="p">:</span> <span class="s">"/swift"</span><span class="p">)</span>
 
-<p>Sockets are strongly stored, so be sure to remove them once they are no
-longer needed.</p>
-
-<p>Example usage:</p>
-<pre class="highlight plaintext"><code>let manager = SocketClientManager.sharedManager
-manager["room1"] = socket1
-manager["room2"] = socket2
-manager.removeSocket(socket: socket2)
-manager["room1"]?.emit("hello")
+<span class="c1">// defaultNamespaceSocket and swiftSocket both share a single connection to the server</span>
 </code></pre>
 
-                        <a href="Classes/SocketClientManager.html" class="slightly-smaller">See more</a>
+<p>Sockets created through the manager are retained by the manager. So at the very least, a single strong reference
+to the manager must be maintained to keep sockets alive.</p>
+
+<p>To disconnect a socket and remove it from the manager, either call <code><a href="Classes/SocketIOClient.html#/c:@M@SocketIO@objc(cs)SocketIOClient(im)disconnect">SocketIOClient.disconnect()</a></code> on the socket,
+or call one of the <code>disconnectSocket</code> methods on this class.</p>
+
+                        <a href="Classes/SocketManager.html" class="slightly-smaller">See more</a>
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">class</span> <span class="kt">SocketClientManager</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">class</span> <span class="kt">SocketManager</span> <span class="p">:</span> <span class="kt">NSObject</span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketManagerSpec.html">SocketManagerSpec</a></span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketParsable.html">SocketParsable</a></span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketDataBufferable.html">SocketDataBufferable</a></span><span class="p">,</span> <span class="kt"><a href="Protocols/ConfigSettable.html">ConfigSettable</a></span></code></pre>
 
                         </div>
                       </div>
@@ -425,8 +446,8 @@ manager["room1"]?.emit("hello")
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2017 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2017-10-05)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.8.4</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2017 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2017-11-12)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>

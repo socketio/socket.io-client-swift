@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>SocketPacket Structure Reference</title>
+    <title>SocketIOStatus Enumeration Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset="utf-8">
@@ -14,9 +14,9 @@
   </head>
   <body>
 
-    <a name="//apple_ref/swift/Struct/SocketPacket" class="dashAnchor"></a>
+    <a name="//apple_ref/swift/Enum/SocketIOStatus" class="dashAnchor"></a>
 
-    <a title="SocketPacket Structure Reference"></a>
+    <a title="SocketIOStatus Enumeration Reference"></a>
 
     <header class="header">
       <p class="header-col header-col--primary">
@@ -38,7 +38,7 @@
     <p class="breadcrumbs">
       <a class="breadcrumb" href="../index.html">SocketIO Reference</a>
       <img class="carat" src="../img/carat.png" />
-      SocketPacket Structure Reference
+      SocketIOStatus Enumeration Reference
     </p>
 
     <div class="content-wrapper">
@@ -176,20 +176,144 @@
 
         <section class="section">
           <div class="section-content">
-            <h1>SocketPacket</h1>
+            <h1>SocketIOStatus</h1>
               <div class="declaration">
                 <div class="language">
-                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">SocketPacket</span> <span class="p">:</span> <span class="kt">CustomStringConvertible</span></code></pre>
+                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">SocketIOStatus</span> <span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="kt">CustomStringConvertible</span></code></pre>
 
                 </div>
               </div>
-            <p>A struct that represents a socket.io packet.</p>
+            <p>Represents state of a manager or client.</p>
 
           </div>
         </section>
 
         <section class="section">
           <div class="section-content">
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@SocketIO@E@SocketIOStatus@SocketIOStatusNotConnected"></a>
+                    <a name="//apple_ref/swift/Element/notConnected" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@E@SocketIOStatus@SocketIOStatusNotConnected">notConnected</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The client/manager has never been connected. Or the client has been reset.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="n">notConnected</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@SocketIO@E@SocketIOStatus@SocketIOStatusDisconnected"></a>
+                    <a name="//apple_ref/swift/Element/disconnected" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@E@SocketIOStatus@SocketIOStatusDisconnected">disconnected</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The client/manager was once connected, but not anymore.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="n">disconnected</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@SocketIO@E@SocketIOStatus@SocketIOStatusConnecting"></a>
+                    <a name="//apple_ref/swift/Element/connecting" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@E@SocketIOStatus@SocketIOStatusConnecting">connecting</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The client/manager is in the process of connecting.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="n">connecting</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@SocketIO@E@SocketIOStatus@SocketIOStatusConnected"></a>
+                    <a name="//apple_ref/swift/Element/connected" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@E@SocketIOStatus@SocketIOStatusConnected">connected</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The client/manager is currently connected.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="n">connected</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
             <div class="task-group">
               <div class="task-name-container">
                 <a name="/Properties"></a>
@@ -202,9 +326,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8SocketIO0A6PacketV3nspSSv"></a>
-                    <a name="//apple_ref/swift/Property/nsp" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A6PacketV3nspSSv">nsp</a>
+                    <a name="/s:8SocketIO0A8IOStatusO6activeSbv"></a>
+                    <a name="//apple_ref/swift/Property/active" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A8IOStatusO6activeSbv">active</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -212,16 +336,19 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The namespace for this packet.</p>
-
+                        
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">nsp</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">active</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
 
                         </div>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>True if this client/manager is connected/connecting to a server.</p>
                       </div>
                     </section>
                   </div>
@@ -229,147 +356,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8SocketIO0A6PacketV2idSiv"></a>
-                    <a name="//apple_ref/swift/Property/id" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A6PacketV2idSiv">id</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>If &gt; 0 then this packet is using acking.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">id</span><span class="p">:</span> <span class="kt">Int</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8SocketIO0A6PacketV4typeAC0C4TypeOv"></a>
-                    <a name="//apple_ref/swift/Property/type" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A6PacketV4typeAC0C4TypeOv">type</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>The type of this packet.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">type</span><span class="p">:</span> <span class="kt"><a href="../Structs/SocketPacket/PacketType.html">PacketType</a></span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8SocketIO0A6PacketV6binarySay10Foundation4DataVGv"></a>
-                    <a name="//apple_ref/swift/Property/binary" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A6PacketV6binarySay10Foundation4DataVGv">binary</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>An array of binary data for this packet.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">internal(set)</span> <span class="k">var</span> <span class="nv">binary</span><span class="p">:</span> <span class="p">[</span><span class="kt">Data</span><span class="p">]</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8SocketIO0A6PacketV4dataSayypGv"></a>
-                    <a name="//apple_ref/swift/Property/data" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A6PacketV4dataSayypGv">data</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>The data for this event.</p>
-
-<p>Note: This includes all data inside of the socket.io packet payload array, which includes the event name for
-event type packets.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">internal(set)</span> <span class="k">var</span> <span class="nv">data</span><span class="p">:</span> <span class="p">[</span><span class="kt">Any</span><span class="p">]</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8SocketIO0A6PacketV4argsSayypGv"></a>
-                    <a name="//apple_ref/swift/Property/args" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A6PacketV4argsSayypGv">args</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Returns the payload for this packet, minus the event name if this is an event or binaryEvent type packet.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">args</span><span class="p">:</span> <span class="p">[</span><span class="kt">Any</span><span class="p">]</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8SocketIO0A6PacketV11descriptionSSv"></a>
+                    <a name="/s:s23CustomStringConvertibleP11descriptionSSv"></a>
                     <a name="//apple_ref/swift/Property/description" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A6PacketV11descriptionSSv">description</a>
+                    <a class="token" href="#/s:s23CustomStringConvertibleP11descriptionSSv">description</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -377,107 +366,13 @@ event type packets.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>A string representation of this packet.</p>
-
+                        
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">description</span><span class="p">:</span> <span class="kt">String</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8SocketIO0A6PacketV5eventSSv"></a>
-                    <a name="//apple_ref/swift/Property/event" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A6PacketV5eventSSv">event</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>The event name for this packet.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">event</span><span class="p">:</span> <span class="kt">String</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8SocketIO0A6PacketV12packetStringSSv"></a>
-                    <a name="//apple_ref/swift/Property/packetString" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A6PacketV12packetStringSSv">packetString</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>A string representation of this packet.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">packetString</span><span class="p">:</span> <span class="kt">String</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <div class="task-name-container">
-                <a name="/PacketType%20enum"></a>
-                <a name="//apple_ref/swift/Section/PacketType enum" class="dashAnchor"></a>
-                <a href="#/PacketType%20enum">
-                  <h3 class="section-name">PacketType enum</h3>
-                </a>
-              </div>
-              <ul class="item-container">
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8SocketIO0A6PacketV0C4TypeO"></a>
-                    <a name="//apple_ref/swift/Enum/PacketType" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A6PacketV0C4TypeO">PacketType</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>The type of packets.</p>
-
-                        <a href="../Structs/SocketPacket/PacketType.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">PacketType</span><span class="p">:</span> <span class="kt">Int</span></code></pre>
 
                         </div>
                       </div>
