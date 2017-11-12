@@ -50,7 +50,7 @@ public protocol SocketManagerSpec : class, SocketEngineClient {
     // MARK: Properties
 
     /// Returns the socket associated with the default namespace ("/").
-    var defaultSocket: SocketIOClient? { get }
+    var defaultSocket: SocketIOClient { get }
 
     /// The engine for this manager.
     var engine: SocketEngineSpec? { get set }

@@ -106,7 +106,7 @@ class SocketParserTest: XCTestCase {
     func validateParseResult(_ message: String) {
         let validValues = SocketParserTest.packetTypes[message]!
         let packet = try! testManager.parseString(message)
-        let type = String(message.characters.prefix(1))
+        let type = String(message.prefix(1))
 
         XCTAssertEqual(packet.type, SocketPacket.PacketType(rawValue: Int(type) ?? -1)!)
         XCTAssertEqual(packet.nsp, validValues.0)

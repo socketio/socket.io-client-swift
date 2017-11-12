@@ -49,7 +49,7 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
     // MARK Properties
 
     /// The socket associated with the default namespace ("/").
-    public var defaultSocket: SocketIOClient? {
+    public var defaultSocket: SocketIOClient {
         return socket(forNamespace: "/")
     }
 
