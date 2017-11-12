@@ -46,7 +46,7 @@ import Foundation
 open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDataBufferable, ConfigSettable {
     private static let logType = "SocketManager"
 
-    // MARK Properties
+    // MARK: Properties
 
     /// The socket associated with the default namespace ("/").
     public var defaultSocket: SocketIOClient {
@@ -124,6 +124,8 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
     private var _config: SocketIOClientConfiguration
     private var currentReconnectAttempt = 0
     private var reconnecting = false
+
+    // MARK: Initializers
 
     /// Type safe way to create a new SocketIOClient. `opts` can be omitted.
     ///
