@@ -34,6 +34,9 @@ import Starscream
     /// `true` if this engine is closed.
     var closed: Bool { get }
 
+    /// If `true` the engine will attempt to use WebSocket compression.
+    var compress: Bool { get }
+
     /// `true` if this engine is connected. Connected means that the initial poll connect has succeeded.
     var connected: Bool { get }
 
@@ -87,7 +90,7 @@ import Starscream
     /// - parameter client: The client for this engine.
     /// - parameter url: The url for this engine.
     /// - parameter options: The options for this engine.
-    init(client: SocketEngineClient, url: URL, options: NSDictionary?)
+    init(client: SocketEngineClient, url: URL, options: [String: Any]?)
 
     /// Starts the connection to the server.
     func connect()

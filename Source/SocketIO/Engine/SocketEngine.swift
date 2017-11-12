@@ -28,7 +28,8 @@ import Starscream
 
 /// The class that handles the engine.io protocol and transports.
 /// See `SocketEnginePollable` and `SocketEngineWebsocket` for transport specific methods.
-public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, SocketEngineWebsocket {
+public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, SocketEngineWebsocket,
+                                  ConfigSettable {
     // MARK: Properties
 
     private static let logType = "SocketEngine"
@@ -147,40 +148,10 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     public init(client: SocketEngineClient, url: URL, config: SocketIOClientConfiguration) {
         self.client = client
         self.url = url
-        for option in config {
-            switch option {
-            case let .connectParams(params):
-                connectParams = params
-            case let .cookies(cookies):
-                self.cookies = cookies
-            case let .extraHeaders(headers):
-                extraHeaders = headers
-            case let .sessionDelegate(delegate):
-                sessionDelegate = delegate
-            case let .forcePolling(force):
-                forcePolling = force
-            case let .forceWebsockets(force):
-                forceWebsockets = force
-            case let .path(path):
-                socketPath = path
-
-                if !socketPath.hasSuffix("/") {
-                    socketPath += "/"
-                }
-            case let .secure(secure):
-                self.secure = secure
-            case let .selfSigned(selfSigned):
-                self.selfSigned = selfSigned
-            case let .security(security):
-                self.security = security
-            case .compress:
-                self.compress = true
-            default:
-                continue
-            }
-        }
 
         super.init()
+
+        setConfigs(config)
 
         sessionDelegate = sessionDelegate ?? self
 
@@ -192,7 +163,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     /// - parameter client: The client for this engine.
     /// - parameter url: The url for this engine.
     /// - parameter options: The options for this engine.
-    public convenience init(client: SocketEngineClient, url: URL, options: NSDictionary?) {
+    public convenience init(client: SocketEngineClient, url: URL, options: [String: Any]?) {
         self.init(client: client, url: url, config: options?.toSocketConfiguration() ?? [])
     }
 
@@ -310,22 +281,22 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
 
     private func createWebSocketAndConnect() {
         ws?.delegate = nil // TODO this seems a bit defensive, is this really needed?
-        ws = WebSocket(url: urlWebSocketWithSid)
+        var req = URLRequest(url: urlWebSocketWithSid)
 
         if cookies != nil {
             let headers = HTTPCookie.requestHeaderFields(with: cookies!)
-            for (key, value) in headers {
-                ws?.headers[key] = value
+            for (headerName, value) in headers {
+                req.setValue(value, forHTTPHeaderField: headerName)
             }
         }
 
         if extraHeaders != nil {
             for (headerName, value) in extraHeaders! {
-                ws?.headers[headerName] = value
+                req.setValue(value, forHTTPHeaderField: headerName)
             }
         }
 
-        
+        ws = WebSocket(request: req)
         ws?.callbackQueue = engineQueue
         ws?.enableCompression = compress
         ws?.delegate = self
@@ -485,6 +456,8 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         if message == "3probe" {
             upgradeTransport()
         }
+
+        client?.engineDidReceivePong()
     }
 
     /// Parses raw binary received from engine.io.
@@ -569,6 +542,46 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
 
             this.sendPing()
         }
+
+        client?.engineDidSendPing()
+    }
+
+    /// Called when the engine should set/update its configs from a given configuration.
+    ///
+    /// parameter config: The `SocketIOClientConfiguration` that should be used to set/update configs.
+    open func setConfigs(_ config: SocketIOClientConfiguration) {
+        for option in config {
+            switch option {
+            case let .connectParams(params):
+                connectParams = params
+            case let .cookies(cookies):
+                self.cookies = cookies
+            case let .extraHeaders(headers):
+                extraHeaders = headers
+            case let .sessionDelegate(delegate):
+                sessionDelegate = delegate
+            case let .forcePolling(force):
+                forcePolling = force
+            case let .forceWebsockets(force):
+                forceWebsockets = force
+            case let .path(path):
+                socketPath = path
+
+                if !socketPath.hasSuffix("/") {
+                    socketPath += "/"
+                }
+            case let .secure(secure):
+                self.secure = secure
+            case let .selfSigned(selfSigned):
+                self.selfSigned = selfSigned
+            case let .security(security):
+                self.security = security
+            case .compress:
+                self.compress = true
+            default:
+                continue
+            }
+        }
     }
 
     // Moves from long-polling to websockets
@@ -608,7 +621,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     // MARK: Starscream delegate conformance
 
     /// Delegate method for connection.
-    public func websocketDidConnect(socket: WebSocket) {
+    public func websocketDidConnect(socket: WebSocketClient) {
         if !forceWebsockets {
             probing = true
             probeWebSocket()
@@ -620,7 +633,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     }
 
     /// Delegate method for disconnection.
-    public func websocketDidDisconnect(socket: WebSocket, error: NSError?) {
+    public func websocketDidDisconnect(socket: WebSocketClient, error: Error?) {
         probing = false
 
         if closed {
@@ -643,6 +656,12 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         } else {
             client?.engineDidClose(reason: "Socket Disconnected")
         }
+    }
+
+    // Test Properties
+
+    func setConnected(_ value: Bool) {
+        connected = value
     }
 }
 

@@ -44,6 +44,12 @@ import Foundation
     /// - parameter reason: The reason the engine opened.
     func engineDidOpen(reason: String)
 
+    /// Called when the engine receives a pong message.
+    func engineDidReceivePong()
+
+    /// Called when the engine sends a ping to the server.
+    func engineDidSendPing()
+
     /// Called when the engine has a message that must be parsed.
     ///
     /// - parameter msg: The message that needs parsing.

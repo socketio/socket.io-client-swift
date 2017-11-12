@@ -32,22 +32,19 @@ public protocol SocketIOClientSpec : class {
     /// A handler that will be called on any event.
     var anyHandler: ((SocketAnyEvent) -> ())? { get }
 
-    /// The configuration for this client.
-    var config: SocketIOClientConfiguration { get set }
-
-    /// The queue that all interaction with the client must be on.
-    var handleQueue: DispatchQueue { get set }
-
     /// The array of handlers for this socket.
     var handlers: [SocketEventHandler] { get }
+
+    /// The manager for this socket.
+    var manager: SocketManagerSpec? { get }
 
     /// The namespace that this socket is currently connected to.
     ///
     /// **Must** start with a `/`.
-    var nsp: String { get set }
+    var nsp: String { get }
 
     /// The status of this client.
-    var status: SocketIOClientStatus { get }
+    var status: SocketIOStatus { get }
 
     // MARK: Methods
 
@@ -126,6 +123,12 @@ public protocol SocketIOClientSpec : class {
     /// - parameter data: The data sent back with this ack.
     func handleAck(_ ack: Int, data: [Any])
 
+    /// Called on socket.io specific events.
+    ///
+    /// - parameter event: The `SocketClientEvent`.
+    /// - parameter data: The data for this event.
+    func handleClientEvent(_ event: SocketClientEvent, data: [Any])
+
     /// Called when we get an event from socket.io.
     ///
     /// - parameter event: The name of the event.
@@ -134,21 +137,17 @@ public protocol SocketIOClientSpec : class {
     /// - parameter withAck: If > 0 then this event expects to get an ack back from the client.
     func handleEvent(_ event: String, data: [Any], isInternalMessage: Bool, withAck ack: Int)
 
-    /// Called on socket.io specific events.
+    /// Causes a client to handle a socket.io packet. The namespace for the packet must match the namespace of the
+    /// socket.
     ///
-    /// - parameter event: The `SocketClientEvent`.
-    /// - parameter data: The data for this event.
-    func handleClientEvent(_ event: SocketClientEvent, data: [Any])
+    /// - parameter packet: The packet to handle.
+    func handlePacket(_ packet: SocketPacket)
 
-    /// Call when you wish to leave a namespace and return to the default namespace.
+    /// Call when you wish to leave a namespace and disconnect this socket.
     func leaveNamespace()
 
-    /// Joins `namespace`.
-    ///
-    /// **Do not use this to join the default namespace.** Instead call `leaveNamespace`.
-    ///
-    /// - parameter namespace: The namespace to join.
-    func joinNamespace(_ namespace: String)
+    /// Joins `nsp`.
+    func joinNamespace()
 
     /// Removes handler(s) for a client event.
     ///
@@ -212,13 +211,16 @@ public protocol SocketIOClientSpec : class {
     /// - parameter handler: The callback that will execute whenever an event is received.
     func onAny(_ handler: @escaping (SocketAnyEvent) -> ())
 
-    /// Tries to reconnect to the server.
-    func reconnect()
-
     /// Removes all handlers.
     ///
     /// Can be used after disconnecting to break any potential remaining retain cycles.
     func removeAllHandlers()
+
+    /// Puts the socket back into the connecting state.
+    /// Called when the manager detects a broken connection, or when a manual reconnect is triggered.
+    ///
+    /// parameter reason: The reason this socket is going reconnecting.
+    func setReconnecting(reason: String)
 }
 
 public extension SocketIOClientSpec {
@@ -245,18 +247,80 @@ public enum SocketClientEvent : String {
     /// ```
     case connect
 
-    /// Called when the socket has disconnected and will not attempt to try to reconnect.
+    /// Emitted when the socket has disconnected and will not attempt to try to reconnect.
+    ///
+    /// Usage:
+    ///
+    /// ```swift
+    /// socket.on(clientEvent: .disconnect) {data, ack in
+    ///     // Some cleanup logic
+    /// }
+    /// ```
     case disconnect
 
-    /// Called when an error occurs.
+    /// Emitted when an error occurs.
+    ///
+    /// Usage:
+    ///
+    /// ```swift
+    /// socket.on(clientEvent: .error) {data, ack in
+    ///     // Some logging
+    /// }
+    /// ```
     case error
 
-    /// Called when the client begins the reconnection process.
+    /// Emitted whenever the engine sends a ping.
+    ///
+    /// Usage:
+    ///
+    /// ```swift
+    /// socket.on(clientEvent: .ping) {_, _ in
+    ///   // Maybe keep track of latency?
+    /// }
+    /// ```
+    case ping
+
+    /// Emitted whenever the engine gets a pong.
+    ///
+    /// Usage:
+    ///
+    /// ```swift
+    /// socket.on(clientEvent: .pong) {_, _ in
+    ///   // Maybe keep track of latency?
+    /// }
+    /// ```
+    case pong
+
+    /// Emitted when the client begins the reconnection process.
+    ///
+    /// Usage:
+    ///
+    /// ```swift
+    /// socket.on(clientEvent: .reconnect) {data, ack in
+    ///     // Some reconnect event logic
+    /// }
+    /// ```
     case reconnect
 
-    /// Called each time the client tries to reconnect to the server.
+    /// Emitted each time the client tries to reconnect to the server.
+    ///
+    /// Usage:
+    ///
+    /// ```swift
+    /// socket.on(clientEvent: .reconnectAttempt) {data, ack in
+    ///     // Some reconnect attempt logging
+    /// }
+    /// ```
     case reconnectAttempt
 
-    /// Called every time there is a change in the client's status.
+    /// Emitted every time there is a change in the client's status.
+    ///
+    /// Usage:
+    ///
+    /// ```swift
+    /// socket.on(clientEvent: .statusChange) {data, ack in
+    ///     // Some status changing logging
+    /// }
+    /// ```
     case statusChange
 }

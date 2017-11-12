@@ -10,26 +10,6 @@ import XCTest
 @testable import SocketIO
 
 class SocketParserTest: XCTestCase {
-    let testSocket = SocketIOClient(socketURL: URL(string: "http://localhost/")!)
-
-    //Format key: message; namespace-data-binary-id
-    static let packetTypes: [String: (String, [Any], [Data], Int)] = [
-        "0": ("/", [], [], -1), "1": ("/", [], [], -1),
-        "25[\"test\"]": ("/", ["test"], [], 5),
-        "2[\"test\",\"~~0\"]": ("/", ["test", "~~0"], [], -1),
-        "2/swift,[\"testArrayEmitReturn\",[\"test3\",\"test4\"]]": ("/swift", ["testArrayEmitReturn", ["test3", "test4"] as NSArray], [], -1),
-        "51-/swift,[\"testMultipleItemsWithBufferEmitReturn\",[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]": ("/swift", ["testMultipleItemsWithBufferEmitReturn", [1, 2] as NSArray, ["test": "bob"] as NSDictionary, 25, "polo", ["_placeholder": true, "num": 0] as NSDictionary], [], -1),
-        "3/swift,0[[\"test3\",\"test4\"]]": ("/swift", [["test3", "test4"] as NSArray], [], 0),
-        "61-/swift,19[[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]":
-            ("/swift", [ [1, 2] as NSArray, ["test": "bob"] as NSDictionary, 25, "polo", ["_placeholder": true, "num": 0] as NSDictionary], [], 19),
-        "4/swift,": ("/swift", [], [], -1),
-        "0/swift": ("/swift", [], [], -1),
-        "1/swift": ("/swift", [], [], -1),
-        "4\"ERROR\"": ("/", ["ERROR"], [], -1),
-        "4{\"test\":2}": ("/", [["test": 2]], [], -1),
-        "41": ("/", [1], [], -1),
-        "4[1, \"hello\"]": ("/", [1, "hello"], [], -1)]
-
     func testDisconnect() {
         let message = "1"
         validateParseResult(message)
@@ -108,7 +88,7 @@ class SocketParserTest: XCTestCase {
     func testInvalidInput() {
         let message = "8"
         do {
-            let _ = try testSocket.parseString(message)
+            let _ = try testManager.parseString(message)
             XCTFail()
         } catch {
 
@@ -125,8 +105,8 @@ class SocketParserTest: XCTestCase {
 
     func validateParseResult(_ message: String) {
         let validValues = SocketParserTest.packetTypes[message]!
-        let packet = try! testSocket.parseString(message)
-        let type = String(message.characters.prefix(1))
+        let packet = try! testManager.parseString(message)
+        let type = String(message.prefix(1))
 
         XCTAssertEqual(packet.type, SocketPacket.PacketType(rawValue: Int(type) ?? -1)!)
         XCTAssertEqual(packet.nsp, validValues.0)
@@ -139,8 +119,29 @@ class SocketParserTest: XCTestCase {
         let keys = Array(SocketParserTest.packetTypes.keys)
         measure {
             for item in keys.enumerated() {
-                _ = try! self.testSocket.parseString(item.element)
+                _ = try! self.testManager.parseString(item.element)
             }
         }
     }
+
+    let testManager = SocketManager(socketURL: URL(string: "http://localhost/")!)
+
+    //Format key: message; namespace-data-binary-id
+    static let packetTypes: [String: (String, [Any], [Data], Int)] = [
+        "0": ("/", [], [], -1), "1": ("/", [], [], -1),
+        "25[\"test\"]": ("/", ["test"], [], 5),
+        "2[\"test\",\"~~0\"]": ("/", ["test", "~~0"], [], -1),
+        "2/swift,[\"testArrayEmitReturn\",[\"test3\",\"test4\"]]": ("/swift", ["testArrayEmitReturn", ["test3", "test4"] as NSArray], [], -1),
+        "51-/swift,[\"testMultipleItemsWithBufferEmitReturn\",[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]": ("/swift", ["testMultipleItemsWithBufferEmitReturn", [1, 2] as NSArray, ["test": "bob"] as NSDictionary, 25, "polo", ["_placeholder": true, "num": 0] as NSDictionary], [], -1),
+        "3/swift,0[[\"test3\",\"test4\"]]": ("/swift", [["test3", "test4"] as NSArray], [], 0),
+        "61-/swift,19[[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]":
+        ("/swift", [ [1, 2] as NSArray, ["test": "bob"] as NSDictionary, 25, "polo", ["_placeholder": true, "num": 0] as NSDictionary], [], 19),
+        "4/swift,": ("/swift", [], [], -1),
+        "0/swift": ("/swift", [], [], -1),
+        "1/swift": ("/swift", [], [], -1),
+        "4\"ERROR\"": ("/", ["ERROR"], [], -1),
+        "4{\"test\":2}": ("/", [["test": 2]], [], -1),
+        "41": ("/", [1], [], -1),
+        "4[1, \"hello\"]": ("/", [1, "hello"], [], -1)
+    ]
 }
