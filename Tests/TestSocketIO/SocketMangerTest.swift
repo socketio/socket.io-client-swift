@@ -72,6 +72,22 @@ class SocketMangerTest : XCTestCase {
         waitForExpectations(timeout: 0.3)
     }
 
+    func testManagerSetsConfigs() {
+        let queue = DispatchQueue(label: "testQueue")
+
+        manager = TestManager(socketURL: URL(string: "http://localhost/")!, config: [
+            .handleQueue(queue),
+            .forceNew(true),
+            .reconnects(false),
+            .reconnectWait(5)
+        ])
+
+        XCTAssertEqual(manager.handleQueue, queue)
+        XCTAssertTrue(manager.forceNew)
+        XCTAssertFalse(manager.reconnects)
+        XCTAssertEqual(manager.reconnectWait, 5)
+    }
+
     private func setUpSockets() {
         socket = manager.testSocket(forNamespace: "/")
         socket2 = manager.testSocket(forNamespace: "/swift")

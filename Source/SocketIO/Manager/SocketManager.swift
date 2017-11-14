@@ -463,6 +463,8 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
             switch option {
             case let .forceNew(new):
                 self.forceNew = new
+            case let .handleQueue(queue):
+                self.handleQueue = queue
             case let .reconnects(reconnects):
                 self.reconnects = reconnects
             case let .reconnectWait(wait):
