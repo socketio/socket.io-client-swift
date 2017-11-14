@@ -52,7 +52,7 @@ import Starscream
     var engineQueue: DispatchQueue { get }
 
     /// A dictionary of extra http headers that will be set during connection.
-    var extraHeaders: [String: String]? { get }
+    var extraHeaders: [String: String]? { get set }
 
     /// When `true`, the engine is in the process of switching to WebSockets.
     var fastUpgrade: Bool { get }

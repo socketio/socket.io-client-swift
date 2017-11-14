@@ -44,6 +44,9 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         }
     }
 
+    /// A dictionary of extra http headers that will be set during connection.
+    public var extraHeaders: [String: String]?
+
     /// A queue of engine.io messages waiting for POSTing
     ///
     /// **You should not touch this directly**
@@ -72,9 +75,6 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
 
     /// An array of HTTPCookies that are sent during the connection.
     public private(set) var cookies: [HTTPCookie]?
-
-    /// A dictionary of extra http headers that will be set during connection.
-    public private(set) var extraHeaders: [String: String]?
 
     /// When `true`, the engine is in the process of switching to WebSockets.
     ///

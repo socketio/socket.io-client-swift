@@ -192,6 +192,14 @@ class SocketEngineTest: XCTestCase {
         XCTAssertTrue(manager.engine!.forceWebsockets)
     }
 
+    func testChangingEngineHeadersAfterInit() {
+        engine.extraHeaders = ["Hello": "World"]
+
+        let req = engine.createRequestForPostWithPostWait()
+
+        XCTAssertEqual("World", req.allHTTPHeaderFields?["Hello"])
+    }
+
     var manager: SocketManager!
     var socket: SocketIOClient!
     var engine: SocketEngine!

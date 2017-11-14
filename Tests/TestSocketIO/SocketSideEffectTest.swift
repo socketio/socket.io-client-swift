@@ -450,7 +450,7 @@ class TestEngine : SocketEngineSpec {
     var connectParams: [String: Any]? = nil
     private(set) var cookies: [HTTPCookie]? = nil
     private(set) var engineQueue = DispatchQueue.main
-    private(set) var extraHeaders: [String: String]? = nil
+    var extraHeaders: [String: String]? = nil
     private(set) var fastUpgrade = false
     private(set) var forcePolling = false
     private(set) var forceWebsockets = false
