@@ -1,3 +1,7 @@
+# v13.0.1
+
+- Fix not setting handleQueue on `SocketManager`
+
 # v13.0.0
 
 Checkout out the migration guide in Usage Docs for a more detailed guide on how to migrate to this version.
