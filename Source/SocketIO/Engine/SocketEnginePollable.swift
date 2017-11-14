@@ -26,7 +26,7 @@ import Foundation
 
 /// Protocol that is used to implement socket.io polling support
 public protocol SocketEnginePollable : SocketEngineSpec {
-    /// MARK: Properties
+    // MARK: Properties
 
     /// `true` If engine's session has been invalidated.
     var invalidated: Bool { get }
@@ -50,6 +50,8 @@ public protocol SocketEnginePollable : SocketEngineSpec {
     ///
     /// **Do not touch this directly**
     var waitingForPost: Bool { get set }
+
+    // MARK: Methods
 
     /// Call to send a long-polling request.
     ///

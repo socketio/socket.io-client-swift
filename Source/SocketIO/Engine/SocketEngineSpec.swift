@@ -28,6 +28,8 @@ import Starscream
 
 /// Specifies a SocketEngine.
 @objc public protocol SocketEngineSpec {
+    // MARK: Properties
+
     /// The client for this engine.
     var client: SocketEngineClient? { get set }
 
@@ -85,12 +87,16 @@ import Starscream
     /// The WebSocket for this engine.
     var ws: WebSocket? { get }
 
+    // MARK: Initializers
+
     /// Creates a new engine.
     ///
     /// - parameter client: The client for this engine.
     /// - parameter url: The url for this engine.
     /// - parameter options: The options for this engine.
     init(client: SocketEngineClient, url: URL, options: [String: Any]?)
+
+    // MARK: Methods
 
     /// Starts the connection to the server.
     func connect()

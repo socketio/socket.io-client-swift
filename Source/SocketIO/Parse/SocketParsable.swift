@@ -24,8 +24,6 @@ import Foundation
 
 /// Defines that a type will be able to parse socket.io-protocol messages.
 public protocol SocketParsable : class {
-    // MARK: Properties
-
     // MARK: Methods
 
     /// Called when the engine has received some binary data that should be attached to a packet.
@@ -60,6 +58,8 @@ public enum SocketParsableError : Error {
 
 /// Says that a type will be able to buffer binary data before all data for an event has come in.
 public protocol SocketDataBufferable : class {
+    // MARK: Properties
+
     /// A list of packets that are waiting for binary data.
     ///
     /// The way that socket.io works all data should be sent directly after each packet.

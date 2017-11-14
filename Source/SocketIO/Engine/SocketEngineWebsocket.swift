@@ -28,6 +28,8 @@ import Starscream
 
 /// Protocol that is used to implement socket.io WebSocket support
 public protocol SocketEngineWebsocket : SocketEngineSpec, WebSocketDelegate {
+    // MARK: Methods
+
     /// Sends an engine.io message through the WebSocket transport.
     ///
     /// You shouldn't call this directly, instead call the `write` method on `SocketEngine`.
