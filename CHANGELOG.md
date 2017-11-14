@@ -1,3 +1,7 @@
+# v13.1.0
+
+- Allow setting `SocketEngineSpec.extraHeaders` after init.
+
 # v13.0.1
 
 - Fix not setting handleQueue on `SocketManager`
