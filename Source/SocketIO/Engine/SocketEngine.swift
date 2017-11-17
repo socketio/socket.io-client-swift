@@ -283,18 +283,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         ws?.delegate = nil // TODO this seems a bit defensive, is this really needed?
         var req = URLRequest(url: urlWebSocketWithSid)
 
-        if cookies != nil {
-            let headers = HTTPCookie.requestHeaderFields(with: cookies!)
-            for (headerName, value) in headers {
-                req.setValue(value, forHTTPHeaderField: headerName)
-            }
-        }
-
-        if extraHeaders != nil {
-            for (headerName, value) in extraHeaders! {
-                req.setValue(value, forHTTPHeaderField: headerName)
-            }
-        }
+        addHeaders(to: &req)
 
         ws = WebSocket(request: req)
         ws?.callbackQueue = engineQueue
