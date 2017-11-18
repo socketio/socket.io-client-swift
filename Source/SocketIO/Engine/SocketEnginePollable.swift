@@ -101,7 +101,7 @@ extension SocketEnginePollable {
     ///
     /// You shouldn't need to call this directly, the engine should automatically maintain a long-poll request.
     public func doPoll() {
-        guard !websocket && !waitingForPoll && connected && !closed else { return }
+        guard polling && !waitingForPoll && connected && !closed else { return }
 
         var req = URLRequest(url: urlPollingWithSid)
         addHeaders(to: &req)
@@ -151,7 +151,7 @@ extension SocketEnginePollable {
 
     private func flushWaitingForPost() {
         guard postWait.count != 0 && connected else { return }
-        guard !websocket else {
+        guard polling else {
             flushWaitingForPostToWebSocket()
 
             return

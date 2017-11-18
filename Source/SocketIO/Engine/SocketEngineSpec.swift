@@ -82,6 +82,7 @@ import Starscream
     var urlWebSocket: URL { get }
 
     /// If `true`, then the engine is currently in WebSockets mode.
+    @available(*, deprecated, message: "No longer needed, if we're not polling, then we must be doing websockets")
     var websocket: Bool { get }
 
     /// The WebSocket for this engine.
@@ -169,10 +170,10 @@ extension SocketEngineSpec {
     }
 
     func createBinaryDataForSend(using data: Data) -> Either<Data, String> {
-        if websocket {
-            return .left(Data(bytes: [0x4]) + data)
-        } else {
+        if polling {
             return .right("b4" + data.base64EncodedString(options: Data.Base64EncodingOptions(rawValue: 0)))
+        } else {
+            return .left(Data(bytes: [0x4]) + data)
         }
     }
 
