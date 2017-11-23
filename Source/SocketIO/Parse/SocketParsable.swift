@@ -119,7 +119,7 @@ public extension SocketParsable where Self: SocketManagerSpec & SocketDataBuffer
             }
         }
 
-        var dataArray = String(message.utf16[message.utf16.index(reader.currentIndex, offsetBy: 1)..<message.utf16.endIndex])!
+        var dataArray = String(message.utf16[message.utf16.index(reader.currentIndex, offsetBy: 1)...])!
 
         if type == .error && !dataArray.hasPrefix("[") && !dataArray.hasSuffix("]") {
             dataArray = "[" + dataArray + "]"
