@@ -2,6 +2,7 @@
 
 - Allow setting `SocketEngineSpec.extraHeaders` after init.
 - Deprecate `SocketEngineSpec.websocket` in favor of just using the `SocketEngineSpec.polling` property.
+- Enable bitcode for most platforms.
 
 # v13.0.1
 
