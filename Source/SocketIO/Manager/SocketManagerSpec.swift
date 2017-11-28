@@ -63,6 +63,9 @@ public protocol SocketManagerSpec : class, SocketEngineClient {
     /// called on.
     var handleQueue: DispatchQueue { get set }
 
+    /// The sockets in this manager indexed by namespace.
+    var nsps: [String: SocketIOClient] { get set }
+
     /// If `true`, this manager will try and reconnect on any disconnects.
     var reconnects: Bool { get set }
 
@@ -113,6 +116,14 @@ public protocol SocketManagerSpec : class, SocketEngineClient {
     ///
     /// This will cause a `disconnect` event to be emitted, as well as an `reconnectAttempt` event.
     func reconnect()
+
+    /// Removes the socket from the manager's control.
+    /// After calling this method the socket should no longer be considered usable.
+    ///
+    /// - parameter socket: The socket to remove.
+    /// - returns: The socket removed, if it was owned by the manager.
+    @discardableResult
+    func removeSocket(_ socket: SocketIOClient) -> SocketIOClient?
 
     /// Returns a `SocketIOClient` for the given namespace. This socket shares a transport with the manager.
     ///

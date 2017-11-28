@@ -250,6 +250,22 @@ class SocketSideEffectTest: XCTestCase {
         waitForExpectations(timeout: 0.8)
     }
 
+    func testConnectCallsConnectEventImmediatelyIfManagerAlreadyConnected() {
+        let expect = expectation(description: "The client should call the connect handler")
+
+        socket = manager.defaultSocket
+
+        socket.setTestStatus(.notConnected)
+        manager.setTestStatus(.connected)
+
+        socket.on(clientEvent: .connect) {data, ack in
+            expect.fulfill()
+        }
+        socket.connect(timeoutAfter: 0.3, withHandler: nil)
+
+        waitForExpectations(timeout: 0.8)
+    }
+
     func testConnectDoesNotTimeOutIfConnected() {
         let expect = expectation(description: "The client should not call the timeout function")
 
