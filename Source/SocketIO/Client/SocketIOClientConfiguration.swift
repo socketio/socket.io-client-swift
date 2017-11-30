@@ -129,6 +129,8 @@ public struct SocketIOClientConfiguration : ExpressibleByArrayLiteral, Collectio
 
 /// Declares that a type can set configs from a `SocketIOClientConfiguration`.
 public protocol ConfigSettable {
+    // MARK: Methods
+
     /// Called when an `ConfigSettable` should set/update its configs from a given configuration.
     ///
     /// - parameter config: The `SocketIOClientConfiguration` that should be used to set/update configs.

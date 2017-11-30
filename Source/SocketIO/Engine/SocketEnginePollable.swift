@@ -26,7 +26,7 @@ import Foundation
 
 /// Protocol that is used to implement socket.io polling support
 public protocol SocketEnginePollable : SocketEngineSpec {
-    /// MARK: Properties
+    // MARK: Properties
 
     /// `true` If engine's session has been invalidated.
     var invalidated: Bool { get }
@@ -50,6 +50,8 @@ public protocol SocketEnginePollable : SocketEngineSpec {
     ///
     /// **Do not touch this directly**
     var waitingForPost: Bool { get set }
+
+    // MARK: Methods
 
     /// Call to send a long-polling request.
     ///
@@ -99,7 +101,7 @@ extension SocketEnginePollable {
     ///
     /// You shouldn't need to call this directly, the engine should automatically maintain a long-poll request.
     public func doPoll() {
-        guard !websocket && !waitingForPoll && connected && !closed else { return }
+        guard polling && !waitingForPoll && connected && !closed else { return }
 
         var req = URLRequest(url: urlPollingWithSid)
         addHeaders(to: &req)
@@ -149,7 +151,7 @@ extension SocketEnginePollable {
 
     private func flushWaitingForPost() {
         guard postWait.count != 0 && connected else { return }
-        guard !websocket else {
+        guard polling else {
             flushWaitingForPostToWebSocket()
 
             return

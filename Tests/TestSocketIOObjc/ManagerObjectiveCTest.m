@@ -106,6 +106,14 @@
     [self waitForExpectationsWithTimeout:0.3 handler:nil];
 }
 
+- (void)testMangerRemoveSocket {
+    [self setUpSockets];
+
+    [self.manager removeSocket:self.socket];
+
+    XCTAssertNil(self.manager.nsps[self.socket.nsp]);
+}
+
 - (void)setUpSockets {
     self.socket = [self.manager testSocketForNamespace:@"/"];
     self.socket2 = [self.manager testSocketForNamespace:@"/swift"];

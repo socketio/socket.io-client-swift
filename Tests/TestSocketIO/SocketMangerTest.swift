@@ -88,6 +88,14 @@ class SocketMangerTest : XCTestCase {
         XCTAssertEqual(manager.reconnectWait, 5)
     }
 
+    func testManagerRemovesSocket() {
+        setUpSockets()
+
+        manager.removeSocket(socket)
+
+        XCTAssertNil(manager.nsps[socket.nsp])
+    }
+
     private func setUpSockets() {
         socket = manager.testSocket(forNamespace: "/")
         socket2 = manager.testSocket(forNamespace: "/swift")

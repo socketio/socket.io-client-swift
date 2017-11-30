@@ -127,7 +127,14 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
 
         status = .connecting
 
-        manager.connectSocket(self)
+        joinNamespace()
+
+        if manager.status == .connected && nsp == "/" {
+            // We might not get a connect event for the default nsp, fire immediately
+            didConnect(toNamespace: nsp)
+
+            return
+        }
 
         guard timeoutAfter != 0 else { return }
 
@@ -183,7 +190,6 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
         DefaultSocketLogger.Logger.log("Closing socket", type: logType)
 
         leaveNamespace()
-        didDisconnect(reason: "Disconnect")
     }
 
     /// Send an event to the server, with optional data items.
@@ -366,21 +372,15 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     /// Call when you wish to leave a namespace and disconnect this socket.
     @objc
     open func leaveNamespace() {
-        guard nsp != "/" else { return }
-
-        status = .disconnected
-
         manager?.disconnectSocket(self)
     }
 
     /// Joins `nsp`.
     @objc
     open func joinNamespace() {
-        guard nsp != "/" else { return }
-
         DefaultSocketLogger.Logger.log("Joining namespace \(nsp)", type: logType)
 
-        manager?.engine?.send("0\(nsp)", withData: [])
+        manager?.connectSocket(self)
     }
 
     /// Removes handler(s) for a client event.

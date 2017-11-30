@@ -44,6 +44,9 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         }
     }
 
+    /// A dictionary of extra http headers that will be set during connection.
+    public var extraHeaders: [String: String]?
+
     /// A queue of engine.io messages waiting for POSTing
     ///
     /// **You should not touch this directly**
@@ -72,9 +75,6 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
 
     /// An array of HTTPCookies that are sent during the connection.
     public private(set) var cookies: [HTTPCookie]?
-
-    /// A dictionary of extra http headers that will be set during connection.
-    public private(set) var extraHeaders: [String: String]?
 
     /// When `true`, the engine is in the process of switching to WebSockets.
     ///
@@ -112,6 +112,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     public private(set) var urlWebSocket = URL(string: "http://localhost/")!
 
     /// If `true`, then the engine is currently in WebSockets mode.
+    @available(*, deprecated, message: "No longer needed, if we're not polling, then we must be doing websockets")
     public private(set) var websocket = false
 
     /// The WebSocket for this engine.
@@ -233,7 +234,6 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
 
         if forceWebsockets {
             polling = false
-            websocket = true
             createWebSocketAndConnect()
             return
         }
@@ -283,18 +283,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         ws?.delegate = nil // TODO this seems a bit defensive, is this really needed?
         var req = URLRequest(url: urlWebSocketWithSid)
 
-        if cookies != nil {
-            let headers = HTTPCookie.requestHeaderFields(with: cookies!)
-            for (headerName, value) in headers {
-                req.setValue(value, forHTTPHeaderField: headerName)
-            }
-        }
-
-        if extraHeaders != nil {
-            for (headerName, value) in extraHeaders! {
-                req.setValue(value, forHTTPHeaderField: headerName)
-            }
-        }
+        addHeaders(to: &req)
 
         ws = WebSocket(request: req)
         ws?.callbackQueue = engineQueue
@@ -323,19 +312,15 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     }
 
     private func _disconnect(reason: String) {
-        guard connected else { return closeOutEngine(reason: reason) }
+        guard connected && !closed else { return closeOutEngine(reason: reason) }
 
         DefaultSocketLogger.Logger.log("Engine is being closed.", type: SocketEngine.logType)
 
-        if closed {
-            return closeOutEngine(reason: reason)
-        }
-
-        if websocket {
+        if polling {
+            disconnectPolling(reason: reason)
+        } else {
             sendWebSocketMessage("", withType: .close, withData: [])
             closeOutEngine(reason: reason)
-        } else {
-            disconnectPolling(reason: reason)
         }
     }
 
@@ -358,8 +343,9 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
                 "we'll probably disconnect soon. You should report this.", type: SocketEngine.logType)
         }
 
+        DefaultSocketLogger.Logger.log("Switching to WebSockets", type: SocketEngine.logType)
+
         sendWebSocketMessage("", withType: .upgrade, withData: [])
-        websocket = true
         polling = false
         fastUpgrade = false
         probing = false
@@ -454,6 +440,9 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
 
         // We should upgrade
         if message == "3probe" {
+            DefaultSocketLogger.Logger.log("Received probe response, should upgrade to WebSockets",
+                                           type: SocketEngine.logType)
+
             upgradeTransport()
         }
 
@@ -520,7 +509,6 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         sid = ""
         waitingForPoll = false
         waitingForPost = false
-        websocket = false
     }
 
     private func sendPing() {
@@ -603,17 +591,20 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     public func write(_ msg: String, withType type: SocketEnginePacketType, withData data: [Data]) {
         engineQueue.async {
             guard self.connected else { return }
+            guard !self.probing else {
+                self.probeWait.append((msg, type, data))
 
-            if self.websocket {
-                DefaultSocketLogger.Logger.log("Writing ws: \(msg) has data: \(data.count != 0)",
-                                               type: SocketEngine.logType)
-                self.sendWebSocketMessage(msg, withType: type, withData: data)
-            } else if !self.probing {
+                return
+            }
+
+            if self.polling {
                 DefaultSocketLogger.Logger.log("Writing poll: \(msg) has data: \(data.count != 0)",
                                                type: SocketEngine.logType)
                 self.sendPollMessage(msg, withType: type, withData: data)
             } else {
-                self.probeWait.append((msg, type, data))
+                DefaultSocketLogger.Logger.log("Writing ws: \(msg) has data: \(data.count != 0)",
+                                               type: SocketEngine.logType)
+                self.sendWebSocketMessage(msg, withType: type, withData: data)
             }
         }
     }
@@ -642,14 +633,14 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
             return
         }
 
-        guard websocket else {
+        guard !polling else {
             flushProbeWait()
 
             return
         }
 
         connected = false
-        websocket = false
+        polling = true
 
         if let reason = error?.localizedDescription {
             didError(reason: reason)

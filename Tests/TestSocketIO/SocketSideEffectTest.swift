@@ -250,6 +250,22 @@ class SocketSideEffectTest: XCTestCase {
         waitForExpectations(timeout: 0.8)
     }
 
+    func testConnectCallsConnectEventImmediatelyIfManagerAlreadyConnected() {
+        let expect = expectation(description: "The client should call the connect handler")
+
+        socket = manager.defaultSocket
+
+        socket.setTestStatus(.notConnected)
+        manager.setTestStatus(.connected)
+
+        socket.on(clientEvent: .connect) {data, ack in
+            expect.fulfill()
+        }
+        socket.connect(timeoutAfter: 0.3, withHandler: nil)
+
+        waitForExpectations(timeout: 0.8)
+    }
+
     func testConnectDoesNotTimeOutIfConnected() {
         let expect = expectation(description: "The client should not call the timeout function")
 
@@ -450,7 +466,7 @@ class TestEngine : SocketEngineSpec {
     var connectParams: [String: Any]? = nil
     private(set) var cookies: [HTTPCookie]? = nil
     private(set) var engineQueue = DispatchQueue.main
-    private(set) var extraHeaders: [String: String]? = nil
+    var extraHeaders: [String: String]? = nil
     private(set) var fastUpgrade = false
     private(set) var forcePolling = false
     private(set) var forceWebsockets = false

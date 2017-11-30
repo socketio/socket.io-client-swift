@@ -28,6 +28,8 @@ import Starscream
 
 /// Specifies a SocketEngine.
 @objc public protocol SocketEngineSpec {
+    // MARK: Properties
+
     /// The client for this engine.
     var client: SocketEngineClient? { get set }
 
@@ -50,7 +52,7 @@ import Starscream
     var engineQueue: DispatchQueue { get }
 
     /// A dictionary of extra http headers that will be set during connection.
-    var extraHeaders: [String: String]? { get }
+    var extraHeaders: [String: String]? { get set }
 
     /// When `true`, the engine is in the process of switching to WebSockets.
     var fastUpgrade: Bool { get }
@@ -80,10 +82,13 @@ import Starscream
     var urlWebSocket: URL { get }
 
     /// If `true`, then the engine is currently in WebSockets mode.
+    @available(*, deprecated, message: "No longer needed, if we're not polling, then we must be doing websockets")
     var websocket: Bool { get }
 
     /// The WebSocket for this engine.
     var ws: WebSocket? { get }
+
+    // MARK: Initializers
 
     /// Creates a new engine.
     ///
@@ -91,6 +96,8 @@ import Starscream
     /// - parameter url: The url for this engine.
     /// - parameter options: The options for this engine.
     init(client: SocketEngineClient, url: URL, options: [String: Any]?)
+
+    // MARK: Methods
 
     /// Starts the connection to the server.
     func connect()
@@ -163,10 +170,10 @@ extension SocketEngineSpec {
     }
 
     func createBinaryDataForSend(using data: Data) -> Either<Data, String> {
-        if websocket {
-            return .left(Data(bytes: [0x4]) + data)
-        } else {
+        if polling {
             return .right("b4" + data.base64EncodedString(options: Data.Base64EncodingOptions(rawValue: 0)))
+        } else {
+            return .left(Data(bytes: [0x4]) + data)
         }
     }
 
