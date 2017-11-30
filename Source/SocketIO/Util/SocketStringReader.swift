@@ -46,7 +46,7 @@ struct SocketStringReader {
     }
 
     mutating func read(count: Int) -> String {
-        let readString = String(message.utf16[currentIndex..<message.utf16.index(currentIndex, offsetBy: count)])!
+        let readString = "\(message.utf16[currentIndex..<message.utf16.index(currentIndex, offsetBy: count)])"
 
         advance(by: count)
 

@@ -113,7 +113,7 @@ extension SocketParsable where Self: SocketIOClientSpec {
             }
         }
 
-        var dataArray = String(message.utf16[message.utf16.index(reader.currentIndex, offsetBy: 1)..<message.utf16.endIndex])!
+        var dataArray = "\(message.utf16[message.utf16.index(reader.currentIndex, offsetBy: 1)..<message.utf16.endIndex])"
 
         if type == .error && !dataArray.hasPrefix("[") && !dataArray.hasSuffix("]") {
             dataArray = "[" + dataArray + "]"
