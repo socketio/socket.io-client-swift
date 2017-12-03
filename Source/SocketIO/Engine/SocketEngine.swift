@@ -465,30 +465,34 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     ///                          If `true` we might have to fix utf8 encoding.
     public func parseEngineMessage(_ message: String) {
         DefaultSocketLogger.Logger.log("Got message: \(message)", type: SocketEngine.logType)
+        
+        guard let str = utf8().decode(message) else {
+            return;
+        }
 
-        let reader = SocketStringReader(message: message)
+        let reader = SocketStringReader(message: str)
 
         if message.hasPrefix("b4") {
-            return handleBase64(message: message)
+            return handleBase64(message: str)
         }
 
         guard let type = SocketEnginePacketType(rawValue: Int(reader.currentCharacter) ?? -1) else {
-            checkAndHandleEngineError(message)
+            checkAndHandleEngineError(str)
 
             return
         }
 
         switch type {
         case .message:
-            handleMessage(String(message.dropFirst()))
+            handleMessage(String(str.dropFirst()))
         case .noop:
             handleNOOP()
         case .pong:
-            handlePong(with: message)
+            handlePong(with: str)
         case .open:
-            handleOpen(openData: String(message.dropFirst()))
+            handleOpen(openData: String(str.dropFirst()))
         case .close:
-            handleClose(message)
+            handleClose(str)
         default:
             DefaultSocketLogger.Logger.log("Got unknown packet type", type: SocketEngine.logType)
         }
