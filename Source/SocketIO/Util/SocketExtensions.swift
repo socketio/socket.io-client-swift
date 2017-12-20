@@ -38,7 +38,7 @@ extension Array {
 
 extension CharacterSet {
     static var allowedURLCharacterSet: CharacterSet {
-        return CharacterSet(charactersIn: "!*'();:@&=+$,/?%#[]\" {}").inverted
+        return CharacterSet(charactersIn: "!*'();:@&=+$,/?%#[]\" {}^").inverted
     }
 }
 
