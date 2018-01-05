@@ -537,9 +537,11 @@
 				TargetAttributes = {
 					572EF2181B51F16C00EEBB58 = {
 						CreatedOnToolsVersion = 6.4;
+						LastSwiftMigration = 0920;
 					};
 					572EF2231B51F16C00EEBB58 = {
 						CreatedOnToolsVersion = 6.4;
+						LastSwiftMigration = 0920;
 					};
 					572EF2371B51F18A00EEBB58 = {
 						CreatedOnToolsVersion = 6.4;
@@ -886,7 +888,8 @@
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -937,7 +940,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.socket.SocketIOClientSwift;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -993,6 +997,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "io.socket.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -1037,6 +1043,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "io.socket.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
