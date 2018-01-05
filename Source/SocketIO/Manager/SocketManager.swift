@@ -414,7 +414,8 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
 
     /// Tries to reconnect to the server.
     ///
-    /// This will cause a `disconnect` event to be emitted, as well as an `reconnectAttempt` event.
+    /// This will cause a `SocketClientEvent.reconnect` event to be emitted, as well as
+    /// `SocketClientEvent.reconnectAttempt` events.
     open func reconnect() {
         guard !reconnecting else { return }
 
