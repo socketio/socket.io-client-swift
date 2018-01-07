@@ -233,7 +233,8 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
     ///
     /// - parameter socket: The socket to disconnect.
     open func disconnectSocket(_ socket: SocketIOClient) {
-        engine?.send("1\(socket.nsp)", withData: [])
+        engine?.send("1\(socket.nsp),", withData: [])
+
         socket.didDisconnect(reason: "Namespace leave")
     }
 
