@@ -1,6 +1,7 @@
 # 13.1.1
 
 - Fix [#923](https://github.com/socketio/socket.io-client-swift/issues/923)
+- Fix [#894](https://github.com/socketio/socket.io-client-swift/issues/894)
 
 # v13.1.0
 
