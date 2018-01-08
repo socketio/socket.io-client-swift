@@ -540,7 +540,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         case .pong:
             handlePong(with: fixedString)
         case .open:
-            handleOpen(openData: fixedString)
+            handleOpen(openData: String(fixedString.dropFirst()))
         case .close:
             handleClose(fixedString)
         default:
