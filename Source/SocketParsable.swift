@@ -107,13 +107,13 @@ extension SocketParsable where Self: SocketIOClientSpec {
             }
         }
         
-        var dataArray = message[message.characters.index(reader.currentIndex, offsetBy: 1)..<message.endIndex]
+        var dataArray = message[message.index(reader.currentIndex, offsetBy: 1)..<message.endIndex]
         
         if type == .error && !dataArray.hasPrefix("[") && !dataArray.hasSuffix("]") {
             dataArray = "[" + dataArray + "]"
         }
         
-        switch parseData(dataArray) {
+        switch parseData(String(dataArray)) {
         case let .left(err):
             return .left(err)
         case let .right(data):
