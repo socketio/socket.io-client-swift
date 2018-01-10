@@ -179,7 +179,7 @@
             <h1>SocketClientEvent</h1>
               <div class="declaration">
                 <div class="language">
-                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">SocketClientEvent</span> <span class="p">:</span> <span class="kt">String</span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">SocketClientEvent</span> <span class="p">:</span> <span class="kt">String</span></code></pre>
 
                 </div>
               </div>
@@ -208,7 +208,7 @@
                         <p>Emitted when the client connects. This is also called on a successful reconnection. A connect event gets one
 data item: the namespace that was connected to.</p>
 <pre class="highlight swift"><code><span class="n">socket</span><span class="o">.</span><span class="nf">on</span><span class="p">(</span><span class="nv">clientEvent</span><span class="p">:</span> <span class="o">.</span><span class="n">connect</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span><span class="p">,</span> <span class="n">ack</span> <span class="k">in</span>
-    <span class="k">guard</span> <span class="k">let</span> <span class="nv">nsp</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">as?</span> <span class="kt">String</span> <span class="k">else</span> <span class="p">{</span> <span class="k">return</span> <span class="p">}</span>
+    <span class="k">guard</span> <span class="k">let</span> <span class="nv">nsp</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">as?</span> <span class="kt">String</span> <span class="nf">else</span> <span class="p">{</span> <span class="k">return</span> <span class="p">}</span>
     <span class="c1">// Some logic using the nsp</span>
 <span class="p">}</span>
 </code></pre>
@@ -218,7 +218,7 @@ data item: the namespace that was connected to.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">connect</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">connect</span></code></pre>
 
                         </div>
                       </div>
@@ -255,7 +255,7 @@ data item: the namespace that was connected to.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">disconnect</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">disconnect</span></code></pre>
 
                         </div>
                       </div>
@@ -292,7 +292,7 @@ data item: the namespace that was connected to.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">error</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">error</span></code></pre>
 
                         </div>
                       </div>
@@ -329,7 +329,7 @@ data item: the namespace that was connected to.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">ping</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">ping</span></code></pre>
 
                         </div>
                       </div>
@@ -366,7 +366,7 @@ data item: the namespace that was connected to.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">pong</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">pong</span></code></pre>
 
                         </div>
                       </div>
@@ -403,7 +403,7 @@ data item: the namespace that was connected to.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">reconnect</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">reconnect</span></code></pre>
 
                         </div>
                       </div>
@@ -440,7 +440,7 @@ data item: the namespace that was connected to.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">reconnectAttempt</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">reconnectAttempt</span></code></pre>
 
                         </div>
                       </div>
@@ -477,7 +477,7 @@ data item: the namespace that was connected to.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">statusChange</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">statusChange</span></code></pre>
 
                         </div>
                       </div>
@@ -492,8 +492,8 @@ data item: the namespace that was connected to.</p>
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2017 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2017-11-30)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2018 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2018-01-10)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>

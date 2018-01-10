@@ -206,7 +206,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">@objc</span> <span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketEngineSpec</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketEngineSpec</span></code></pre>
 
                         </div>
                       </div>
@@ -238,7 +238,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">@objc</span> <span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketEngineClient</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketEngineClient</span></code></pre>
 
                         </div>
                       </div>
@@ -270,7 +270,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketEnginePollable</span> <span class="p">:</span> <span class="kt"><a href="Protocols/SocketEngineSpec.html">SocketEngineSpec</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketEnginePollable</span> <span class="p">:</span> <span class="kt"><a href="Protocols/SocketEngineSpec.html">SocketEngineSpec</a></span></code></pre>
 
                         </div>
                       </div>
@@ -302,7 +302,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketEngineWebsocket</span> <span class="p">:</span> <span class="kt"><a href="Protocols/SocketEngineSpec.html">SocketEngineSpec</a></span><span class="p">,</span> <span class="kt">WebSocketDelegate</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketEngineWebsocket</span> <span class="p">:</span> <span class="kt"><a href="Protocols/SocketEngineSpec.html">SocketEngineSpec</a></span><span class="p">,</span> <span class="kt">WebSocketDelegate</span></code></pre>
 
                         </div>
                       </div>
@@ -334,7 +334,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketIOClientSpec</span> <span class="p">:</span> <span class="kd">class</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketIOClientSpec</span> <span class="p">:</span> <span class="kd">class</span></code></pre>
 
                         </div>
                       </div>
@@ -366,7 +366,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">ConfigSettable</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">ConfigSettable</span></code></pre>
 
                         </div>
                       </div>
@@ -393,16 +393,16 @@
                         <p>A marking protocol that says a type can be represented in a socket.io packet.</p>
 
 <p>Example:</p>
-<pre class="highlight swift"><code><span class="kd">struct</span> <span class="kt">CustomData</span> <span class="p">:</span> <span class="kt">SocketData</span> <span class="p">{</span>
+<pre class="highlight swift"><code><span class="kd">struct</span> <span class="kt">CustomData</span> <span class="p">:</span> <span class="nf">SocketData</span> <span class="p">{</span>
    <span class="k">let</span> <span class="nv">name</span><span class="p">:</span> <span class="kt">String</span>
    <span class="k">let</span> <span class="nv">age</span><span class="p">:</span> <span class="kt">Int</span>
 
-   <span class="kd">func</span> <span class="nf">socketRepresentation</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">SocketData</span> <span class="p">{</span>
+   <span class="kd">func</span> <span class="nf">socketRepresentation</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nf">SocketData</span> <span class="p">{</span>
        <span class="k">return</span> <span class="p">[</span><span class="s">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s">"age"</span><span class="p">:</span> <span class="n">age</span><span class="p">]</span>
    <span class="p">}</span>
 <span class="p">}</span>
 
-<span class="n">socket</span><span class="o">.</span><span class="nf">emit</span><span class="p">(</span><span class="s">"myEvent"</span><span class="p">,</span> <span class="kt">CustomData</span><span class="p">(</span><span class="nv">name</span><span class="p">:</span> <span class="s">"Erik"</span><span class="p">,</span> <span class="nv">age</span><span class="p">:</span> <span class="mi">24</span><span class="p">))</span>
+<span class="n">socket</span><span class="o">.</span><span class="nf">emit</span><span class="p">(</span><span class="s">"myEvent"</span><span class="p">,</span> <span class="nf">CustomData</span><span class="p">(</span><span class="nv">name</span><span class="p">:</span> <span class="s">"Erik"</span><span class="p">,</span> <span class="nv">age</span><span class="p">:</span> <span class="mi">24</span><span class="p">))</span>
 </code></pre>
 
                         <a href="Protocols/SocketData.html" class="slightly-smaller">See more</a>
@@ -411,7 +411,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketData</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketData</span></code></pre>
 
                         </div>
                       </div>
@@ -443,7 +443,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketLogger</span> <span class="p">:</span> <span class="kd">class</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketLogger</span> <span class="p">:</span> <span class="kd">class</span></code></pre>
 
                         </div>
                       </div>
@@ -475,7 +475,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketParsable</span> <span class="p">:</span> <span class="kd">class</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketParsable</span> <span class="p">:</span> <span class="kd">class</span></code></pre>
 
                         </div>
                       </div>
@@ -503,7 +503,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketDataBufferable</span> <span class="p">:</span> <span class="kd">class</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketDataBufferable</span> <span class="p">:</span> <span class="kd">class</span></code></pre>
 
                         </div>
                       </div>
@@ -532,7 +532,7 @@
 <p>A <code>SocketManagerSpec</code> is responsible for multiplexing multiple namespaces through a single <code><a href="Protocols/SocketEngineSpec.html">SocketEngineSpec</a></code>.</p>
 
 <p>Example with <code><a href="Classes/SocketManager.html">SocketManager</a></code>:</p>
-<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">manager</span> <span class="o">=</span> <span class="kt">SocketManager</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">(</span><span class="nv">string</span><span class="p">:</span><span class="s">"http://localhost:8080/"</span><span class="p">)</span><span class="o">!</span><span class="p">)</span>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">manager</span> <span class="o">=</span> <span class="nf">SocketManager</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="nf">URL</span><span class="p">(</span><span class="nv">string</span><span class="p">:</span><span class="s">"http://localhost:8080/"</span><span class="p">)</span><span class="o">!</span><span class="p">)</span>
 <span class="k">let</span> <span class="nv">defaultNamespaceSocket</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">defaultSocket</span>
 <span class="k">let</span> <span class="nv">swiftSocket</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="nf">socket</span><span class="p">(</span><span class="nv">forNamespace</span><span class="p">:</span> <span class="s">"/swift"</span><span class="p">)</span>
 
@@ -551,7 +551,7 @@ or call one of the <code>disconnectSocket</code> methods on this class.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketManagerSpec</span> <span class="p">:</span> <span class="kd">class</span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketEngineClient.html">SocketEngineClient</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketManagerSpec</span> <span class="p">:</span> <span class="kd">class</span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketEngineClient.html">SocketEngineClient</a></span></code></pre>
 
                         </div>
                       </div>
@@ -566,8 +566,8 @@ or call one of the <code>disconnectSocket</code> methods on this class.</p>
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2017 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2017-11-30)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2018 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2018-01-10)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>
