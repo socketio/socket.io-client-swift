@@ -139,8 +139,6 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
             self._config.insert(.secure(true))
         }
 
-        self._config.insert(.path("/socket.io/"), replacing: false)
-
         super.init()
 
         setConfigs(_config)
@@ -205,7 +203,7 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
             return
         }
 
-        engine?.send("0\(socket.nsp)", withData: [])
+        engine?.send("0\(socket.nsp),", withData: [])
     }
 
     /// Called when the manager has disconnected from socket.io.
@@ -233,7 +231,8 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
     ///
     /// - parameter socket: The socket to disconnect.
     open func disconnectSocket(_ socket: SocketIOClient) {
-        engine?.send("1\(socket.nsp)", withData: [])
+        engine?.send("1\(socket.nsp),", withData: [])
+
         socket.didDisconnect(reason: "Namespace leave")
     }
 
@@ -414,7 +413,8 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
 
     /// Tries to reconnect to the server.
     ///
-    /// This will cause a `disconnect` event to be emitted, as well as an `reconnectAttempt` event.
+    /// This will cause a `SocketClientEvent.reconnect` event to be emitted, as well as
+    /// `SocketClientEvent.reconnectAttempt` events.
     open func reconnect() {
         guard !reconnecting else { return }
 
