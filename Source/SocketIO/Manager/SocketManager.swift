@@ -139,8 +139,6 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
             self._config.insert(.secure(true))
         }
 
-        self._config.insert(.path("/socket.io/"), replacing: false)
-
         super.init()
 
         setConfigs(_config)
