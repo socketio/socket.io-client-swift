@@ -183,7 +183,7 @@
 <h2 id='example' class='heading'>Example</h2>
 <pre class="highlight swift"><code><span class="kd">import</span> <span class="kt">SocketIO</span>
 
-<span class="k">let</span> <span class="nv">manager</span> <span class="o">=</span> <span class="kt">SocketManager</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">(</span><span class="nv">string</span><span class="p">:</span> <span class="s">"http://localhost:8080"</span><span class="p">)</span><span class="o">!</span><span class="p">,</span> <span class="nv">config</span><span class="p">:</span> <span class="p">[</span><span class="o">.</span><span class="nf">log</span><span class="p">(</span><span class="kc">true</span><span class="p">),</span> <span class="o">.</span><span class="n">compress</span><span class="p">])</span>
+<span class="k">let</span> <span class="nv">manager</span> <span class="o">=</span> <span class="nf">SocketManager</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="nf">URL</span><span class="p">(</span><span class="nv">string</span><span class="p">:</span> <span class="s">"http://localhost:8080"</span><span class="p">)</span><span class="o">!</span><span class="p">,</span> <span class="nv">config</span><span class="p">:</span> <span class="p">[</span><span class="o">.</span><span class="nf">log</span><span class="p">(</span><span class="kc">true</span><span class="p">),</span> <span class="o">.</span><span class="n">compress</span><span class="p">])</span>
 <span class="k">let</span> <span class="nv">socket</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">defaultSocket</span>
 
 <span class="n">socket</span><span class="o">.</span><span class="nf">on</span><span class="p">(</span><span class="nv">clientEvent</span><span class="p">:</span> <span class="o">.</span><span class="n">connect</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span><span class="p">,</span> <span class="n">ack</span> <span class="k">in</span>
@@ -191,7 +191,7 @@
 <span class="p">}</span>
 
 <span class="n">socket</span><span class="o">.</span><span class="nf">on</span><span class="p">(</span><span class="s">"currentAmount"</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span><span class="p">,</span> <span class="n">ack</span> <span class="k">in</span>
-    <span class="k">guard</span> <span class="k">let</span> <span class="nv">cur</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">as?</span> <span class="kt">Double</span> <span class="k">else</span> <span class="p">{</span> <span class="k">return</span> <span class="p">}</span>
+    <span class="k">guard</span> <span class="k">let</span> <span class="nv">cur</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">as?</span> <span class="kt">Double</span> <span class="nf">else</span> <span class="p">{</span> <span class="k">return</span> <span class="p">}</span>
 
     <span class="n">socket</span><span class="o">.</span><span class="nf">emitWithAck</span><span class="p">(</span><span class="s">"canUpdate"</span><span class="p">,</span> <span class="n">cur</span><span class="p">)</span><span class="o">.</span><span class="nf">timingOut</span><span class="p">(</span><span class="nv">after</span><span class="p">:</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span> <span class="k">in</span>
         <span class="n">socket</span><span class="o">.</span><span class="nf">emit</span><span class="p">(</span><span class="s">"update"</span><span class="p">,</span> <span class="p">[</span><span class="s">"amount"</span><span class="p">:</span> <span class="n">cur</span> <span class="o">+</span> <span class="mf">2.50</span><span class="p">])</span>
@@ -254,7 +254,7 @@ SocketIOClient* socket = manager.defaultSocket;
 
 <span class="kd">import</span> <span class="kt">PackageDescription</span>
 
-<span class="k">let</span> <span class="nv">package</span> <span class="o">=</span> <span class="kt">Package</span><span class="p">(</span>
+<span class="k">let</span> <span class="nv">package</span> <span class="o">=</span> <span class="nf">Package</span><span class="p">(</span>
     <span class="nv">name</span><span class="p">:</span> <span class="s">"socket.io-test"</span><span class="p">,</span>
     <span class="nv">products</span><span class="p">:</span> <span class="p">[</span>
         <span class="o">.</span><span class="nf">executable</span><span class="p">(</span><span class="nv">name</span><span class="p">:</span> <span class="s">"socket.io-test"</span><span class="p">,</span> <span class="nv">targets</span><span class="p">:</span> <span class="p">[</span><span class="s">"YourTargetName"</span><span class="p">])</span>
@@ -325,8 +325,8 @@ SocketIOClient* socket = manager.defaultSocket;
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2017 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2017-11-30)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2018 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2018-01-10)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>
