@@ -108,7 +108,7 @@ public final class OnAckCallback : NSObject {
 
     /// Completes an emitWithAck. If this isn't called, the emit never happens.
     ///
-    /// - parameter after: The number of seconds before this emit times out if an ack hasn't been received.
+    /// - parameter seconds: The number of seconds before this emit times out if an ack hasn't been received.
     /// - parameter callback: The callback called when an ack is received, or when a timeout happens.
     ///                       To check for timeout, use `SocketAckStatus`'s `noAck` case.
     @objc

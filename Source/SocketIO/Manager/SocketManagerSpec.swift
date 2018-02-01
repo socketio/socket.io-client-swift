@@ -103,13 +103,13 @@ public protocol SocketManagerSpec : class, SocketEngineClient {
 
     /// Disconnects the socket associated with `forNamespace`.
     ///
-    /// - parameter forNamespace: The namespace to disconnect from.
+    /// - parameter nsp: The namespace to disconnect from.
     func disconnectSocket(forNamespace nsp: String)
 
     /// Sends an event to the server on all namespaces in this manager.
     ///
     /// - parameter event: The event to send.
-    /// - parameter withItems: The data to send with this event.
+    /// - parameter items: The data to send with this event.
     func emitAll(_ event: String, withItems items: [Any])
 
     /// Tries to reconnect to the server.
@@ -133,7 +133,7 @@ public protocol SocketManagerSpec : class, SocketEngineClient {
     /// Call one of the `disconnectSocket` methods on the implementing class to remove the socket from manager control.
     /// Or call `SocketIOClient.disconnect()` on the client.
     ///
-    /// - parameter forNamespace: The namespace for the socket.
+    /// - parameter nsp: The namespace for the socket.
     /// - returns: A `SocketIOClient` for the given namespace.
     func socket(forNamespace nsp: String) -> SocketIOClient
 }

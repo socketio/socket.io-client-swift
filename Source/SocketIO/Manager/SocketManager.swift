@@ -241,7 +241,7 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
     /// This will remove the socket for the manager's control, and make the socket instance useless and ready for
     /// releasing.
     ///
-    /// - parameter forNamespace: The namespace to disconnect from.
+    /// - parameter nsp: The namespace to disconnect from.
     open func disconnectSocket(forNamespace nsp: String) {
         guard let socket = nsps.removeValue(forKey: nsp) else {
             DefaultSocketLogger.Logger.log("Could not find socket for \(nsp) to disconnect",
@@ -282,7 +282,7 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
     /// Same as `emitAll(_:_:)`, but meant for Objective-C.
     ///
     /// - parameter event: The event to send.
-    /// - parameter withItems: The data to send with this event.
+    /// - parameter items: The data to send with this event.
     open func emitAll(_ event: String, withItems items: [Any]) {
         forAll {socket in
             socket.emit(event, with: items)
@@ -508,7 +508,7 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
     /// Call one of the `disconnectSocket` methods on this class to remove the socket from manager control.
     /// Or call `SocketIOClient.disconnect()` on the client.
     ///
-    /// - parameter forNamespace: The namespace for the socket.
+    /// - parameter nsp: The namespace for the socket.
     /// - returns: A `SocketIOClient` for the given namespace.
     open func socket(forNamespace nsp: String) -> SocketIOClient {
         assert(nsp.hasPrefix("/"), "forNamespace must have a leading /")

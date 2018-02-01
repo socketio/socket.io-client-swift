@@ -461,8 +461,6 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     /// Parses a raw engine.io packet.
     ///
     /// - parameter message: The message to parse.
-    /// - parameter fromPolling: Whether this message is from long-polling.
-    ///                          If `true` we might have to fix utf8 encoding.
     public func parseEngineMessage(_ message: String) {
         DefaultSocketLogger.Logger.log("Got message: \(message)", type: SocketEngine.logType)
 
@@ -586,8 +584,8 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     /// Writes a message to engine.io, independent of transport.
     ///
     /// - parameter msg: The message to send.
-    /// - parameter withType: The type of this message.
-    /// - parameter withData: Any data that this message has.
+    /// - parameter type: The type of this message.
+    /// - parameter data: Any data that this message has.
     public func write(_ msg: String, withType type: SocketEnginePacketType, withData data: [Data]) {
         engineQueue.async {
             guard self.connected else { return }
