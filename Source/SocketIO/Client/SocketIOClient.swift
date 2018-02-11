@@ -314,11 +314,11 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     /// - parameter data: The data sent back with this ack.
     @objc
     open func handleAck(_ ack: Int, data: [Any]) {
-        guard status == .connected, let manager = self.manager else { return }
+        guard status == .connected else { return }
 
         DefaultSocketLogger.Logger.log("Handling ack: \(ack) with data: \(data)", type: logType)
 
-        ackHandlers.executeAck(ack, with: data, onQueue: manager.handleQueue)
+        ackHandlers.executeAck(ack, with: data)
     }
 
     /// Called on socket.io specific events.
