@@ -38,6 +38,19 @@ class SocketSideEffectTest: XCTestCase {
         waitForExpectations(timeout: 3, handler: nil)
     }
 
+    func testHandleAckWithAckEmit() {
+        let expect = expectation(description: "handled ack")
+        socket.emitWithAck("test").timingOut(after: 0) {data in
+            XCTAssertEqual(data[0] as? String, "hello world")
+
+            self.socket.emitWithAck("test").timingOut(after: 0) {data in}
+            expect.fulfill()
+        }
+
+        manager.parseEngineMessage("30[\"hello world\"]")
+        waitForExpectations(timeout: 3, handler: nil)
+    }
+
     func testHandleAck2() {
         let expect = expectation(description: "handled ack2")
         socket.emitWithAck("test").timingOut(after: 0) {data in

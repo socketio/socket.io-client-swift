@@ -75,7 +75,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
         }
     }
 
-    var ackHandlers = SocketAckManager()
+    let ackHandlers = SocketAckManager()
 
     private(set) var currentAck = -1
 
