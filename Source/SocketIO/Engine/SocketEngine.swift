@@ -629,7 +629,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         }
     }
 
-    // MARK: WebSocket Methods
+    // WebSocket Methods
 
     private func websocketDidConnect() {
         if !forceWebsockets {
