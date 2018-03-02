@@ -280,7 +280,6 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
     }
 
     private func createWebSocketAndConnect() {
-        ws?.delegate = nil // TODO this seems a bit defensive, is this really needed?
         var req = URLRequest(url: urlWebSocketWithSid)
 
         addHeaders(to: &req)
@@ -288,9 +287,32 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         ws = WebSocket(request: req)
         ws?.callbackQueue = engineQueue
         ws?.enableCompression = compress
-        ws?.delegate = self
         ws?.disableSSLCertValidation = selfSigned
         ws?.security = security?.security
+
+        ws?.onConnect = {[weak self] in
+            guard let this = self else { return }
+
+            this.websocketDidConnect()
+        }
+
+        ws?.onDisconnect = {[weak self] error in
+            guard let this = self else { return }
+
+            this.websocketDidDisconnect(error: error)
+        }
+
+        ws?.onData = {[weak self] data in
+            guard let this = self else { return }
+
+            this.parseEngineData(data)
+        }
+
+        ws?.onText = {[weak self] message in
+            guard let this = self else { return }
+
+            this.parseEngineMessage(message)
+        }
 
         ws?.connect()
     }
@@ -607,10 +629,9 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         }
     }
 
-    // MARK: Starscream delegate conformance
+    // MARK: WebSocket Methods
 
-    /// Delegate method for connection.
-    public func websocketDidConnect(socket: WebSocketClient) {
+    private func websocketDidConnect() {
         if !forceWebsockets {
             probing = true
             probeWebSocket()
@@ -621,8 +642,7 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
         }
     }
 
-    /// Delegate method for disconnection.
-    public func websocketDidDisconnect(socket: WebSocketClient, error: Error?) {
+    private func websocketDidDisconnect(error: Error?) {
         probing = false
 
         if closed {
