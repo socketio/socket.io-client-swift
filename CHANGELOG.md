@@ -1,4 +1,10 @@
-# 13.1.1
+# v13.1.2
+
+- Fix [#950](https://github.com/socketio/socket.io-client-swift/issues/950)
+- Conforming to `SocketEngineWebsocket` no longer requires conforming to `WebsocketDelegate`
+
+
+# v13.1.1
 
 - Fix [#923](https://github.com/socketio/socket.io-client-swift/issues/923)
 - Fix [#894](https://github.com/socketio/socket.io-client-swift/issues/894)
