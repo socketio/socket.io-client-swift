@@ -21,7 +21,7 @@ class SocketAckManagerTest : XCTestCase {
         }
 
         ackManager.addAck(1, callback: callback)
-        ackManager.executeAck(1, with: itemsArray, onQueue: DispatchQueue.main)
+        ackManager.executeAck(1, with: itemsArray)
 
         waitForExpectations(timeout: 3.0, handler: nil)
     }
@@ -44,7 +44,7 @@ class SocketAckManagerTest : XCTestCase {
         }
 
         ackManager.addAck(1, callback: callback)
-        ackManager.timeoutAck(1, onQueue: DispatchQueue.main)
+        ackManager.timeoutAck(1)
 
         waitForExpectations(timeout: 0.2, handler: nil)
     }

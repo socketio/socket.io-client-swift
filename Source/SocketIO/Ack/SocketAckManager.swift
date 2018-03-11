@@ -58,31 +58,20 @@ private struct SocketAck : Hashable {
     }
 }
 
-struct SocketAckManager {
+class SocketAckManager {
     private var acks = Set<SocketAck>(minimumCapacity: 1)
-    private let ackSemaphore = DispatchSemaphore(value: 1)
 
-    mutating func addAck(_ ack: Int, callback: @escaping AckCallback) {
+    func addAck(_ ack: Int, callback: @escaping AckCallback) {
         acks.insert(SocketAck(ack: ack, callback: callback))
     }
 
     /// Should be called on handle queue
-    mutating func executeAck(_ ack: Int, with items: [Any], onQueue: DispatchQueue) {
-        ackSemaphore.wait()
-        defer { ackSemaphore.signal() }
-        let ack = acks.remove(SocketAck(ack: ack))
-
-        onQueue.async() { ack?.callback(items) }
+    func executeAck(_ ack: Int, with items: [Any]) {
+        acks.remove(SocketAck(ack: ack))?.callback(items)
     }
 
     /// Should be called on handle queue
-    mutating func timeoutAck(_ ack: Int, onQueue: DispatchQueue) {
-        ackSemaphore.wait()
-        defer { ackSemaphore.signal() }
-        let ack = acks.remove(SocketAck(ack: ack))
-
-        onQueue.async() {
-            ack?.callback?([SocketAckStatus.noAck.rawValue])
-        }
+    func timeoutAck(_ ack: Int) {
+       acks.remove(SocketAck(ack: ack))?.callback?([SocketAckStatus.noAck.rawValue])
     }
 }

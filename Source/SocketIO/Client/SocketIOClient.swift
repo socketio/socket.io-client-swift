@@ -75,7 +75,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
         }
     }
 
-    var ackHandlers = SocketAckManager()
+    let ackHandlers = SocketAckManager()
 
     private(set) var currentAck = -1
 
@@ -86,7 +86,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     /// Type safe way to create a new SocketIOClient. `opts` can be omitted.
     ///
     /// - parameter manager: The manager for this socket.
-    /// - parameter socketURL: The url of the socket.io server.
+    /// - parameter nsp: The namespace of the socket.
     @objc
     public init(manager: SocketManagerSpec, nsp: String) {
         self.manager = manager
@@ -115,7 +115,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     ///
     /// - parameter timeoutAfter: The number of seconds after which if we are not connected we assume the connection
     ///                           has failed. Pass 0 to never timeout.
-    /// - parameter withHandler: The handler to call when the client fails to connect.
+    /// - parameter handler: The handler to call when the client fails to connect.
     @objc
     open func connect(timeoutAfter: Double, withHandler handler: (() -> ())?) {
         assert(timeoutAfter >= 0, "Invalid timeout: \(timeoutAfter)")
@@ -213,7 +213,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     /// Same as emit, but meant for Objective-C
     ///
     /// - parameter event: The event to send.
-    /// - parameter with: The items to send with this event. Send an empty array to send no data.
+    /// - parameter items: The items to send with this event. Send an empty array to send no data.
     @objc
     open func emit(_ event: String, with items: [Any]) {
         guard status == .connected else {
@@ -270,7 +270,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     /// ```
     ///
     /// - parameter event: The event to send.
-    /// - parameter with: The items to send with this event. Use `[]` to send nothing.
+    /// - parameter items: The items to send with this event. Use `[]` to send nothing.
     /// - returns: An `OnAckCallback`. You must call the `timingOut(after:)` method before the event will be sent.
     @objc
     open func emitWithAck(_ event: String, with items: [Any]) -> OnAckCallback {
@@ -314,11 +314,11 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     /// - parameter data: The data sent back with this ack.
     @objc
     open func handleAck(_ ack: Int, data: [Any]) {
-        guard status == .connected, let manager = self.manager else { return }
+        guard status == .connected else { return }
 
         DefaultSocketLogger.Logger.log("Handling ack: \(ack) with data: \(data)", type: logType)
 
-        ackHandlers.executeAck(ack, with: data, onQueue: manager.handleQueue)
+        ackHandlers.executeAck(ack, with: data)
     }
 
     /// Called on socket.io specific events.
@@ -334,7 +334,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     /// - parameter event: The name of the event.
     /// - parameter data: The data that was sent with this event.
     /// - parameter isInternalMessage: Whether this event was sent internally. If `true` it is always sent to handlers.
-    /// - parameter withAck: If > 0 then this event expects to get an ack back from the client.
+    /// - parameter ack: If > 0 then this event expects to get an ack back from the client.
     @objc
     open func handleEvent(_ event: String, data: [Any], isInternalMessage: Bool, withAck ack: Int = -1) {
         guard status == .connected || isInternalMessage else { return }

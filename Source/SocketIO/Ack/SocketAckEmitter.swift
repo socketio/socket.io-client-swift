@@ -108,7 +108,7 @@ public final class OnAckCallback : NSObject {
 
     /// Completes an emitWithAck. If this isn't called, the emit never happens.
     ///
-    /// - parameter after: The number of seconds before this emit times out if an ack hasn't been received.
+    /// - parameter seconds: The number of seconds before this emit times out if an ack hasn't been received.
     /// - parameter callback: The callback called when an ack is received, or when a timeout happens.
     ///                       To check for timeout, use `SocketAckStatus`'s `noAck` case.
     @objc
@@ -121,9 +121,9 @@ public final class OnAckCallback : NSObject {
         guard seconds != 0 else { return }
 
         socket.manager?.handleQueue.asyncAfter(deadline: DispatchTime.now() + seconds) {[weak socket] in
-            guard let socket = socket, let manager = socket.manager else { return }
+            guard let socket = socket else { return }
 
-            socket.ackHandlers.timeoutAck(self.ackNumber, onQueue: manager.handleQueue)
+            socket.ackHandlers.timeoutAck(self.ackNumber)
         }
     }
 
