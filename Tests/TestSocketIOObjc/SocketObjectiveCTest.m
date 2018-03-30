@@ -66,6 +66,10 @@
     [self.socket emit:@"testEmit" with:@[@YES]];
 }
 
+- (void)testRawEmitSyntax {
+    [[self.socket rawEmitView] emit:@"myEvent" with:@[@1]];
+}
+
 - (void)testEmitWithAckSyntax {
     [[self.socket emitWithAck:@"testAckEmit" with:@[@YES]] timingOutAfter:0 callback:^(NSArray* data) { }];
 }

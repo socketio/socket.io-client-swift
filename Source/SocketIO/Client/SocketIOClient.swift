@@ -67,6 +67,18 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     @objc
     public private(set) weak var manager: SocketManagerSpec?
 
+    /// A view into this socket where emits do not check for binary data.
+    ///
+    /// Usage:
+    ///
+    /// ```swift
+    /// socket.rawEmitView.emit("myEvent", myObject)
+    /// ```
+    ///
+    /// **NOTE**: It is not safe to hold on to this view beyond the life of the socket.
+    @objc
+    public private(set) lazy var rawEmitView = SocketBinaryView(socket: self)
+
     /// The status of this client.
     @objc
     public private(set) var status = SocketIOStatus.notConnected {

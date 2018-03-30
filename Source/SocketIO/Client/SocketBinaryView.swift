@@ -7,16 +7,15 @@ import Foundation
 /// Class that gives a backwards compatible way to cause an emit not to recursively check for Data objects.
 ///
 /// Usage:
+///
 /// ```swift
-/// socket.binary(false).emit("myEvent", myObject)
+/// socket.rawEmitView.emit("myEvent", myObject)
 /// ```
 public final class SocketBinaryView : NSObject {
     private unowned let socket: SocketIOClient
-    private let binary: Bool
 
-    init(socket: SocketIOClient, binary: Bool) {
+    init(socket: SocketIOClient) {
         self.socket = socket
-        self.binary = binary
     }
 
     /// Send an event to the server, with optional data items.
@@ -48,7 +47,7 @@ public final class SocketBinaryView : NSObject {
             return
         }
 
-        socket.emit([event] + items, binary: binary)
+        socket.emit([event] + items, binary: false)
     }
 
     /// Sends a message to the server, requesting an ack.
@@ -101,6 +100,6 @@ public final class SocketBinaryView : NSObject {
     /// - returns: An `OnAckCallback`. You must call the `timingOut(after:)` method before the event will be sent.
     @objc
     open func emitWithAck(_ event: String, with items: [Any]) -> OnAckCallback {
-        return socket.createOnAck([event] + items, binary: binary)
+        return socket.createOnAck([event] + items, binary: false)
     }
 }
