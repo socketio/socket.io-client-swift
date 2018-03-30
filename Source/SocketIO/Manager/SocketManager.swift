@@ -476,6 +476,8 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
                 self.handleQueue = queue
             case let .reconnects(reconnects):
                 self.reconnects = reconnects
+            case let .reconnectAttempts(attempts):
+                self.reconnectAttempts = attempts
             case let .reconnectWait(wait):
                 reconnectWait = abs(wait)
             case let .log(log):
