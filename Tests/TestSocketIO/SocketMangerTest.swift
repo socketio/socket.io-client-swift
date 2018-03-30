@@ -79,13 +79,15 @@ class SocketMangerTest : XCTestCase {
             .handleQueue(queue),
             .forceNew(true),
             .reconnects(false),
-            .reconnectWait(5)
+            .reconnectWait(5),
+            .reconnectAttempts(5)
         ])
 
         XCTAssertEqual(manager.handleQueue, queue)
         XCTAssertTrue(manager.forceNew)
         XCTAssertFalse(manager.reconnects)
         XCTAssertEqual(manager.reconnectWait, 5)
+        XCTAssertEqual(manager.reconnectAttempts, 5)
     }
 
     func testManagerRemovesSocket() {

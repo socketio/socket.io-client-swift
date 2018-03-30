@@ -1,7 +1,7 @@
 language: objective-c
 xcode_project: Socket.IO-Client-Swift.xcodeproj # path to your xcodeproj folder
 xcode_scheme: SocketIO-Mac
-osx_image: xcode9
+osx_image: xcode9.2
 branches:
   only:
     - master
