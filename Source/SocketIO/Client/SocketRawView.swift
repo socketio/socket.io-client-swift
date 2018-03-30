@@ -25,7 +25,7 @@ public final class SocketRawView: NSObject {
     ///
     /// - parameter event: The event to send.
     /// - parameter items: The items to send with this event. May be left out.
-    open func emit(_ event: String, _ items: SocketData...) {
+    public func emit(_ event: String, _ items: SocketData...) {
         do {
             try emit(event, with: items.map({ try $0.socketRepresentation() }))
         } catch let err {
@@ -41,7 +41,7 @@ public final class SocketRawView: NSObject {
     /// - parameter event: The event to send.
     /// - parameter items: The items to send with this event. Send an empty array to send no data.
     @objc
-    open func emit(_ event: String, with items: [Any]) {
+    public func emit(_ event: String, with items: [Any]) {
         guard socket.status == .connected else {
             socket.handleClientEvent(.error, data: ["Tried emitting \(event) when not connected"])
             return
@@ -69,7 +69,7 @@ public final class SocketRawView: NSObject {
     /// - parameter event: The event to send.
     /// - parameter items: The items to send with this event. May be left out.
     /// - returns: An `OnAckCallback`. You must call the `timingOut(after:)` method before the event will be sent.
-    open func emitWithAck(_ event: String, _ items: SocketData...) -> OnAckCallback {
+    public func emitWithAck(_ event: String, _ items: SocketData...) -> OnAckCallback {
         do {
             return emitWithAck(event, with: try items.map({ try $0.socketRepresentation() }))
         } catch let err {
@@ -99,7 +99,7 @@ public final class SocketRawView: NSObject {
     /// - parameter items: The items to send with this event. Use `[]` to send nothing.
     /// - returns: An `OnAckCallback`. You must call the `timingOut(after:)` method before the event will be sent.
     @objc
-    open func emitWithAck(_ event: String, with items: [Any]) -> OnAckCallback {
+    public func emitWithAck(_ event: String, with items: [Any]) -> OnAckCallback {
         return socket.createOnAck([event] + items, binary: false)
     }
 }
