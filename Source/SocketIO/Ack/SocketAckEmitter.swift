@@ -29,8 +29,20 @@ import Foundation
 ///
 /// **NOTE**: You should not store this beyond the life of the event handler.
 public final class SocketAckEmitter : NSObject {
-    let socket: SocketIOClient
-    let ackNum: Int
+    private unowned let socket: SocketIOClient
+    private let ackNum: Int
+
+    /// A view into this emitter where emits do not check for binary data.
+    ///
+    /// Usage:
+    ///
+    /// ```swift
+    /// ack.rawEmitView.with(myObject)
+    /// ```
+    ///
+    /// **NOTE**: It is not safe to hold on to this view beyond the life of the socket.
+    @objc
+    public private(set) lazy var rawEmitView = SocketRawAckView(socket: socket, ackNum: ackNum)
 
     // MARK: Properties
 

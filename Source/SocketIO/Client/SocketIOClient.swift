@@ -310,9 +310,13 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     /// - parameter ack: The ack number.
     /// - parameter with: The data for this ack.
     open func emitAck(_ ack: Int, with items: [Any]) {
+        emitAck(ack, with: items, binary: true)
+    }
+
+    func emitAck(_ ack: Int, with items: [Any], binary: Bool) {
         guard status == .connected else { return }
 
-        let packet = SocketPacket.packetFromEmit(items, id: ack, nsp: nsp, ack: true, checkForBinary: true)
+        let packet = SocketPacket.packetFromEmit(items, id: ack, nsp: nsp, ack: true, checkForBinary: binary)
         let str = packet.packetString
 
         DefaultSocketLogger.Logger.log("Emitting Ack: \(str)", type: logType)
