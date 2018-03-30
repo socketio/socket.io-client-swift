@@ -11,7 +11,7 @@ import Foundation
 /// ```swift
 /// socket.rawEmitView.emit("myEvent", myObject)
 /// ```
-public final class SocketBinaryView : NSObject {
+public final class SocketRawView: NSObject {
     private unowned let socket: SocketIOClient
 
     init(socket: SocketIOClient) {

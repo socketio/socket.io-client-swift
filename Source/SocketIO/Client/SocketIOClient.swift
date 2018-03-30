@@ -77,7 +77,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     ///
     /// **NOTE**: It is not safe to hold on to this view beyond the life of the socket.
     @objc
-    public private(set) lazy var rawEmitView = SocketBinaryView(socket: self)
+    public private(set) lazy var rawEmitView = SocketRawView(socket: self)
 
     /// The status of this client.
     @objc

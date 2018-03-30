@@ -52,7 +52,7 @@ public protocol SocketIOClientSpec : class {
     /// ```
     ///
     /// **NOTE**: It is not safe to hold on to this view beyond the life of the socket.
-    var rawEmitView: SocketBinaryView { get }
+    var rawEmitView: SocketRawView { get }
 
     /// The status of this client.
     var status: SocketIOStatus { get }
