@@ -148,7 +148,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
         }
     }
 
-    private func createOnAck(_ items: [Any]) -> OnAckCallback {
+    func createOnAck(_ items: [Any], binary: Bool = true) -> OnAckCallback {
         currentAck += 1
 
         return OnAckCallback(ackNumber: currentAck, items: items, socket: self)
@@ -277,13 +277,13 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
         return createOnAck([event] + items)
     }
 
-    func emit(_ data: [Any], ack: Int? = nil) {
+    func emit(_ data: [Any], ack: Int? = nil, binary: Bool = true) {
         guard status == .connected else {
             handleClientEvent(.error, data: ["Tried emitting when not connected"])
             return
         }
 
-        let packet = SocketPacket.packetFromEmit(data, id: ack ?? -1, nsp: nsp, ack: false)
+        let packet = SocketPacket.packetFromEmit(data, id: ack ?? -1, nsp: nsp, ack: false, checkForBinary: binary)
         let str = packet.packetString
 
         DefaultSocketLogger.Logger.log("Emitting: \(str)", type: logType)
@@ -300,7 +300,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     open func emitAck(_ ack: Int, with items: [Any]) {
         guard status == .connected else { return }
 
-        let packet = SocketPacket.packetFromEmit(items, id: ack, nsp: nsp, ack: true)
+        let packet = SocketPacket.packetFromEmit(items, id: ack, nsp: nsp, ack: true, checkForBinary: true)
         let str = packet.packetString
 
         DefaultSocketLogger.Logger.log("Emitting Ack: \(str)", type: logType)

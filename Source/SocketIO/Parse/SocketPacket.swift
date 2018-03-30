@@ -200,11 +200,15 @@ extension SocketPacket {
         }
     }
 
-    static func packetFromEmit(_ items: [Any], id: Int, nsp: String, ack: Bool) -> SocketPacket {
-        let (parsedData, binary) = deconstructData(items)
+    static func packetFromEmit(_ items: [Any], id: Int, nsp: String, ack: Bool, checkForBinary: Bool = true) -> SocketPacket {
+        if checkForBinary {
+            let (parsedData, binary) = deconstructData(items)
 
-        return SocketPacket(type: findType(binary.count, ack: ack), data: parsedData, id: id, nsp: nsp,
-                            binary: binary)
+            return SocketPacket(type: findType(binary.count, ack: ack), data: parsedData, id: id, nsp: nsp,
+                                binary: binary)
+        } else {
+            return SocketPacket(type: findType(0, ack: ack), data: items, id: id, nsp: nsp)
+        }
     }
 }
 

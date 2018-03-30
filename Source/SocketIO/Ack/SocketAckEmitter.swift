@@ -91,13 +91,16 @@ public final class SocketAckEmitter : NSObject {
 /// ```
 public final class OnAckCallback : NSObject {
     private let ackNumber: Int
+    private let binary: Bool
     private let items: [Any]
+
     private weak var socket: SocketIOClient?
 
-    init(ackNumber: Int, items: [Any], socket: SocketIOClient) {
+    init(ackNumber: Int, items: [Any], socket: SocketIOClient, binary: Bool = true) {
         self.ackNumber = ackNumber
         self.items = items
         self.socket = socket
+        self.binary = binary
     }
 
     deinit {
@@ -116,7 +119,7 @@ public final class OnAckCallback : NSObject {
         guard let socket = self.socket, ackNumber != -1 else { return }
 
         socket.ackHandlers.addAck(ackNumber, callback: callback)
-        socket.emit(items, ack: ackNumber)
+        socket.emit(items, ack: ackNumber, binary: binary)
 
         guard seconds != 0 else { return }
 
