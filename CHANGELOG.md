@@ -1,3 +1,8 @@
+# v13.2.0
+
+- Add ability to bypass Data inspection in emits. [#992]((https://github.com/socketio/socket.io-client-swift/issues/992))
+- Allow `SocketEngine` to be subclassed
+
 # v13.1.3
 
 - Fix setting reconnectAttempts [#989]((https://github.com/socketio/socket.io-client-swift/issues/989))
