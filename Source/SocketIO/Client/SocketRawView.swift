@@ -150,7 +150,7 @@ public final class SocketRawAckView : NSObject {
         guard ackNum != -1 else { return }
 
         do {
-            socket.emitAck(ackNum, with: try items.map({ try $0.socketRepresentation() }), binary: false)
+            socket.emit(try items.map({ try $0.socketRepresentation() }), ack: ackNum, binary: false, isAck: true)
         } catch let err {
             socket.handleClientEvent(.error, data: [ackNum, items, err])
         }
@@ -163,6 +163,6 @@ public final class SocketRawAckView : NSObject {
     public func with(_ items: [Any]) {
         guard ackNum != -1 else { return }
 
-        socket.emitAck(ackNum, with: items, binary: false)
+        socket.emit(items, ack: ackNum, binary: false, isAck: true)
     }
 }
