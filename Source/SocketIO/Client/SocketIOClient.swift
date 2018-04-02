@@ -228,11 +228,6 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     /// - parameter items: The items to send with this event. Send an empty array to send no data.
     @objc
     open func emit(_ event: String, with items: [Any]) {
-        guard status == .connected else {
-            handleClientEvent(.error, data: ["Tried emitting \(event) when not connected"])
-            return
-        }
-
         emit([event] + items)
     }
 

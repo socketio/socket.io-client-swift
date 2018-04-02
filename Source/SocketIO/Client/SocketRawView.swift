@@ -62,11 +62,6 @@ public final class SocketRawView : NSObject {
     /// - parameter items: The items to send with this event. Send an empty array to send no data.
     @objc
     public func emit(_ event: String, with items: [Any]) {
-        guard socket.status == .connected else {
-            socket.handleClientEvent(.error, data: ["Tried emitting \(event) when not connected"])
-            return
-        }
-
         socket.emit([event] + items, binary: false)
     }
 
