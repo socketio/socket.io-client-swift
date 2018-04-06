@@ -77,6 +77,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
 
     let ackHandlers = SocketAckManager()
 
+    private let ackSemaphore = DispatchSemaphore(value: 1)
     private(set) var currentAck = -1
 
     private lazy var logType = "SocketIOClient{\(nsp)}"
@@ -147,11 +148,16 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
             handler?()
         }
     }
+    
+    private func nextAck() -> Int {
+        ackSemaphore.wait()
+        defer { ackSemaphore.signal() }
+        currentAck += 1
+        return currentAck
+    }
 
     private func createOnAck(_ items: [Any]) -> OnAckCallback {
-        currentAck += 1
-
-        return OnAckCallback(ackNumber: currentAck, items: items, socket: self)
+        return OnAckCallback(ackNumber: nextAck(), items: items, socket: self)
     }
 
     /// Called when the client connects to a namespace. If the client was created with a namespace upfront,
