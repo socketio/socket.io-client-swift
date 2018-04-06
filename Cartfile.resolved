@@ -1,0 +1,3 @@
+github "daltoniam/Starscream" "3.0.4"
+github "daltoniam/common-crypto-spm" "1.1.0"
+github "daltoniam/zlib-spm" "1.1.0"

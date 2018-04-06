@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>12to13  Reference</title>
+    <link rel="stylesheet" type="text/css" href="css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="css/highlight.css" />
+    <meta charset="utf-8">
+    <script src="js/jquery.min.js" defer></script>
+    <script src="js/jazzy.js" defer></script>
+    
+    <script src="js/lunr.min.js" defer></script>
+    <script src="js/typeahead.jquery.js" defer></script>
+    <script src="js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+
+
+    <a title="12to13  Reference"></a>
+
+    <header class="header">
+      <p class="header-col header-col--primary">
+        <a class="header-link" href="index.html">
+          SocketIO Docs
+        </a>
+         (100% documented)
+      </p>
+    
+      <p class="header-col--secondary">
+        <form role="search" action="search.json">
+          <input type="text" placeholder="Search documentation" data-typeahead>
+        </form>
+      </p>
+    
+    
+    </header>
+
+    <p class="breadcrumbs">
+      <a class="breadcrumb" href="index.html">SocketIO Reference</a>
+      <img class="carat" src="img/carat.png" />
+      12to13  Reference
+    </p>
+
+    <div class="content-wrapper">
+      <nav class="navigation">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Guides.html">Guides</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="12to13.html">12to13</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="faq.html">FAQ</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/OnAckCallback.html">OnAckCallback</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SSLSecurity.html">SSLSecurity</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SocketAckEmitter.html">SocketAckEmitter</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SocketAnyEvent.html">SocketAnyEvent</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SocketEngine.html">SocketEngine</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SocketIOClient.html">SocketIOClient</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SocketManager.html">SocketManager</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/SocketAckStatus.html">SocketAckStatus</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/SocketClientEvent.html">SocketClientEvent</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/SocketEnginePacketType.html">SocketEnginePacketType</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/SocketIOClientOption.html">SocketIOClientOption</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/SocketIOStatus.html">SocketIOStatus</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/SocketParsableError.html">SocketParsableError</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Protocols.html">Protocols</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/ConfigSettable.html">ConfigSettable</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketData.html">SocketData</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketDataBufferable.html">SocketDataBufferable</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketEngineClient.html">SocketEngineClient</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketEnginePollable.html">SocketEnginePollable</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketEngineSpec.html">SocketEngineSpec</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketEngineWebsocket.html">SocketEngineWebsocket</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketIOClientSpec.html">SocketIOClientSpec</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketLogger.html">SocketLogger</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketManagerSpec.html">SocketManagerSpec</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketParsable.html">SocketParsable</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/SocketEventHandler.html">SocketEventHandler</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/SocketIOClientConfiguration.html">SocketIOClientConfiguration</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/SocketPacket.html">SocketPacket</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/SocketPacket/PacketType.html">– PacketType</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Typealiases.html">Type Aliases</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Typealiases.html#/s:8SocketIO11AckCallbacka">AckCallback</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Typealiases.html#/s:8SocketIO14NormalCallbacka">NormalCallback</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+
+        <section class="section">
+          <div class="section-content">
+            
+            <h1 id='upgrading-from-v12' class='heading'>Upgrading from v12</h1>
+
+<p>This guide will help you navigate the changes that were introduced in v13.</p>
+<h2 id='what-are-the-big-changes' class='heading'>What are the big changes?</h2>
+
+<p>The biggest change is how to create and manage clients. Much like the native JS client and server,
+the swift client now only uses one engine per connection. Previously in order to use namespaces it was required
+to create multiple clients, and each client had its own engine.</p>
+
+<p>Some v12 code might&rsquo;ve looked like this:</p>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">defaultSocket</span> <span class="o">=</span> <span class="nf">SocketIOClient</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="n">myURL</span><span class="p">)</span>
+<span class="k">let</span> <span class="nv">namespaceSocket</span> <span class="o">=</span> <span class="nf">SocketIOClient</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="n">myURL</span><span class="p">,</span> <span class="nv">config</span><span class="p">:</span> <span class="p">[</span><span class="o">.</span><span class="nf">nsp</span><span class="p">(</span><span class="s">"/swift"</span><span class="p">)])</span>
+
+<span class="c1">// add handlers for sockets and connect</span>
+
+</code></pre>
+
+<p>In v12 this would have opened two connections to the socket.io.</p>
+
+<p>In v13 the same code would look like this:</p>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">manager</span> <span class="o">=</span> <span class="nf">SocketManager</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="n">myURL</span><span class="p">)</span>
+<span class="k">let</span> <span class="nv">defaultSocket</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">defaultSocket</span>
+<span class="k">let</span> <span class="nv">namespaceSocket</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="nf">socket</span><span class="p">(</span><span class="nv">forNamespace</span><span class="p">:</span> <span class="s">"/swift"</span><span class="p">)</span>
+
+<span class="c1">// add handlers for sockets and connect</span>
+</code></pre>
+
+<p>In v13 <code>defaultSocket</code> and <code>namespaceSocket</code> will share a single transport. This means one less connection to the server
+needs to be opened. </p>
+<h2 id='what-might-i-have-to-change' class='heading'>What might I have to change?</h2>
+
+<ul>
+<li><p>The most obvious thing you will need to change is that instead of creating <code><a href="Classes/SocketIOClient.html">SocketIOClient</a></code>s directly, you will create a
+<code><a href="Classes/SocketManager.html">SocketManager</a></code> and either use the <code>defaultSocket</code> property if you don&rsquo;t need namespaces, or call the 
+<code>socket(forNamespace:)</code> method on the manager.</p></li>
+<li><p><code><a href="Classes/SocketIOClient.html">SocketIOClient</a></code> is no longer a client to an engine. So if you were overriding the engine methods, these have been moved 
+to the manager. </p></li>
+<li><p>The library is now a single target. So you might have to change some of your Xcode project settings.</p></li>
+<li><p><code><a href="Classes/SocketIOClient.html">SocketIOClient</a></code>s no longer take a configuration, they are shared from the manager.</p></li>
+<li><p>The <code>joinNamespace()</code> and <code>leaveNamespace()</code> methods on <code><a href="Classes/SocketIOClient.html">SocketIOClient</a></code> no longer take any arguments, and in most cases
+no longer need to be called. Namespace joining/leaving can be managed by calling <code>connect()</code>/<code>disconnect()</code> on the socket
+associated with that namespace.</p></li>
+</ul>
+
+<hr>
+<h1 id='what-things-should-i-know' class='heading'>What things should I know?</h1>
+<h2 id='how-sockets-are-stored' class='heading'>How sockets are stored</h2>
+
+<p>You should know that <code><a href="Classes/SocketIOClient.html">SocketIOClient</a></code>s no longer need to be held around in properties, but the <code><a href="Classes/SocketManager.html">SocketManager</a></code> should.</p>
+
+<p>One of the most common mistakes people made is not maintaining a strong reference to the client.</p>
+<pre class="highlight swift"><code><span class="kd">class</span> <span class="nf">Manager</span> <span class="p">{</span>
+    <span class="kd">func</span> <span class="nf">addHandlers</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="nv">socket</span> <span class="o">=</span> <span class="nf">SocketIOClient</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="n">myURL</span><span class="p">,</span> <span class="nv">config</span><span class="p">:</span> <span class="p">[</span><span class="o">.</span><span class="nf">nsp</span><span class="p">(</span><span class="s">"/swift"</span><span class="p">)])</span>
+
+        <span class="c1">// Add handlers</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+
+<p>This would have resulted in the client being released and no handlers being called.</p>
+
+<p>A <em>correct</em> equivalent would be:</p>
+<pre class="highlight swift"><code><span class="kd">class</span> <span class="nf">Manager</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="nv">socketManager</span> <span class="o">=</span> <span class="nf">SocketManager</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="n">someURL</span><span class="p">)</span>
+
+    <span class="kd">func</span> <span class="nf">addHandlers</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="nv">socket</span> <span class="o">=</span> <span class="n">socketManager</span><span class="o">.</span><span class="nf">socket</span><span class="p">(</span><span class="nv">forNamespace</span><span class="p">:</span> <span class="s">"/swift"</span><span class="p">)</span>
+
+        <span class="c1">// Add handlers</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+
+<p>This code is fine because the <code><a href="Classes/SocketManager.html">SocketManager</a></code> will maintain a strong reference to the socket.</p>
+
+<p>It&rsquo;s also worth noting that subsequent calls to <code>socket(forNamespace:)</code> will return the <em>same</em> socket instance as the 
+first call. So you don&rsquo;t need to hold onto the socket directly just to access it again, just call <code>socket(forNamespace:)</code>
+on the manager to get it. <strong>This does mean that if you need multiple sockets on the same namespace, you will have to use
+multiple managers.</strong></p>
+<h2 id='what-to-call-connect-on' class='heading'>What to call connect on</h2>
+
+<p>Connect can either be called on the manager directly, or on one of the sockets made from it. In either case, if the manager
+was not already connected to the server, a connection will be made. Also in both cases the default socket (namespace <q>/</q>)
+will fire a <code>connect</code> event. </p>
+
+<p>The difference is that if <code>connect()</code> is just called on the manager, then any sockets for that manager that are not the default
+socket will not automatically connect. <code>connect()</code> will need to be called individually for each socket. However, if <code>connect()</code>
+is called on a client, then in addition to opening the connection if needed, the client will connect to the its namespace,
+and a <code>connect</code> event fired.</p>
+
+          </div>
+        </section>
+
+
+      </article>
+    </div>
+    <section class="footer">
+      <p>&copy; 2018 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2018-03-11)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+    </section>
+  </body>
+</div>
+</html>

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>SocketIO  Reference</title>
+    <link rel="stylesheet" type="text/css" href="css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="css/highlight.css" />
+    <meta charset="utf-8">
+    <script src="js/jquery.min.js" defer></script>
+    <script src="js/jazzy.js" defer></script>
+    
+    <script src="js/lunr.min.js" defer></script>
+    <script src="js/typeahead.jquery.js" defer></script>
+    <script src="js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+
+
+    <a title="SocketIO  Reference"></a>
+
+    <header class="header">
+      <p class="header-col header-col--primary">
+        <a class="header-link" href="index.html">
+          SocketIO Docs
+        </a>
+         (100% documented)
+      </p>
+    
+      <p class="header-col--secondary">
+        <form role="search" action="search.json">
+          <input type="text" placeholder="Search documentation" data-typeahead>
+        </form>
+      </p>
+    
+    
+    </header>
+
+    <p class="breadcrumbs">
+      <a class="breadcrumb" href="index.html">SocketIO Reference</a>
+      <img class="carat" src="img/carat.png" />
+      SocketIO  Reference
+    </p>
+
+    <div class="content-wrapper">
+      <nav class="navigation">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Guides.html">Guides</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="12to13.html">12to13</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="faq.html">FAQ</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/OnAckCallback.html">OnAckCallback</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SSLSecurity.html">SSLSecurity</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SocketAckEmitter.html">SocketAckEmitter</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SocketAnyEvent.html">SocketAnyEvent</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SocketEngine.html">SocketEngine</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SocketIOClient.html">SocketIOClient</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SocketManager.html">SocketManager</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/SocketAckStatus.html">SocketAckStatus</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/SocketClientEvent.html">SocketClientEvent</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/SocketEnginePacketType.html">SocketEnginePacketType</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/SocketIOClientOption.html">SocketIOClientOption</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/SocketIOStatus.html">SocketIOStatus</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/SocketParsableError.html">SocketParsableError</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Protocols.html">Protocols</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/ConfigSettable.html">ConfigSettable</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketData.html">SocketData</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketDataBufferable.html">SocketDataBufferable</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketEngineClient.html">SocketEngineClient</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketEnginePollable.html">SocketEnginePollable</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketEngineSpec.html">SocketEngineSpec</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketEngineWebsocket.html">SocketEngineWebsocket</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketIOClientSpec.html">SocketIOClientSpec</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketLogger.html">SocketLogger</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketManagerSpec.html">SocketManagerSpec</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketParsable.html">SocketParsable</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/SocketEventHandler.html">SocketEventHandler</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/SocketIOClientConfiguration.html">SocketIOClientConfiguration</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/SocketPacket.html">SocketPacket</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/SocketPacket/PacketType.html">– PacketType</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Typealiases.html">Type Aliases</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Typealiases.html#/s:8SocketIO11AckCallbacka">AckCallback</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Typealiases.html#/s:8SocketIO14NormalCallbacka">NormalCallback</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+
+        <section class="section">
+          <div class="section-content">
+            
+            <p><a href="https://travis-ci.org/socketio/socket.io-client-swift"><img src="https://travis-ci.org/socketio/socket.io-client-swift.svg?branch=master" alt="Build Status"></a></p>
+<h1 id='socket-io-client-swift' class='heading'>Socket.IO-Client-Swift</h1>
+
+<p>Socket.IO-client for iOS/OS X.</p>
+<h2 id='example' class='heading'>Example</h2>
+<pre class="highlight swift"><code><span class="kd">import</span> <span class="kt">SocketIO</span>
+
+<span class="k">let</span> <span class="nv">manager</span> <span class="o">=</span> <span class="nf">SocketManager</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="nf">URL</span><span class="p">(</span><span class="nv">string</span><span class="p">:</span> <span class="s">"http://localhost:8080"</span><span class="p">)</span><span class="o">!</span><span class="p">,</span> <span class="nv">config</span><span class="p">:</span> <span class="p">[</span><span class="o">.</span><span class="nf">log</span><span class="p">(</span><span class="kc">true</span><span class="p">),</span> <span class="o">.</span><span class="n">compress</span><span class="p">])</span>
+<span class="k">let</span> <span class="nv">socket</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">defaultSocket</span>
+
+<span class="n">socket</span><span class="o">.</span><span class="nf">on</span><span class="p">(</span><span class="nv">clientEvent</span><span class="p">:</span> <span class="o">.</span><span class="n">connect</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span><span class="p">,</span> <span class="n">ack</span> <span class="k">in</span>
+    <span class="nf">print</span><span class="p">(</span><span class="s">"socket connected"</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="n">socket</span><span class="o">.</span><span class="nf">on</span><span class="p">(</span><span class="s">"currentAmount"</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span><span class="p">,</span> <span class="n">ack</span> <span class="k">in</span>
+    <span class="k">guard</span> <span class="k">let</span> <span class="nv">cur</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">as?</span> <span class="kt">Double</span> <span class="nf">else</span> <span class="p">{</span> <span class="k">return</span> <span class="p">}</span>
+
+    <span class="n">socket</span><span class="o">.</span><span class="nf">emitWithAck</span><span class="p">(</span><span class="s">"canUpdate"</span><span class="p">,</span> <span class="n">cur</span><span class="p">)</span><span class="o">.</span><span class="nf">timingOut</span><span class="p">(</span><span class="nv">after</span><span class="p">:</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span> <span class="k">in</span>
+        <span class="n">socket</span><span class="o">.</span><span class="nf">emit</span><span class="p">(</span><span class="s">"update"</span><span class="p">,</span> <span class="p">[</span><span class="s">"amount"</span><span class="p">:</span> <span class="n">cur</span> <span class="o">+</span> <span class="mf">2.50</span><span class="p">])</span>
+    <span class="p">}</span>
+
+    <span class="n">ack</span><span class="o">.</span><span class="nf">with</span><span class="p">(</span><span class="s">"Got your currentAmount"</span><span class="p">,</span> <span class="s">"dude"</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="n">socket</span><span class="o">.</span><span class="nf">connect</span><span class="p">()</span>
+</code></pre>
+<h2 id='objective-c-example' class='heading'>Objective-C Example</h2>
+<pre class="highlight plaintext"><code>@import SocketIO;
+
+NSURL* url = [[NSURL alloc] initWithString:@"http://localhost:8080"];
+SocketManager* manager = [[SocketManager alloc] initWithSocketURL:url config:@{@"log": @YES, @"compress": @YES}];
+SocketIOClient* socket = manager.defaultSocket;
+
+[socket on:@"connect" callback:^(NSArray* data, SocketAckEmitter* ack) {
+    NSLog(@"socket connected");
+}];
+
+[socket on:@"currentAmount" callback:^(NSArray* data, SocketAckEmitter* ack) {
+    double cur = [[data objectAtIndex:0] floatValue];
+
+    [[socket emitWithAck:@"canUpdate" with:@[@(cur)]] timingOutAfter:0 callback:^(NSArray* data) {
+        [socket emit:@"update" with:@[@{@"amount": @(cur + 2.50)}]];
+    }];
+
+    [ack with:@[@"Got your currentAmount, ", @"dude"]];
+}];
+
+[socket connect];
+
+</code></pre>
+<h2 id='features' class='heading'>Features</h2>
+
+<ul>
+<li>Supports socket.io 2.0+ (For socket.io 1.0 use v9.x)</li>
+<li>Supports binary</li>
+<li>Supports Polling and WebSockets</li>
+<li>Supports TLS/SSL</li>
+<li>Can be used from Objective-C</li>
+</ul>
+<h2 id='faqs' class='heading'>FAQS</h2>
+
+<p>Checkout the <a href="https://nuclearace.github.io/Socket.IO-Client-Swift/faq.html">FAQs</a> for commonly asked questions.</p>
+
+<p>Checkout the <a href="https://nuclearace.github.io/Socket.IO-Client-Swift/12to13.html">12to13</a> guide for migrating to v13.</p>
+<h2 id='installation' class='heading'>Installation</h2>
+
+<p>Requires Swift 4/Xcode 9.x</p>
+
+<p>If you need Swift 2.3 use the <a href="https://github.com/socketio/socket.io-client-swift/releases/tag/swift2.3">swift2.3 tag</a> (Pre-Swift 4 support is no longer maintained)</p>
+
+<p>If you need Swift 3.x use v11.1.3.</p>
+<h3 id='swift-package-manager' class='heading'>Swift Package Manager</h3>
+
+<p>Add the project as a dependency to your Package.swift:</p>
+<pre class="highlight swift"><code><span class="c1">// swift-tools-version:4.0</span>
+
+<span class="kd">import</span> <span class="kt">PackageDescription</span>
+
+<span class="k">let</span> <span class="nv">package</span> <span class="o">=</span> <span class="nf">Package</span><span class="p">(</span>
+    <span class="nv">name</span><span class="p">:</span> <span class="s">"socket.io-test"</span><span class="p">,</span>
+    <span class="nv">products</span><span class="p">:</span> <span class="p">[</span>
+        <span class="o">.</span><span class="nf">executable</span><span class="p">(</span><span class="nv">name</span><span class="p">:</span> <span class="s">"socket.io-test"</span><span class="p">,</span> <span class="nv">targets</span><span class="p">:</span> <span class="p">[</span><span class="s">"YourTargetName"</span><span class="p">])</span>
+    <span class="p">],</span>
+    <span class="nv">dependencies</span><span class="p">:</span> <span class="p">[</span>
+        <span class="o">.</span><span class="nf">package</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="s">"https://github.com/socketio/socket.io-client-swift"</span><span class="p">,</span> <span class="o">.</span><span class="nf">upToNextMinor</span><span class="p">(</span><span class="nv">from</span><span class="p">:</span> <span class="s">"13.1.0"</span><span class="p">))</span>
+    <span class="p">],</span>
+    <span class="nv">targets</span><span class="p">:</span> <span class="p">[</span>
+        <span class="o">.</span><span class="nf">target</span><span class="p">(</span><span class="nv">name</span><span class="p">:</span> <span class="s">"YourTargetName"</span><span class="p">,</span> <span class="nv">dependencies</span><span class="p">:</span> <span class="p">[</span><span class="s">"SocketIO"</span><span class="p">],</span> <span class="nv">path</span><span class="p">:</span> <span class="s">"./Path/To/Your/Sources"</span><span class="p">)</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+</code></pre>
+
+<p>Then import <code>import SocketIO</code>.</p>
+<h3 id='carthage' class='heading'>Carthage</h3>
+
+<p>Add this line to your <code>Cartfile</code>:</p>
+<pre class="highlight plaintext"><code>github "socketio/socket.io-client-swift" ~&gt; 13.1.0
+</code></pre>
+
+<p>Run <code>carthage update --platform ios,macosx</code>.</p>
+
+<p>Add the <code>Starscream</code> and <code>SocketIO</code> frameworks to your projects and follow the usual Carthage process.</p>
+<h3 id='cocoapods-1-0-0-or-later' class='heading'>CocoaPods 1.0.0 or later</h3>
+
+<p>Create <code>Podfile</code> and add <code>pod &#39;Socket.IO-Client-Swift&#39;</code>:</p>
+<pre class="highlight ruby"><code><span class="n">use_frameworks!</span>
+
+<span class="n">target</span> <span class="s1">'YourApp'</span> <span class="k">do</span>
+    <span class="n">pod</span> <span class="s1">'Socket.IO-Client-Swift'</span><span class="p">,</span> <span class="s1">'~&gt; 13.1.0'</span>
+<span class="k">end</span>
+</code></pre>
+
+<p>Install pods:</p>
+<pre class="highlight plaintext"><code>$ pod install
+</code></pre>
+
+<p>Import the module:</p>
+
+<p>Swift:</p>
+<pre class="highlight swift"><code><span class="kd">import</span> <span class="kt">SocketIO</span>
+</code></pre>
+
+<p>Objective-C:</p>
+<pre class="highlight plaintext"><code>@import SocketIO;
+</code></pre>
+<h1 id='a-href-https-nuclearace-github-io-socket-io-client-swift-index-html-docs-a' class='heading'><a href="https://nuclearace.github.io/Socket.IO-Client-Swift/index.html">Docs</a></h1>
+
+<ul>
+<li><a href="https://nuclearace.github.io/Socket.IO-Client-Swift/Classes/SocketIOClient.html">Client</a></li>
+<li><a href="https://nuclearace.github.io/Socket.IO-Client-Swift/Classes/SocketManager.html">Manager</a></li>
+<li><a href="https://nuclearace.github.io/Socket.IO-Client-Swift/Classes/SocketEngine.html">Engine</a></li>
+<li><a href="https://nuclearace.github.io/Socket.IO-Client-Swift/Enums/SocketIOClientOption.html">Options</a></li>
+</ul>
+<h2 id='detailed-example' class='heading'>Detailed Example</h2>
+
+<p>A more detailed example can be found <a href="https://github.com/nuclearace/socket.io-client-swift-example">here</a></p>
+
+<p>An example using the Swift Package Manager can be found <a href="https://github.com/nuclearace/socket.io-client-swift-spm-example">here</a></p>
+<h2 id='license' class='heading'>License</h2>
+
+<p>MIT</p>
+
+          </div>
+        </section>
+
+
+      </article>
+    </div>
+    <section class="footer">
+      <p>&copy; 2018 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2018-03-11)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+    </section>
+  </body>
+</div>
+</html>

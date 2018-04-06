@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Protocols  Reference</title>
+    <link rel="stylesheet" type="text/css" href="css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="css/highlight.css" />
+    <meta charset="utf-8">
+    <script src="js/jquery.min.js" defer></script>
+    <script src="js/jazzy.js" defer></script>
+    
+    <script src="js/lunr.min.js" defer></script>
+    <script src="js/typeahead.jquery.js" defer></script>
+    <script src="js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+
+
+    <a title="Protocols  Reference"></a>
+
+    <header class="header">
+      <p class="header-col header-col--primary">
+        <a class="header-link" href="index.html">
+          SocketIO Docs
+        </a>
+         (100% documented)
+      </p>
+    
+      <p class="header-col--secondary">
+        <form role="search" action="search.json">
+          <input type="text" placeholder="Search documentation" data-typeahead>
+        </form>
+      </p>
+    
+    
+    </header>
+
+    <p class="breadcrumbs">
+      <a class="breadcrumb" href="index.html">SocketIO Reference</a>
+      <img class="carat" src="img/carat.png" />
+      Protocols  Reference
+    </p>
+
+    <div class="content-wrapper">
+      <nav class="navigation">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Guides.html">Guides</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="12to13.html">12to13</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="faq.html">FAQ</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/OnAckCallback.html">OnAckCallback</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SSLSecurity.html">SSLSecurity</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SocketAckEmitter.html">SocketAckEmitter</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SocketAnyEvent.html">SocketAnyEvent</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SocketEngine.html">SocketEngine</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SocketIOClient.html">SocketIOClient</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SocketManager.html">SocketManager</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/SocketAckStatus.html">SocketAckStatus</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/SocketClientEvent.html">SocketClientEvent</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/SocketEnginePacketType.html">SocketEnginePacketType</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/SocketIOClientOption.html">SocketIOClientOption</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/SocketIOStatus.html">SocketIOStatus</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/SocketParsableError.html">SocketParsableError</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Protocols.html">Protocols</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/ConfigSettable.html">ConfigSettable</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketData.html">SocketData</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketDataBufferable.html">SocketDataBufferable</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketEngineClient.html">SocketEngineClient</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketEnginePollable.html">SocketEnginePollable</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketEngineSpec.html">SocketEngineSpec</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketEngineWebsocket.html">SocketEngineWebsocket</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketIOClientSpec.html">SocketIOClientSpec</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketLogger.html">SocketLogger</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketManagerSpec.html">SocketManagerSpec</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SocketParsable.html">SocketParsable</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/SocketEventHandler.html">SocketEventHandler</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/SocketIOClientConfiguration.html">SocketIOClientConfiguration</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/SocketPacket.html">SocketPacket</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/SocketPacket/PacketType.html">– PacketType</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Typealiases.html">Type Aliases</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Typealiases.html#/s:8SocketIO11AckCallbacka">AckCallback</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Typealiases.html#/s:8SocketIO14NormalCallbacka">NormalCallback</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+
+        <section class="section">
+          <div class="section-content">
+            <h1>Protocols</h1>
+            <p>The following protocols are available globally.</p>
+
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-content">
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@SocketIO@objc(pl)SocketEngineSpec"></a>
+                    <a name="//apple_ref/swift/Protocol/SocketEngineSpec" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(pl)SocketEngineSpec">SocketEngineSpec</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Specifies a SocketEngine.</p>
+
+                        <a href="Protocols/SocketEngineSpec.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketEngineSpec</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@SocketIO@objc(pl)SocketEngineClient"></a>
+                    <a name="//apple_ref/swift/Protocol/SocketEngineClient" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(pl)SocketEngineClient">SocketEngineClient</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Declares that a type will be a delegate to an engine.</p>
+
+                        <a href="Protocols/SocketEngineClient.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketEngineClient</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8SocketIO0A14EnginePollableP"></a>
+                    <a name="//apple_ref/swift/Protocol/SocketEnginePollable" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A14EnginePollableP">SocketEnginePollable</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Protocol that is used to implement socket.io polling support</p>
+
+                        <a href="Protocols/SocketEnginePollable.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketEnginePollable</span> <span class="p">:</span> <span class="kt"><a href="Protocols/SocketEngineSpec.html">SocketEngineSpec</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8SocketIO0A15EngineWebsocketP"></a>
+                    <a name="//apple_ref/swift/Protocol/SocketEngineWebsocket" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A15EngineWebsocketP">SocketEngineWebsocket</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Protocol that is used to implement socket.io WebSocket support</p>
+
+                        <a href="Protocols/SocketEngineWebsocket.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketEngineWebsocket</span> <span class="p">:</span> <span class="kt"><a href="Protocols/SocketEngineSpec.html">SocketEngineSpec</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8SocketIO0A12IOClientSpecP"></a>
+                    <a name="//apple_ref/swift/Protocol/SocketIOClientSpec" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A12IOClientSpecP">SocketIOClientSpec</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Defines the interface for a SocketIOClient.</p>
+
+                        <a href="Protocols/SocketIOClientSpec.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketIOClientSpec</span> <span class="p">:</span> <span class="kd">class</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8SocketIO14ConfigSettableP"></a>
+                    <a name="//apple_ref/swift/Protocol/ConfigSettable" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO14ConfigSettableP">ConfigSettable</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Declares that a type can set configs from a <code><a href="Structs/SocketIOClientConfiguration.html">SocketIOClientConfiguration</a></code>.</p>
+
+                        <a href="Protocols/ConfigSettable.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">ConfigSettable</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8SocketIO0A4DataP"></a>
+                    <a name="//apple_ref/swift/Protocol/SocketData" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A4DataP">SocketData</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>A marking protocol that says a type can be represented in a socket.io packet.</p>
+
+<p>Example:</p>
+<pre class="highlight swift"><code><span class="kd">struct</span> <span class="kt">CustomData</span> <span class="p">:</span> <span class="nf">SocketData</span> <span class="p">{</span>
+   <span class="k">let</span> <span class="nv">name</span><span class="p">:</span> <span class="kt">String</span>
+   <span class="k">let</span> <span class="nv">age</span><span class="p">:</span> <span class="kt">Int</span>
+
+   <span class="kd">func</span> <span class="nf">socketRepresentation</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nf">SocketData</span> <span class="p">{</span>
+       <span class="k">return</span> <span class="p">[</span><span class="s">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s">"age"</span><span class="p">:</span> <span class="n">age</span><span class="p">]</span>
+   <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">socket</span><span class="o">.</span><span class="nf">emit</span><span class="p">(</span><span class="s">"myEvent"</span><span class="p">,</span> <span class="nf">CustomData</span><span class="p">(</span><span class="nv">name</span><span class="p">:</span> <span class="s">"Erik"</span><span class="p">,</span> <span class="nv">age</span><span class="p">:</span> <span class="mi">24</span><span class="p">))</span>
+</code></pre>
+
+                        <a href="Protocols/SocketData.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketData</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8SocketIO0A6LoggerP"></a>
+                    <a name="//apple_ref/swift/Protocol/SocketLogger" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A6LoggerP">SocketLogger</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Represents a class will log client events.</p>
+
+                        <a href="Protocols/SocketLogger.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketLogger</span> <span class="p">:</span> <span class="kd">class</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8SocketIO0A8ParsableP"></a>
+                    <a name="//apple_ref/swift/Protocol/SocketParsable" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A8ParsableP">SocketParsable</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Defines that a type will be able to parse socket.io-protocol messages.</p>
+
+                        <a href="Protocols/SocketParsable.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketParsable</span> <span class="p">:</span> <span class="kd">class</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8SocketIO0A14DataBufferableP"></a>
+                    <a name="//apple_ref/swift/Protocol/SocketDataBufferable" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A14DataBufferableP">SocketDataBufferable</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Says that a type will be able to buffer binary data before all data for an event has come in.</p>
+
+                        <a href="Protocols/SocketDataBufferable.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketDataBufferable</span> <span class="p">:</span> <span class="kd">class</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@SocketIO@objc(pl)SocketManagerSpec"></a>
+                    <a name="//apple_ref/swift/Protocol/SocketManagerSpec" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(pl)SocketManagerSpec">SocketManagerSpec</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>A manager for a socket.io connection.</p>
+
+<p>A <code>SocketManagerSpec</code> is responsible for multiplexing multiple namespaces through a single <code><a href="Protocols/SocketEngineSpec.html">SocketEngineSpec</a></code>.</p>
+
+<p>Example with <code><a href="Classes/SocketManager.html">SocketManager</a></code>:</p>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">manager</span> <span class="o">=</span> <span class="nf">SocketManager</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="nf">URL</span><span class="p">(</span><span class="nv">string</span><span class="p">:</span><span class="s">"http://localhost:8080/"</span><span class="p">)</span><span class="o">!</span><span class="p">)</span>
+<span class="k">let</span> <span class="nv">defaultNamespaceSocket</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">defaultSocket</span>
+<span class="k">let</span> <span class="nv">swiftSocket</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="nf">socket</span><span class="p">(</span><span class="nv">forNamespace</span><span class="p">:</span> <span class="s">"/swift"</span><span class="p">)</span>
+
+<span class="c1">// defaultNamespaceSocket and swiftSocket both share a single connection to the server</span>
+</code></pre>
+
+<p>Sockets created through the manager are retained by the manager. So at the very least, a single strong reference
+to the manager must be maintained to keep sockets alive.</p>
+
+<p>To disconnect a socket and remove it from the manager, either call <code><a href="Classes/SocketIOClient.html#/c:@M@SocketIO@objc(cs)SocketIOClient(im)disconnect">SocketIOClient.disconnect()</a></code> on the socket,
+or call one of the <code>disconnectSocket</code> methods on this class.</p>
+
+                        <a href="Protocols/SocketManagerSpec.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketManagerSpec</span> <span class="p">:</span> <span class="kd">class</span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketEngineClient.html">SocketEngineClient</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+      </article>
+    </div>
+    <section class="footer">
+      <p>&copy; 2018 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2018-03-11)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+    </section>
+  </body>
+</div>
+</html>

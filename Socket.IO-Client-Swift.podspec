@@ -1,12 +1,12 @@
 Pod::Spec.new do |s|
   s.name         = "Socket.IO-Client-Swift"
   s.module_name  = "SocketIO"
-  s.version      = "8.3.3"
+  s.version      = "13.1.3"
   s.summary      = "Socket.IO-client for iOS and OS X"
   s.description  = <<-DESC
                    Socket.IO-client for iOS and OS X.
                    Supports ws/wss/polling connections and binary.
-                   For socket.io 1.0+ and Swift.
+                   For socket.io 2.0+ and Swift.
                    DESC
   s.homepage     = "https://github.com/socketio/socket.io-client-swift"
   s.license      = { :type => 'MIT' }
@@ -14,9 +14,16 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '8.0'
   s.osx.deployment_target = '10.10'
   s.tvos.deployment_target = '9.0'
-  s.source       = { :git => "https://github.com/socketio/socket.io-client-swift.git", :tag => 'v8.3.3' }
-  s.source_files  = "Source/**/*.swift"
+  s.watchos.deployment_target = '2.0'
   s.requires_arc = true
-  s.pod_target_xcconfig = {'SWIFT_VERSION' => '3.1'}
-  # s.dependency 'Starscream', '~> 0.9' # currently this repo includes Starscream swift files
+  s.source = {
+    :git => "https://github.com/socketio/socket.io-client-swift.git",
+    :tag => 'v13.1.3',
+    :submodules => true
+  }
+  s.pod_target_xcconfig = {
+      'SWIFT_VERSION' => '4.0'
+  }
+  s.source_files  = "Source/SocketIO/**/*.swift", "Source/SocketIO/*.swift"
+  s.dependency "Starscream", "~> 3.0.2"
 end
