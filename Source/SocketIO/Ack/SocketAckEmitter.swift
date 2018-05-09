@@ -134,11 +134,15 @@ public final class OnAckCallback : NSObject {
         socket.emit(items, ack: ackNumber, binary: binary)
 
         guard seconds != 0 else { return }
+        
+        weak var weakSelf:OnAckCallback? = self
 
         socket.manager?.handleQueue.asyncAfter(deadline: DispatchTime.now() + seconds) {[weak socket] in
             guard let socket = socket else { return }
 
-            socket.ackHandlers.timeoutAck(self.ackNumber)
+            guard weakSelf != nil else {return}
+            
+            socket.ackHandlers.timeoutAck((weakSelf?.ackNumber)!)
         }
     }
 
