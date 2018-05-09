@@ -60,18 +60,27 @@ private struct SocketAck : Hashable {
 
 class SocketAckManager {
     private var acks = Set<SocketAck>(minimumCapacity: 1)
+    private let ackSemaphore = DispatchSemaphore(value: 1)
 
     func addAck(_ ack: Int, callback: @escaping AckCallback) {
+        ackSemaphore.wait()
+        defer { ackSemaphore.signal() }
         acks.insert(SocketAck(ack: ack, callback: callback))
     }
 
     /// Should be called on handle queue
     func executeAck(_ ack: Int, with items: [Any]) {
-        acks.remove(SocketAck(ack: ack))?.callback(items)
+        ackSemaphore.wait()
+        let ack = acks.remove(SocketAck(ack: ack))
+        ackSemaphore.signal()
+        ack?.callback(items)
     }
 
     /// Should be called on handle queue
     func timeoutAck(_ ack: Int) {
-       acks.remove(SocketAck(ack: ack))?.callback?([SocketAckStatus.noAck.rawValue])
+        ackSemaphore.wait()
+        let ack = acks.remove(SocketAck(ack: ack))
+        ackSemaphore.signal()
+        ack?.callback?([SocketAckStatus.noAck.rawValue])
     }
 }
