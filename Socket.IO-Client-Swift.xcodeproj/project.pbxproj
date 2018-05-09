@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1C6572803D7E252A77A86E5F /* SocketManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C65763817782DFAC67BE05C /* SocketManager.swift */; };
+		1C6573B22DC9423CDFC32F05 /* SocketRawView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C657533E849FC3E4342C602 /* SocketRawView.swift */; };
 		1C657FBB3F670261780FD72E /* SocketManagerSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C6574AF9687A213814753E4 /* SocketManagerSpec.swift */; };
 		1C686BE21F869AFD007D8627 /* SocketIOClientConfigurationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C686BD21F869AF1007D8627 /* SocketIOClientConfigurationTest.swift */; };
 		1C686BE31F869AFD007D8627 /* SocketEngineTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C686BD31F869AF1007D8627 /* SocketEngineTest.swift */; };
@@ -61,6 +62,7 @@
 
 /* Begin PBXFileReference section */
 		1C6574AF9687A213814753E4 /* SocketManagerSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketManagerSpec.swift; sourceTree = "<group>"; };
+		1C657533E849FC3E4342C602 /* SocketRawView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketRawView.swift; sourceTree = "<group>"; };
 		1C65763817782DFAC67BE05C /* SocketManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketManager.swift; sourceTree = "<group>"; };
 		1C686BD21F869AF1007D8627 /* SocketIOClientConfigurationTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketIOClientConfigurationTest.swift; sourceTree = "<group>"; };
 		1C686BD31F869AF1007D8627 /* SocketEngineTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketEngineTest.swift; sourceTree = "<group>"; };
@@ -300,6 +302,7 @@
 				DD52B078DB0A3C3D1BB507CD /* SocketIOClientOption.swift */,
 				DD52B1D9BC4AE46D38D827DE /* SocketIOStatus.swift */,
 				DD52B57FFEE8560CFFD793B3 /* SocketIOClientConfiguration.swift */,
+				1C657533E849FC3E4342C602 /* SocketRawView.swift */,
 			);
 			name = Client;
 			path = Source/SocketIO/Client;
@@ -480,6 +483,7 @@
 				DD52B9412F660F828B683422 /* SocketParsable.swift in Sources */,
 				1C6572803D7E252A77A86E5F /* SocketManager.swift in Sources */,
 				1C657FBB3F670261780FD72E /* SocketManagerSpec.swift in Sources */,
+				1C6573B22DC9423CDFC32F05 /* SocketRawView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

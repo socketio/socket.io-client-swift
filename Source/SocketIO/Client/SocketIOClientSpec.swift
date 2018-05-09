@@ -43,6 +43,17 @@ public protocol SocketIOClientSpec : class {
     /// **Must** start with a `/`.
     var nsp: String { get }
 
+    /// A view into this socket where emits do not check for binary data.
+    ///
+    /// Usage:
+    ///
+    /// ```swift
+    /// socket.rawEmitView.emit("myEvent", myObject)
+    /// ```
+    ///
+    /// **NOTE**: It is not safe to hold on to this view beyond the life of the socket.
+    var rawEmitView: SocketRawView { get }
+
     /// The status of this client.
     var status: SocketIOStatus { get }
 
