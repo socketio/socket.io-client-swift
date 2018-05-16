@@ -79,6 +79,12 @@
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/SocketManager.html">SocketManager</a>
               </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/SocketRawAckView.html">SocketRawAckView</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/SocketRawView.html">SocketRawView</a>
+              </li>
             </ul>
           </li>
           <li class="nav-group-name">
@@ -202,9 +208,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8SocketIO0A12IOClientSpecP10anyHandleryAA0A8AnyEventCcSgv"></a>
+                    <a name="/s:8SocketIO0A12IOClientSpecP10anyHandleryAA0A8AnyEventCcSgvp"></a>
                     <a name="//apple_ref/swift/Property/anyHandler" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A12IOClientSpecP10anyHandleryAA0A8AnyEventCcSgv">anyHandler</a>
+                    <a class="token" href="#/s:8SocketIO0A12IOClientSpecP10anyHandleryAA0A8AnyEventCcSgvp">anyHandler</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -229,9 +235,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8SocketIO0A12IOClientSpecP8handlersSayAA0A12EventHandlerVGv"></a>
+                    <a name="/s:8SocketIO0A12IOClientSpecP8handlersSayAA0A12EventHandlerVGvp"></a>
                     <a name="//apple_ref/swift/Property/handlers" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A12IOClientSpecP8handlersSayAA0A12EventHandlerVGv">handlers</a>
+                    <a class="token" href="#/s:8SocketIO0A12IOClientSpecP8handlersSayAA0A12EventHandlerVGvp">handlers</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -256,9 +262,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8SocketIO0A12IOClientSpecP7managerAA0a7ManagerD0_pSgv"></a>
+                    <a name="/s:8SocketIO0A12IOClientSpecP7managerAA0a7ManagerD0_pSgvp"></a>
                     <a name="//apple_ref/swift/Property/manager" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A12IOClientSpecP7managerAA0a7ManagerD0_pSgv">manager</a>
+                    <a class="token" href="#/s:8SocketIO0A12IOClientSpecP7managerAA0a7ManagerD0_pSgvp">manager</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -283,9 +289,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8SocketIO0A12IOClientSpecP3nspSSv"></a>
+                    <a name="/s:8SocketIO0A12IOClientSpecP3nspSSvp"></a>
                     <a name="//apple_ref/swift/Property/nsp" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A12IOClientSpecP3nspSSv">nsp</a>
+                    <a class="token" href="#/s:8SocketIO0A12IOClientSpecP3nspSSvp">nsp</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -312,9 +318,42 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8SocketIO0A12IOClientSpecP6statusAA0A8IOStatusOv"></a>
+                    <a name="/s:8SocketIO0A12IOClientSpecP11rawEmitViewAA0a3RawG0Cvp"></a>
+                    <a name="//apple_ref/swift/Property/rawEmitView" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A12IOClientSpecP11rawEmitViewAA0a3RawG0Cvp">rawEmitView</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>A view into this socket where emits do not check for binary data.</p>
+
+<p>Usage:</p>
+<pre class="highlight swift"><code><span class="n">socket</span><span class="o">.</span><span class="n">rawEmitView</span><span class="o">.</span><span class="nf">emit</span><span class="p">(</span><span class="s">"myEvent"</span><span class="p">,</span> <span class="n">myObject</span><span class="p">)</span>
+</code></pre>
+
+<p><strong>NOTE</strong>: It is not safe to hold on to this view beyond the life of the socket.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">rawEmitView</span><span class="p">:</span> <span class="kt"><a href="../Classes/SocketRawView.html">SocketRawView</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8SocketIO0A12IOClientSpecP6statusAA0A8IOStatusOvp"></a>
                     <a name="//apple_ref/swift/Property/status" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A12IOClientSpecP6statusAA0A8IOStatusOv">status</a>
+                    <a class="token" href="#/s:8SocketIO0A12IOClientSpecP6statusAA0A8IOStatusOvp">status</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -614,9 +653,9 @@ then this is only called when the client connects to that namespace.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8SocketIO0A12IOClientSpecP4emitySS_SayAA0A4Data_pGdtF"></a>
+                    <a name="/s:8SocketIO0A12IOClientSpecP4emitySS_AA0A4Data_pdtF"></a>
                     <a name="//apple_ref/swift/Method/emit(_:_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A12IOClientSpecP4emitySS_SayAA0A4Data_pGdtF">emit(_:_:)</a>
+                    <a class="token" href="#/s:8SocketIO0A12IOClientSpecP4emitySS_AA0A4Data_pdtF">emit(_:_:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -733,9 +772,9 @@ will be emitted. The structure of the error data is <code>[eventName, items, the
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8SocketIO0A12IOClientSpecP11emitWithAckAA02OnG8CallbackCSS_SayAA0A4Data_pGdtF"></a>
+                    <a name="/s:8SocketIO0A12IOClientSpecP11emitWithAckAA02OnG8CallbackCSS_AA0A4Data_pdtF"></a>
                     <a name="//apple_ref/swift/Method/emitWithAck(_:_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A12IOClientSpecP11emitWithAckAA02OnG8CallbackCSS_SayAA0A4Data_pGdtF">emitWithAck(_:_:)</a>
+                    <a class="token" href="#/s:8SocketIO0A12IOClientSpecP11emitWithAckAA02OnG8CallbackCSS_AA0A4Data_pdtF">emitWithAck(_:_:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1089,7 +1128,7 @@ socket.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Joins <code><a href="../Protocols/SocketIOClientSpec.html#/s:8SocketIO0A12IOClientSpecP3nspSSv">nsp</a></code>.</p>
+                        <p>Joins <code><a href="../Protocols/SocketIOClientSpec.html#/s:8SocketIO0A12IOClientSpecP3nspSSvp">nsp</a></code>.</p>
 
                       </div>
                       <div class="declaration">
@@ -1614,7 +1653,7 @@ Called when the manager detects a broken connection, or when a manual reconnect 
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2018 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2018-03-11)</p>
+      <p>&copy; 2018 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2018-05-16)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>

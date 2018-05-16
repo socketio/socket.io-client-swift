@@ -79,6 +79,12 @@
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/SocketManager.html">SocketManager</a>
               </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/SocketRawAckView.html">SocketRawAckView</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/SocketRawView.html">SocketRawView</a>
+              </li>
             </ul>
           </li>
           <li class="nav-group-name">
@@ -193,6 +199,43 @@
         <section class="section">
           <div class="section-content">
             <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@SocketIO@objc(cs)SocketAckEmitter(py)rawEmitView"></a>
+                    <a name="//apple_ref/swift/Property/rawEmitView" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketAckEmitter(py)rawEmitView">rawEmitView</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>A view into this emitter where emits do not check for binary data.</p>
+
+<p>Usage:</p>
+<pre class="highlight swift"><code><span class="n">ack</span><span class="o">.</span><span class="n">rawEmitView</span><span class="o">.</span><span class="nf">with</span><span class="p">(</span><span class="n">myObject</span><span class="p">)</span>
+</code></pre>
+
+<p><strong>NOTE</strong>: It is not safe to hold on to this view beyond the life of the socket.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="kd">lazy</span> <span class="k">var</span> <span class="nv">rawEmitView</span> <span class="o">=</span> <span class="nf">SocketRawAckView</span><span class="p">(</span><span class="nv">socket</span><span class="p">:</span> <span class="n">socket</span><span class="p">,</span> <span class="nv">ackNum</span><span class="p">:</span> <span class="n">ackNum</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
               <div class="task-name-container">
                 <a name="/Properties"></a>
                 <a name="//apple_ref/swift/Section/Properties" class="dashAnchor"></a>
@@ -204,9 +247,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8SocketIO0A10AckEmitterC8expectedSbv"></a>
+                    <a name="/s:8SocketIO0A10AckEmitterC8expectedSbvp"></a>
                     <a name="//apple_ref/swift/Property/expected" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A10AckEmitterC8expectedSbv">expected</a>
+                    <a class="token" href="#/s:8SocketIO0A10AckEmitterC8expectedSbvp">expected</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -311,9 +354,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8SocketIO0A10AckEmitterC4withySayAA0A4Data_pGd_tF"></a>
+                    <a name="/s:8SocketIO0A10AckEmitterC4withyAA0A4Data_pd_tF"></a>
                     <a name="//apple_ref/swift/Method/with(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A10AckEmitterC4withySayAA0A4Data_pGd_tF">with(_:)</a>
+                    <a class="token" href="#/s:8SocketIO0A10AckEmitterC4withyAA0A4Data_pd_tF">with(_:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -411,7 +454,7 @@ will be emitted. The structure of the error data is <code>[ackNum, items, theErr
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2018 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2018-03-11)</p>
+      <p>&copy; 2018 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2018-05-16)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>

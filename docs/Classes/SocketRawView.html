@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>SocketEventHandler Structure Reference</title>
+    <title>SocketRawView Class Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset="utf-8">
@@ -14,9 +14,9 @@
   </head>
   <body>
 
-    <a name="//apple_ref/swift/Struct/SocketEventHandler" class="dashAnchor"></a>
+    <a name="//apple_ref/swift/Class/SocketRawView" class="dashAnchor"></a>
 
-    <a title="SocketEventHandler Structure Reference"></a>
+    <a title="SocketRawView Class Reference"></a>
 
     <header class="header">
       <p class="header-col header-col--primary">
@@ -38,7 +38,7 @@
     <p class="breadcrumbs">
       <a class="breadcrumb" href="../index.html">SocketIO Reference</a>
       <img class="carat" src="../img/carat.png" />
-      SocketEventHandler Structure Reference
+      SocketRawView Class Reference
     </p>
 
     <div class="content-wrapper">
@@ -182,14 +182,18 @@
 
         <section class="section">
           <div class="section-content">
-            <h1>SocketEventHandler</h1>
+            <h1>SocketRawView</h1>
               <div class="declaration">
                 <div class="language">
-                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">SocketEventHandler</span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">SocketRawView</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
 
                 </div>
               </div>
-            <p>A wrapper around a handler.</p>
+            <p>Class that gives a backwards compatible way to cause an emit not to recursively check for Data objects.</p>
+
+<p>Usage:</p>
+<pre class="highlight swift"><code><span class="n">socket</span><span class="o">.</span><span class="n">rawEmitView</span><span class="o">.</span><span class="nf">emit</span><span class="p">(</span><span class="s">"myEvent"</span><span class="p">,</span> <span class="n">myObject</span><span class="p">)</span>
+</code></pre>
 
           </div>
         </section>
@@ -197,20 +201,13 @@
         <section class="section">
           <div class="section-content">
             <div class="task-group">
-              <div class="task-name-container">
-                <a name="/Properties"></a>
-                <a name="//apple_ref/swift/Section/Properties" class="dashAnchor"></a>
-                <a href="#/Properties">
-                  <h3 class="section-name">Properties</h3>
-                </a>
-              </div>
               <ul class="item-container">
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8SocketIO0A12EventHandlerV5eventSSvp"></a>
-                    <a name="//apple_ref/swift/Property/event" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A12EventHandlerV5eventSSvp">event</a>
+                    <a name="/s:8SocketIO0A7RawViewC4emitySS_AA0A4Data_pdtF"></a>
+                    <a name="//apple_ref/swift/Method/emit(_:_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A7RawViewC4emitySS_AA0A4Data_pdtF">emit(_:_:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -218,106 +215,17 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The event for this handler.</p>
+                        <p>Send an event to the server, with optional data items.</p>
+
+<p>If an error occurs trying to transform <code>items</code> into their socket representation, a <code><a href="../Enums/SocketClientEvent.html#/s:8SocketIO0A11ClientEventO5errorA2CmF">SocketClientEvent.error</a></code>
+will be emitted. The structure of the error data is <code>[eventName, items, theError]</code></p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">event</span><span class="p">:</span> <span class="kt">String</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8SocketIO0A12EventHandlerV2id10Foundation4UUIDVvp"></a>
-                    <a name="//apple_ref/swift/Property/id" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A12EventHandlerV2id10Foundation4UUIDVvp">id</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>A unique identifier for this handler.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">id</span><span class="p">:</span> <span class="kt">UUID</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8SocketIO0A12EventHandlerV8callbackySayypG_AA0A10AckEmitterCtcvp"></a>
-                    <a name="//apple_ref/swift/Property/callback" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A12EventHandlerV8callbackySayypG_AA0A10AckEmitterCtcvp">callback</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>The actual handler function.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">callback</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8SocketIO14NormalCallbacka">NormalCallback</a></span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <div class="task-name-container">
-                <a name="/Methods"></a>
-                <a name="//apple_ref/swift/Section/Methods" class="dashAnchor"></a>
-                <a href="#/Methods">
-                  <h3 class="section-name">Methods</h3>
-                </a>
-              </div>
-              <ul class="item-container">
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8SocketIO0A12EventHandlerV15executeCallbackySayypG4with_Si0G3AckAA0A8IOClientC0gA0tF"></a>
-                    <a name="//apple_ref/swift/Method/executeCallback(with:withAck:withSocket:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A12EventHandlerV15executeCallbackySayypG4with_Si0G3AckAA0A8IOClientC0gA0tF">executeCallback(with:withAck:withSocket:)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Causes this handler to be executed.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">executeCallback</span><span class="p">(</span><span class="n">with</span> <span class="nv">items</span><span class="p">:</span> <span class="p">[</span><span class="kt">Any</span><span class="p">],</span> <span class="n">withAck</span> <span class="nv">ack</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="n">withSocket</span> <span class="nv">socket</span><span class="p">:</span> <span class="kt"><a href="../Classes/SocketIOClient.html">SocketIOClient</a></span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">emit</span><span class="p">(</span><span class="n">_</span> <span class="nv">event</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="n">_</span> <span class="nv">items</span><span class="p">:</span> <span class="kt"><a href="../Protocols/SocketData.html">SocketData</a></span><span class="o">...</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -328,41 +236,232 @@
                             <tr>
                               <td>
                                 <code>
-                                <em>with</em>
+                                <em>event</em>
                                 </code>
                               </td>
                               <td>
                                 <div>
-                                  <p>The data that this handler should be called with.</p>
+                                  <p>The event to send.</p>
                                 </div>
                               </td>
                             </tr>
                             <tr>
                               <td>
                                 <code>
-                                <em>withAck</em>
+                                <em>items</em>
                                 </code>
                               </td>
                               <td>
                                 <div>
-                                  <p>The ack number that this event expects. Pass -1 to say this event doesn&rsquo;t expect an ack.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>withSocket</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The socket that is calling this event.</p>
+                                  <p>The items to send with this event. May be left out.</p>
                                 </div>
                               </td>
                             </tr>
                           </tbody>
                         </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@SocketIO@objc(cs)SocketRawView(im)emit:with:"></a>
+                    <a name="//apple_ref/swift/Method/emit(_:with:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketRawView(im)emit:with:">emit(_:with:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Same as emit, but meant for Objective-C</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">emit</span><span class="p">(</span><span class="n">_</span> <span class="nv">event</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="n">with</span> <span class="nv">items</span><span class="p">:</span> <span class="p">[</span><span class="kt">Any</span><span class="p">])</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>event</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The event to send.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>items</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The items to send with this event. Send an empty array to send no data.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8SocketIO0A7RawViewC11emitWithAckAA02OnG8CallbackCSS_AA0A4Data_pdtF"></a>
+                    <a name="//apple_ref/swift/Method/emitWithAck(_:_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A7RawViewC11emitWithAckAA02OnG8CallbackCSS_AA0A4Data_pdtF">emitWithAck(_:_:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Sends a message to the server, requesting an ack.</p>
+
+<p><strong>NOTE</strong>: It is up to the server send an ack back, just calling this method does not mean the server will ack.
+Check that your server&rsquo;s api will ack the event being sent.</p>
+
+<p>If an error occurs trying to transform <code>items</code> into their socket representation, a <code><a href="../Enums/SocketClientEvent.html#/s:8SocketIO0A11ClientEventO5errorA2CmF">SocketClientEvent.error</a></code>
+will be emitted. The structure of the error data is <code>[eventName, items, theError]</code></p>
+
+<p>Example:</p>
+<pre class="highlight swift"><code><span class="n">socket</span><span class="o">.</span><span class="nf">emitWithAck</span><span class="p">(</span><span class="s">"myEvent"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="nf">timingOut</span><span class="p">(</span><span class="nv">after</span><span class="p">:</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span> <span class="k">in</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+</code></pre>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">emitWithAck</span><span class="p">(</span><span class="n">_</span> <span class="nv">event</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="n">_</span> <span class="nv">items</span><span class="p">:</span> <span class="kt"><a href="../Protocols/SocketData.html">SocketData</a></span><span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/OnAckCallback.html">OnAckCallback</a></span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>event</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The event to send.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>items</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The items to send with this event. May be left out.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>An <code><a href="../Classes/OnAckCallback.html">OnAckCallback</a></code>. You must call the <code>timingOut(after:)</code> method before the event will be sent.</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@SocketIO@objc(cs)SocketRawView(im)emitWithAck:with:"></a>
+                    <a name="//apple_ref/swift/Method/emitWithAck(_:with:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketRawView(im)emitWithAck:with:">emitWithAck(_:with:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Same as emitWithAck, but for Objective-C</p>
+
+<p><strong>NOTE</strong>: It is up to the server send an ack back, just calling this method does not mean the server will ack.
+Check that your server&rsquo;s api will ack the event being sent.</p>
+
+<p>Example:</p>
+<pre class="highlight swift"><code><span class="n">socket</span><span class="o">.</span><span class="nf">emitWithAck</span><span class="p">(</span><span class="s">"myEvent"</span><span class="p">,</span> <span class="nv">with</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="nf">timingOut</span><span class="p">(</span><span class="nv">after</span><span class="p">:</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span><span class="n">data</span> <span class="k">in</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+</code></pre>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">emitWithAck</span><span class="p">(</span><span class="n">_</span> <span class="nv">event</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="n">with</span> <span class="nv">items</span><span class="p">:</span> <span class="p">[</span><span class="kt">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/OnAckCallback.html">OnAckCallback</a></span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>event</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The event to send.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>items</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The items to send with this event. Use <code>[]</code> to send nothing.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>An <code><a href="../Classes/OnAckCallback.html">OnAckCallback</a></code>. You must call the <code>timingOut(after:)</code> method before the event will be sent.</p>
                       </div>
                     </section>
                   </div>

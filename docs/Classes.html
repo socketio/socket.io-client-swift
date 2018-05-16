@@ -78,6 +78,12 @@
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/SocketManager.html">SocketManager</a>
               </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SocketRawAckView.html">SocketRawAckView</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SocketRawView.html">SocketRawView</a>
+              </li>
             </ul>
           </li>
           <li class="nav-group-name">
@@ -207,8 +213,7 @@ See <code><a href="Protocols/SocketEnginePollable.html">SocketEnginePollable</a>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">SocketEngine</span> <span class="p">:</span> <span class="kt">NSObject</span><span class="p">,</span> <span class="kt">URLSessionDelegate</span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketEnginePollable.html">SocketEnginePollable</a></span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketEngineWebsocket.html">SocketEngineWebsocket</a></span><span class="p">,</span>
-                                  <span class="kt"><a href="Protocols/ConfigSettable.html">ConfigSettable</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kt">SocketEngine</span> <span class="p">:</span> <span class="kt">NSObject</span><span class="p">,</span> <span class="kt">URLSessionDelegate</span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketEnginePollable.html">SocketEnginePollable</a></span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketEngineWebsocket.html">SocketEngineWebsocket</a></span><span class="p">,</span> <span class="kt"><a href="Protocols/ConfigSettable.html">ConfigSettable</a></span></code></pre>
 
                         </div>
                       </div>
@@ -425,6 +430,8 @@ to the manager must be maintained to keep sockets alive.</p>
 <p>To disconnect a socket and remove it from the manager, either call <code><a href="Classes/SocketIOClient.html#/c:@M@SocketIO@objc(cs)SocketIOClient(im)disconnect">SocketIOClient.disconnect()</a></code> on the socket,
 or call one of the <code>disconnectSocket</code> methods on this class.</p>
 
+<p><strong>NOTE</strong>: The manager is not thread/queue safe, all interaction with the manager should be done on the <code>handleQueue</code></p>
+
                         <a href="Classes/SocketManager.html" class="slightly-smaller">See more</a>
                       </div>
                       <div class="declaration">
@@ -440,13 +447,81 @@ or call one of the <code>disconnectSocket</code> methods on this class.</p>
                 </li>
               </ul>
             </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@SocketIO@objc(cs)SocketRawView"></a>
+                    <a name="//apple_ref/swift/Class/SocketRawView" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketRawView">SocketRawView</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Class that gives a backwards compatible way to cause an emit not to recursively check for Data objects.</p>
+
+<p>Usage:</p>
+<pre class="highlight swift"><code><span class="n">socket</span><span class="o">.</span><span class="n">rawEmitView</span><span class="o">.</span><span class="nf">emit</span><span class="p">(</span><span class="s">"myEvent"</span><span class="p">,</span> <span class="n">myObject</span><span class="p">)</span>
+</code></pre>
+
+                        <a href="Classes/SocketRawView.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">SocketRawView</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@SocketIO@objc(cs)SocketRawAckView"></a>
+                    <a name="//apple_ref/swift/Class/SocketRawAckView" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketRawAckView">SocketRawAckView</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Class that gives a backwards compatible way to cause an emit not to recursively check for Data objects.</p>
+
+<p>Usage:</p>
+<pre class="highlight swift"><code><span class="n">ack</span><span class="o">.</span><span class="n">rawEmitView</span><span class="o">.</span><span class="nf">with</span><span class="p">(</span><span class="n">myObject</span><span class="p">)</span>
+</code></pre>
+
+                        <a href="Classes/SocketRawAckView.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">SocketRawAckView</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
           </div>
         </section>
 
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2018 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2018-03-11)</p>
+      <p>&copy; 2018 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2018-05-16)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
