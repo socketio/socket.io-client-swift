@@ -26,6 +26,7 @@
 - (void)testOnSyntax {
     [self.socket on:@"someCallback" callback:^(NSArray* data, SocketAckEmitter* ack) {
         [ack with:@[@1]];
+        [[ack rawEmitView] with:@[@"hello"]];
     }];
 }
 
@@ -64,6 +65,10 @@
 
 - (void)testEmitSyntax {
     [self.socket emit:@"testEmit" with:@[@YES]];
+}
+
+- (void)testRawEmitSyntax {
+    [[self.socket rawEmitView] emit:@"myEvent" with:@[@1]];
 }
 
 - (void)testEmitWithAckSyntax {

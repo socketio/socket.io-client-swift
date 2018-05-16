@@ -1,3 +1,13 @@
+# v13.2.0
+
+- Add ability to bypass Data inspection in emits. [#992]((https://github.com/socketio/socket.io-client-swift/issues/992))
+- Allow `SocketEngine` to be subclassed
+
+# v13.1.3
+
+- Fix setting reconnectAttempts [#989]((https://github.com/socketio/socket.io-client-swift/issues/989))
+
+
 # v13.1.2
 
 - Fix [#950](https://github.com/socketio/socket.io-client-swift/issues/950)
@@ -29,7 +39,7 @@ Checkout out the migration guide in Usage Docs for a more detailed guide on how 
 What's new:
 ---
 
-- Adds a new `SocketManager` class that multiplexes multiple namespaces through a single engine. 
+- Adds a new `SocketManager` class that multiplexes multiple namespaces through a single engine.
 - Adds `.sentPing` and `.gotPong` client events for tracking ping/pongs.
 - watchOS support.
 

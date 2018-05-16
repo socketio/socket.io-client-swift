@@ -55,6 +55,8 @@ public enum SocketIOClientOption : ClientOption {
 
     /// The queue that all interaction with the client should occur on. This is the queue that event handlers are
     /// called on.
+    ///
+    /// **This should be a serial queue! Concurrent queues are not supported and might cause crashes and races**.
     case handleQueue(DispatchQueue)
 
     /// If passed `true`, the client will log debug information. This should be turned off in production code.

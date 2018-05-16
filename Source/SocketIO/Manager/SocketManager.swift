@@ -43,6 +43,8 @@ import Foundation
 /// To disconnect a socket and remove it from the manager, either call `SocketIOClient.disconnect()` on the socket,
 /// or call one of the `disconnectSocket` methods on this class.
 ///
+/// **NOTE**: The manager is not thread/queue safe, all interaction with the manager should be done on the `handleQueue`
+///
 open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDataBufferable, ConfigSettable {
     private static let logType = "SocketManager"
 
@@ -476,6 +478,8 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
                 self.handleQueue = queue
             case let .reconnects(reconnects):
                 self.reconnects = reconnects
+            case let .reconnectAttempts(attempts):
+                self.reconnectAttempts = attempts
             case let .reconnectWait(wait):
                 reconnectWait = abs(wait)
             case let .log(log):
