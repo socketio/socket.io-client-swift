@@ -371,6 +371,9 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
         fastUpgrade = false
         probing = false
         flushProbeWait()
+        if postWait.count != 0 {
+            flushWaitingForPostToWebSocket()
+        }
     }
 
     private func flushProbeWait() {
@@ -381,10 +384,6 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
         }
 
         probeWait.removeAll(keepingCapacity: false)
-
-        if postWait.count != 0 {
-            flushWaitingForPostToWebSocket()
-        }
     }
 
     /// Causes any packets that were waiting for POSTing to be sent through the WebSocket. This happens because when

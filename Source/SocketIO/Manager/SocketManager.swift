@@ -169,6 +169,7 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
 
         engine?.engineQueue.sync {
             self.engine?.client = nil
+            self.engine?.disconnect(reason: "Adding new engine")
         }
 
         engine = SocketEngine(client: self, url: socketURL, config: config)
