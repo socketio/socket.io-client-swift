@@ -13,9 +13,18 @@
 
 - (void)testSettingConfig {
     NSURL* url = [[NSURL alloc] initWithString:@"http://localhost"];
-    self.manager = [[TestManager alloc] initWithSocketURL:url config:@{@"forceNew": @YES}];
+    NSDictionary* headers = @{@"My Header": @"Some Value"};
+
+    self.manager = [[TestManager alloc] initWithSocketURL:url config:@{
+            @"forceNew": @YES,
+            @"extraHeaders": headers
+    }];
+
+    [self.manager connect];
 
     XCTAssertTrue(self.manager.forceNew);
+    XCTAssertTrue([self.manager.engine.extraHeaders isEqualToDictionary:headers]);
+
 }
 
 - (void)testManagerProperties {

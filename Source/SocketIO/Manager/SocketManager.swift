@@ -169,6 +169,9 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
 
         engine?.engineQueue.sync {
             self.engine?.client = nil
+
+            // Close old engine so it will not leak because of URLSession if in polling mode
+            self.engine?.disconnect(reason: "Adding new engine")
         }
 
         engine = SocketEngine(client: self, url: socketURL, config: config)

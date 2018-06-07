@@ -214,11 +214,11 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     open func emit(_ event: String, _ items: SocketData...) {
         do {
             try emit(event, with: items.map({ try $0.socketRepresentation() }))
-        } catch let err {
+        } catch {
             DefaultSocketLogger.Logger.error("Error creating socketRepresentation for emit: \(event), \(items)",
                                              type: logType)
 
-            handleClientEvent(.error, data: [event, items, err])
+            handleClientEvent(.error, data: [event, items, error])
         }
     }
 
@@ -253,11 +253,11 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     open func emitWithAck(_ event: String, _ items: SocketData...) -> OnAckCallback {
         do {
             return emitWithAck(event, with: try items.map({ try $0.socketRepresentation() }))
-        } catch let err {
+        } catch {
             DefaultSocketLogger.Logger.error("Error creating socketRepresentation for emit: \(event), \(items)",
                                              type: logType)
 
-            handleClientEvent(.error, data: [event, items, err])
+            handleClientEvent(.error, data: [event, items, error])
 
             return OnAckCallback(ackNumber: -1, items: [], socket: self)
         }
