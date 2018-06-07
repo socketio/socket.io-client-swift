@@ -359,7 +359,6 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
     ///
     /// **You shouldn't call this directly**
     open func doFastUpgrade() {
-        
         if waitingForPoll {
             DefaultSocketLogger.Logger.error("Outstanding poll when switched to WebSockets," +
                 "we'll probably disconnect soon. You should report this.", type: SocketEngine.logType)
@@ -372,9 +371,10 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
         fastUpgrade = false
         probing = false
         flushProbeWait()
-        
+
         // Need to flush postWait to socket since it connected successfully
-        // (moved from flushProbeWait() since it is also called on connected failure)
+        // moved from flushProbeWait() since it is also called on connected failure, and we don't want to try and send
+        // packets through WebSockets when WebSockets has failed!
         if !postWait.isEmpty {
             flushWaitingForPostToWebSocket()
         }
