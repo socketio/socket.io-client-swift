@@ -1,3 +1,8 @@
+# v13.2.1
+
+- Fix packets getting lost when WebSocket upgrade fails. [#1033](https://github.com/socketio/socket.io-client-swift/issues/1033)
+- Fix bad unit tests. [#794](https://github.com/socketio/socket.io-client-swift/issues/794)
+
 # v13.2.0
 
 - Add ability to bypass Data inspection in emits. [#992]((https://github.com/socketio/socket.io-client-swift/issues/992))
