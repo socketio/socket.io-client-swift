@@ -214,12 +214,6 @@ extension SocketEnginePollable {
 
         postWait.append(String(type.rawValue) + message)
 
-        for data in datas {
-            if case let .right(bin) = createBinaryDataForSend(using: data) {
-                postWait.append(bin)
-            }
-        }
-
         if !waitingForPost {
             flushWaitingForPost()
         }
