@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0A6EF5211FD424D200AD5490 /* utf8.h in Headers */ = {isa = PBXBuildFile; fileRef = 0A6EF51F1FD424D100AD5490 /* utf8.h */; };
+		0A6EF5221FD424D200AD5490 /* utf8.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A6EF5201FD424D200AD5490 /* utf8.m */; };
 		1C6572803D7E252A77A86E5F /* SocketManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C65763817782DFAC67BE05C /* SocketManager.swift */; };
 		1C6573B22DC9423CDFC32F05 /* SocketRawView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C657533E849FC3E4342C602 /* SocketRawView.swift */; };
 		1C657FBB3F670261780FD72E /* SocketManagerSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C6574AF9687A213814753E4 /* SocketManagerSpec.swift */; };
@@ -61,6 +63,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0A6EF51F1FD424D100AD5490 /* utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utf8.h; sourceTree = "<group>"; };
+		0A6EF5201FD424D200AD5490 /* utf8.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = utf8.m; sourceTree = "<group>"; };
+		0A6EF5231FD4254900AD5490 /* SocketIO-Brdging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SocketIO-Brdging-Header.h"; sourceTree = "<group>"; };
 		1C6574AF9687A213814753E4 /* SocketManagerSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketManagerSpec.swift; sourceTree = "<group>"; };
 		1C657533E849FC3E4342C602 /* SocketRawView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketRawView.swift; sourceTree = "<group>"; };
 		1C65763817782DFAC67BE05C /* SocketManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketManager.swift; sourceTree = "<group>"; };
@@ -179,6 +184,9 @@
 		572EF20D1B51F12F00EEBB58 = {
 			isa = PBXGroup;
 			children = (
+				0A6EF5231FD4254900AD5490 /* SocketIO-Brdging-Header.h */,
+				0A6EF51F1FD424D100AD5490 /* utf8.h */,
+				0A6EF5201FD424D200AD5490 /* utf8.m */,
 				1C686BD11F869AF1007D8627 /* TestSocketIO */,
 				1C686BFD1F869E9D007D8627 /* TestSocketIOObjc */,
 				6CA08A9B1D615C190061FD2A /* Frameworks */,
@@ -340,6 +348,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				74BF53581F894326004972D8 /* SocketIO.h in Headers */,
+				0A6EF5211FD424D200AD5490 /* utf8.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -474,6 +483,7 @@
 				DD52BB9A3E42FF2DD6BE7C2F /* SocketIOClientSpec.swift in Sources */,
 				DD52B2AFE7D46039C7AE4D19 /* SocketIOClientOption.swift in Sources */,
 				DD52BE4D1E6BB752CD9614A6 /* SocketIOStatus.swift in Sources */,
+				0A6EF5221FD424D200AD5490 /* utf8.m in Sources */,
 				DD52BD065B74AC5B77BAEFAA /* SocketIOClientConfiguration.swift in Sources */,
 				DD52B048C71D724ABBD18C71 /* SocketTypes.swift in Sources */,
 				DD52BC3F1F880820E8FDFD0C /* SocketLogger.swift in Sources */,
@@ -717,6 +727,7 @@
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "$(inherited)";
 				SWIFT_INCLUDE_PATHS = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "SocketIO-Brdging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 4.0;
@@ -781,6 +792,7 @@
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "$(inherited)";
 				SWIFT_INCLUDE_PATHS = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "SocketIO-Brdging-Header.h";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2,3,4";
