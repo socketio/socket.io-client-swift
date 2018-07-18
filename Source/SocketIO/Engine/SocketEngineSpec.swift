@@ -156,7 +156,7 @@ extension SocketEngineSpec {
     }
 
     func addHeaders(to req: inout URLRequest, includingCookies additionalCookies: [HTTPCookie]? = nil) {
-        var cookiesToAdd = cookies ?? []
+        var cookiesToAdd: [HTTPCookie] = cookies ?? []
         cookiesToAdd += additionalCookies ?? []
         
         if !cookiesToAdd.isEmpty {
