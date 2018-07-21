@@ -77,7 +77,7 @@ public extension SocketParsable where Self: SocketManagerSpec & SocketDataBuffer
     internal func parseString(_ message: String) throws -> SocketPacket {
         var reader = SocketStringReader(message: message)
 
-		guard let type = Int(reader.read(count: 1)).flatMap({ SocketPacket.PacketType(rawValue: $0) }) else {
+        guard let type = Int(reader.read(count: 1)).flatMap({ SocketPacket.PacketType(rawValue: $0) }) else {
             throw SocketParsableError.invalidPacketType
         }
 
