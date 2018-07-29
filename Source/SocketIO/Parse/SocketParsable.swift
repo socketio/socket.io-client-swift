@@ -23,7 +23,7 @@
 import Foundation
 
 /// Defines that a type will be able to parse socket.io-protocol messages.
-public protocol SocketParsable : class {
+public protocol SocketParsable : AnyObject {
     // MARK: Methods
 
     /// Called when the engine has received some binary data that should be attached to a packet.
@@ -57,7 +57,7 @@ public enum SocketParsableError : Error {
 }
 
 /// Says that a type will be able to buffer binary data before all data for an event has come in.
-public protocol SocketDataBufferable : class {
+public protocol SocketDataBufferable : AnyObject {
     // MARK: Properties
 
     /// A list of packets that are waiting for binary data.
@@ -77,7 +77,7 @@ public extension SocketParsable where Self: SocketManagerSpec & SocketDataBuffer
     internal func parseString(_ message: String) throws -> SocketPacket {
         var reader = SocketStringReader(message: message)
 
-		guard let type = Int(reader.read(count: 1)).flatMap({ SocketPacket.PacketType(rawValue: $0) }) else {
+        guard let type = Int(reader.read(count: 1)).flatMap({ SocketPacket.PacketType(rawValue: $0) }) else {
             throw SocketParsableError.invalidPacketType
         }
 
@@ -88,7 +88,7 @@ public extension SocketParsable where Self: SocketManagerSpec & SocketDataBuffer
         var namespace = "/"
         var placeholders = -1
 
-        if type == .binaryEvent || type == .binaryAck {
+        if type.isBinary {
             if let holders = Int(reader.readUntilOccurence(of: "-")) {
                 placeholders = holders
             } else {

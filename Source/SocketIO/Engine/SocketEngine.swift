@@ -281,7 +281,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
     private func createWebSocketAndConnect() {
         var req = URLRequest(url: urlWebSocketWithSid)
 
-        addHeaders(to: &req)
+        addHeaders(to: &req, includingCookies: session?.configuration.httpCookieStorage?.cookies)
 
         ws = WebSocket(request: req)
         ws?.callbackQueue = engineQueue

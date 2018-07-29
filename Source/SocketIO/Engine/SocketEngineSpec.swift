@@ -155,11 +155,14 @@ extension SocketEngineSpec {
         return com.url!
     }
 
-    func addHeaders(to req: inout URLRequest) {
-        if let cookies = cookies {
-            req.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+    func addHeaders(to req: inout URLRequest, includingCookies additionalCookies: [HTTPCookie]? = nil) {
+        var cookiesToAdd: [HTTPCookie] = cookies ?? []
+        cookiesToAdd += additionalCookies ?? []
+        
+        if !cookiesToAdd.isEmpty {
+            req.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookiesToAdd)
         }
-
+        
         if let extraHeaders = extraHeaders {
             for (headerName, value) in extraHeaders {
                 req.setValue(value, forHTTPHeaderField: headerName)

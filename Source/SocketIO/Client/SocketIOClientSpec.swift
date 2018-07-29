@@ -26,7 +26,7 @@ import Dispatch
 import Foundation
 
 /// Defines the interface for a SocketIOClient.
-public protocol SocketIOClientSpec : class {
+public protocol SocketIOClientSpec : AnyObject {
     // MARK: Properties
 
     /// A handler that will be called on any event.

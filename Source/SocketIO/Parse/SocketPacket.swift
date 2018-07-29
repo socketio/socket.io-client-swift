@@ -116,7 +116,7 @@ public struct SocketPacket : CustomStringConvertible {
     private func createPacketString() -> String {
         let typeString = String(type.rawValue)
         // Binary count?
-        let binaryCountString = typeString + (type == .binaryEvent || type == .binaryAck ? "\(String(binary.count))-" : "")
+        let binaryCountString = typeString + (type.isBinary ? "\(String(binary.count))-" : "")
         // Namespace?
         let nspString = binaryCountString + (nsp != "/" ? "\(nsp)," : "")
         // Ack number?
@@ -181,6 +181,13 @@ public extension SocketPacket {
 
         /// Binary Ack: 6
         case binaryAck
+
+        // MARK: Properties
+
+        /// Whether or not this type is binary
+        public var isBinary: Bool {
+            return self == .binaryAck || self == .binaryEvent
+        }
     }
 }
 
