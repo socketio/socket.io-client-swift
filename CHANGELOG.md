@@ -1,3 +1,7 @@
+# v13.3.0
+
+- Copy cookies from polling to WebSockets ([#1057](https://github.com/socketio/socket.io-client-swift/issues/1057), [#1058](https://github.com/socketio/socket.io-client-swift/issues/1058))
+
 # v13.2.1
 
 - Fix packets getting lost when WebSocket upgrade fails. [#1033](https://github.com/socketio/socket.io-client-swift/issues/1033)

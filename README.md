@@ -86,7 +86,7 @@ let package = Package(
         .executable(name: "socket.io-test", targets: ["YourTargetName"])
     ],
     dependencies: [
-        .package(url: "https://github.com/socketio/socket.io-client-swift", .upToNextMinor(from: "13.2.0"))
+        .package(url: "https://github.com/socketio/socket.io-client-swift", .upToNextMinor(from: "13.3.0"))
     ],
     targets: [
         .target(name: "YourTargetName", dependencies: ["SocketIO"], path: "./Path/To/Your/Sources")
@@ -99,7 +99,7 @@ Then import `import SocketIO`.
 ### Carthage
 Add this line to your `Cartfile`:
 ```
-github "socketio/socket.io-client-swift" ~> 13.2.0
+github "socketio/socket.io-client-swift" ~> 13.3.0
 ```
 
 Run `carthage update --platform ios,macosx`.
@@ -113,7 +113,7 @@ Create `Podfile` and add `pod 'Socket.IO-Client-Swift'`:
 use_frameworks!
 
 target 'YourApp' do
-    pod 'Socket.IO-Client-Swift', '~> 13.2.0'
+    pod 'Socket.IO-Client-Swift', '~> 13.3.0'
 end
 ```
 
