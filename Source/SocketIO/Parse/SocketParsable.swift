@@ -88,7 +88,7 @@ public extension SocketParsable where Self: SocketManagerSpec & SocketDataBuffer
         var namespace = "/"
         var placeholders = -1
 
-        if type == .binaryEvent || type == .binaryAck {
+        if type.isBinary {
             if let holders = Int(reader.readUntilOccurence(of: "-")) {
                 placeholders = holders
             } else {
