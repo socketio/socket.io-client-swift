@@ -286,7 +286,10 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
 
     func emit(_ data: [Any], ack: Int? = nil, binary: Bool = true, isAck: Bool = false) {
         guard status == .connected else {
-            handleClientEvent(.error, data: ["Tried emitting when not connected"])
+// rsvp <
+            //handleClientEvent(.error, data: ["Tried emitting when not connected"])
+            handleClientEvent(.error, data: ["Tried emitting when not connected", data])
+// >
             return
         }
 
