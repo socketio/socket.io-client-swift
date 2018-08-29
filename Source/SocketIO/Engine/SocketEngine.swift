@@ -546,7 +546,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
         pongsMissed += 1
         write("", withType: .ping, withData: [])
 
-        engineQueue.asyncAfter(deadline: DispatchTime.now() + .milliseconds(pingInterval)) {[weak self, id = self.sid] in
+        engineQueue.asyncAfter(deadline: .now() + .milliseconds(pingInterval)) {[weak self, id = self.sid] in
             // Make sure not to ping old connections
             guard let this = self, this.sid == id else { return }
 
