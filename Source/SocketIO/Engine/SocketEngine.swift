@@ -662,7 +662,9 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
         connected = false
         polling = true
 
-        if let reason = error?.localizedDescription {
+        if let error = error as? WSError {
+            didError(reason: "\(error.message). code=\(error.code), type=\(error.type)")
+        } else if let reason = error?.localizedDescription {
             didError(reason: reason)
         } else {
             client?.engineDidClose(reason: "Socket Disconnected")
