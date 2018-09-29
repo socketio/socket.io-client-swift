@@ -67,6 +67,20 @@
     [self.socket emit:@"testEmit" with:@[@YES]];
 }
 
+- (void)testEmitWriteCompletionSyntax {
+    [self.socket emit:@"testEmit" with:@[@YES] completion:^{}];
+}
+
+- (void)testEmitWriteCompletion {
+    XCTestExpectation* expect = [self expectationWithDescription:@"Write completion should be called"];
+    
+    [self.socket emit:@"testEmit" with:@[@YES] completion:^{
+        [expect fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:0.3 handler:nil];
+}
+
 - (void)testRawEmitSyntax {
     [[self.socket rawEmitView] emit:@"myEvent" with:@[@1]];
 }
