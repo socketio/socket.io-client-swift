@@ -295,8 +295,14 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     }
 
     func emit(_ data: [Any], ack: Int? = nil, binary: Bool = true, isAck: Bool = false, completion: (() -> ())? = nil) {
+        // wrap the completion handler so it always runs async via handlerQueue
+        let wrappedCompletion = {[weak self, completion] in
+            guard let this = self else { return }
+            this.manager?.handleQueue.async { completion?() }
+        }
+        
         guard status == .connected else {
-            completion?();
+            wrappedCompletion();
             handleClientEvent(.error, data: ["Tried emitting when not connected"])
             return
         }
@@ -306,7 +312,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
 
         DefaultSocketLogger.Logger.log("Emitting: \(str), Ack: \(isAck)", type: logType)
 
-        manager?.engine?.send(str, withData: packet.binary, completion: completion)
+        manager?.engine?.send(str, withData: packet.binary, completion: completion != nil ? wrappedCompletion : nil)
     }
 
     /// Call when you wish to tell the server that you've received the event for `ack`.
