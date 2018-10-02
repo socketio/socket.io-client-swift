@@ -221,6 +221,18 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
             handleClientEvent(.error, data: [event, items, error])
         }
     }
+    
+    /// Send an event to the server, with optional data items and write completion handler.
+    ///
+    /// If an error occurs trying to transform `items` into their socket representation, a `SocketClientEvent.error`
+    /// will be emitted. The structure of the error data is `[eventName, items, theError]`
+    ///
+    /// - parameter event: The event to send.
+    /// - parameter items: The items to send with this event. May be left out.
+    /// - parameter completion: Callback called on transport write completion.
+    open func emit(_ event: String, _ items: SocketData..., completion: @escaping () -> ())  {
+        emit([event] + items, completion: completion)
+    }
 
     /// Same as emit, but meant for Objective-C
     ///

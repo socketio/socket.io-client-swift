@@ -27,6 +27,11 @@ class SocketSideEffectTest: XCTestCase {
         XCTAssertEqual(socket.currentAck, 1)
     }
 
+    func testEmitCompletionSyntax() {
+        socket.emit("test", completion: {})
+        socket.emit("test", "thing", completion: {})
+    }
+
     func testHandleAck() {
         let expect = expectation(description: "handled ack")
         socket.emitWithAck("test").timingOut(after: 0) {data in
