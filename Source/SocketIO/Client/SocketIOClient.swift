@@ -231,7 +231,14 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     /// - parameter items: The items to send with this event. May be left out.
     /// - parameter completion: Callback called on transport write completion.
     open func emit(_ event: String, _ items: SocketData..., completion: @escaping () -> ())  {
-        emit([event] + items, completion: completion)
+        do {
+            try emit(event, with: items.map({ try $0.socketRepresentation() }), completion: completion)
+        } catch {
+            DefaultSocketLogger.Logger.error("Error creating socketRepresentation for emit: \(event), \(items)",
+                                             type: logType)
+
+            handleClientEvent(.error, data: [event, items, error])
+        }
     }
 
     /// Same as emit, but meant for Objective-C
