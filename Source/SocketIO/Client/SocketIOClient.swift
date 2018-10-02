@@ -296,7 +296,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
 
     func emit(_ data: [Any], ack: Int? = nil, binary: Bool = true, isAck: Bool = false, completion: (() -> ())? = nil) {
         // wrap the completion handler so it always runs async via handlerQueue
-        let wrappedCompletion = {[weak self, completion] in
+        let wrappedCompletion = {[weak self] in
             guard let this = self else { return }
             this.manager?.handleQueue.async { completion?() }
         }
