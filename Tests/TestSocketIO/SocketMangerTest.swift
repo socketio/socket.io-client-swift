@@ -18,6 +18,16 @@ class SocketMangerTest : XCTestCase {
         XCTAssertEqual(manager.status, .notConnected)
     }
 
+    func testSettingConfig() {
+        let manager = SocketManager(socketURL: URL(string: "https://example.com/")!)
+
+        XCTAssertEqual(manager.config.first!, .secure(true))
+
+        manager.config = []
+
+        XCTAssertEqual(manager.config.first!, .secure(true))
+    }
+
     func testManagerCallsConnect() {
         setUpSockets()
 

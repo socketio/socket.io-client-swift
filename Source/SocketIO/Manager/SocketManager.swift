@@ -137,10 +137,6 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
         self._config = config
         self.socketURL = socketURL
 
-        if socketURL.absoluteString.hasPrefix("https://") {
-            self._config.insert(.secure(true))
-        }
-
         super.init()
 
         setConfigs(_config)
@@ -489,12 +485,17 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
                 DefaultSocketLogger.Logger.log = log
             case let .logger(logger):
                 DefaultSocketLogger.Logger = logger
-            default:
+            case _:
                 continue
             }
         }
 
         _config = config
+
+        if socketURL.absoluteString.hasPrefix("https://") {
+            _config.insert(.secure(true))
+        }
+
         _config.insert(.path("/socket.io/"), replacing: false)
 
         // If `ConfigSettable` & `SocketEngineSpec`, update its configs.

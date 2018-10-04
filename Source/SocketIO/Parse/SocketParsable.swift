@@ -109,14 +109,11 @@ public extension SocketParsable where Self: SocketManagerSpec & SocketDataBuffer
         if type == .error {
             reader.advance(by: -1)
         } else {
-            while reader.hasNext {
-                if let int = Int(reader.read(count: 1)) {
-                    idString += String(int)
-                } else {
-                    reader.advance(by: -2)
-                    break
-                }
+            while let int = Int(reader.read(count: 1)) {
+                idString += String(int)
             }
+
+            reader.advance(by: -2)
         }
 
         var dataArray = String(message.utf16[message.utf16.index(reader.currentIndex, offsetBy: 1)...])!

@@ -281,7 +281,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
     private func createWebSocketAndConnect() {
         var req = URLRequest(url: urlWebSocketWithSid)
 
-        addHeaders(to: &req, includingCookies: session?.configuration.httpCookieStorage?.cookies)
+        addHeaders(to: &req, includingCookies: session?.configuration.httpCookieStorage?.cookies(for: urlPollingWithSid))
 
         ws = WebSocket(request: req)
         ws?.callbackQueue = engineQueue
@@ -546,7 +546,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
         pongsMissed += 1
         write("", withType: .ping, withData: [])
 
-        engineQueue.asyncAfter(deadline: DispatchTime.now() + .milliseconds(pingInterval)) {[weak self, id = self.sid] in
+        engineQueue.asyncAfter(deadline: .now() + .milliseconds(pingInterval)) {[weak self, id = self.sid] in
             // Make sure not to ping old connections
             guard let this = self, this.sid == id else { return }
 
