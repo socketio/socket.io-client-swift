@@ -1,3 +1,7 @@
+# v13.3.1
+
+- Fixes various bugs. [#857](https://github.com/socketio/socket.io-client-swift/issues/857), [#1078](https://github.com/socketio/socket.io-client-swift/issues/1078)
+
 # v13.3.0
 
 - Copy cookies from polling to WebSockets ([#1057](https://github.com/socketio/socket.io-client-swift/issues/1057), [#1058](https://github.com/socketio/socket.io-client-swift/issues/1058))
