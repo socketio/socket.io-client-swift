@@ -286,7 +286,7 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
     /// - parameter items: The data to send with this event.
     open func emitAll(_ event: String, withItems items: [Any]) {
         forAll {socket in
-            socket.emit(event, with: items)
+            socket.emit(event, with: items, completion: {})
         }
     }
 

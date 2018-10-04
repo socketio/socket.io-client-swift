@@ -27,6 +27,11 @@ class SocketSideEffectTest: XCTestCase {
         XCTAssertEqual(socket.currentAck, 1)
     }
 
+    func testEmitCompletionSyntax() {
+        socket.emit("test", completion: {})
+        socket.emit("test", "thing", completion: {})
+    }
+
     func testHandleAck() {
         let expect = expectation(description: "handled ack")
         socket.emitWithAck("test").timingOut(after: 0) {data in
@@ -506,5 +511,5 @@ class TestEngine : SocketEngineSpec {
     func flushWaitingForPostToWebSocket() { }
     func parseEngineData(_ data: Data) { }
     func parseEngineMessage(_ message: String) { }
-    func write(_ msg: String, withType type: SocketEnginePacketType, withData data: [Data]) { }
+    func write(_ msg: String, withType type: SocketEnginePacketType, withData data: [Data], completion: @escaping () -> ()) { }
 }
