@@ -313,6 +313,12 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
             this.parseEngineMessage(message)
         }
 
+        ws?.onHttpResponseHeaders = {[weak self] headers in
+            guard let this = self else { return }
+
+            this.client?.engineOnWebsocketUpgrade(headers: headers)
+        }
+
         ws?.connect()
     }
 
@@ -666,7 +672,9 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
         connected = false
         polling = true
 
-        if let reason = error?.localizedDescription {
+        if let error = error as? WSError {
+            didError(reason: "\(error.message). code=\(error.code), type=\(error.type)")
+        } else if let reason = error?.localizedDescription {
             didError(reason: reason)
         } else {
             client?.engineDidClose(reason: "Socket Disconnected")

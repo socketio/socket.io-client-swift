@@ -377,6 +377,18 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
         }
     }
 
+    /// Called when when upgrading the http connection to a websocket connection.
+    ///
+    /// - parameter headers: The http headers.
+    open func engineDidWebsocketUpgrade(headers: [String: String]) {
+        handleQueue.async {
+            self._engineDidWebsocketUpgrade(headers: headers)
+        }
+    }
+     private func _engineDidWebsocketUpgrade(headers: [String: String]) {
+        emitAll(clientEvent: .httpResponseHeaders, data: [headers])
+    }
+
     /// Called when the engine has a message that must be parsed.
     ///
     /// - parameter msg: The message that needs parsing.

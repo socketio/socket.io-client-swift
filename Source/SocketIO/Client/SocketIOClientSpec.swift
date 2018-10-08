@@ -344,4 +344,16 @@ public enum SocketClientEvent : String {
     /// }
     /// ```
     case statusChange
+
+    /// Emitted when when upgrading the http connection to a websocket connection.
+    ///
+    /// Usage:
+    ///
+    /// ```swift
+    /// socket.on(clientEvent: .websocketUpgrade) {data, ack in
+    ///     let headers = (data as [Any])[0]
+    ///     // Some header logic
+    /// }
+    /// ```
+    case websocketUpgrade
 }
