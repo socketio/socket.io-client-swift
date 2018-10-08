@@ -386,7 +386,7 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
         }
     }
      private func _engineDidWebsocketUpgrade(headers: [String: String]) {
-        emitAll(clientEvent: .httpResponseHeaders, data: [headers])
+        emitAll(clientEvent: .websocketUpgrade, data: [headers])
     }
 
     /// Called when the engine has a message that must be parsed.
