@@ -60,7 +60,7 @@ import Foundation
     /// - parameter data: The data the engine received.
     func parseEngineBinaryData(_ data: Data)
 
-    /// Called when upgrading the http to websocket.
+    /// Called when when upgrading the http connection to a websocket connection.
     ///
     /// - parameter headers: The http headers.
     func engineDidReceiveHttpHeaders(headers: [String: String])
