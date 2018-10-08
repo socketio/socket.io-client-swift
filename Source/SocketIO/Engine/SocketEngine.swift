@@ -316,7 +316,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
         ws?.onHttpResponseHeaders = {[weak self] headers in
             guard let this = self else { return }
 
-            this.client?.engineOnWebsocketUpgrade(headers: headers)
+            this.client?.engineDidWebsocketUpgrade(headers: headers)
         }
 
         ws?.connect()
