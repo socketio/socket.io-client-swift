@@ -375,7 +375,7 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
         emitAll(clientEvent: .ping, data: [])
     }
 
-    /// Called when upgrading the http to websocket.
+    /// Called when when upgrading the http connection to a websocket connection.
     ///
     /// - parameter headers: The http headers.
     open func engineDidReceiveHttpHeaders(headers: [String: String]) {
