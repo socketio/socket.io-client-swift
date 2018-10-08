@@ -375,6 +375,19 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
         emitAll(clientEvent: .ping, data: [])
     }
 
+    /// Called when upgrading the http to websocket.
+    ///
+    /// - parameter headers: The http headers.
+    open func engineDidReceiveHttpHeaders(headers: [String: String]) {
+        handleQueue.async {
+            self._engineDidReceiveHttpHeaders(headers: headers)
+        }
+    }
+
+    private func _engineDidReceiveHttpHeaders(headers: [String: String]) {
+        emitAll(clientEvent: .httpResponseHeaders, data: [headers])
+    }
+
     private func forAll(do: (SocketIOClient) throws -> ()) rethrows {
         for (_, socket) in nsps {
             try `do`(socket)
