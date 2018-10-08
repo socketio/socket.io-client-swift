@@ -312,6 +312,12 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
 
             this.parseEngineMessage(message)
         }
+        
+        ws?.onHttpResponseHeaders = {[weak self] headers in
+            guard let this = self else { return }
+
+            this.client?.engineDidReceiveHttpHeaders(headers: headers)
+        }
 
         ws?.connect()
     }
