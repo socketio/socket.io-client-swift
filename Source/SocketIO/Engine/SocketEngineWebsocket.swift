@@ -38,7 +38,10 @@ public protocol SocketEngineWebsocket : SocketEngineSpec {
     /// - parameter withType: The type of message to send.
     /// - parameter withData: The data associated with this message.
     /// - parameter completion: Callback called on transport write completion.
-    func sendWebSocketMessage(_ str: String, withType type: SocketEnginePacketType, withData datas: [Data], completion: @escaping () -> ())
+    func sendWebSocketMessage(_ str: String,
+                              withType type: SocketEnginePacketType,
+                              withData datas: [Data],
+                              completion: @escaping () -> ())
 }
 
 // WebSocket methods
@@ -57,7 +60,11 @@ extension SocketEngineWebsocket {
     /// - parameter withType: The type of message to send.
     /// - parameter withData: The data associated with this message.
     /// - parameter completion: Callback called on transport write completion.
-    public func sendWebSocketMessage(_ str: String, withType type: SocketEnginePacketType, withData datas: [Data], completion: @escaping () -> ()) {
+    public func sendWebSocketMessage(_ str: String,
+                                     withType type: SocketEnginePacketType,
+                                     withData datas: [Data],
+                                     completion: @escaping () -> ()
+    ) {
         DefaultSocketLogger.Logger.log("Sending ws: \(str) as type: \(type.rawValue)", type: "SocketEngineWebSocket")
 
         ws?.write(string: "\(type.rawValue)\(str)")

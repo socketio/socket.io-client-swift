@@ -226,8 +226,6 @@ extension SocketEnginePollable {
 
         for data in datas {
             if case let .right(bin) = createBinaryDataForSend(using: data) {
-                // completion handler will be called on initial message write
-                //     TODO: call completion after last message in batch
                 postWait.append((bin, {}))
             }
         }

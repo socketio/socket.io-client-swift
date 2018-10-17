@@ -159,7 +159,7 @@ extension SocketEngineSpec {
     func addHeaders(to req: inout URLRequest, includingCookies additionalCookies: [HTTPCookie]? = nil) {
         var cookiesToAdd: [HTTPCookie] = cookies ?? []
         cookiesToAdd += additionalCookies ?? []
-        
+
         if !cookiesToAdd.isEmpty {
             req.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookiesToAdd)
         }
@@ -180,7 +180,7 @@ extension SocketEngineSpec {
     }
 
     /// Send an engine message (4)
-    func send(_ msg: String, withData datas: [Data], completion: (() -> ())? = nil) {
-        write(msg, withType: .message, withData: datas, completion: completion ?? {})
+    func send(_ msg: String, withData datas: [Data], completion: @escaping () -> () = {}) {
+        write(msg, withType: .message, withData: datas, completion: completion)
     }
 }
