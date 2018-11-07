@@ -346,7 +346,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
         if polling {
             disconnectPolling(reason: reason)
         } else {
-            sendWebSocketMessage("", withType: .close, withData: [], completion: {})
+            sendWebSocketMessage("", withType: .close, withData: [], completion: nil)
             closeOutEngine(reason: reason)
         }
     }
@@ -372,7 +372,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
 
         DefaultSocketLogger.Logger.log("Switching to WebSockets", type: SocketEngine.logType)
 
-        sendWebSocketMessage("", withType: .upgrade, withData: [], completion: {})
+        sendWebSocketMessage("", withType: .upgrade, withData: [], completion: nil)
         polling = false
         fastUpgrade = false
         probing = false
@@ -390,7 +390,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
         DefaultSocketLogger.Logger.log("Flushing probe wait", type: SocketEngine.logType)
 
         for waiter in probeWait {
-            write(waiter.msg, withType: waiter.type, withData: waiter.data, completion:waiter.completion)
+            write(waiter.msg, withType: waiter.type, withData: waiter.data, completion: waiter.completion)
         }
 
         probeWait.removeAll(keepingCapacity: false)
@@ -550,7 +550,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
         }
 
         pongsMissed += 1
-        write("", withType: .ping, withData: [], completion: {})
+        write("", withType: .ping, withData: [], completion: nil)
 
         engineQueue.asyncAfter(deadline: .now() + .milliseconds(pingInterval)) {[weak self, id = self.sid] in
             // Make sure not to ping old connections
@@ -606,7 +606,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
             DefaultSocketLogger.Logger.log("Upgrading transport to WebSockets", type: SocketEngine.logType)
 
             fastUpgrade = true
-            sendPollMessage("", withType: .noop, withData: [], completion: {})
+            sendPollMessage("", withType: .noop, withData: [], completion: nil)
             // After this point, we should not send anymore polling messages
         }
     }
@@ -617,10 +617,10 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
     /// - parameter type: The type of this message.
     /// - parameter data: Any data that this message has.
     /// - parameter completion: Callback called on transport write completion.
-    open func write(_ msg: String, withType type: SocketEnginePacketType, withData data: [Data], completion: @escaping () -> ()) {
+    open func write(_ msg: String, withType type: SocketEnginePacketType, withData data: [Data], completion: (() -> ())? = nil) {
         engineQueue.async {
             guard self.connected else {
-                completion()
+                completion?()
                 return
             }
             guard !self.probing else {

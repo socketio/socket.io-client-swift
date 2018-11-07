@@ -74,10 +74,10 @@ public typealias AckCallback = ([Any]) -> ()
 public typealias NormalCallback = ([Any], SocketAckEmitter) -> ()
 
 /// A typealias for a queued POST
-public typealias Post = (msg: String, completion: (() -> ()))
+public typealias Post = (msg: String, completion: (() -> ())?)
 
 typealias JSON = [String: Any]
-typealias Probe = (msg: String, type: SocketEnginePacketType, data: [Data], completion: (() -> ()))
+typealias Probe = (msg: String, type: SocketEnginePacketType, data: [Data], completion: (() -> ())?)
 typealias ProbeWaitQueue = [Probe]
 
 enum Either<E, V> {

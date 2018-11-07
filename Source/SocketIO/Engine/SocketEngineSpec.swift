@@ -138,7 +138,7 @@ import Starscream
     /// - parameter type: The type of this message.
     /// - parameter data: Any data that this message has.
     /// - parameter completion: Callback called on transport write completion.
-    func write(_ msg: String, withType type: SocketEnginePacketType, withData data: [Data], completion: @escaping () -> ())
+    func write(_ msg: String, withType type: SocketEnginePacketType, withData data: [Data], completion: (() -> ())?)
 }
 
 extension SocketEngineSpec {
@@ -180,7 +180,7 @@ extension SocketEngineSpec {
     }
 
     /// Send an engine message (4)
-    func send(_ msg: String, withData datas: [Data], completion: @escaping () -> () = {}) {
+    func send(_ msg: String, withData datas: [Data], completion: (() -> ())? = nil) {
         write(msg, withType: .message, withData: datas, completion: completion)
     }
 }

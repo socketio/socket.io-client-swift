@@ -198,7 +198,7 @@ public class TestSocket : SocketIOClient {
         super.didDisconnect(reason: reason)
     }
 
-    public override func emit(_ event: String, with items: [Any], completion: @escaping () -> ()) {
+    public override func emit(_ event: String, with items: [Any], completion: (() -> ())?) {
         expectations[ManagerExpectation.emitAllEventCalled]?.fulfill()
         expectations[ManagerExpectation.emitAllEventCalled] = nil
 
