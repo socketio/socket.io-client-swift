@@ -617,7 +617,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
     /// - parameter type: The type of this message.
     /// - parameter data: Any data that this message has.
     /// - parameter completion: Callback called on transport write completion.
-    open func write(_ msg: String, withType type: SocketEnginePacketType, withData data: [Data], completion: @escaping (() -> ())? = nil) {
+    open func write(_ msg: String, withType type: SocketEnginePacketType, withData data: [Data], completion: (() -> ())? = nil) {
         engineQueue.async {
             guard self.connected else {
                 completion?()

@@ -41,7 +41,7 @@ public protocol SocketEngineWebsocket : SocketEngineSpec {
     func sendWebSocketMessage(_ str: String,
                               withType type: SocketEnginePacketType,
                               withData datas: [Data],
-                              completion: @escaping (() -> ())?)
+                              completion: (() -> ())?)
 }
 
 // WebSocket methods
@@ -63,7 +63,7 @@ extension SocketEngineWebsocket {
     public func sendWebSocketMessage(_ str: String,
                                      withType type: SocketEnginePacketType,
                                      withData datas: [Data],
-                                     completion: @escaping (() -> ())?
+                                     completion: (() -> ())?
     ) {
         DefaultSocketLogger.Logger.log("Sending ws: \(str) as type: \(type.rawValue)", type: "SocketEngineWebSocket")
 
