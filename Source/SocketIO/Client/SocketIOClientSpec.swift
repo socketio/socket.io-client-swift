@@ -92,16 +92,7 @@ public protocol SocketIOClientSpec : AnyObject {
     /// Disconnects the socket.
     func disconnect()
 
-    /// Send an event to the server, with optional data items.
-    ///
-    /// If an error occurs trying to transform `items` into their socket representation, a `SocketClientEvent.error`
-    /// will be emitted. The structure of the error data is `[eventName, items, theError]`
-    ///
-    /// - parameter event: The event to send.
-    /// - parameter items: The items to send with this event. May be left out.
-    func emit(_ event: String, _ items: SocketData...)
-
-    /// Send an event to the server, with optional data items and write completion handler.
+    /// Send an event to the server, with optional data items and optional write completion handler.
     ///
     /// If an error occurs trying to transform `items` into their socket representation, a `SocketClientEvent.error`
     /// will be emitted. The structure of the error data is `[eventName, items, theError]`
