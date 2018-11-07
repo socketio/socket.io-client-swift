@@ -511,5 +511,5 @@ class TestEngine : SocketEngineSpec {
     func flushWaitingForPostToWebSocket() { }
     func parseEngineData(_ data: Data) { }
     func parseEngineMessage(_ message: String) { }
-    func write(_ msg: String, withType type: SocketEnginePacketType, withData data: [Data], completion: @escaping () -> ()) { }
+    func write(_ msg: String, withType type: SocketEnginePacketType, withData data: [Data], completion: @escaping (() -> ())?) { }
 }

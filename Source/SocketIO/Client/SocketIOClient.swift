@@ -230,7 +230,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     /// - parameter event: The event to send.
     /// - parameter items: The items to send with this event. May be left out.
     /// - parameter completion: Callback called on transport write completion.
-    open func emit(_ event: String, _ items: SocketData..., completion: @escaping () -> ())  {
+    open func emit(_ event: String, _ items: SocketData..., completion: @escaping (() -> ())? = nil)  {
         do {
             try emit(event, with: items.map({ try $0.socketRepresentation() }), completion: completion)
         } catch {
@@ -256,7 +256,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     /// - parameter items: The items to send with this event. Send an empty array to send no data.
     /// - parameter completion: Callback called on transport write completion.
     @objc
-    open func emit(_ event: String, with items: [Any], completion: @escaping () -> ()) {
+    open func emit(_ event: String, with items: [Any], completion: @escaping (() -> ())? = nil) {
         emit([event] + items, completion: completion)
     }
 
@@ -317,10 +317,10 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
               ack: Int? = nil,
               binary: Bool = true,
               isAck: Bool = false,
-              completion: @escaping () -> () = {}
+              completion: @escaping (() -> ())? = nil
     ) {
         // wrap the completion handler so it always runs async via handlerQueue
-        let wrappedCompletion = {[weak self] in
+        let wrappedCompletion: (() -> ())? = (completion == nil) ? nil : {[weak self] in
             guard let this = self else { return }
             this.manager?.handleQueue.async {
                 completion()
@@ -328,7 +328,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
         }
 
         guard status == .connected else {
-            wrappedCompletion()
+            wrappedCompletion?()
             handleClientEvent(.error, data: ["Tried emitting when not connected"])
             return
         }

@@ -109,7 +109,7 @@ public protocol SocketIOClientSpec : AnyObject {
     /// - parameter event: The event to send.
     /// - parameter items: The items to send with this event. May be left out.
     /// - parameter completion: Callback called on transport write completion.
-    func emit(_ event: String, _ items: SocketData..., completion: @escaping () -> ())
+    func emit(_ event: String, _ items: SocketData..., completion: @escaping (() -> ())? = nil)
 
     /// Call when you wish to tell the server that you've received the event for `ack`.
     ///

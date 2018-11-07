@@ -65,7 +65,7 @@ public protocol SocketEnginePollable : SocketEngineSpec {
     /// - parameter message: The message to send.
     /// - parameter withType: The type of message to send.
     /// - parameter withData: The data associated with this message.
-    func sendPollMessage(_ message: String, withType type: SocketEnginePacketType, withData datas: [Data], completion: @escaping () -> ())
+    func sendPollMessage(_ message: String, withType type: SocketEnginePacketType, withData datas: [Data], completion: @escaping (() -> ())?)
 
     /// Call to stop polling and invalidate the URLSession.
     func stopPolling()
@@ -75,7 +75,7 @@ public protocol SocketEnginePollable : SocketEngineSpec {
 extension SocketEnginePollable {
     func createRequestForPostWithPostWait() -> URLRequest {
         defer {
-            for packet in postWait { packet.completion() }
+            for packet in postWait { packet.completion?() }
             postWait.removeAll(keepingCapacity: true)
         }
 
@@ -219,7 +219,7 @@ extension SocketEnginePollable {
     /// - parameter withType: The type of message to send.
     /// - parameter withData: The data associated with this message.
     /// - parameter completion: Callback called on transport write completion.
-    public func sendPollMessage(_ message: String, withType type: SocketEnginePacketType, withData datas: [Data], completion: @escaping () -> ()) {
+    public func sendPollMessage(_ message: String, withType type: SocketEnginePacketType, withData datas: [Data], completion: @escaping (() -> ())? = nil) {
         DefaultSocketLogger.Logger.log("Sending poll: \(message) as type: \(type.rawValue)", type: "SocketEnginePolling")
 
         postWait.append((String(type.rawValue) + message, completion))
