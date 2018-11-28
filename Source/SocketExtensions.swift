@@ -31,7 +31,7 @@ enum JSONError : Error {
 
 extension Array {
     func toJSON() throws -> Data {
-        if #available(iOSApplicationExtension 11.0, *) {
+        if #available(iOS 11.0, OSX 10.13, tvOS 11.0, *) {
             return try JSONSerialization.data(withJSONObject: self, options: [.sortedKeys])
         } else {
             return try JSONSerialization.data(withJSONObject: self, options: JSONSerialization.WritingOptions(rawValue: 0))
