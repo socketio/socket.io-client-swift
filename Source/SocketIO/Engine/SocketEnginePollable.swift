@@ -34,7 +34,7 @@ public protocol SocketEnginePollable : SocketEngineSpec {
     /// A queue of engine.io messages waiting for POSTing
     ///
     /// **You should not touch this directly**
-    var postWait: [String] { get set }
+    var postWait: [Post] { get set }
 
     /// The URLSession that will be used for polling.
     var session: URLSession? { get }
@@ -65,7 +65,7 @@ public protocol SocketEnginePollable : SocketEngineSpec {
     /// - parameter message: The message to send.
     /// - parameter withType: The type of message to send.
     /// - parameter withData: The data associated with this message.
-    func sendPollMessage(_ message: String, withType type: SocketEnginePacketType, withData datas: [Data])
+    func sendPollMessage(_ message: String, withType type: SocketEnginePacketType, withData datas: [Data], completion: (() -> ())?)
 
     /// Call to stop polling and invalidate the URLSession.
     func stopPolling()
@@ -74,12 +74,15 @@ public protocol SocketEnginePollable : SocketEngineSpec {
 // Default polling methods
 extension SocketEnginePollable {
     func createRequestForPostWithPostWait() -> URLRequest {
-        defer { postWait.removeAll(keepingCapacity: true) }
+        defer {
+            for packet in postWait { packet.completion?() }
+            postWait.removeAll(keepingCapacity: true)
+        }
 
         var postStr = ""
 
         for packet in postWait {
-            postStr += "\(packet.utf16.count):\(packet)"
+            postStr += "\(packet.msg.utf16.count):\(packet.msg)"
         }
 
         DefaultSocketLogger.Logger.log("Created POST string: \(postStr)", type: "SocketEnginePolling")
@@ -215,14 +218,15 @@ extension SocketEnginePollable {
     /// - parameter message: The message to send.
     /// - parameter withType: The type of message to send.
     /// - parameter withData: The data associated with this message.
-    public func sendPollMessage(_ message: String, withType type: SocketEnginePacketType, withData datas: [Data]) {
+    /// - parameter completion: Callback called on transport write completion.
+    public func sendPollMessage(_ message: String, withType type: SocketEnginePacketType, withData datas: [Data], completion: (() -> ())? = nil) {
         DefaultSocketLogger.Logger.log("Sending poll: \(message) as type: \(type.rawValue)", type: "SocketEnginePolling")
 
-        postWait.append(String(type.rawValue) + message)
+        postWait.append((String(type.rawValue) + message, completion))
 
         for data in datas {
             if case let .right(bin) = createBinaryDataForSend(using: data) {
-                postWait.append(bin)
+                postWait.append((bin, {}))
             }
         }
 

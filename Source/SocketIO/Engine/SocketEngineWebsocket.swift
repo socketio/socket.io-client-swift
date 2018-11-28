@@ -37,14 +37,18 @@ public protocol SocketEngineWebsocket : SocketEngineSpec {
     /// - parameter message: The message to send.
     /// - parameter withType: The type of message to send.
     /// - parameter withData: The data associated with this message.
-    func sendWebSocketMessage(_ str: String, withType type: SocketEnginePacketType, withData datas: [Data])
+    /// - parameter completion: Callback called on transport write completion.
+    func sendWebSocketMessage(_ str: String,
+                              withType type: SocketEnginePacketType,
+                              withData datas: [Data],
+                              completion: (() -> ())?)
 }
 
 // WebSocket methods
 extension SocketEngineWebsocket {
     func probeWebSocket() {
         if ws?.isConnected ?? false {
-            sendWebSocketMessage("probe", withType: .ping, withData: [])
+            sendWebSocketMessage("probe", withType: .ping, withData: [], completion: nil)
         }
     }
 
@@ -55,14 +59,19 @@ extension SocketEngineWebsocket {
     /// - parameter message: The message to send.
     /// - parameter withType: The type of message to send.
     /// - parameter withData: The data associated with this message.
-    public func sendWebSocketMessage(_ str: String, withType type: SocketEnginePacketType, withData datas: [Data]) {
+    /// - parameter completion: Callback called on transport write completion.
+    public func sendWebSocketMessage(_ str: String,
+                                     withType type: SocketEnginePacketType,
+                                     withData datas: [Data],
+                                     completion: (() -> ())?
+    ) {
         DefaultSocketLogger.Logger.log("Sending ws: \(str) as type: \(type.rawValue)", type: "SocketEngineWebSocket")
 
         ws?.write(string: "\(type.rawValue)\(str)")
 
         for data in datas {
             if case let .left(bin) = createBinaryDataForSend(using: data) {
-                ws?.write(data: bin)
+                ws?.write(data: bin, completion: completion)
             }
         }
     }

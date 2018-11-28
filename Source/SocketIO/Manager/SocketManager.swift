@@ -286,7 +286,7 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
     /// - parameter items: The data to send with this event.
     open func emitAll(_ event: String, withItems items: [Any]) {
         forAll {socket in
-            socket.emit(event, with: items)
+            socket.emit(event, with: items, completion: nil)
         }
     }
 
@@ -375,6 +375,18 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
         for (_, socket) in nsps {
             try `do`(socket)
         }
+    }
+
+    /// Called when when upgrading the http connection to a websocket connection.
+    ///
+    /// - parameter headers: The http headers.
+    open func engineDidWebsocketUpgrade(headers: [String: String]) {
+        handleQueue.async {
+            self._engineDidWebsocketUpgrade(headers: headers)
+        }
+    }
+     private func _engineDidWebsocketUpgrade(headers: [String: String]) {
+        emitAll(clientEvent: .websocketUpgrade, data: [headers])
     }
 
     /// Called when the engine has a message that must be parsed.
