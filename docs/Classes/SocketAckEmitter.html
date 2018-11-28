@@ -174,6 +174,9 @@
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Typealiases.html#/s:8SocketIO14NormalCallbacka">NormalCallback</a>
               </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Typealiases.html#/s:8SocketIO4Posta">Post</a>
+              </li>
             </ul>
           </li>
         </ul>
@@ -226,8 +229,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">@objc</span>
-<span class="kd">public</span> <span class="kd">private(set)</span> <span class="kd">lazy</span> <span class="k">var</span> <span class="nv">rawEmitView</span><span class="p">:</span> <span class="nf">SocketRawAckView</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="kd">lazy</span> <span class="k">var</span> <span class="nv">rawEmitView</span> <span class="o">=</span> <span class="nf">SocketRawAckView</span><span class="p">(</span><span class="nv">socket</span><span class="p">:</span> <span class="n">socket</span><span class="p">,</span> <span class="nv">ackNum</span><span class="p">:</span> <span class="n">ackNum</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -265,7 +267,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">expected</span><span class="p">:</span> <span class="nf">Bool</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">expected</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
 
                         </div>
                       </div>
@@ -286,9 +288,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8SocketIO0A10AckEmitterCAcA0A8IOClientC6socket_Si6ackNumtcfc"></a>
+                    <a name="/s:8SocketIO0A10AckEmitterC6socket6ackNumAcA0A8IOClientC_Sitcfc"></a>
                     <a name="//apple_ref/swift/Method/init(socket:ackNum:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A10AckEmitterCAcA0A8IOClientC6socket_Si6ackNumtcfc">init(socket:ackNum:)</a>
+                    <a class="token" href="#/s:8SocketIO0A10AckEmitterC6socket6ackNumAcA0A8IOClientC_Sitcfc">init(socket:ackNum:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -355,9 +357,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8SocketIO0A10AckEmitterC4withyAA0A4Data_pd_tF"></a>
+                    <a name="/s:8SocketIO0A10AckEmitterC4withyyAA0A4Data_pd_tF"></a>
                     <a name="//apple_ref/swift/Method/with(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A10AckEmitterC4withyAA0A4Data_pd_tF">with(_:)</a>
+                    <a class="token" href="#/s:8SocketIO0A10AckEmitterC4withyyAA0A4Data_pd_tF">with(_:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -367,7 +369,7 @@
                       <div class="abstract">
                         <p>Call to ack receiving this event.</p>
 
-<p>If an error occurs trying to transform <code>items</code> into their socket representation, a <code><a href="../Enums/SocketClientEvent.html#/s:8SocketIO0A11ClientEventO5errorA2CmF">SocketClientEvent.error</a></code>
+<p>If an error occurs trying to transform <code>items</code> into their socket representation, a <code><a href="../Enums/SocketClientEvent.html#/s:8SocketIO0A11ClientEventO5erroryA2CmF">SocketClientEvent.error</a></code>
 will be emitted. The structure of the error data is <code>[ackNum, items, theError]</code></p>
 
                       </div>
@@ -421,8 +423,7 @@ will be emitted. The structure of the error data is <code>[ackNum, items, theErr
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">@objc</span>
-<span class="kd">public</span> <span class="kd">func</span> <span class="nf">with</span><span class="p">(</span><span class="n">_</span> <span class="nv">items</span><span class="p">:</span> <span class="p">[</span><span class="kt">Any</span><span class="p">])</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">with</span><span class="p">(</span><span class="n">_</span> <span class="nv">items</span><span class="p">:</span> <span class="p">[</span><span class="kt">Any</span><span class="p">])</span></code></pre>
 
                         </div>
                       </div>
@@ -456,8 +457,8 @@ will be emitted. The structure of the error data is <code>[ackNum, items, theErr
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2018 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2018-07-29)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.3</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2018 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2018-11-28)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>

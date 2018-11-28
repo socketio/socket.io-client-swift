@@ -1,3 +1,8 @@
+# v13.4.0
+
+- Add emits with write completion handlers. [#1096](https://github.com/socketio/socket.io-client-swift/issues/1096)
+- Add ability to listen for when a websocket upgrade happens
+
 # v13.3.1
 
 - Fixes various bugs. [#857](https://github.com/socketio/socket.io-client-swift/issues/857), [#1078](https://github.com/socketio/socket.io-client-swift/issues/1078)
