@@ -14,7 +14,6 @@
   </head>
   <body>
 
-    <a name="//apple_ref/swift/Section/Classes" class="dashAnchor"></a>
 
     <a title="Classes  Reference"></a>
 
@@ -174,6 +173,9 @@
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Typealiases.html#/s:8SocketIO14NormalCallbacka">NormalCallback</a>
               </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Typealiases.html#/s:8SocketIO4Posta">Post</a>
+              </li>
             </ul>
           </li>
         </ul>
@@ -190,6 +192,39 @@
 
         <section class="section">
           <div class="section-content">
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine"></a>
+                    <a name="//apple_ref/swift/Class/SocketEngine" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine">SocketEngine</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The class that handles the engine.io protocol and transports.
+See <code><a href="Protocols/SocketEnginePollable.html">SocketEnginePollable</a></code> and <code><a href="Protocols/SocketEngineWebsocket.html">SocketEngineWebsocket</a></code> for transport specific methods.</p>
+
+                        <a href="Classes/SocketEngine.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kt">SocketEngine</span> <span class="p">:</span> <span class="kt">NSObject</span><span class="p">,</span> <span class="kt">URLSessionDelegate</span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketEnginePollable.html">SocketEnginePollable</a></span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketEngineWebsocket.html">SocketEngineWebsocket</a></span><span class="p">,</span> <span class="kt"><a href="Protocols/ConfigSettable.html">ConfigSettable</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
             <div class="task-group">
               <ul class="item-container">
                 <li class="item">
@@ -338,9 +373,9 @@ Example:</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketRawView"></a>
-                    <a name="//apple_ref/swift/Class/SocketRawView" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketRawView">SocketRawView</a>
+                    <a name="/c:@M@SocketIO@objc(cs)SSLSecurity"></a>
+                    <a name="//apple_ref/swift/Class/SSLSecurity" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SSLSecurity">SSLSecurity</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -348,84 +383,15 @@ Example:</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Class that gives a backwards compatible way to cause an emit not to recursively check for Data objects.</p>
+                        <p>A wrapper around Starscream&rsquo;s SSLSecurity that provides a minimal Objective-C interface.</p>
 
-<p>Usage:</p>
-<pre class="highlight swift"><code><span class="n">socket</span><span class="o">.</span><span class="n">rawEmitView</span><span class="o">.</span><span class="nf">emit</span><span class="p">(</span><span class="s">"myEvent"</span><span class="p">,</span> <span class="n">myObject</span><span class="p">)</span>
-</code></pre>
-
-                        <a href="Classes/SocketRawView.html" class="slightly-smaller">See more</a>
+                        <a href="Classes/SSLSecurity.html" class="slightly-smaller">See more</a>
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">SocketRawView</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketRawAckView"></a>
-                    <a name="//apple_ref/swift/Class/SocketRawAckView" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketRawAckView">SocketRawAckView</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Class that gives a backwards compatible way to cause an emit not to recursively check for Data objects.</p>
-
-<p>Usage:</p>
-<pre class="highlight swift"><code><span class="n">ack</span><span class="o">.</span><span class="n">rawEmitView</span><span class="o">.</span><span class="nf">with</span><span class="p">(</span><span class="n">myObject</span><span class="p">)</span>
-</code></pre>
-
-                        <a href="Classes/SocketRawAckView.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">SocketRawAckView</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul class="item-container">
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine"></a>
-                    <a name="//apple_ref/swift/Class/SocketEngine" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine">SocketEngine</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>The class that handles the engine.io protocol and transports.
-See <code><a href="Protocols/SocketEnginePollable.html">SocketEnginePollable</a></code> and <code><a href="Protocols/SocketEngineWebsocket.html">SocketEngineWebsocket</a></code> for transport specific methods.</p>
-
-                        <a href="Classes/SocketEngine.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kt">SocketEngine</span> <span class="p">:</span> <span class="kt">NSObject</span><span class="p">,</span> <span class="kt">URLSessionDelegate</span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketEnginePollable.html">SocketEnginePollable</a></span><span class="p">,</span> <span class="kt"><a href="Protocols/SocketEngineWebsocket.html">SocketEngineWebsocket</a></span><span class="p">,</span> <span class="kt"><a href="Protocols/ConfigSettable.html">ConfigSettable</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kt">SSLSecurity</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
 
                         </div>
                       </div>
@@ -489,9 +455,9 @@ or call one of the <code>disconnectSocket</code> methods on this class.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SSLSecurity"></a>
-                    <a name="//apple_ref/swift/Class/SSLSecurity" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SSLSecurity">SSLSecurity</a>
+                    <a name="/c:@M@SocketIO@objc(cs)SocketRawView"></a>
+                    <a name="//apple_ref/swift/Class/SocketRawView" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketRawView">SocketRawView</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -499,15 +465,51 @@ or call one of the <code>disconnectSocket</code> methods on this class.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>A wrapper around Starscream&rsquo;s SSLSecurity that provides a minimal Objective-C interface.</p>
+                        <p>Class that gives a backwards compatible way to cause an emit not to recursively check for Data objects.</p>
 
-                        <a href="Classes/SSLSecurity.html" class="slightly-smaller">See more</a>
+<p>Usage:</p>
+<pre class="highlight swift"><code><span class="n">socket</span><span class="o">.</span><span class="n">rawEmitView</span><span class="o">.</span><span class="nf">emit</span><span class="p">(</span><span class="s">"myEvent"</span><span class="p">,</span> <span class="n">myObject</span><span class="p">)</span>
+</code></pre>
+
+                        <a href="Classes/SocketRawView.html" class="slightly-smaller">See more</a>
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kt">SSLSecurity</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">SocketRawView</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@SocketIO@objc(cs)SocketRawAckView"></a>
+                    <a name="//apple_ref/swift/Class/SocketRawAckView" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketRawAckView">SocketRawAckView</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Class that gives a backwards compatible way to cause an emit not to recursively check for Data objects.</p>
+
+<p>Usage:</p>
+<pre class="highlight swift"><code><span class="n">ack</span><span class="o">.</span><span class="n">rawEmitView</span><span class="o">.</span><span class="nf">with</span><span class="p">(</span><span class="n">myObject</span><span class="p">)</span>
+</code></pre>
+
+                        <a href="Classes/SocketRawAckView.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">SocketRawAckView</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
 
                         </div>
                       </div>
@@ -522,8 +524,8 @@ or call one of the <code>disconnectSocket</code> methods on this class.</p>
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2018 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2018-07-29)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.3</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2018 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2018-11-28)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>
