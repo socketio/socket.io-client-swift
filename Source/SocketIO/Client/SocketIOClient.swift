@@ -83,7 +83,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     @objc
     public private(set) var status = SocketIOStatus.notConnected {
         didSet {
-            handleClientEvent(.statusChange, data: [status])
+            handleClientEvent(.statusChange, data: [status, status.rawValue])
         }
     }
 
