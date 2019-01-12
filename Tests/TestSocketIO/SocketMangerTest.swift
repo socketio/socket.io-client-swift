@@ -107,6 +107,8 @@ class SocketMangerTest : XCTestCase {
             .forceNew(true),
             .reconnects(false),
             .reconnectWait(5),
+            .reconnectWaitMax(5),
+            .randomizationFactor(0.7),
             .reconnectAttempts(5)
         ])
 
@@ -114,6 +116,8 @@ class SocketMangerTest : XCTestCase {
         XCTAssertTrue(manager.forceNew)
         XCTAssertFalse(manager.reconnects)
         XCTAssertEqual(manager.reconnectWait, 5)
+        XCTAssertEqual(manager.reconnectWaitMax, 5)
+        XCTAssertEqual(manager.randomizationFactor, 0.7)
         XCTAssertEqual(manager.reconnectAttempts, 5)
     }
 

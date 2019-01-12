@@ -513,6 +513,10 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
                 self.reconnectAttempts = attempts
             case let .reconnectWait(wait):
                 reconnectWait = abs(wait)
+            case let .reconnectWaitMax(wait):
+                reconnectWaitMax = abs(wait)
+            case let .randomizationFactor(factor):
+                randomizationFactor = factor
             case let .log(log):
                 DefaultSocketLogger.Logger.log = log
             case let .logger(logger):

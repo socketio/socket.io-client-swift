@@ -34,6 +34,8 @@
     XCTAssertEqual(self.manager.handleQueue, dispatch_get_main_queue());
     XCTAssertTrue(self.manager.reconnects);
     XCTAssertEqual(self.manager.reconnectWait, 10);
+    XCTAssertEqual(self.manager.reconnectWaitMax, 30);
+    XCTAssertEqual(self.manager.randomizationFactor, 0.5);
     XCTAssertEqual(self.manager.status, SocketIOStatusNotConnected);
 }
 
