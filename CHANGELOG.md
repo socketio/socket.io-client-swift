@@ -1,3 +1,7 @@
+# v14.0.0
+
+- Add exponential backoff for reconnects, with `reconnectWaitMax` and `randomizationFactor` options [#1149](https://github.com/socketio/socket.io-client-swift/pull/1149)
+
 # v13.4.0
 
 - Add emits with write completion handlers. [#1096](https://github.com/socketio/socket.io-client-swift/issues/1096)
@@ -69,4 +73,3 @@ Important API changes
 - Adds `.sentPing` and `.gotPong` client events for tracking ping/pongs.
 - Makes the framework a single target.
 - Updates Starscream to 3.0
-

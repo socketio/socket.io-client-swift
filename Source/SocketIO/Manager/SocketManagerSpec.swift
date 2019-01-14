@@ -69,8 +69,14 @@ public protocol SocketManagerSpec : AnyObject, SocketEngineClient {
     /// If `true`, this manager will try and reconnect on any disconnects.
     var reconnects: Bool { get set }
 
-    /// The number of seconds to wait before attempting to reconnect.
+    /// The minimum number of seconds to wait before attempting to reconnect.
     var reconnectWait: Int { get set }
+    
+    /// The maximum number of seconds to wait before attempting to reconnect.
+    var reconnectWaitMax: Int { get set }
+
+    /// The randomization factor for calculating reconnect jitter.
+    var randomizationFactor: Double { get set }
 
     /// The URL of the socket.io server.
     var socketURL: URL { get }

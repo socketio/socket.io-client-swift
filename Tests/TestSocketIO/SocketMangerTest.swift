@@ -15,6 +15,8 @@ class SocketMangerTest : XCTestCase {
         XCTAssertEqual(manager.handleQueue, DispatchQueue.main)
         XCTAssertTrue(manager.reconnects)
         XCTAssertEqual(manager.reconnectWait, 10)
+        XCTAssertEqual(manager.reconnectWaitMax, 30)
+        XCTAssertEqual(manager.randomizationFactor, 0.5)
         XCTAssertEqual(manager.status, .notConnected)
     }
 
@@ -26,6 +28,21 @@ class SocketMangerTest : XCTestCase {
         manager.config = []
 
         XCTAssertEqual(manager.config.first!, .secure(true))
+    }
+    
+    func testBackoffIntervalCalulation() {
+        XCTAssertLessThanOrEqual(manager.reconnectInterval(attempts: -1), Double(manager.reconnectWaitMax))
+        XCTAssertLessThanOrEqual(manager.reconnectInterval(attempts: 0), 15)
+        XCTAssertLessThanOrEqual(manager.reconnectInterval(attempts: 1), 22.5)
+        XCTAssertLessThanOrEqual(manager.reconnectInterval(attempts: 2), 33.75)
+        XCTAssertLessThanOrEqual(manager.reconnectInterval(attempts: 50), Double(manager.reconnectWaitMax))
+        XCTAssertLessThanOrEqual(manager.reconnectInterval(attempts: 10000), Double(manager.reconnectWaitMax))
+        
+        XCTAssertGreaterThanOrEqual(manager.reconnectInterval(attempts: -1), Double(manager.reconnectWait))
+        XCTAssertGreaterThanOrEqual(manager.reconnectInterval(attempts: 0), Double(manager.reconnectWait))
+        XCTAssertGreaterThanOrEqual(manager.reconnectInterval(attempts: 1), 15)
+        XCTAssertGreaterThanOrEqual(manager.reconnectInterval(attempts: 2), 22.5)
+        XCTAssertGreaterThanOrEqual(manager.reconnectInterval(attempts: 10000), Double(manager.reconnectWait))
     }
 
     func testManagerCallsConnect() {
@@ -90,6 +107,8 @@ class SocketMangerTest : XCTestCase {
             .forceNew(true),
             .reconnects(false),
             .reconnectWait(5),
+            .reconnectWaitMax(5),
+            .randomizationFactor(0.7),
             .reconnectAttempts(5)
         ])
 
@@ -97,6 +116,8 @@ class SocketMangerTest : XCTestCase {
         XCTAssertTrue(manager.forceNew)
         XCTAssertFalse(manager.reconnects)
         XCTAssertEqual(manager.reconnectWait, 5)
+        XCTAssertEqual(manager.reconnectWaitMax, 5)
+        XCTAssertEqual(manager.randomizationFactor, 0.7)
         XCTAssertEqual(manager.reconnectAttempts, 5)
     }
 
