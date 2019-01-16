@@ -63,7 +63,7 @@ SocketIOClient* socket = manager.defaultSocket;
 ## FAQS
 Checkout the [FAQs](https://nuclearace.github.io/Socket.IO-Client-Swift/faq.html) for commonly asked questions.
 
-Checkout the [12to13](https://nuclearace.github.io/Socket.IO-Client-Swift/12to13.html) guide for migrating to v13.
+Checkout the [12to13](https://nuclearace.github.io/Socket.IO-Client-Swift/12to13.html) guide for migrating to v13+ from v12 below.
 
 
 ## Installation
@@ -76,7 +76,7 @@ If you need Swift 3.x use v11.1.3.
 ### Swift Package Manager
 Add the project as a dependency to your Package.swift:
 ```swift
-// swift-tools-version:4.0
+// swift-tools-version:4.2
 
 import PackageDescription
 
@@ -86,7 +86,7 @@ let package = Package(
         .executable(name: "socket.io-test", targets: ["YourTargetName"])
     ],
     dependencies: [
-        .package(url: "https://github.com/socketio/socket.io-client-swift", .upToNextMinor(from: "13.3.0"))
+        .package(url: "https://github.com/socketio/socket.io-client-swift", .upToNextMinor(from: "14.0.0"))
     ],
     targets: [
         .target(name: "YourTargetName", dependencies: ["SocketIO"], path: "./Path/To/Your/Sources")
@@ -99,7 +99,7 @@ Then import `import SocketIO`.
 ### Carthage
 Add this line to your `Cartfile`:
 ```
-github "socketio/socket.io-client-swift" ~> 13.3.0
+github "socketio/socket.io-client-swift" ~> 14.0.0
 ```
 
 Run `carthage update --platform ios,macosx`.
@@ -113,7 +113,7 @@ Create `Podfile` and add `pod 'Socket.IO-Client-Swift'`:
 use_frameworks!
 
 target 'YourApp' do
-    pod 'Socket.IO-Client-Swift', '~> 13.3.0'
+    pod 'Socket.IO-Client-Swift', '~> 14.0.0'
 end
 ```
 

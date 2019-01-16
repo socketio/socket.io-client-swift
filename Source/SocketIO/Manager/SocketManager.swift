@@ -97,8 +97,14 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
     /// If `true`, this client will try and reconnect on any disconnects.
     public var reconnects = true
 
-    /// The number of seconds to wait before attempting to reconnect.
+    /// The minimum number of seconds to wait before attempting to reconnect.
     public var reconnectWait = 10
+
+    /// The maximum number of seconds to wait before attempting to reconnect.
+    public var reconnectWaitMax = 30
+
+    /// The randomization factor for calculating reconnect jitter.
+    public var randomizationFactor = 0.5
 
     /// The status of this manager.
     public private(set) var status: SocketIOStatus = .notConnected {
@@ -474,7 +480,21 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
         currentReconnectAttempt += 1
         connect()
 
-        handleQueue.asyncAfter(deadline: DispatchTime.now() + Double(reconnectWait), execute: _tryReconnect)
+        let interval = reconnectInterval(attempts: currentReconnectAttempt)
+        DefaultSocketLogger.Logger.log("Scheduling reconnect in \(interval)s", type: SocketManager.logType)
+        handleQueue.asyncAfter(deadline: DispatchTime.now() + interval, execute: _tryReconnect)
+    }
+
+    func reconnectInterval(attempts: Int) -> Double {
+        // apply exponential factor
+        let backoffFactor = pow(1.5, attempts)
+        let interval = Double(reconnectWait) * Double(truncating: backoffFactor as NSNumber)
+        // add in a random factor smooth thundering herds
+        let rand = Double.random(in: 0 ..< 1)
+        let randomFactor = rand * randomizationFactor * Double(truncating: interval as NSNumber)
+        // add in random factor, and clamp to min and max values
+        let combined = interval + randomFactor
+        return Double(fmax(Double(reconnectWait), fmin(combined, Double(reconnectWaitMax))))
     }
 
     /// Sets manager specific configs.
@@ -493,6 +513,10 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
                 self.reconnectAttempts = attempts
             case let .reconnectWait(wait):
                 reconnectWait = abs(wait)
+            case let .reconnectWaitMax(wait):
+                reconnectWaitMax = abs(wait)
+            case let .randomizationFactor(factor):
+                randomizationFactor = factor
             case let .log(log):
                 DefaultSocketLogger.Logger.log = log
             case let .logger(logger):

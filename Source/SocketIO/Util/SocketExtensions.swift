@@ -71,6 +71,10 @@ extension Dictionary where Key == String, Value == Any {
             return .reconnectAttempts(attempts)
         case let ("reconnectWait", wait as Int):
             return .reconnectWait(wait)
+        case let ("reconnectWaitMax", wait as Int):
+            return .reconnectWaitMax(wait)
+        case let ("randomizationFactor", factor as Double):
+            return .randomizationFactor(factor)
         case let ("secure", secure as Bool):
             return .secure(secure)
         case let ("security", security as SSLSecurity):

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		1C6572803D7E252A77A86E5F /* SocketManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C65763817782DFAC67BE05C /* SocketManager.swift */; };
 		1C6573B22DC9423CDFC32F05 /* SocketRawView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C657533E849FC3E4342C602 /* SocketRawView.swift */; };
+		1C657CDE5D510E8E2E573E39 /* utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C6577B639C34EE1C8829D9A /* utils.swift */; };
 		1C657FBB3F670261780FD72E /* SocketManagerSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C6574AF9687A213814753E4 /* SocketManagerSpec.swift */; };
 		1C686BE21F869AFD007D8627 /* SocketIOClientConfigurationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C686BD21F869AF1007D8627 /* SocketIOClientConfigurationTest.swift */; };
 		1C686BE31F869AFD007D8627 /* SocketEngineTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C686BD31F869AF1007D8627 /* SocketEngineTest.swift */; };
@@ -64,6 +65,7 @@
 		1C6574AF9687A213814753E4 /* SocketManagerSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketManagerSpec.swift; sourceTree = "<group>"; };
 		1C657533E849FC3E4342C602 /* SocketRawView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketRawView.swift; sourceTree = "<group>"; };
 		1C65763817782DFAC67BE05C /* SocketManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketManager.swift; sourceTree = "<group>"; };
+		1C6577B639C34EE1C8829D9A /* utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = utils.swift; sourceTree = "<group>"; };
 		1C686BD21F869AF1007D8627 /* SocketIOClientConfigurationTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketIOClientConfigurationTest.swift; sourceTree = "<group>"; };
 		1C686BD31F869AF1007D8627 /* SocketEngineTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketEngineTest.swift; sourceTree = "<group>"; };
 		1C686BD41F869AF1007D8627 /* SocketSideEffectTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketSideEffectTest.swift; sourceTree = "<group>"; };
@@ -159,6 +161,7 @@
 				1C686BD71F869AF1007D8627 /* SocketParserTest.swift */,
 				1C686BD81F869AF1007D8627 /* SocketNamespacePacketTest.swift */,
 				DD52BBAC5FAA7730D32CD5BF /* SocketMangerTest.swift */,
+				1C6577B639C34EE1C8829D9A /* utils.swift */,
 			);
 			name = TestSocketIO;
 			path = Tests/TestSocketIO;
@@ -501,6 +504,7 @@
 				1C686BE81F869AFD007D8627 /* SocketNamespacePacketTest.swift in Sources */,
 				DD52BCCD25EFA76E0F9B313C /* SocketMangerTest.swift in Sources */,
 				DD52B53F2609D91A683DFCDD /* ManagerObjectiveCTest.m in Sources */,
+				1C657CDE5D510E8E2E573E39 /* utils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

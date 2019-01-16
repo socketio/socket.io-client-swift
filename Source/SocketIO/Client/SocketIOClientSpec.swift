@@ -327,6 +327,9 @@ public enum SocketClientEvent : String {
 
     /// Emitted every time there is a change in the client's status.
     ///
+    /// The payload for data is [SocketIOClientStatus, Int]. Where the second item is the raw value. Use the second one
+    /// if you are working in Objective-C.
+    ///
     /// Usage:
     ///
     /// ```swift
