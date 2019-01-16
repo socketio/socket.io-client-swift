@@ -246,7 +246,7 @@ or call one of the <code>disconnectSocket</code> methods on this class.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">defaultSocket</span><span class="p">:</span> <span class="kt"><a href="../Classes/SocketIOClient.html">SocketIOClient</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">defaultSocket</span><span class="p">:</span> <span class="nf">SocketIOClient</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -305,7 +305,7 @@ init.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">config</span><span class="p">:</span> <span class="kt"><a href="../Structs/SocketIOClientConfiguration.html">SocketIOClientConfiguration</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">config</span><span class="p">:</span> <span class="nf">SocketIOClientConfiguration</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -359,7 +359,7 @@ init.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">forceNew</span> <span class="o">=</span> <span class="kc">false</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">forceNew</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
 
                         </div>
                       </div>
@@ -389,7 +389,7 @@ called on.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">handleQueue</span> <span class="o">=</span> <span class="kt">DispatchQueue</span><span class="o">.</span><span class="n">main</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">handleQueue</span><span class="p">:</span> <span class="kt">DispatchQueue</span></code></pre>
 
                         </div>
                       </div>
@@ -416,7 +416,7 @@ called on.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">nsps</span> <span class="o">=</span> <span class="p">[</span><span class="kt">String</span><span class="p">:</span> <span class="kt"><a href="../Classes/SocketIOClient.html">SocketIOClient</a></span><span class="p">]()</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">nsps</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span> <span class="p">:</span> <span class="kt"><a href="../Classes/SocketIOClient.html">SocketIOClient</a></span><span class="p">]</span></code></pre>
 
                         </div>
                       </div>
@@ -443,7 +443,7 @@ called on.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">reconnects</span> <span class="o">=</span> <span class="kc">true</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">reconnects</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
 
                         </div>
                       </div>
@@ -463,14 +463,68 @@ called on.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The number of seconds to wait before attempting to reconnect.</p>
+                        <p>The minimum number of seconds to wait before attempting to reconnect.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">reconnectWait</span> <span class="o">=</span> <span class="mi">10</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">reconnectWait</span><span class="p">:</span> <span class="kt">Int</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(py)reconnectWaitMax"></a>
+                    <a name="//apple_ref/swift/Property/reconnectWaitMax" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(py)reconnectWaitMax">reconnectWaitMax</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The maximum number of seconds to wait before attempting to reconnect.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">reconnectWaitMax</span><span class="p">:</span> <span class="kt">Int</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(py)randomizationFactor"></a>
+                    <a name="//apple_ref/swift/Property/randomizationFactor" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(py)randomizationFactor">randomizationFactor</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The randomization factor for calculating reconnect jitter.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">randomizationFactor</span><span class="p">:</span> <span class="kt">Double</span></code></pre>
 
                         </div>
                       </div>
@@ -497,7 +551,7 @@ called on.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">status</span><span class="p">:</span> <span class="kt"><a href="../Enums/SocketIOStatus.html">SocketIOStatus</a></span> <span class="o">=</span> <span class="o">.</span><span class="n">notConnected</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">status</span><span class="p">:</span> <span class="nf">SocketIOStatus</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -529,7 +583,7 @@ So this should ideally be an array of one packet waiting for data.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">waitingPackets</span> <span class="o">=</span> <span class="p">[</span><span class="kt"><a href="../Structs/SocketPacket.html">SocketPacket</a></span><span class="p">]()</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">waitingPackets</span><span class="p">:</span> <span class="p">[</span><span class="kt"><a href="../Structs/SocketPacket.html">SocketPacket</a></span><span class="p">]</span></code></pre>
 
                         </div>
                       </div>
@@ -626,7 +680,8 @@ If using Swift it&rsquo;s recommended to use <code>init(socketURL: NSURL, option
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="n">convenience</span> <span class="nf">init</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">,</span> <span class="nv">config</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">:</span> <span class="kt">Any</span><span class="p">]?)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span>
+<span class="kd">public</span> <span class="n">convenience</span> <span class="nf">init</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">,</span> <span class="nv">config</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">]?)</span></code></pre>
 
                         </div>
                       </div>
@@ -1297,7 +1352,7 @@ releasing.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">engineDidWebsocketUpgrade</span><span class="p">(</span><span class="nv">headers</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">:</span> <span class="kt">String</span><span class="p">])</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">engineDidWebsocketUpgrade</span><span class="p">(</span><span class="nv">headers</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span> <span class="p">:</span> <span class="kt">String</span><span class="p">])</span></code></pre>
 
                         </div>
                       </div>
@@ -1468,7 +1523,8 @@ method.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">removeSocket</span><span class="p">(</span><span class="n">_</span> <span class="nv">socket</span><span class="p">:</span> <span class="kt"><a href="../Classes/SocketIOClient.html">SocketIOClient</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/SocketIOClient.html">SocketIOClient</a></span><span class="p">?</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">@discardableResult</span>
+<span class="kd">open</span> <span class="kd">func</span> <span class="nf">removeSocket</span><span class="p">(</span><span class="n">_</span> <span class="nv">socket</span><span class="p">:</span> <span class="kt"><a href="../Classes/SocketIOClient.html">SocketIOClient</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/SocketIOClient.html">SocketIOClient</a></span><span class="p">?</span></code></pre>
 
                         </div>
                       </div>
@@ -1591,8 +1647,8 @@ Or call <code><a href="../Classes/SocketIOClient.html#/c:@M@SocketIO@objc(cs)Soc
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2018 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2018-11-28)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2019 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2019-01-16)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>
