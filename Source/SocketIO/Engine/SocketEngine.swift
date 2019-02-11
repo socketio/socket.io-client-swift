@@ -544,8 +544,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
 
         // Server is not responding
         if pongsMissed > pongsMissedMax {
-            client?.engineDidClose(reason: "Ping timeout")
-
+            closeOutEngine(reason: "Ping timeout")
             return
         }
 
