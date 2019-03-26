@@ -140,7 +140,7 @@ public extension SocketParsable where Self: SocketManagerSpec & SocketDataBuffer
     ///
     /// - parameter message: The string that needs parsing.
     /// - returns: A completed socket packet or nil if the packet is invalid.
-    public func parseSocketMessage(_ message: String) -> SocketPacket? {
+    func parseSocketMessage(_ message: String) -> SocketPacket? {
         guard !message.isEmpty else { return nil }
 
         DefaultSocketLogger.Logger.log("Parsing \(message)", type: "SocketParser")
@@ -166,7 +166,7 @@ public extension SocketParsable where Self: SocketManagerSpec & SocketDataBuffer
     ///
     /// - parameter data: The data that should be attached to a packet.
     /// - returns: A completed socket packet if there is no more data left to collect.
-    public func parseBinaryData(_ data: Data) -> SocketPacket? {
+    func parseBinaryData(_ data: Data) -> SocketPacket? {
         guard !waitingPackets.isEmpty else {
             DefaultSocketLogger.Logger.error("Got data when not remaking packet", type: "SocketParser")
 

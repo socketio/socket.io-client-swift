@@ -1,3 +1,7 @@
+# v15.0.0
+
+- Swift 5
+
 # v14.0.0
 
 - Minimum version of the client is now Swift 4.2.

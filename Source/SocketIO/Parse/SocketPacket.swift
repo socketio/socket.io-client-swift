@@ -158,7 +158,7 @@ public extension SocketPacket {
     // MARK: PacketType enum
 
     /// The type of packets.
-    public enum PacketType: Int {
+    enum PacketType: Int {
         // MARK: Cases
 
         /// Connect: 0
