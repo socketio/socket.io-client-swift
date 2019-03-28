@@ -175,7 +175,7 @@ extension SocketEngineSpec {
         if polling {
             return .right("b4" + data.base64EncodedString(options: Data.Base64EncodingOptions(rawValue: 0)))
         } else {
-            return .left(Data(bytes: [0x4]) + data)
+            return .left(Data([0x4]) + data)
         }
     }
 
