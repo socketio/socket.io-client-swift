@@ -67,7 +67,7 @@ Checkout the [12to13](https://nuclearace.github.io/Socket.IO-Client-Swift/12to13
 
 
 ## Installation
-Requires Swift 4/Xcode 9.x
+Requires Swift 4/5 and Xcode 10.x
 
 If you need Swift 2.3 use the [swift2.3 tag](https://github.com/socketio/socket.io-client-swift/releases/tag/swift2.3) (Pre-Swift 4 support is no longer maintained)
 
@@ -86,7 +86,7 @@ let package = Package(
         .executable(name: "socket.io-test", targets: ["YourTargetName"])
     ],
     dependencies: [
-        .package(url: "https://github.com/socketio/socket.io-client-swift", .upToNextMinor(from: "14.0.0"))
+        .package(url: "https://github.com/socketio/socket.io-client-swift", .upToNextMinor(from: "15.0.0"))
     ],
     targets: [
         .target(name: "YourTargetName", dependencies: ["SocketIO"], path: "./Path/To/Your/Sources")
@@ -99,7 +99,7 @@ Then import `import SocketIO`.
 ### Carthage
 Add this line to your `Cartfile`:
 ```
-github "socketio/socket.io-client-swift" ~> 14.0.0
+github "socketio/socket.io-client-swift" ~> 15.0.0
 ```
 
 Run `carthage update --platform ios,macosx`.
@@ -113,7 +113,7 @@ Create `Podfile` and add `pod 'Socket.IO-Client-Swift'`:
 use_frameworks!
 
 target 'YourApp' do
-    pod 'Socket.IO-Client-Swift', '~> 14.0.0'
+    pod 'Socket.IO-Client-Swift', '~> 15.0.0'
 end
 ```
 
