@@ -1,3 +1,7 @@
+# v15.0.1
+
+- Fix emit completion callback not firing on websockets [#1178](https://github.com/socketio/socket.io-client-swift/issues/1178)
+
 # v15.0.0
 
 - Swift 5
