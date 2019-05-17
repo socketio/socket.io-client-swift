@@ -25,7 +25,7 @@
 import Foundation
 
 /// Represents some event that was received.
-public final class SocketAnyEvent : NSObject {
+@objcMembers public final class SocketAnyEvent : NSObject {
     // MARK: Properties
 
     /// The event name.

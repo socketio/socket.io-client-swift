@@ -28,7 +28,7 @@ import Foundation
 /// The main class for SocketIOClientSwift.
 ///
 /// Represents a socket.io-client. Most interaction with socket.io will be through this class.
-open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, SocketParsable {
+@objcMembers open class SocketIOClient : NSObject, SocketIOClientSpec, SocketEngineClient, SocketParsable {
     // MARK: Properties
 
     /// The URL of the socket.io server. This is set in the initializer.
