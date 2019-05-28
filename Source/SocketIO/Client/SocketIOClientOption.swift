@@ -52,6 +52,9 @@ public enum SocketIOClientOption : ClientOption {
 
     /// If passed `true`, the only transport that will be used will be WebSockets.
     case forceWebsockets(Bool)
+    
+    /// If passed `true`, the WebSocket stream will be configured with the enableSOCKSProxy `true`.
+    case enableSOCKSProxy(Bool)
 
     /// The queue that all interaction with the client should occur on. This is the queue that event handlers are
     /// called on.
@@ -143,6 +146,8 @@ public enum SocketIOClientOption : ClientOption {
             description = "security"
         case .sessionDelegate:
             description = "sessionDelegate"
+        case .enableSOCKSProxy:
+            description = "enableSOCKSProxy"
         }
 
         return description
@@ -192,6 +197,8 @@ public enum SocketIOClientOption : ClientOption {
             value = signed
         case let .sessionDelegate(delegate):
             value = delegate
+        case let .enableSOCKSProxy(enable):
+            value = enable
         }
 
         return value
