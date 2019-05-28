@@ -107,6 +107,7 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
         super.init()
     }
 
+    /// :nodoc:
     deinit {
         DefaultSocketLogger.Logger.log("Client is being released", type: logType)
     }

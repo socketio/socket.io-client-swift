@@ -115,6 +115,7 @@ public final class OnAckCallback : NSObject {
         self.binary = binary
     }
 
+    /// :nodoc:
     deinit {
         DefaultSocketLogger.Logger.log("OnAckCallback for \(ackNumber) being released", type: "OnAckCallback")
     }
