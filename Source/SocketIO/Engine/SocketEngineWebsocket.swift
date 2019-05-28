@@ -62,15 +62,19 @@ extension SocketEngineWebsocket {
     /// - parameter completion: Callback called on transport write completion.
     public func sendWebSocketMessage(_ str: String,
                                      withType type: SocketEnginePacketType,
-                                     withData datas: [Data],
+                                     withData data: [Data],
                                      completion: (() -> ())?
     ) {
         DefaultSocketLogger.Logger.log("Sending ws: \(str) as type: \(type.rawValue)", type: "SocketEngineWebSocket")
 
         ws?.write(string: "\(type.rawValue)\(str)")
 
-        for data in datas {
-            if case let .left(bin) = createBinaryDataForSend(using: data) {
+        if data.count == 0 {
+            completion?()
+        }
+
+        for item in data {
+            if case let .left(bin) = createBinaryDataForSend(using: item) {
                 ws?.write(data: bin, completion: completion)
             }
         }
