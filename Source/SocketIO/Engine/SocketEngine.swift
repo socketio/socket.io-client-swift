@@ -250,6 +250,18 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
         if client == nil {
             return (URL(string: "http://localhost/")!, URL(string: "http://localhost/")!)
         }
+        
+        switch URLComponents(string: url.absoluteString)!.scheme {
+        case let httpSheme where httpSheme?.hasPrefix("http"):
+            forcePolling = true
+            secure = httpSheme!.hasSuffix("s")
+            
+        case let webSocketSheme where httpSheme?.hasPrefix("ws"):
+            forceWebsockets = true
+            secure = webSocketSheme!.hasSuffix("ss")
+
+        default:    break
+        }
 
         var urlPolling = URLComponents(string: url.absoluteString)!
         var urlWebSocket = URLComponents(string: url.absoluteString)!
