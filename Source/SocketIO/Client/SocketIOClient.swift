@@ -284,10 +284,11 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
         return createOnAck([event] + items)
     }
 
-    func emit(_ data: [Any], ack: Int? = nil, binary: Bool = true, isAck: Bool = false) {
-        guard status == .connected else {
-// rsvp <
+    func emit(_ data: [Any], ack: Int? = nil, binary: Bool = true, isAck: Bool = false, handleError: ((Error?) -> Void)? = nil) {
+        guard status == .connected  else {
+// rsvp <b
             //handleClientEvent(.error, data: ["Tried emitting when not connected"])
+            handleError?(NSError(domain: "", code: 404, userInfo: ["data": data]))
             handleClientEvent(.error, data: ["Tried emitting when not connected", data])
 // >
             return
