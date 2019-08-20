@@ -295,24 +295,12 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
     open func emitWithAck(_ event: String, with items: [Any]) -> OnAckCallback {
         return createOnAck([event] + items)
     }
-
-    func emit(_ data: [Any],
-              ack: Int? = nil,
-              binary: Bool = true,
-              isAck: Bool = false,
-              completion: (() -> ())? = nil
-    ) {
-        // wrap the completion handler so it always runs async via handlerQueue
-        let wrappedCompletion: (() -> ())? = (completion == nil) ? nil : {[weak self] in
-            guard let this = self else { return }
-            this.manager?.handleQueue.async {
-                completion!()
-            }
-        }
-
-        guard status == .connected else {
-            wrappedCompletion?()
-            handleClientEvent(.error, data: ["Tried emitting when not connected"])
+    
+    func emit(_ data: [Any], ack: Int? = nil, binary: Bool = true, isAck: Bool = false, handleError: ((Error?) -> Void)? = nil) {
+        guard status == .connected  else {
+            //handleClientEvent(.error, data: ["Tried emitting when not connected"])
+            handleError?(NSError(domain: "", code: 404, userInfo: ["data": data]))
+            handleClientEvent(.error, data: ["Tried emitting when not connected", data])
             return
         }
 
@@ -320,8 +308,8 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
         let str = packet.packetString
 
         DefaultSocketLogger.Logger.log("Emitting: \(str), Ack: \(isAck)", type: logType)
-
-        manager?.engine?.send(str, withData: packet.binary, completion: wrappedCompletion)
+        
+        manager?.engine?.send(str, withData: packet.binary)
     }
 
     /// Call when you wish to tell the server that you've received the event for `ack`.
