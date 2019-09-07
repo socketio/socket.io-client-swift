@@ -227,7 +227,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
         if connected {
             DefaultSocketLogger.Logger.error("Engine tried opening while connected. Assuming this was a reconnect",
                                              type: SocketEngine.logType)
-            disconnect(reason: "reconnect")
+            _disconnect(reason: "reconnect")
         }
 
         DefaultSocketLogger.Logger.log("Starting engine. Server: \(url)", type: SocketEngine.logType)
