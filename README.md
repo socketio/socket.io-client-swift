@@ -14,7 +14,7 @@ socket.on(clientEvent: .connect) {data, ack in
     print("socket connected")
 }
 
-socket.on("currentAmount") {data, ack in
+socket.on("currentAmount") {[unowned socket] data, ack in
     guard let cur = data[0] as? Double else { return }
     
     socket.emitWithAck("canUpdate", cur).timingOut(after: 0) {data in
@@ -33,7 +33,7 @@ socket.connect()
 
 NSURL* url = [[NSURL alloc] initWithString:@"http://localhost:8080"];
 SocketManager* manager = [[SocketManager alloc] initWithSocketURL:url config:@{@"log": @YES, @"compress": @YES}];
-SocketIOClient* socket = manager.defaultSocket;
+SocketIOClient* __weak socket = manager.defaultSocket;
 
 [socket on:@"connect" callback:^(NSArray* data, SocketAckEmitter* ack) {
     NSLog(@"socket connected");
