@@ -99,7 +99,7 @@ Then import `import SocketIO`.
 ### Carthage
 Add this line to your `Cartfile`:
 ```
-github "socketio/socket.io-client-swift" ~> 15.1.0
+github "socketio/socket.io-client-swift" ~> 15.2.0
 ```
 
 Run `carthage update --platform ios,macosx`.
@@ -113,7 +113,7 @@ Create `Podfile` and add `pod 'Socket.IO-Client-Swift'`:
 use_frameworks!
 
 target 'YourApp' do
-    pod 'Socket.IO-Client-Swift', '~> 15.1.0'
+    pod 'Socket.IO-Client-Swift', '~> 15.2.0'
 end
 ```
 
