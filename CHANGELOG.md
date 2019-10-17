@@ -1,3 +1,7 @@
+# v15.2.0
+
+- Small fixes.
+
 # v15.1.0
 
 - Add ability to enable websockets SOCKS proxy.
