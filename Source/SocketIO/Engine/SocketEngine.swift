@@ -113,7 +113,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
     /// If `true`, then the engine is currently in WebSockets mode.
     @available(*, deprecated, message: "No longer needed, if we're not polling, then we must be doing websockets")
     public private(set) var websocket = false
-    
+
     /// When `true`, the WebSocket `stream` will be configured with the enableSOCKSProxy `true`.
     public private(set) var enableSOCKSProxy = false
 
@@ -170,6 +170,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
         self.init(client: client, url: url, config: options?.toSocketConfiguration() ?? [])
     }
 
+    /// :nodoc:
     deinit {
         DefaultSocketLogger.Logger.log("Engine is being released", type: SocketEngine.logType)
         closed = true
@@ -226,7 +227,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
         if connected {
             DefaultSocketLogger.Logger.error("Engine tried opening while connected. Assuming this was a reconnect",
                                              type: SocketEngine.logType)
-            disconnect(reason: "reconnect")
+            _disconnect(reason: "reconnect")
         }
 
         DefaultSocketLogger.Logger.log("Starting engine. Server: \(url)", type: SocketEngine.logType)

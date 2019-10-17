@@ -158,6 +158,7 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
         self.init(socketURL: socketURL, config: config?.toSocketConfiguration() ?? [])
     }
 
+    /// :nodoc:
     deinit {
         DefaultSocketLogger.Logger.log("Manager is being released", type: SocketManager.logType)
 
