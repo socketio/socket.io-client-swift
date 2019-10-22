@@ -251,7 +251,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
             return (URL(string: "http://localhost/")!, URL(string: "http://localhost/")!)
         }
         
-        if let scheme = URLComponents(string: url.absoluteString)!.scheme {
+        if let scheme = URLComponents(string: url.absoluteString)?.scheme {
             switch scheme {
             case let httpSheme where httpSheme.hasPrefix("http"):
                 forcePolling = true
