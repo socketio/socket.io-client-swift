@@ -1,3 +1,7 @@
+# v15.3.0
+
+- Add `==` operators for `SocketAckStatus` and `String`
+
 # v15.2.0
 
 - Small fixes.

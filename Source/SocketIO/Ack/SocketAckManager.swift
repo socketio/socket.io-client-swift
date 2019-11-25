@@ -31,6 +31,16 @@ public enum SocketAckStatus : String {
 
     /// The ack timed out.
     case noAck = "NO ACK"
+
+    /// Tests whether a string is equal to a given SocketAckStatus
+    public static func == (lhs: String, rhs: SocketAckStatus) -> Bool {
+        return lhs == rhs.rawValue
+    }
+
+    /// Tests whether a string is equal to a given SocketAckStatus
+    public static func == (lhs: SocketAckStatus, rhs: String) -> Bool {
+        return rhs == lhs
+    }
 }
 
 private struct SocketAck : Hashable {
