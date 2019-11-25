@@ -18,7 +18,7 @@ socket.on("currentAmount") {data, ack in
     guard let cur = data[0] as? Double else { return }
     
     socket.emitWithAck("canUpdate", cur).timingOut(after: 0) {data in
-        if data.first as? String == SocketAckValue.noAck {
+        if data.first as? String ?? "passed" == SocketAckValue.noAck {
             // Handle ack timeout 
         }
 
