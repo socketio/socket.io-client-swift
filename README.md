@@ -4,7 +4,7 @@
 Socket.IO-client for iOS/OS X.
 
 ## Example
-```swift
+```
 import SocketIO
 
 let manager = SocketManager(socketURL: URL(string: "http://localhost:8080")!, config: [.log(true), .compress])
@@ -18,6 +18,10 @@ socket.on("currentAmount") {data, ack in
     guard let cur = data[0] as? Double else { return }
     
     socket.emitWithAck("canUpdate", cur).timingOut(after: 0) {data in
+        if data.first as? String == SocketAckValue.noAck {
+            // Handle ack timeout 
+        }
+
         socket.emit("update", ["amount": cur + 2.50])
     }
 
@@ -43,6 +47,10 @@ SocketIOClient* socket = manager.defaultSocket;
     double cur = [[data objectAtIndex:0] floatValue];
 
     [[socket emitWithAck:@"canUpdate" with:@[@(cur)]] timingOutAfter:0 callback:^(NSArray* data) {
+        if ([[data[0] description] isEqualToString:@"NO ACK"]) {
+            // Handle ack timeout
+        }
+
         [socket emit:@"update" with:@[@{@"amount": @(cur + 2.50)}]];
     }];
 
