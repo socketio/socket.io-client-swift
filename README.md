@@ -4,7 +4,7 @@
 Socket.IO-client for iOS/OS X.
 
 ## Example
-```
+```swift
 import SocketIO
 
 let manager = SocketManager(socketURL: URL(string: "http://localhost:8080")!, config: [.log(true), .compress])
