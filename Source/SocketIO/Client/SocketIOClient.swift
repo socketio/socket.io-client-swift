@@ -154,7 +154,10 @@ open class SocketIOClient : NSObject, SocketIOClientSpec {
 
         manager.handleQueue.asyncAfter(deadline: DispatchTime.now() + timeoutAfter) {[weak self] in
             guard let this = self, this.status == .connecting || this.status == .notConnected else {
-                handler?()
+                guard self?.status == .connected else {
+                    handler?()
+                    return
+                }
                 return
             }
             
