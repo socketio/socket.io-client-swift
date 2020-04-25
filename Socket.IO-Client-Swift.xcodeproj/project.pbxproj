@@ -22,7 +22,6 @@
 		572EF2431B51F18A00EEBB58 /* SocketIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 572EF2381B51F18A00EEBB58 /* SocketIO.framework */; };
 		6CA08A981D615C0B0061FD2A /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6CA08A971D615C0B0061FD2A /* Security.framework */; };
 		74BF53581F894326004972D8 /* SocketIO.h in Headers */ = {isa = PBXBuildFile; fileRef = 572EF23C1B51F18A00EEBB58 /* SocketIO.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		74D0F5961F8053950037C4DC /* Starscream.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9432E00B1F77F883006AF628 /* Starscream.framework */; };
 		74DA21741F09440F009C19EE /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 74DA21731F09440F009C19EE /* libz.tbd */; };
 		74DA217C1F09457B009C19EE /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 74DA21731F09440F009C19EE /* libz.tbd */; };
 		9432E00F1F77F8C4006AF628 /* SSLSecurity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9432E0061F77F7CA006AF628 /* SSLSecurity.swift */; };
@@ -124,7 +123,6 @@
 			files = (
 				74DA21741F09440F009C19EE /* libz.tbd in Frameworks */,
 				6CA08A981D615C0B0061FD2A /* Security.framework in Frameworks */,
-				74D0F5961F8053950037C4DC /* Starscream.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -357,6 +355,7 @@
 				572EF2341B51F18A00EEBB58 /* Frameworks */,
 				572EF2351B51F18A00EEBB58 /* Headers */,
 				572EF2361B51F18A00EEBB58 /* Resources */,
+				06B753202453DFEE00C48C70 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -443,6 +442,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		06B753202453DFEE00C48C70 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "for path in $FRAMEWORK_SEARCH_PATHS\ndo\n    if [ -d \"${path}/Starscream.framework\" ] && [[ $path == *\"Carthage\"* ]]; then\n        export SCRIPT_INPUT_FILE_COUNT=1\n        export SCRIPT_INPUT_FILE_0=\"${path}/Starscream.framework\"\n        /usr/local/bin/carthage copy-frameworks\n        break\n    fi\ndone\n";
+		};
 		74BF53571F8930D3004972D8 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -454,7 +470,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "for path in $FRAMEWORK_SEARCH_PATHS\ndo\n    if [ -d \"${path}/Starscream.framework\" ] && [[ $path == *\"Carthage\"* ]]; then\n        export SCRIPT_INPUT_FILE_COUNT=1\n        export SCRIPT_INPUT_FILE_0=\"${path}/Starscream.framework\"\n        /usr/local/bin/carthage copy-frameworks\n        break\n    fi\ndone";
+			shellScript = "for path in $FRAMEWORK_SEARCH_PATHS\ndo\n    if [ -d \"${path}/Starscream.framework\" ] && [[ $path == *\"Carthage\"* ]]; then\n        export SCRIPT_INPUT_FILE_COUNT=1\n        export SCRIPT_INPUT_FILE_0=\"${path}/Starscream.framework\"\n        /usr/local/bin/carthage copy-frameworks\n        break\n    fi\ndone\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
