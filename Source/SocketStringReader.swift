@@ -55,7 +55,7 @@ struct SocketStringReader {
     mutating func readUntilOccurence(of string: String) -> String {
         let substring = message.utf16[currentIndex...]
         
-        guard let foundIndex = substring.index(of: string.utf16.first!) else {
+        guard let foundIndex = substring.firstIndex(of: string.utf16.first!) else {
             currentIndex = message.utf16.endIndex
             
             return String(substring)!

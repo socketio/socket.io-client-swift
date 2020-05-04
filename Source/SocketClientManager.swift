@@ -47,7 +47,7 @@ open class SocketClientManager : NSObject {
     // MARK: Properties.
 
     /// The shared manager.
-    open static let sharedManager = SocketClientManager()
+    public static let sharedManager = SocketClientManager()
 
     private var sockets = [String: SocketIOClient]()
 
