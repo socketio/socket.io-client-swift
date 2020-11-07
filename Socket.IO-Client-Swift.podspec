@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name         = "Socket.IO-Client-Swift"
   s.module_name  = "SocketIO"
-  s.version      = "16.0.0-beta1"
+  s.version      = "16.0.0-beta2"
   s.summary      = "Socket.IO-client for iOS and OS X"
   s.description  = <<-DESC
                    Socket.IO-client for iOS and OS X.
@@ -18,7 +18,7 @@ Pod::Spec.new do |s|
   s.requires_arc = true
   s.source = {
     :git => "https://github.com/socketio/socket.io-client-swift.git",
-    :tag => 'v16.0.0-beta1',
+    :tag => 'v16.0.0-beta2',
     :submodules => true
   }
 

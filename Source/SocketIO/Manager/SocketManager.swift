@@ -202,7 +202,8 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     /// Connects a socket through this manager's engine.
     ///
     /// - parameter socket: The socket who we should connect through this manager.
-    open func connectSocket(_ socket: SocketIOClient) {
+    /// - parameter withPayload: Optional payload to send on connect
+    open func connectSocket(_ socket: SocketIOClient, withPayload payload: [String: Any]? = nil) {
         guard status == .connected else {
             DefaultSocketLogger.Logger.log("Tried connecting socket when engine isn't open. Connecting",
                                            type: SocketManager.logType)
@@ -211,7 +212,15 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
             return
         }
 
-        engine?.send("0\(socket.nsp),", withData: [])
+        var payloadStr = ""
+
+        if payload != nil,
+           let payloadData = try? JSONSerialization.data(withJSONObject: payload!, options: .fragmentsAllowed),
+           let jsonString = String(data: payloadData, encoding: .utf8) {
+            payloadStr = jsonString
+        }
+
+        engine?.send("0\(socket.nsp),\(payloadStr)", withData: [])
     }
 
     /// Called when the manager has disconnected from socket.io.
@@ -341,7 +350,7 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
         status = .connected
 
         for (_, socket) in nsps where socket.status == .connecting {
-            connectSocket(socket)
+            connectSocket(socket, withPayload: socket.connectPayload)
         }
     }
 

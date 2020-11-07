@@ -79,6 +79,7 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
     public private(set) var sid: String?
 
     let ackHandlers = SocketAckManager()
+    var connectPayload: [String: Any]?
 
     private(set) var currentAck = -1
 
@@ -107,8 +108,8 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
     /// Connect to the server. The same as calling `connect(timeoutAfter:withHandler:)` with a timeout of 0.
     ///
     /// Only call after adding your event listeners, unless you know what you're doing.
-    open func connect() {
-        connect(timeoutAfter: 0, withHandler: nil)
+    open func connect(withPayload payload: [String: Any]? = nil) {
+        connect(withPayload: payload, timeoutAfter: 0, withHandler: nil)
     }
 
     /// Connect to the server. If we aren't connected after `timeoutAfter` seconds, then `withHandler` is called.
@@ -118,7 +119,7 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
     /// - parameter timeoutAfter: The number of seconds after which if we are not connected we assume the connection
     ///                           has failed. Pass 0 to never timeout.
     /// - parameter handler: The handler to call when the client fails to connect.
-    open func connect(timeoutAfter: Double, withHandler handler: (() -> ())?) {
+    open func connect(withPayload payload: [String: Any]? = nil, timeoutAfter: Double, withHandler handler: (() -> ())?) {
         assert(timeoutAfter >= 0, "Invalid timeout: \(timeoutAfter)")
 
         guard let manager = self.manager, status != .connected else {
@@ -128,7 +129,7 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
 
         status = .connecting
 
-        joinNamespace()
+        joinNamespace(withPayload: payload)
 
         guard timeoutAfter != 0 else { return }
 
@@ -340,11 +341,15 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
         manager?.disconnectSocket(self)
     }
 
-    /// Joins `nsp`.
-    open func joinNamespace() {
+    /// Joins `nsp`. You shouldn't need to call this directly, instead call `connect`.
+    ///
+    /// - Parameter payload: The optional
+    open func joinNamespace(withPayload payload: [String: Any]? = nil) {
         DefaultSocketLogger.Logger.log("Joining namespace \(nsp)", type: logType)
 
-        manager?.connectSocket(self)
+        connectPayload = payload
+
+        manager?.connectSocket(self, withPayload: connectPayload)
     }
 
     /// Removes handler(s) for a client event.

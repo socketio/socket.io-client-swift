@@ -91,7 +91,8 @@ public protocol SocketManagerSpec : AnyObject, SocketEngineClient {
     /// Connects a socket through this manager's engine.
     ///
     /// - parameter socket: The socket who we should connect through this manager.
-    func connectSocket(_ socket: SocketIOClient)
+    /// - parameter withPayload: Optional payload to send on connect
+    func connectSocket(_ socket: SocketIOClient, withPayload: [String: Any]?)
 
     /// Called when the manager has disconnected from socket.io.
     ///

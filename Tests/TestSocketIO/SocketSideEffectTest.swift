@@ -454,7 +454,7 @@ class SocketSideEffectTest: XCTestCase {
     }
 }
 
-struct ThrowingData : SocketData {
+struct ThrowingData: SocketData {
     enum ThrowingError : Error {
         case error
     }
@@ -465,7 +465,7 @@ struct ThrowingData : SocketData {
 
 }
 
-class TestEngine : SocketEngineSpec {
+class TestEngine: SocketEngineSpec {
     weak var client: SocketEngineClient?
     private(set) var closed = false
     private(set) var compress = false

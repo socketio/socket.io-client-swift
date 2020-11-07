@@ -65,16 +65,19 @@ public protocol SocketIOClientSpec : AnyObject {
     /// Connect to the server. The same as calling `connect(timeoutAfter:withHandler:)` with a timeout of 0.
     ///
     /// Only call after adding your event listeners, unless you know what you're doing.
-    func connect()
+    ///
+    /// - parameter payload: An optional payload sent on connect
+    func connect(withPayload payload: [String: Any]?)
 
     /// Connect to the server. If we aren't connected after `timeoutAfter` seconds, then `withHandler` is called.
     ///
     /// Only call after adding your event listeners, unless you know what you're doing.
     ///
+    /// - parameter payload: An optional payload sent on connect
     /// - parameter timeoutAfter: The number of seconds after which if we are not connected we assume the connection
     ///                           has failed. Pass 0 to never timeout.
     /// - parameter handler: The handler to call when the client fails to connect.
-    func connect(timeoutAfter: Double, withHandler handler: (() -> ())?)
+    func connect(withPayload payload: [String: Any]?, timeoutAfter: Double, withHandler handler: (() -> ())?)
 
     /// Called when the client connects to a namespace. If the client was created with a namespace upfront,
     /// then this is only called when the client connects to that namespace.
@@ -162,7 +165,9 @@ public protocol SocketIOClientSpec : AnyObject {
     func leaveNamespace()
 
     /// Joins `nsp`.
-    func joinNamespace()
+    ///
+    /// - Parameter withPayload: The payload to connect when joining this namespace
+    func joinNamespace(withPayload payload: [String: Any]?)
 
     /// Removes handler(s) for a client event.
     ///
