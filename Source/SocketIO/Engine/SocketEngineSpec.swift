@@ -27,7 +27,7 @@ import Foundation
 import Starscream
 
 /// Specifies a SocketEngine.
-@objc public protocol SocketEngineSpec {
+public protocol SocketEngineSpec: class {
     // MARK: Properties
 
     /// The client for this engine.
@@ -173,9 +173,9 @@ extension SocketEngineSpec {
 
     func createBinaryDataForSend(using data: Data) -> Either<Data, String> {
         if polling {
-            return .right("b4" + data.base64EncodedString(options: Data.Base64EncodingOptions(rawValue: 0)))
+            return .right("b" + data.base64EncodedString(options: Data.Base64EncodingOptions(rawValue: 0)))
         } else {
-            return .left(Data([0x4]) + data)
+            return .left(data)
         }
     }
 

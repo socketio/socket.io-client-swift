@@ -54,6 +54,9 @@ public protocol SocketIOClientSpec : AnyObject {
     /// **NOTE**: It is not safe to hold on to this view beyond the life of the socket.
     var rawEmitView: SocketRawView { get }
 
+    /// The id of this socket.io connect. This is different from the sid of the engine.io connection.
+    var sid: String? { get }
+
     /// The status of this client.
     var status: SocketIOStatus { get }
 
@@ -77,7 +80,7 @@ public protocol SocketIOClientSpec : AnyObject {
     /// then this is only called when the client connects to that namespace.
     ///
     /// - parameter toNamespace: The namespace that was connected to.
-    func didConnect(toNamespace namespace: String)
+    func didConnect(toNamespace namespace: String, payload: [String: Any]?)
 
     /// Called when the client has disconnected from socket.io.
     ///

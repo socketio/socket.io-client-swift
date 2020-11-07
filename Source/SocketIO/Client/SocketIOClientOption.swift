@@ -52,7 +52,7 @@ public enum SocketIOClientOption : ClientOption {
 
     /// If passed `true`, the only transport that will be used will be WebSockets.
     case forceWebsockets(Bool)
-    
+
     /// If passed `true`, the WebSocket stream will be configured with the enableSOCKSProxy `true`.
     case enableSOCKSProxy(Bool)
 
@@ -80,10 +80,10 @@ public enum SocketIOClientOption : ClientOption {
 
     /// The minimum number of seconds to wait before reconnect attempts.
     case reconnectWait(Int)
-    
+
     /// The maximum number of seconds to wait before reconnect attempts.
     case reconnectWaitMax(Int)
-    
+
     /// The randomization factor for calculating reconnect jitter.
     case randomizationFactor(Double)
 
@@ -91,7 +91,7 @@ public enum SocketIOClientOption : ClientOption {
     case secure(Bool)
 
     /// Allows you to set which certs are valid. Useful for SSL pinning.
-    case security(SSLSecurity)
+    case security(CertificatePinning)
 
     /// If you're using a self-signed set. Only use for development.
     case selfSigned(Bool)

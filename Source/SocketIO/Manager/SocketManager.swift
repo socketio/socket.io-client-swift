@@ -45,7 +45,7 @@ import Foundation
 ///
 /// **NOTE**: The manager is not thread/queue safe, all interaction with the manager should be done on the `handleQueue`
 ///
-open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDataBufferable, ConfigSettable {
+open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDataBufferable, ConfigSettable {
     private static let logType = "SocketManager"
 
     // MARK: Properties
@@ -282,18 +282,8 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
             return
         }
 
-        emitAll(event, withItems: emitData)
-    }
-
-    /// Sends an event to the server on all namespaces in this manager.
-    ///
-    /// Same as `emitAll(_:_:)`, but meant for Objective-C.
-    ///
-    /// - parameter event: The event to send.
-    /// - parameter items: The data to send with this event.
-    open func emitAll(_ event: String, withItems items: [Any]) {
         forAll {socket in
-            socket.emit(event, with: items, completion: nil)
+            socket.emit([event] + emitData, completion: nil)
         }
     }
 
@@ -349,33 +339,32 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
         DefaultSocketLogger.Logger.log("Engine opened \(reason)", type: SocketManager.logType)
 
         status = .connected
-        nsps["/"]?.didConnect(toNamespace: "/")
 
-        for (nsp, socket) in nsps where nsp != "/" && socket.status == .connecting {
+        for (_, socket) in nsps where socket.status == .connecting {
             connectSocket(socket)
         }
     }
 
     /// Called when the engine receives a pong message.
-    open func engineDidReceivePong() {
+    open func engineDidReceivePing() {
         handleQueue.async {
-            self._engineDidReceivePong()
+            self._engineDidReceivePing()
         }
     }
 
-    private func _engineDidReceivePong() {
-        emitAll(clientEvent: .pong, data: [])
+    private func _engineDidReceivePing() {
+        emitAll(clientEvent: .ping, data: [])
     }
 
     /// Called when the sends a ping to the server.
-    open func engineDidSendPing() {
+    open func engineDidSendPong() {
         handleQueue.async {
-            self._engineDidSendPing()
+            self._engineDidSendPong()
         }
     }
 
-    private func _engineDidSendPing() {
-        emitAll(clientEvent: .ping, data: [])
+    private func _engineDidSendPong() {
+        emitAll(clientEvent: .pong, data: [])
     }
 
     private func forAll(do: (SocketIOClient) throws -> ()) rethrows {
@@ -476,14 +465,19 @@ open class SocketManager : NSObject, SocketManagerSpec, SocketParsable, SocketDa
         }
 
         DefaultSocketLogger.Logger.log("Trying to reconnect", type: SocketManager.logType)
-        emitAll(clientEvent: .reconnectAttempt, data: [(reconnectAttempts - currentReconnectAttempt)])
+
+        forAll {socket in
+            guard socket.status == .connecting else { return }
+
+            socket.handleClientEvent(.reconnectAttempt, data: [(reconnectAttempts - currentReconnectAttempt)])
+        }
 
         currentReconnectAttempt += 1
         connect()
 
         let interval = reconnectInterval(attempts: currentReconnectAttempt)
         DefaultSocketLogger.Logger.log("Scheduling reconnect in \(interval)s", type: SocketManager.logType)
-        handleQueue.asyncAfter(deadline: DispatchTime.now() + interval, execute: _tryReconnect)
+        handleQueue.asyncAfter(deadline: .now() + interval, execute: _tryReconnect)
     }
 
     func reconnectInterval(attempts: Int) -> Double {

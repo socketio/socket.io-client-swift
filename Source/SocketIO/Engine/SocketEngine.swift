@@ -28,7 +28,8 @@ import Starscream
 
 /// The class that handles the engine.io protocol and transports.
 /// See `SocketEnginePollable` and `SocketEngineWebsocket` for transport specific methods.
-open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, SocketEngineWebsocket, ConfigSettable {
+open class SocketEngine:
+        NSObject, WebSocketDelegate, URLSessionDelegate, SocketEnginePollable, SocketEngineWebsocket, ConfigSettable {
     // MARK: Properties
 
     private static let logType = "SocketEngine"
@@ -120,6 +121,9 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
     /// The WebSocket for this engine.
     public private(set) var ws: WebSocket?
 
+    /// Whether or not the WebSocket is currently connected.
+    public private(set) var wsConnected = false
+
     /// The client for this engine.
     public weak var client: SocketEngineClient?
 
@@ -130,15 +134,15 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
     private var pingInterval: Int?
     private var pingTimeout = 0 {
         didSet {
-            pongsMissedMax = Int(pingTimeout / (pingInterval ?? 25000))
+            pingsMissedMax = Int(pingTimeout / (pingInterval ?? 25000))
         }
     }
 
-    private var pongsMissed = 0
-    private var pongsMissedMax = 0
+    private var pingsMissed = 0
+    private var pingsMissedMax = 0
     private var probeWait = ProbeWaitQueue()
     private var secure = false
-    private var security: SocketIO.SSLSecurity?
+    private var certPinner: CertificatePinning?
     private var selfSigned = false
 
     // MARK: Initializers
@@ -198,7 +202,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
 
     private func handleBase64(message: String) {
         // binary in base64 string
-        let noPrefix = String(message[message.index(message.startIndex, offsetBy: 2)..<message.endIndex])
+        let noPrefix = String(message[message.index(message.startIndex, offsetBy: 1)..<message.endIndex])
 
         if let data = Data(base64Encoded: noPrefix, options: .ignoreUnknownCharacters) {
             client?.parseEngineBinaryData(data)
@@ -285,45 +289,14 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
     private func createWebSocketAndConnect() {
         var req = URLRequest(url: urlWebSocketWithSid)
 
-        addHeaders(to: &req, includingCookies: session?.configuration.httpCookieStorage?.cookies(for: urlPollingWithSid))
+        addHeaders(
+            to: &req,
+            includingCookies: session?.configuration.httpCookieStorage?.cookies(for: urlPollingWithSid)
+        )
 
-        let stream = FoundationStream()
-        stream.enableSOCKSProxy = enableSOCKSProxy
-        ws = WebSocket(request: req, stream: stream)
+        ws = WebSocket(request: req, certPinner: certPinner, compressionHandler: compress ? WSCompression() : nil)
         ws?.callbackQueue = engineQueue
-        ws?.enableCompression = compress
-        ws?.disableSSLCertValidation = selfSigned
-        ws?.security = security?.security
-
-        ws?.onConnect = {[weak self] in
-            guard let this = self else { return }
-
-            this.websocketDidConnect()
-        }
-
-        ws?.onDisconnect = {[weak self] error in
-            guard let this = self else { return }
-
-            this.websocketDidDisconnect(error: error)
-        }
-
-        ws?.onData = {[weak self] data in
-            guard let this = self else { return }
-
-            this.parseEngineData(data)
-        }
-
-        ws?.onText = {[weak self] message in
-            guard let this = self else { return }
-
-            this.parseEngineMessage(message)
-        }
-
-        ws?.onHttpResponseHeaders = {[weak self] headers in
-            guard let this = self else { return }
-
-            this.client?.engineDidWebsocketUpgrade(headers: headers)
-        }
+        ws?.delegate = self
 
         ws?.connect()
     }
@@ -445,7 +418,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
 
         self.sid = sid
         connected = true
-        pongsMissed = 0
+        pingsMissed = 0
 
         if let upgrades = json["upgrades"] as? [String] {
             upgradeWs = upgrades.contains("websocket")
@@ -462,18 +435,15 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
             createWebSocketAndConnect()
         }
 
-        sendPing()
-
         if !forceWebsockets {
             doPoll()
         }
 
+        checkPings()
         client?.engineDidOpen(reason: "Connect")
     }
 
     private func handlePong(with message: String) {
-        pongsMissed = 0
-
         // We should upgrade
         if message == "3probe" {
             DefaultSocketLogger.Logger.log("Received probe response, should upgrade to WebSockets",
@@ -481,8 +451,31 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
 
             upgradeTransport()
         }
+    }
 
-        client?.engineDidReceivePong()
+    private func handlePing(with message: String) {
+        pingsMissed = 0
+
+        write("", withType: .pong, withData: [])
+
+        client?.engineDidReceivePing()
+    }
+
+    private func checkPings() {
+        let pingInterval = self.pingInterval ?? 25_000
+
+        engineQueue.asyncAfter(deadline: .now() + .milliseconds(pingInterval)) {[weak self, id = self.sid] in
+            // Make sure not to ping old connections
+            guard let this = self, this.sid == id else { return }
+
+            if this.pingsMissed > this.pingsMissedMax {
+                this.closeOutEngine(reason: "Ping timeout")
+            } else {
+                this.pingsMissed += 1
+
+                this.checkPings()
+            }
+        }
     }
 
     /// Parses raw binary received from engine.io.
@@ -491,7 +484,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
     open func parseEngineData(_ data: Data) {
         DefaultSocketLogger.Logger.log("Got binary data: \(data)", type: SocketEngine.logType)
 
-        client?.parseEngineBinaryData(data.subdata(in: 1..<data.endIndex))
+        client?.parseEngineBinaryData(data)
     }
 
     /// Parses a raw engine.io packet.
@@ -502,7 +495,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
 
         let reader = SocketStringReader(message: message)
 
-        if message.hasPrefix("b4") {
+        if message.hasPrefix("b") {
             return handleBase64(message: message)
         }
 
@@ -517,6 +510,8 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
             handleMessage(String(message.dropFirst()))
         case .noop:
             handleNOOP()
+        case .ping:
+            handlePing(with: message)
         case .pong:
             handlePong(with: message)
         case .open:
@@ -549,12 +544,12 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
         guard connected, let pingInterval = pingInterval else { return }
 
         // Server is not responding
-        if pongsMissed > pongsMissedMax {
+        if pingsMissed > pingsMissedMax {
             closeOutEngine(reason: "Ping timeout")
             return
         }
 
-        pongsMissed += 1
+        pingsMissed += 1
         write("", withType: .ping, withData: [], completion: nil)
 
         engineQueue.asyncAfter(deadline: .now() + .milliseconds(pingInterval)) {[weak self, id = self.sid] in
@@ -564,7 +559,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
             this.sendPing()
         }
 
-        client?.engineDidSendPing()
+        client?.engineDidSendPong()
     }
 
     /// Called when the engine should set/update its configs from a given configuration.
@@ -595,8 +590,8 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
                 self.secure = secure
             case let .selfSigned(selfSigned):
                 self.selfSigned = selfSigned
-            case let .security(security):
-                self.security = security
+            case let .security(pinner):
+                self.certPinner = pinner
             case .compress:
                 self.compress = true
             case .enableSOCKSProxy:
@@ -609,7 +604,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
 
     // Moves from long-polling to websockets
     private func upgradeTransport() {
-        if ws?.isConnected ?? false {
+        if wsConnected {
             DefaultSocketLogger.Logger.log("Upgrading transport to WebSockets", type: SocketEngine.logType)
 
             fastUpgrade = true
@@ -630,6 +625,7 @@ open class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePollable, So
                 completion?()
                 return
             }
+
             guard !self.probing else {
                 self.probeWait.append((msg, type, data, completion))
 
@@ -703,5 +699,34 @@ extension SocketEngine {
         DefaultSocketLogger.Logger.error("Engine URLSession became invalid", type: "SocketEngine")
 
         didError(reason: "Engine URLSession became invalid")
+    }
+}
+
+enum EngineError: Error {
+    case canceled
+}
+
+extension SocketEngine {
+    public func didReceive(event: WebSocketEvent, client _: WebSocket) {
+        switch event {
+        case let .connected(headers):
+            wsConnected = true
+            client?.engineDidWebsocketUpgrade(headers: headers)
+            websocketDidConnect()
+        case let .error(err):
+            print(err)
+        case .cancelled:
+            wsConnected = false
+            websocketDidDisconnect(error: EngineError.canceled)
+        case let .disconnected(reason, code):
+            wsConnected = false
+            websocketDidDisconnect(error: nil)
+        case let .text(msg):
+            parseEngineMessage(msg)
+        case let .binary(data):
+            parseEngineData(data)
+        case _:
+            break
+        }
     }
 }

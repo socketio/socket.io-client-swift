@@ -25,7 +25,7 @@
 import Foundation
 
 /// Protocol that is used to implement socket.io polling support
-public protocol SocketEnginePollable : SocketEngineSpec {
+public protocol SocketEnginePollable: SocketEngineSpec {
     // MARK: Properties
 
     /// `true` If engine's session has been invalidated.
@@ -79,11 +79,7 @@ extension SocketEnginePollable {
             postWait.removeAll(keepingCapacity: true)
         }
 
-        var postStr = ""
-
-        for packet in postWait {
-            postStr += "\(packet.msg.utf16.count):\(packet.msg)"
-        }
+        let postStr = postWait.lazy.map({ $0.msg }).joined(separator: "\u{1e}")
 
         DefaultSocketLogger.Logger.log("Created POST string: \(postStr)", type: "SocketEnginePolling")
 
@@ -195,19 +191,14 @@ extension SocketEnginePollable {
     }
 
     func parsePollingMessage(_ str: String) {
-        guard str.count != 1 else { return }
+        guard !str.isEmpty else { return }
 
         DefaultSocketLogger.Logger.log("Got poll message: \(str)", type: "SocketEnginePolling")
 
-        var reader = SocketStringReader(message: str)
+        let records = str.components(separatedBy: "\u{1e}")
 
-        while reader.hasNext {
-            if let n = Int(reader.readUntilOccurence(of: ":")) {
-                parseEngineMessage(reader.read(count: n))
-            } else {
-                parseEngineMessage(str)
-                break
-            }
+        for record in records {
+            parseEngineMessage(record)
         }
     }
 
