@@ -73,7 +73,7 @@ public protocol SocketIOClientSpec : AnyObject {
     ///
     /// Only call after adding your event listeners, unless you know what you're doing.
     ///
-    /// - parameter payload: An optional payload sent on connect
+    /// - parameter withPayload: An optional payload sent on connect
     /// - parameter timeoutAfter: The number of seconds after which if we are not connected we assume the connection
     ///                           has failed. Pass 0 to never timeout.
     /// - parameter handler: The handler to call when the client fails to connect.
@@ -164,7 +164,7 @@ public protocol SocketIOClientSpec : AnyObject {
     /// Call when you wish to leave a namespace and disconnect this socket.
     func leaveNamespace()
 
-    /// Joins `nsp`.
+    /// Joins `nsp`. You shouldn't need to call this directly, instead call `connect`.
     ///
     /// - Parameter withPayload: The payload to connect when joining this namespace
     func joinNamespace(withPayload payload: [String: Any]?)
