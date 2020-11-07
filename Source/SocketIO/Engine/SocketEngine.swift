@@ -131,15 +131,10 @@ open class SocketEngine:
 
     private let url: URL
 
+    private var lastCommunication: Date?
     private var pingInterval: Int?
-    private var pingTimeout = 0 {
-        didSet {
-            pingsMissedMax = Int(pingTimeout / (pingInterval ?? 25000))
-        }
-    }
+    private var pingTimeout = 0
 
-    private var pingsMissed = 0
-    private var pingsMissedMax = 0
     private var probeWait = ProbeWaitQueue()
     private var secure = false
     private var certPinner: CertificatePinning?
@@ -418,7 +413,6 @@ open class SocketEngine:
 
         self.sid = sid
         connected = true
-        pingsMissed = 0
 
         if let upgrades = json["upgrades"] as? [String] {
             upgradeWs = upgrades.contains("websocket")
@@ -454,8 +448,6 @@ open class SocketEngine:
     }
 
     private func handlePing(with message: String) {
-        pingsMissed = 0
-
         write("", withType: .pong, withData: [])
 
         client?.engineDidReceivePing()
@@ -463,16 +455,16 @@ open class SocketEngine:
 
     private func checkPings() {
         let pingInterval = self.pingInterval ?? 25_000
+        let deadlineMs = Double(pingInterval + pingTimeout) / 1000
+        let timeoutDeadline = DispatchTime.now() + .milliseconds(pingInterval + pingTimeout)
 
-        engineQueue.asyncAfter(deadline: .now() + .milliseconds(pingInterval)) {[weak self, id = self.sid] in
+        engineQueue.asyncAfter(deadline: timeoutDeadline) {[weak self, id = self.sid] in
             // Make sure not to ping old connections
             guard let this = self, this.sid == id else { return }
 
-            if this.pingsMissed > this.pingsMissedMax {
+            if abs(this.lastCommunication?.timeIntervalSinceNow ?? deadlineMs) >= deadlineMs {
                 this.closeOutEngine(reason: "Ping timeout")
             } else {
-                this.pingsMissed += 1
-
                 this.checkPings()
             }
         }
@@ -484,6 +476,8 @@ open class SocketEngine:
     open func parseEngineData(_ data: Data) {
         DefaultSocketLogger.Logger.log("Got binary data: \(data)", type: SocketEngine.logType)
 
+        lastCommunication = Date()
+
         client?.parseEngineBinaryData(data)
     }
 
@@ -491,6 +485,8 @@ open class SocketEngine:
     ///
     /// - parameter message: The message to parse.
     open func parseEngineMessage(_ message: String) {
+        lastCommunication = Date()
+
         DefaultSocketLogger.Logger.log("Got message: \(message)", type: SocketEngine.logType)
 
         let reader = SocketStringReader(message: message)
@@ -538,28 +534,6 @@ open class SocketEngine:
         sid = ""
         waitingForPoll = false
         waitingForPost = false
-    }
-
-    private func sendPing() {
-        guard connected, let pingInterval = pingInterval else { return }
-
-        // Server is not responding
-        if pingsMissed > pingsMissedMax {
-            closeOutEngine(reason: "Ping timeout")
-            return
-        }
-
-        pingsMissed += 1
-        write("", withType: .ping, withData: [], completion: nil)
-
-        engineQueue.asyncAfter(deadline: .now() + .milliseconds(pingInterval)) {[weak self, id = self.sid] in
-            // Make sure not to ping old connections
-            guard let this = self, this.sid == id else { return }
-
-            this.sendPing()
-        }
-
-        client?.engineDidSendPong()
     }
 
     /// Called when the engine should set/update its configs from a given configuration.
@@ -713,8 +687,6 @@ extension SocketEngine {
             wsConnected = true
             client?.engineDidWebsocketUpgrade(headers: headers)
             websocketDidConnect()
-        case let .error(err):
-            print(err)
         case .cancelled:
             wsConnected = false
             websocketDidDisconnect(error: EngineError.canceled)
