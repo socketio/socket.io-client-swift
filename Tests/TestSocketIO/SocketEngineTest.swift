@@ -16,7 +16,7 @@ class SocketEngineTest: XCTestCase {
             expect.fulfill()
         }
 
-        engine.parsePollingMessage("15:42[\"blankTest\"]")
+        engine.parsePollingMessage("42[\"blankTest\"]")
         waitForExpectations(timeout: 3, handler: nil)
     }
 
@@ -36,7 +36,7 @@ class SocketEngineTest: XCTestCase {
             }
         }
 
-        engine.parsePollingMessage("15:42[\"blankTest\"]24:42[\"stringTest\",\"hello\"]")
+        engine.parsePollingMessage("42[\"blankTest\"]\u{1e}42[\"stringTest\",\"hello\"]")
         waitForExpectations(timeout: 3, handler: nil)
     }
 
@@ -74,7 +74,7 @@ class SocketEngineTest: XCTestCase {
 
         let stringMessage = "42[\"stringTest\",\"lïne one\\nlīne \\rtwo𦅙𦅛\"]"
 
-        engine.parsePollingMessage("\(stringMessage.utf16.count):\(stringMessage)")
+        engine.parsePollingMessage("\(stringMessage)")
         waitForExpectations(timeout: 3, handler: nil)
     }
 
@@ -96,7 +96,7 @@ class SocketEngineTest: XCTestCase {
 
     func testBase64Data() {
         let expect = expectation(description: "Engine Decodes base64 data")
-        let b64String = "b4aGVsbG8NCg=="
+        let b64String = "baGVsbG8NCg=="
         let packetString = "451-[\"test\",{\"test\":{\"_placeholder\":true,\"num\":0}}]"
 
         socket.on("test") {data, ack in

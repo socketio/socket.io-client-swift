@@ -283,7 +283,7 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
         }
 
         forAll {socket in
-            socket.emit([event] + emitData, completion: nil)
+            socket.emit([event] + emitData)
         }
     }
 
