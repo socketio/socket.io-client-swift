@@ -681,6 +681,11 @@ enum EngineError: Error {
 }
 
 extension SocketEngine {
+    /// Delegate method for WebSocketDelegate.
+    ///
+    /// - Parameters:
+    ///   - event: WS Event
+    ///   - _:
     public func didReceive(event: WebSocketEvent, client _: WebSocket) {
         switch event {
         case let .connected(headers):
