@@ -83,11 +83,10 @@ socket.publisher(on: "message")
 socket.publisher(clientEvent: .statusChange)
 		.map { output -> ConnectionStatus in
             guard let id = output.data.last as? Int else { return .notConnected }
-            return ConnectionStatus(rawValue: id) ?? .notConnected
+            return ConnectionStatus(rawValue: id) ?? .notConnected // parsing to local ConnectionStatus Enum
         }
         .sink {[unowned self] (status) in
-            self.delegate?.webSocketConnectionStatusChanged(self, status: status)
-            socket.emit("user", ["id": self.UUIDString])
+            
         }.add(to: &disposeBag)
         
         socket.connect()
