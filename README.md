@@ -53,7 +53,7 @@ SocketIOClient* socket = manager.defaultSocket;
 
 ```
 
-##Combine Support (available: iOS 13.0+ macOS 10.15+ tvOS 13.0+ watchOS 6.0+)
+## Combine Support (available: iOS 13.0+ macOS 10.15+ tvOS 13.0+ watchOS 6.0+)
 
 Socket.IO-client adds support for combine framework. 
 
