@@ -10,7 +10,7 @@ import Combine
 
 public typealias OnSocketData = (data: [Any], ack: SocketAckEmitter)
 
-@available(iOS 13.0, *)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 public final class OnSubscription<OnSubscriber: Subscriber>: Subscription where OnSubscriber.Input == OnSocketData {
     private var subscriber: OnSubscriber?
     private let socket: SocketIOClient
