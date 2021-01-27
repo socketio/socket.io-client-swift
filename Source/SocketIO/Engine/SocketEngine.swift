@@ -307,8 +307,6 @@ open class SocketEngine:
             includingCookies: session?.configuration.httpCookieStorage?.cookies(for: urlPollingWithSid)
         )
 
-        print("ws req: \(req)")
-
         ws = WebSocket(request: req, certPinner: certPinner, compressionHandler: compress ? WSCompression() : nil)
         ws?.callbackQueue = engineQueue
         ws?.delegate = self
