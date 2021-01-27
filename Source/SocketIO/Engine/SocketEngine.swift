@@ -566,7 +566,6 @@ open class SocketEngine:
 
     private func sendPing() {
         guard connected, let pingInterval = pingInterval else {
-            print("not connected \(self.connected) or no ping interval \(self.pingInterval ?? -222)")
             return
         }
 
@@ -582,7 +581,6 @@ open class SocketEngine:
         engineQueue.asyncAfter(deadline: .now() + .milliseconds(pingInterval)) {[weak self, id = self.sid] in
             // Make sure not to ping old connections
             guard let this = self, this.sid == id else {
-                print("wrong ping?")
                 return
             }
 
