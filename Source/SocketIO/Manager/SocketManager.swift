@@ -119,6 +119,8 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
         }
     }
 
+    public private(set) var version = SocketIOVersion.three
+
     /// A list of packets that are waiting for binary data.
     ///
     /// The way that socket.io works all data should be sent directly after each packet.
@@ -214,7 +216,7 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
 
         var payloadStr = ""
 
-        if payload != nil,
+        if version.rawValue >= 3 && payload != nil,
            let payloadData = try? JSONSerialization.data(withJSONObject: payload!, options: .fragmentsAllowed),
            let jsonString = String(data: payloadData, encoding: .utf8) {
             payloadStr = jsonString
@@ -349,12 +351,20 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
 
         status = .connected
 
-        for (_, socket) in nsps where socket.status == .connecting {
+        if version.rawValue < 3 {
+            nsps["/"]?.didConnect(toNamespace: "/", payload: nil)
+        }
+
+        for (nsp, socket) in nsps where socket.status == .connecting {
+            if version.rawValue < 3 && nsp == "/" {
+                continue
+            }
+
             connectSocket(socket, withPayload: socket.connectPayload)
         }
     }
 
-    /// Called when the engine receives a pong message.
+    /// Called when the engine receives a ping message.
     open func engineDidReceivePing() {
         handleQueue.async {
             self._engineDidReceivePing()
@@ -366,6 +376,28 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     }
 
     /// Called when the sends a ping to the server.
+    open func engineDidSendPing() {
+        handleQueue.async {
+            self._engineDidSendPing()
+        }
+    }
+
+    private func _engineDidSendPing() {
+        emitAll(clientEvent: .ping, data: [])
+    }
+
+    /// Called when the engine receives a pong message.
+    open func engineDidReceivePong() {
+        handleQueue.async {
+            self._engineDidReceivePong()
+        }
+    }
+
+    private func _engineDidReceivePong() {
+        emitAll(clientEvent: .pong, data: [])
+    }
+
+    /// Called when the sends a pong to the server.
     open func engineDidSendPong() {
         handleQueue.async {
             self._engineDidSendPong()
@@ -508,13 +540,13 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
         for option in config {
             switch option {
             case let .forceNew(new):
-                self.forceNew = new
+                forceNew = new
             case let .handleQueue(queue):
-                self.handleQueue = queue
+                handleQueue = queue
             case let .reconnects(reconnects):
                 self.reconnects = reconnects
             case let .reconnectAttempts(attempts):
-                self.reconnectAttempts = attempts
+                reconnectAttempts = attempts
             case let .reconnectWait(wait):
                 reconnectWait = abs(wait)
             case let .reconnectWaitMax(wait):
@@ -525,6 +557,8 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
                 DefaultSocketLogger.Logger.log = log
             case let .logger(logger):
                 DefaultSocketLogger.Logger = logger
+            case let .version(num):
+                version = num
             case _:
                 continue
             }

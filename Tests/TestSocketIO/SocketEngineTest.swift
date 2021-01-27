@@ -10,6 +10,19 @@ import XCTest
 @testable import SocketIO
 
 class SocketEngineTest: XCTestCase {
+    func testBasicPollingMessageV3() {
+        let expect = expectation(description: "Basic polling test v3")
+
+        socket.on("blankTest") {data, ack in
+            expect.fulfill()
+        }
+
+        engine.setConfigs([.version(.two)])
+        engine.parsePollingMessage("15:42[\"blankTest\"]")
+
+        waitForExpectations(timeout: 3, handler: nil)
+    }
+
     func testBasicPollingMessage() {
         let expect = expectation(description: "Basic polling test")
         socket.on("blankTest") {data, ack in
@@ -83,15 +96,15 @@ class SocketEngineTest: XCTestCase {
             "created": "2016-05-04T18:31:15+0200"
         ]
 
-        XCTAssertEqual(engine.urlPolling.query, "transport=polling&b64=1&created=2016-05-04T18%3A31%3A15%2B0200")
-        XCTAssertEqual(engine.urlWebSocket.query, "transport=websocket&created=2016-05-04T18%3A31%3A15%2B0200")
+        XCTAssertEqual(engine.urlPolling.query, "transport=polling&b64=1&created=2016-05-04T18%3A31%3A15%2B0200&EIO=4")
+        XCTAssertEqual(engine.urlWebSocket.query, "transport=websocket&created=2016-05-04T18%3A31%3A15%2B0200&EIO=4")
 
         engine.connectParams = [
             "forbidden": "!*'();:@&=+$,/?%#[]\" {}^|"
         ]
 
-        XCTAssertEqual(engine.urlPolling.query, "transport=polling&b64=1&forbidden=%21%2A%27%28%29%3B%3A%40%26%3D%2B%24%2C%2F%3F%25%23%5B%5D%22%20%7B%7D%5E%7C")
-        XCTAssertEqual(engine.urlWebSocket.query, "transport=websocket&forbidden=%21%2A%27%28%29%3B%3A%40%26%3D%2B%24%2C%2F%3F%25%23%5B%5D%22%20%7B%7D%5E%7C")
+        XCTAssertEqual(engine.urlPolling.query, "transport=polling&b64=1&forbidden=%21%2A%27%28%29%3B%3A%40%26%3D%2B%24%2C%2F%3F%25%23%5B%5D%22%20%7B%7D%5E%7C&EIO=4")
+        XCTAssertEqual(engine.urlWebSocket.query, "transport=websocket&forbidden=%21%2A%27%28%29%3B%3A%40%26%3D%2B%24%2C%2F%3F%25%23%5B%5D%22%20%7B%7D%5E%7C&EIO=4")
     }
 
     func testBase64Data() {

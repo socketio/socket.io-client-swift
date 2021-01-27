@@ -134,6 +134,18 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
 
         joinNamespace(withPayload: payload)
 
+        switch manager.version {
+        case .three:
+            break
+        case .two where manager.status == .connected && nsp == "/":
+            // We might not get a connect event for the default nsp, fire immediately
+            didConnect(toNamespace: nsp, payload: nil)
+
+            return
+        case _:
+            break
+        }
+
         guard timeoutAfter != 0 else { return }
 
         manager.handleQueue.asyncAfter(deadline: DispatchTime.now() + timeoutAfter) {[weak self] in

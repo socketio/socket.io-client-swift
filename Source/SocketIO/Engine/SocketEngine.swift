@@ -111,6 +111,9 @@ open class SocketEngine:
     /// The url for WebSockets.
     public private(set) var urlWebSocket = URL(string: "http://localhost/")!
 
+    /// The version of engine.io being used. Default is three.
+    public private(set) var version: SocketIOVersion = .three
+
     /// If `true`, then the engine is currently in WebSockets mode.
     @available(*, deprecated, message: "No longer needed, if we're not polling, then we must be doing websockets")
     public private(set) var websocket = false
@@ -133,8 +136,14 @@ open class SocketEngine:
 
     private var lastCommunication: Date?
     private var pingInterval: Int?
-    private var pingTimeout = 0
+    private var pingTimeout = 0 {
+        didSet {
+            pongsMissedMax = Int(pingTimeout / (pingInterval ?? 25000))
+        }
+    }
 
+    private var pongsMissed = 0
+    private var pongsMissedMax = 0
     private var probeWait = ProbeWaitQueue()
     private var secure = false
     private var certPinner: CertificatePinning?
@@ -196,8 +205,9 @@ open class SocketEngine:
     }
 
     private func handleBase64(message: String) {
+        let offset = version.rawValue >= 3 ? 1 : 2
         // binary in base64 string
-        let noPrefix = String(message[message.index(message.startIndex, offsetBy: 1)..<message.endIndex])
+        let noPrefix = String(message[message.index(message.startIndex, offsetBy: offset)..<message.endIndex])
 
         if let data = Data(base64Encoded: noPrefix, options: .ignoreUnknownCharacters) {
             client?.parseEngineBinaryData(data)
@@ -278,6 +288,14 @@ open class SocketEngine:
         urlWebSocket.percentEncodedQuery = "transport=websocket" + queryString
         urlPolling.percentEncodedQuery = "transport=polling&b64=1" + queryString
 
+        if !urlWebSocket.percentEncodedQuery!.contains("EIO") {
+            urlWebSocket.percentEncodedQuery = urlWebSocket.percentEncodedQuery! + engineIOParam
+        }
+
+        if !urlPolling.percentEncodedQuery!.contains("EIO") {
+            urlPolling.percentEncodedQuery = urlPolling.percentEncodedQuery! + engineIOParam
+        }
+
         return (urlPolling.url!, urlWebSocket.url!)
     }
 
@@ -288,6 +306,8 @@ open class SocketEngine:
             to: &req,
             includingCookies: session?.configuration.httpCookieStorage?.cookies(for: urlPollingWithSid)
         )
+
+        print("ws req: \(req)")
 
         ws = WebSocket(request: req, certPinner: certPinner, compressionHandler: compress ? WSCompression() : nil)
         ws?.callbackQueue = engineQueue
@@ -413,6 +433,7 @@ open class SocketEngine:
 
         self.sid = sid
         connected = true
+        pongsMissed = 0
 
         if let upgrades = json["upgrades"] as? [String] {
             upgradeWs = upgrades.contains("websocket")
@@ -429,15 +450,22 @@ open class SocketEngine:
             createWebSocketAndConnect()
         }
 
+        if version.rawValue >= 3 {
+            checkPings()
+        } else {
+            sendPing()
+        }
+
         if !forceWebsockets {
             doPoll()
         }
 
-        checkPings()
         client?.engineDidOpen(reason: "Connect")
     }
 
     private func handlePong(with message: String) {
+        pongsMissed = 0
+
         // We should upgrade
         if message == "3probe" {
             DefaultSocketLogger.Logger.log("Received probe response, should upgrade to WebSockets",
@@ -445,10 +473,14 @@ open class SocketEngine:
 
             upgradeTransport()
         }
+
+        client?.engineDidReceivePong()
     }
 
     private func handlePing(with message: String) {
-        write("", withType: .pong, withData: [])
+        if version.rawValue >= 3 {
+            write("", withType: .pong, withData: [])
+        }
 
         client?.engineDidReceivePing()
     }
@@ -478,7 +510,7 @@ open class SocketEngine:
 
         lastCommunication = Date()
 
-        client?.parseEngineBinaryData(data)
+        client?.parseEngineBinaryData(version.rawValue >= 3 ? data : data.subdata(in: 1..<data.endIndex))
     }
 
     /// Parses a raw engine.io packet.
@@ -489,13 +521,11 @@ open class SocketEngine:
 
         DefaultSocketLogger.Logger.log("Got message: \(message)", type: SocketEngine.logType)
 
-        let reader = SocketStringReader(message: message)
-
-        if message.hasPrefix("b") {
+        if message.hasPrefix(version.rawValue >= 3 ? "b" : "b4") {
             return handleBase64(message: message)
         }
 
-        guard let type = SocketEnginePacketType(rawValue: Int(reader.currentCharacter) ?? -1) else {
+        guard let type = SocketEnginePacketType(rawValue: message.first?.wholeNumberValue ?? -1) else {
             checkAndHandleEngineError(message)
 
             return
@@ -536,6 +566,34 @@ open class SocketEngine:
         waitingForPost = false
     }
 
+    private func sendPing() {
+        guard connected, let pingInterval = pingInterval else {
+            print("not connected \(self.connected) or no ping interval \(self.pingInterval ?? -222)")
+            return
+        }
+
+        // Server is not responding
+        if pongsMissed > pongsMissedMax {
+            closeOutEngine(reason: "Ping timeout")
+            return
+        }
+
+        pongsMissed += 1
+        write("", withType: .ping, withData: [], completion: nil)
+
+        engineQueue.asyncAfter(deadline: .now() + .milliseconds(pingInterval)) {[weak self, id = self.sid] in
+            // Make sure not to ping old connections
+            guard let this = self, this.sid == id else {
+                print("wrong ping?")
+                return
+            }
+
+            this.sendPing()
+        }
+
+        client?.engineDidSendPing()
+    }
+
     /// Called when the engine should set/update its configs from a given configuration.
     ///
     /// parameter config: The `SocketIOClientConfiguration` that should be used to set/update configs.
@@ -570,6 +628,8 @@ open class SocketEngine:
                 self.compress = true
             case .enableSOCKSProxy:
                 self.enableSOCKSProxy = true
+            case let .version(num):
+                version = num
             default:
                 continue
             }

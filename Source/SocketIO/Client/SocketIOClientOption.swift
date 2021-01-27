@@ -25,6 +25,12 @@
 import Foundation
 import Starscream
 
+/// The socket.io version being used.
+public enum SocketIOVersion: Int {
+    case two = 2
+    case three = 3
+}
+
 protocol ClientOption : CustomStringConvertible, Equatable {
     func getSocketIOOptionValue() -> Any
 }
@@ -99,6 +105,9 @@ public enum SocketIOClientOption : ClientOption {
     /// Sets an NSURLSessionDelegate for the underlying engine. Useful if you need to handle self-signed certs.
     case sessionDelegate(URLSessionDelegate)
 
+    /// The version of socket.io being used. This should match the server version. Default is 3.
+    case version(SocketIOVersion)
+
     // MARK: Properties
 
     /// The description of this option.
@@ -148,6 +157,8 @@ public enum SocketIOClientOption : ClientOption {
             description = "sessionDelegate"
         case .enableSOCKSProxy:
             description = "enableSOCKSProxy"
+        case .version:
+            description = "version"
         }
 
         return description
@@ -199,6 +210,8 @@ public enum SocketIOClientOption : ClientOption {
             value = delegate
         case let .enableSOCKSProxy(enable):
             value = enable
+        case let.version(versionNum):
+            value = versionNum
         }
 
         return value

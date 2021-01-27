@@ -79,7 +79,15 @@ extension SocketEnginePollable {
             postWait.removeAll(keepingCapacity: true)
         }
 
-        let postStr = postWait.lazy.map({ $0.msg }).joined(separator: "\u{1e}")
+        var postStr = ""
+
+        if version.rawValue >= 3 {
+            postStr = postWait.lazy.map({ $0.msg }).joined(separator: "\u{1e}")
+        } else {
+            for packet in postWait {
+                postStr += "\(packet.msg.utf16.count):\(packet.msg)"
+            }
+        }
 
         DefaultSocketLogger.Logger.log("Created POST string: \(postStr)", type: "SocketEnginePolling")
 
@@ -195,10 +203,29 @@ extension SocketEnginePollable {
 
         DefaultSocketLogger.Logger.log("Got poll message: \(str)", type: "SocketEnginePolling")
 
-        let records = str.components(separatedBy: "\u{1e}")
+        if version.rawValue >= 3 {
+            let records = str.components(separatedBy: "\u{1e}")
 
-        for record in records {
-            parseEngineMessage(record)
+            for record in records {
+                parseEngineMessage(record)
+            }
+        } else {
+            guard str.count != 1 else {
+                parseEngineMessage(str)
+
+                return
+            }
+
+            var reader = SocketStringReader(message: str)
+
+            while reader.hasNext {
+                if let n = Int(reader.readUntilOccurence(of: ":")) {
+                    parseEngineMessage(reader.read(count: n))
+                } else {
+                    parseEngineMessage(str)
+                    break
+                }
+            }
         }
     }
 

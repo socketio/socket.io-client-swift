@@ -83,6 +83,9 @@ public protocol SocketManagerSpec : AnyObject, SocketEngineClient {
     /// The status of this manager.
     var status: SocketIOStatus { get }
 
+    /// The version of socket.io in use.
+    var version: SocketIOVersion { get }
+
     // MARK: Methods
 
     /// Connects the underlying transport.

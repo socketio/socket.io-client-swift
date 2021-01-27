@@ -485,6 +485,7 @@ class TestEngine: SocketEngineSpec {
     private(set) var urlWebSocket = URL(string: "http://localhost/")!
     private(set) var websocket = false
     private(set) var ws: WebSocket? = nil
+    private(set) var version = SocketIOVersion.three
 
     fileprivate var onConnect: (() -> ())?
 
