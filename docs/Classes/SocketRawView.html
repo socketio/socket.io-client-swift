@@ -21,7 +21,7 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="../index.html">
-          SocketIO Docs
+          SocketIO 16.0.0 Docs
         </a>
          (100% documented)
       </p>
@@ -51,6 +51,9 @@
                 <a class="nav-group-task-link" href="../12to13.html">12to13</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../15to16.html">15to16</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../faq.html">FAQ</a>
               </li>
             </ul>
@@ -60,9 +63,6 @@
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/OnAckCallback.html">OnAckCallback</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Classes/SSLSecurity.html">SSLSecurity</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/SocketAckEmitter.html">SocketAckEmitter</a>
@@ -106,7 +106,51 @@
                 <a class="nav-group-task-link" href="../Enums/SocketIOStatus.html">SocketIOStatus</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/SocketIOVersion.html">SocketIOVersion</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Enums/SocketParsableError.html">SocketParsableError</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:Sa">Array</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:Sb">Bool</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:10Foundation4DataV">Data</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:SD">Dictionary</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:Sd">Double</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:Si">Int</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSArray">NSArray</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSData">NSData</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSDictionary">NSDictionary</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSNull">NSNull</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSString">NSString</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:SS">String</a>
               </li>
             </ul>
           </li>
@@ -184,10 +228,11 @@
       <article class="main-content">
 
         <section class="section">
-          <div class="section-content">
+          <div class="section-content top-matter">
             <h1>SocketRawView</h1>
               <div class="declaration">
                 <div class="language">
+                  
                   <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">SocketRawView</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
 
                 </div>
@@ -210,7 +255,7 @@
                     <code>
                     <a name="/s:8SocketIO0A7RawViewC4emityySS_AA0A4Data_pdtF"></a>
                     <a name="//apple_ref/swift/Method/emit(_:_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A7RawViewC4emityySS_AA0A4Data_pdtF">emit(_:_:)</a>
+                    <a class="token" href="#/s:8SocketIO0A7RawViewC4emityySS_AA0A4Data_pdtF">emit(_:<wbr>_:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -271,7 +316,7 @@ will be emitted. The structure of the error data is <code>[eventName, items, the
                     <code>
                     <a name="/c:@M@SocketIO@objc(cs)SocketRawView(im)emit:with:"></a>
                     <a name="//apple_ref/swift/Method/emit(_:with:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketRawView(im)emit:with:">emit(_:with:)</a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketRawView(im)emit:with:">emit(_:<wbr>with:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -330,7 +375,7 @@ will be emitted. The structure of the error data is <code>[eventName, items, the
                     <code>
                     <a name="/s:8SocketIO0A7RawViewC11emitWithAckyAA02OnG8CallbackCSS_AA0A4Data_pdtF"></a>
                     <a name="//apple_ref/swift/Method/emitWithAck(_:_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A7RawViewC11emitWithAckyAA02OnG8CallbackCSS_AA0A4Data_pdtF">emitWithAck(_:_:)</a>
+                    <a class="token" href="#/s:8SocketIO0A7RawViewC11emitWithAckyAA02OnG8CallbackCSS_AA0A4Data_pdtF">emitWithAck(_:<wbr>_:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -404,7 +449,7 @@ will be emitted. The structure of the error data is <code>[eventName, items, the
                     <code>
                     <a name="/c:@M@SocketIO@objc(cs)SocketRawView(im)emitWithAck:with:"></a>
                     <a name="//apple_ref/swift/Method/emitWithAck(_:with:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketRawView(im)emitWithAck:with:">emitWithAck(_:with:)</a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketRawView(im)emitWithAck:with:">emitWithAck(_:<wbr>with:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -479,8 +524,8 @@ Check that your server&rsquo;s api will ack the event being sent.</p>
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2019 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2019-05-28)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2021 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2021-02-01)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>

@@ -268,22 +268,6 @@ class SocketSideEffectTest: XCTestCase {
         waitForExpectations(timeout: 0.8)
     }
 
-    func testConnectCallsConnectEventImmediatelyIfManagerAlreadyConnected() {
-        let expect = expectation(description: "The client should call the connect handler")
-
-        socket = manager.defaultSocket
-
-        socket.setTestStatus(.notConnected)
-        manager.setTestStatus(.connected)
-
-        socket.on(clientEvent: .connect) {data, ack in
-            expect.fulfill()
-        }
-        socket.connect(timeoutAfter: 0.3, withHandler: nil)
-
-        waitForExpectations(timeout: 0.8)
-    }
-
     func testConnectDoesNotTimeOutIfConnected() {
         let expect = expectation(description: "The client should not call the timeout function")
 
@@ -308,9 +292,14 @@ class SocketSideEffectTest: XCTestCase {
 
     func testClientCallsConnectOnEngineOpen() {
         let expect = expectation(description: "The client call the connect handler")
+        let eng = TestEngine(client: manager, url: manager.socketURL, options: nil)
 
+        eng.onConnect = {
+            self.socket.didConnect(toNamespace: self.socket.nsp, payload: nil)
+        }
+
+        manager.engine = eng
         socket.setTestStatus(.notConnected)
-        manager.engine = TestEngine(client: manager, url: manager.socketURL, options: nil)
 
         socket.on(clientEvent: .connect) {data, ack in
             expect.fulfill()
@@ -429,11 +418,11 @@ class SocketSideEffectTest: XCTestCase {
     func testClientCallsSentPingHandler() {
         let expect = expectation(description: "The client should emit a ping event")
 
-        socket.on(clientEvent: .ping) {data, ack in
+        socket.on(clientEvent: .pong) {data, ack in
             expect.fulfill()
         }
 
-        manager.engineDidSendPing()
+        manager.engineDidSendPong()
 
         waitForExpectations(timeout: 0.2)
     }
@@ -441,11 +430,11 @@ class SocketSideEffectTest: XCTestCase {
     func testClientCallsGotPongHandler() {
         let expect = expectation(description: "The client should emit a pong event")
 
-        socket.on(clientEvent: .pong) {data, ack in
+        socket.on(clientEvent: .ping) {data, ack in
             expect.fulfill()
         }
 
-        manager.engineDidReceivePong()
+        manager.engineDidReceivePing()
 
         waitForExpectations(timeout: 0.2)
     }
@@ -465,7 +454,7 @@ class SocketSideEffectTest: XCTestCase {
     }
 }
 
-struct ThrowingData : SocketData {
+struct ThrowingData: SocketData {
     enum ThrowingError : Error {
         case error
     }
@@ -476,7 +465,7 @@ struct ThrowingData : SocketData {
 
 }
 
-class TestEngine : SocketEngineSpec {
+class TestEngine: SocketEngineSpec {
     weak var client: SocketEngineClient?
     private(set) var closed = false
     private(set) var compress = false
@@ -496,13 +485,16 @@ class TestEngine : SocketEngineSpec {
     private(set) var urlWebSocket = URL(string: "http://localhost/")!
     private(set) var websocket = false
     private(set) var ws: WebSocket? = nil
+    private(set) var version = SocketIOVersion.three
+
+    fileprivate var onConnect: (() -> ())?
 
     required init(client: SocketEngineClient, url: URL, options: [String: Any]?) {
         self.client = client
     }
 
     func connect() {
-        client?.engineDidOpen(reason: "Connect")
+        onConnect?()
     }
 
     func didError(reason: String) { }

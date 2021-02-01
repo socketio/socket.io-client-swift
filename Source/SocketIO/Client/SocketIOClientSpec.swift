@@ -54,6 +54,9 @@ public protocol SocketIOClientSpec : AnyObject {
     /// **NOTE**: It is not safe to hold on to this view beyond the life of the socket.
     var rawEmitView: SocketRawView { get }
 
+    /// The id of this socket.io connect. This is different from the sid of the engine.io connection.
+    var sid: String? { get }
+
     /// The status of this client.
     var status: SocketIOStatus { get }
 
@@ -62,22 +65,25 @@ public protocol SocketIOClientSpec : AnyObject {
     /// Connect to the server. The same as calling `connect(timeoutAfter:withHandler:)` with a timeout of 0.
     ///
     /// Only call after adding your event listeners, unless you know what you're doing.
-    func connect()
+    ///
+    /// - parameter payload: An optional payload sent on connect
+    func connect(withPayload payload: [String: Any]?)
 
     /// Connect to the server. If we aren't connected after `timeoutAfter` seconds, then `withHandler` is called.
     ///
     /// Only call after adding your event listeners, unless you know what you're doing.
     ///
+    /// - parameter withPayload: An optional payload sent on connect
     /// - parameter timeoutAfter: The number of seconds after which if we are not connected we assume the connection
     ///                           has failed. Pass 0 to never timeout.
     /// - parameter handler: The handler to call when the client fails to connect.
-    func connect(timeoutAfter: Double, withHandler handler: (() -> ())?)
+    func connect(withPayload payload: [String: Any]?, timeoutAfter: Double, withHandler handler: (() -> ())?)
 
     /// Called when the client connects to a namespace. If the client was created with a namespace upfront,
     /// then this is only called when the client connects to that namespace.
     ///
     /// - parameter toNamespace: The namespace that was connected to.
-    func didConnect(toNamespace namespace: String)
+    func didConnect(toNamespace namespace: String, payload: [String: Any]?)
 
     /// Called when the client has disconnected from socket.io.
     ///
@@ -158,8 +164,10 @@ public protocol SocketIOClientSpec : AnyObject {
     /// Call when you wish to leave a namespace and disconnect this socket.
     func leaveNamespace()
 
-    /// Joins `nsp`.
-    func joinNamespace()
+    /// Joins `nsp`. You shouldn't need to call this directly, instead call `connect`.
+    ///
+    /// - Parameter withPayload: The payload to connect when joining this namespace
+    func joinNamespace(withPayload payload: [String: Any]?)
 
     /// Removes handler(s) for a client event.
     ///

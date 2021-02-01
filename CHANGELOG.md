@@ -1,3 +1,8 @@
+# v16.0.0
+
+- Removed Objective-C support. It's time for you to embrace Swift.
+- Socket.io 3 support.
+
 # v15.3.0
 
 - Add `==` operators for `SocketAckStatus` and `String`

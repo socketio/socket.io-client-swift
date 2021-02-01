@@ -21,7 +21,7 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="../index.html">
-          SocketIO Docs
+          SocketIO 16.0.0 Docs
         </a>
          (100% documented)
       </p>
@@ -51,6 +51,9 @@
                 <a class="nav-group-task-link" href="../12to13.html">12to13</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../15to16.html">15to16</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../faq.html">FAQ</a>
               </li>
             </ul>
@@ -60,9 +63,6 @@
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/OnAckCallback.html">OnAckCallback</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Classes/SSLSecurity.html">SSLSecurity</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/SocketAckEmitter.html">SocketAckEmitter</a>
@@ -106,7 +106,51 @@
                 <a class="nav-group-task-link" href="../Enums/SocketIOStatus.html">SocketIOStatus</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/SocketIOVersion.html">SocketIOVersion</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Enums/SocketParsableError.html">SocketParsableError</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:Sa">Array</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:Sb">Bool</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:10Foundation4DataV">Data</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:SD">Dictionary</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:Sd">Double</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:Si">Int</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSArray">NSArray</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSData">NSData</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSDictionary">NSDictionary</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSNull">NSNull</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSString">NSString</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:SS">String</a>
               </li>
             </ul>
           </li>
@@ -184,10 +228,11 @@
       <article class="main-content">
 
         <section class="section">
-          <div class="section-content">
+          <div class="section-content top-matter">
             <h1>SocketParsable</h1>
               <div class="declaration">
                 <div class="language">
+                  
                   <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketParsable</span> <span class="p">:</span> <span class="kt">AnyObject</span></code></pre>
 
                 </div>
@@ -203,9 +248,11 @@
               <div class="task-name-container">
                 <a name="/Methods"></a>
                 <a name="//apple_ref/swift/Section/Methods" class="dashAnchor"></a>
-                <a href="#/Methods">
-                  <h3 class="section-name">Methods</h3>
-                </a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/Methods"></a>
+                  <h3 class="section-name"><p>Methods</p>
+</h3>
+                </div>
               </div>
               <ul class="item-container">
                 <li class="item">
@@ -213,26 +260,14 @@
                     <code>
                     <a name="/s:8SocketIO0A8ParsableP15parseBinaryDatayAA0A6PacketVSg10Foundation0F0VF"></a>
                     <a name="//apple_ref/swift/Method/parseBinaryData(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A8ParsableP15parseBinaryDatayAA0A6PacketVSg10Foundation0F0VF">parseBinaryData(_:)</a>
+                    <a class="token" href="#/s:8SocketIO0A8ParsableP15parseBinaryDatayAA0A6PacketVSg10Foundation0F0VF">parseBinaryData(_:<wbr>)</a>
                     </code>
-                      <span class="declaration-note">
-                        Default implementation
-                      </span>
                   </div>
                   <div class="height-container">
                     <div class="pointer-container"></div>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Called when the engine has received some binary data that should be attached to a packet.</p>
-
-<p>Packets binary data should be sent directly after the packet that expects it, so there&rsquo;s confusion over
-where the data should go. Data should be received in the order it is sent, so that the correct data is put
-into the correct placeholder.</p>
-
-                      </div>
-                      <h4>Default Implementation</h4>
-                      <div class="default_impl abstract">
                         <p>Called when the engine has received some binary data that should be attached to a packet.</p>
 
 <p>Packets binary data should be sent directly after the packet that expects it, so there&rsquo;s confusion over
@@ -275,22 +310,14 @@ into the correct placeholder.</p>
                     <code>
                     <a name="/s:8SocketIO0A8ParsableP05parseA7MessageyAA0A6PacketVSgSSF"></a>
                     <a name="//apple_ref/swift/Method/parseSocketMessage(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A8ParsableP05parseA7MessageyAA0A6PacketVSgSSF">parseSocketMessage(_:)</a>
+                    <a class="token" href="#/s:8SocketIO0A8ParsableP05parseA7MessageyAA0A6PacketVSgSSF">parseSocketMessage(_:<wbr>)</a>
                     </code>
-                      <span class="declaration-note">
-                        Default implementation
-                      </span>
                   </div>
                   <div class="height-container">
                     <div class="pointer-container"></div>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Called when the engine has received a string that should be parsed into a socket.io packet.</p>
-
-                      </div>
-                      <h4>Default Implementation</h4>
-                      <div class="default_impl abstract">
                         <p>Called when the engine has received a string that should be parsed into a socket.io packet.</p>
 
                       </div>
@@ -330,14 +357,145 @@ into the correct placeholder.</p>
                 </li>
               </ul>
             </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Available%20where%20%60Self%60%3A%20%60SocketManagerSpec%60%20%26%20%60SocketDataBufferable%60"></a>
+                <a name="//apple_ref/swift/Section/Available where `Self`: `SocketManagerSpec` &amp; `SocketDataBufferable`" class="dashAnchor"></a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/Available%20where%20%60Self%60%3A%20%60SocketManagerSpec%60%20%26%20%60SocketDataBufferable%60"></a>
+                  <h3 class="section-name"><p>Available where <code>Self</code>: <code><a href="../Protocols/SocketManagerSpec.html">SocketManagerSpec</a></code> &amp; <code><a href="../Protocols/SocketDataBufferable.html">SocketDataBufferable</a></code></p>
+</h3>
+                </div>
+              </div>
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8SocketIO0A8ParsablePA2A0A14DataBufferableRzAA0A11ManagerSpecRzrlE05parseA7MessageyAA0A6PacketVSgSSF"></a>
+                    <a name="//apple_ref/swift/Method/parseSocketMessage(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A8ParsablePA2A0A14DataBufferableRzAA0A11ManagerSpecRzrlE05parseA7MessageyAA0A6PacketVSgSSF">parseSocketMessage(_:<wbr>)</a>
+                    </code>
+                      <span class="declaration-note">
+                        Default implementation
+                      </span>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <h4>Default Implementation</h4>
+                      <div class="default_impl abstract">
+                        <p>Called when the engine has received a string that should be parsed into a socket.io packet.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">parseSocketMessage</span><span class="p">(</span><span class="n">_</span> <span class="nv">message</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Structs/SocketPacket.html">SocketPacket</a></span><span class="p">?</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>message</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The string that needs parsing.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>A completed socket packet or nil if the packet is invalid.</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8SocketIO0A8ParsablePA2A0A14DataBufferableRzAA0A11ManagerSpecRzrlE011parseBinaryD0yAA0A6PacketVSg10Foundation0D0VF"></a>
+                    <a name="//apple_ref/swift/Method/parseBinaryData(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A8ParsablePA2A0A14DataBufferableRzAA0A11ManagerSpecRzrlE011parseBinaryD0yAA0A6PacketVSg10Foundation0D0VF">parseBinaryData(_:<wbr>)</a>
+                    </code>
+                      <span class="declaration-note">
+                        Default implementation
+                      </span>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <h4>Default Implementation</h4>
+                      <div class="default_impl abstract">
+                        <p>Called when the engine has received some binary data that should be attached to a packet.</p>
+
+<p>Packets binary data should be sent directly after the packet that expects it, so there&rsquo;s confusion over
+where the data should go. Data should be received in the order it is sent, so that the correct data is put
+into the correct placeholder.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">parseBinaryData</span><span class="p">(</span><span class="n">_</span> <span class="nv">data</span><span class="p">:</span> <span class="kt">Data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Structs/SocketPacket.html">SocketPacket</a></span><span class="p">?</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>data</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The data that should be attached to a packet.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>A completed socket packet if there is no more data left to collect.</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
           </div>
         </section>
 
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2019 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2019-05-28)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2021 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2021-02-01)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>

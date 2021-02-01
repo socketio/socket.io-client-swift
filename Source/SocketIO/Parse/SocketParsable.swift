@@ -118,7 +118,7 @@ public extension SocketParsable where Self: SocketManagerSpec & SocketDataBuffer
 
         var dataArray = String(message.utf16[message.utf16.index(reader.currentIndex, offsetBy: 1)...])!
 
-        if type == .error && !dataArray.hasPrefix("[") && !dataArray.hasSuffix("]") {
+        if (type == .error || type == .connect) && !dataArray.hasPrefix("[") && !dataArray.hasSuffix("]") {
             dataArray = "[" + dataArray + "]"
         }
 

@@ -25,6 +25,15 @@
 import Foundation
 import Starscream
 
+/// The socket.io version being used.
+public enum SocketIOVersion: Int {
+    /// socket.io 2, engine.io 3
+    case two = 2
+
+    /// socket.io 3, engine.io 4
+    case three = 3
+}
+
 protocol ClientOption : CustomStringConvertible, Equatable {
     func getSocketIOOptionValue() -> Any
 }
@@ -52,7 +61,7 @@ public enum SocketIOClientOption : ClientOption {
 
     /// If passed `true`, the only transport that will be used will be WebSockets.
     case forceWebsockets(Bool)
-    
+
     /// If passed `true`, the WebSocket stream will be configured with the enableSOCKSProxy `true`.
     case enableSOCKSProxy(Bool)
 
@@ -80,10 +89,10 @@ public enum SocketIOClientOption : ClientOption {
 
     /// The minimum number of seconds to wait before reconnect attempts.
     case reconnectWait(Int)
-    
+
     /// The maximum number of seconds to wait before reconnect attempts.
     case reconnectWaitMax(Int)
-    
+
     /// The randomization factor for calculating reconnect jitter.
     case randomizationFactor(Double)
 
@@ -91,13 +100,16 @@ public enum SocketIOClientOption : ClientOption {
     case secure(Bool)
 
     /// Allows you to set which certs are valid. Useful for SSL pinning.
-    case security(SSLSecurity)
+    case security(CertificatePinning)
 
     /// If you're using a self-signed set. Only use for development.
     case selfSigned(Bool)
 
     /// Sets an NSURLSessionDelegate for the underlying engine. Useful if you need to handle self-signed certs.
     case sessionDelegate(URLSessionDelegate)
+
+    /// The version of socket.io being used. This should match the server version. Default is 3.
+    case version(SocketIOVersion)
 
     // MARK: Properties
 
@@ -148,6 +160,8 @@ public enum SocketIOClientOption : ClientOption {
             description = "sessionDelegate"
         case .enableSOCKSProxy:
             description = "enableSOCKSProxy"
+        case .version:
+            description = "version"
         }
 
         return description
@@ -199,6 +213,8 @@ public enum SocketIOClientOption : ClientOption {
             value = delegate
         case let .enableSOCKSProxy(enable):
             value = enable
+        case let.version(versionNum):
+            value = versionNum
         }
 
         return value
