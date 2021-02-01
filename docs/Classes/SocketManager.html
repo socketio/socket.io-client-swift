@@ -21,7 +21,7 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="../index.html">
-          SocketIO Docs
+          SocketIO 16.0.0 Docs
         </a>
          (100% documented)
       </p>
@@ -51,6 +51,9 @@
                 <a class="nav-group-task-link" href="../12to13.html">12to13</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../15to16.html">15to16</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../faq.html">FAQ</a>
               </li>
             </ul>
@@ -60,9 +63,6 @@
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/OnAckCallback.html">OnAckCallback</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Classes/SSLSecurity.html">SSLSecurity</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/SocketAckEmitter.html">SocketAckEmitter</a>
@@ -106,7 +106,51 @@
                 <a class="nav-group-task-link" href="../Enums/SocketIOStatus.html">SocketIOStatus</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/SocketIOVersion.html">SocketIOVersion</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Enums/SocketParsableError.html">SocketParsableError</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:Sa">Array</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:Sb">Bool</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:10Foundation4DataV">Data</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:SD">Dictionary</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:Sd">Double</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:Si">Int</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSArray">NSArray</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSData">NSData</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSDictionary">NSDictionary</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSNull">NSNull</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSString">NSString</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:SS">String</a>
               </li>
             </ul>
           </li>
@@ -184,10 +228,11 @@
       <article class="main-content">
 
         <section class="section">
-          <div class="section-content">
+          <div class="section-content top-matter">
             <h1>SocketManager</h1>
               <div class="declaration">
                 <div class="language">
+                  
                   <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kt">SocketManager</span> <span class="p">:</span> <span class="kt">NSObject</span><span class="p">,</span> <span class="kt"><a href="../Protocols/SocketManagerSpec.html">SocketManagerSpec</a></span><span class="p">,</span> <span class="kt"><a href="../Protocols/SocketParsable.html">SocketParsable</a></span><span class="p">,</span> <span class="kt"><a href="../Protocols/SocketDataBufferable.html">SocketDataBufferable</a></span><span class="p">,</span> <span class="kt"><a href="../Protocols/ConfigSettable.html">ConfigSettable</a></span></code></pre>
 
                 </div>
@@ -197,7 +242,7 @@
 <p>A <code>SocketManager</code> is responsible for multiplexing multiple namespaces through a single <code><a href="../Protocols/SocketEngineSpec.html">SocketEngineSpec</a></code>.</p>
 
 <p>Example:</p>
-<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">manager</span> <span class="o">=</span> <span class="nf">SocketManager</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="nf">URL</span><span class="p">(</span><span class="nv">string</span><span class="p">:</span><span class="s">"http://localhost:8080/"</span><span class="p">)</span><span class="o">!</span><span class="p">)</span>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">manager</span> <span class="o">=</span> <span class="kt">SocketManager</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">(</span><span class="nv">string</span><span class="p">:</span><span class="s">"http://localhost:8080/"</span><span class="p">)</span><span class="o">!</span><span class="p">)</span>
 <span class="k">let</span> <span class="nv">defaultNamespaceSocket</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">defaultSocket</span>
 <span class="k">let</span> <span class="nv">swiftSocket</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="nf">socket</span><span class="p">(</span><span class="nv">forNamespace</span><span class="p">:</span> <span class="s">"/swift"</span><span class="p">)</span>
 
@@ -207,7 +252,7 @@
 <p>Sockets created through the manager are retained by the manager. So at the very least, a single strong reference
 to the manager must be maintained to keep sockets alive.</p>
 
-<p>To disconnect a socket and remove it from the manager, either call <code><a href="../Classes/SocketIOClient.html#/c:@M@SocketIO@objc(cs)SocketIOClient(im)disconnect">SocketIOClient.disconnect()</a></code> on the socket,
+<p>To disconnect a socket and remove it from the manager, either call <code><a href="../Classes/SocketIOClient.html#/s:8SocketIO0A8IOClientC10disconnectyyF">SocketIOClient.disconnect()</a></code> on the socket,
 or call one of the <code>disconnectSocket</code> methods on this class.</p>
 
 <p><strong>NOTE</strong>: The manager is not thread/queue safe, all interaction with the manager should be done on the <code>handleQueue</code></p>
@@ -221,17 +266,19 @@ or call one of the <code>disconnectSocket</code> methods on this class.</p>
               <div class="task-name-container">
                 <a name="/Properties"></a>
                 <a name="//apple_ref/swift/Section/Properties" class="dashAnchor"></a>
-                <a href="#/Properties">
-                  <h3 class="section-name">Properties</h3>
-                </a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/Properties"></a>
+                  <h3 class="section-name"><p>Properties</p>
+</h3>
+                </div>
               </div>
               <ul class="item-container">
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(py)defaultSocket"></a>
+                    <a name="/s:8SocketIO0A7ManagerC07defaultA0AA0A8IOClientCvp"></a>
                     <a name="//apple_ref/swift/Property/defaultSocket" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(py)defaultSocket">defaultSocket</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC07defaultA0AA0A8IOClientCvp">defaultSocket</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -239,14 +286,14 @@ or call one of the <code>disconnectSocket</code> methods on this class.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The socket associated with the default namespace (<q>/</q>).</p>
+                        <p>The socket associated with the default namespace (&ldquo;/&rdquo;).</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">defaultSocket</span><span class="p">:</span> <span class="nf">SocketIOClient</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">defaultSocket</span><span class="p">:</span> <span class="kt"><a href="../Classes/SocketIOClient.html">SocketIOClient</a></span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -256,9 +303,9 @@ or call one of the <code>disconnectSocket</code> methods on this class.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(py)socketURL"></a>
+                    <a name="/s:8SocketIO0A7ManagerC9socketURL10Foundation0E0Vvp"></a>
                     <a name="//apple_ref/swift/Property/socketURL" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(py)socketURL">socketURL</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC9socketURL10Foundation0E0Vvp">socketURL</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -268,7 +315,7 @@ or call one of the <code>disconnectSocket</code> methods on this class.</p>
                       <div class="abstract">
                         <p>The URL of the socket.io server.</p>
 
-<p>If changed after calling <code>init</code>, <code><a href="../Classes/SocketManager.html#/c:@M@SocketIO@objc(cs)SocketManager(py)forceNew">forceNew</a></code> must be set to <code>true</code>, or it will only connect to the url set in the
+<p>If changed after calling <code>init</code>, <code><a href="../Classes/SocketManager.html#/s:8SocketIO0A7ManagerC8forceNewSbvp">forceNew</a></code> must be set to <code>true</code>, or it will only connect to the url set in the
 init.</p>
 
                       </div>
@@ -305,7 +352,7 @@ init.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">config</span><span class="p">:</span> <span class="nf">SocketIOClientConfiguration</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">config</span><span class="p">:</span> <span class="kt"><a href="../Structs/SocketIOClientConfiguration.html">SocketIOClientConfiguration</a></span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -315,9 +362,9 @@ init.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(py)engine"></a>
+                    <a name="/s:8SocketIO0A7ManagerC6engineAA0A10EngineSpec_pSgvp"></a>
                     <a name="//apple_ref/swift/Property/engine" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(py)engine">engine</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC6engineAA0A10EngineSpec_pSgvp">engine</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -342,9 +389,9 @@ init.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(py)forceNew"></a>
+                    <a name="/s:8SocketIO0A7ManagerC8forceNewSbvp"></a>
                     <a name="//apple_ref/swift/Property/forceNew" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(py)forceNew">forceNew</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC8forceNewSbvp">forceNew</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -369,9 +416,9 @@ init.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(py)handleQueue"></a>
+                    <a name="/s:8SocketIO0A7ManagerC11handleQueueSo17OS_dispatch_queueCvp"></a>
                     <a name="//apple_ref/swift/Property/handleQueue" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(py)handleQueue">handleQueue</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC11handleQueueSo17OS_dispatch_queueCvp">handleQueue</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -399,9 +446,9 @@ called on.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(py)nsps"></a>
+                    <a name="/s:8SocketIO0A7ManagerC4nspsSDySSAA0A8IOClientCGvp"></a>
                     <a name="//apple_ref/swift/Property/nsps" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(py)nsps">nsps</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC4nspsSDySSAA0A8IOClientCGvp">nsps</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -426,9 +473,9 @@ called on.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(py)reconnects"></a>
+                    <a name="/s:8SocketIO0A7ManagerC10reconnectsSbvp"></a>
                     <a name="//apple_ref/swift/Property/reconnects" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(py)reconnects">reconnects</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC10reconnectsSbvp">reconnects</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -453,9 +500,9 @@ called on.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(py)reconnectWait"></a>
+                    <a name="/s:8SocketIO0A7ManagerC13reconnectWaitSivp"></a>
                     <a name="//apple_ref/swift/Property/reconnectWait" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(py)reconnectWait">reconnectWait</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC13reconnectWaitSivp">reconnectWait</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -480,9 +527,9 @@ called on.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(py)reconnectWaitMax"></a>
+                    <a name="/s:8SocketIO0A7ManagerC16reconnectWaitMaxSivp"></a>
                     <a name="//apple_ref/swift/Property/reconnectWaitMax" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(py)reconnectWaitMax">reconnectWaitMax</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC16reconnectWaitMaxSivp">reconnectWaitMax</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -507,9 +554,9 @@ called on.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(py)randomizationFactor"></a>
+                    <a name="/s:8SocketIO0A7ManagerC19randomizationFactorSdvp"></a>
                     <a name="//apple_ref/swift/Property/randomizationFactor" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(py)randomizationFactor">randomizationFactor</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC19randomizationFactorSdvp">randomizationFactor</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -534,9 +581,9 @@ called on.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(py)status"></a>
+                    <a name="/s:8SocketIO0A7ManagerC6statusAA0A8IOStatusOvp"></a>
                     <a name="//apple_ref/swift/Property/status" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(py)status">status</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC6statusAA0A8IOStatusOvp">status</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -551,7 +598,33 @@ called on.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">status</span><span class="p">:</span> <span class="nf">SocketIOStatus</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">status</span><span class="p">:</span> <span class="kt"><a href="../Enums/SocketIOStatus.html">SocketIOStatus</a></span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8SocketIO0A11ManagerSpecP7versionAA0A9IOVersionOvp"></a>
+                    <a name="//apple_ref/swift/Property/version" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A11ManagerSpecP7versionAA0A9IOVersionOvp">version</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">version</span><span class="p">:</span> <span class="kt"><a href="../Enums/SocketIOVersion.html">SocketIOVersion</a></span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -596,9 +669,11 @@ So this should ideally be an array of one packet waiting for data.</p>
               <div class="task-name-container">
                 <a name="/Initializers"></a>
                 <a name="//apple_ref/swift/Section/Initializers" class="dashAnchor"></a>
-                <a href="#/Initializers">
-                  <h3 class="section-name">Initializers</h3>
-                </a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/Initializers"></a>
+                  <h3 class="section-name"><p>Initializers</p>
+</h3>
+                </div>
               </div>
               <ul class="item-container">
                 <li class="item">
@@ -606,7 +681,7 @@ So this should ideally be an array of one packet waiting for data.</p>
                     <code>
                     <a name="/s:8SocketIO0A7ManagerC9socketURL6configAC10Foundation0E0V_AA0A21IOClientConfigurationVtcfc"></a>
                     <a name="//apple_ref/swift/Method/init(socketURL:config:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A7ManagerC9socketURL6configAC10Foundation0E0V_AA0A21IOClientConfigurationVtcfc">init(socketURL:config:)</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC9socketURL6configAC10Foundation0E0V_AA0A21IOClientConfigurationVtcfc">init(socketURL:<wbr>config:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -664,7 +739,7 @@ So this should ideally be an array of one packet waiting for data.</p>
                     <code>
                     <a name="/c:@M@SocketIO@objc(cs)SocketManager(im)initWithSocketURL:config:"></a>
                     <a name="//apple_ref/swift/Method/init(socketURL:config:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)initWithSocketURL:config:">init(socketURL:config:)</a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)initWithSocketURL:config:">init(socketURL:<wbr>config:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -681,7 +756,7 @@ If using Swift it&rsquo;s recommended to use <code>init(socketURL: NSURL, option
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">@objc</span>
-<span class="kd">public</span> <span class="n">convenience</span> <span class="nf">init</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">,</span> <span class="nv">config</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">]?)</span></code></pre>
+<span class="kd">public</span> <span class="kd">convenience</span> <span class="nf">init</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">,</span> <span class="nv">config</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">]?)</span></code></pre>
 
                         </div>
                       </div>
@@ -725,17 +800,19 @@ If using Swift it&rsquo;s recommended to use <code>init(socketURL: NSURL, option
               <div class="task-name-container">
                 <a name="/Methods"></a>
                 <a name="//apple_ref/swift/Section/Methods" class="dashAnchor"></a>
-                <a href="#/Methods">
-                  <h3 class="section-name">Methods</h3>
-                </a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/Methods"></a>
+                  <h3 class="section-name"><p>Methods</p>
+</h3>
+                </div>
               </div>
               <ul class="item-container">
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(im)connect"></a>
+                    <a name="/s:8SocketIO0A7ManagerC7connectyyF"></a>
                     <a name="//apple_ref/swift/Method/connect()" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)connect">connect()</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC7connectyyF">connect()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -762,9 +839,9 @@ If using Swift it&rsquo;s recommended to use <code>init(socketURL: NSURL, option
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(im)connectSocket:"></a>
-                    <a name="//apple_ref/swift/Method/connectSocket(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)connectSocket:">connectSocket(_:)</a>
+                    <a name="/s:8SocketIO0A7ManagerC07connectA0_11withPayloadyAA0A8IOClientC_SDySSypGSgtF"></a>
+                    <a name="//apple_ref/swift/Method/connectSocket(_:withPayload:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC07connectA0_11withPayloadyAA0A8IOClientC_SDySSypGSgtF">connectSocket(_:<wbr>withPayload:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -779,7 +856,7 @@ If using Swift it&rsquo;s recommended to use <code>init(socketURL: NSURL, option
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">connectSocket</span><span class="p">(</span><span class="n">_</span> <span class="nv">socket</span><span class="p">:</span> <span class="kt"><a href="../Classes/SocketIOClient.html">SocketIOClient</a></span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">connectSocket</span><span class="p">(</span><span class="n">_</span> <span class="nv">socket</span><span class="p">:</span> <span class="kt"><a href="../Classes/SocketIOClient.html">SocketIOClient</a></span><span class="p">,</span> <span class="n">withPayload</span> <span class="nv">payload</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">]?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -799,6 +876,18 @@ If using Swift it&rsquo;s recommended to use <code>init(socketURL: NSURL, option
                                 </div>
                               </td>
                             </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>withPayload</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Optional payload to send on connect</p>
+                                </div>
+                              </td>
+                            </tr>
                           </tbody>
                         </table>
                       </div>
@@ -808,9 +897,9 @@ If using Swift it&rsquo;s recommended to use <code>init(socketURL: NSURL, option
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(im)didDisconnectWithReason:"></a>
+                    <a name="/s:8SocketIO0A7ManagerC13didDisconnect6reasonySS_tF"></a>
                     <a name="//apple_ref/swift/Method/didDisconnect(reason:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)didDisconnectWithReason:">didDisconnect(reason:)</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC13didDisconnect6reasonySS_tF">didDisconnect(reason:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -854,9 +943,9 @@ If using Swift it&rsquo;s recommended to use <code>init(socketURL: NSURL, option
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(im)disconnect"></a>
+                    <a name="/s:8SocketIO0A7ManagerC10disconnectyyF"></a>
                     <a name="//apple_ref/swift/Method/disconnect()" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)disconnect">disconnect()</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC10disconnectyyF">disconnect()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -881,9 +970,9 @@ If using Swift it&rsquo;s recommended to use <code>init(socketURL: NSURL, option
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(im)disconnectSocket:"></a>
+                    <a name="/s:8SocketIO0A7ManagerC010disconnectA0yyAA0A8IOClientCF"></a>
                     <a name="//apple_ref/swift/Method/disconnectSocket(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)disconnectSocket:">disconnectSocket(_:)</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC010disconnectA0yyAA0A8IOClientCF">disconnectSocket(_:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -930,9 +1019,9 @@ releasing.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(im)disconnectSocketForNamespace:"></a>
+                    <a name="/s:8SocketIO0A7ManagerC010disconnectA012forNamespaceySS_tF"></a>
                     <a name="//apple_ref/swift/Method/disconnectSocket(forNamespace:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)disconnectSocketForNamespace:">disconnectSocket(forNamespace:)</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC010disconnectA012forNamespaceySS_tF">disconnectSocket(forNamespace:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -981,7 +1070,7 @@ releasing.</p>
                     <code>
                     <a name="/s:8SocketIO0A7ManagerC7emitAll11clientEvent4datayAA0a6ClientG0O_SayypGtF"></a>
                     <a name="//apple_ref/swift/Method/emitAll(clientEvent:data:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A7ManagerC7emitAll11clientEvent4datayAA0a6ClientG0O_SayypGtF">emitAll(clientEvent:data:)</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC7emitAll11clientEvent4datayAA0a6ClientG0O_SayypGtF">emitAll(clientEvent:<wbr>data:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -989,7 +1078,7 @@ releasing.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Sends a client event to all sockets in <code><a href="../Classes/SocketManager.html#/c:@M@SocketIO@objc(cs)SocketManager(py)nsps">nsps</a></code></p>
+                        <p>Sends a client event to all sockets in <code><a href="../Classes/SocketManager.html#/s:8SocketIO0A7ManagerC4nspsSDySSAA0A8IOClientCGvp">nsps</a></code></p>
 
                       </div>
                       <div class="declaration">
@@ -1027,7 +1116,7 @@ releasing.</p>
                     <code>
                     <a name="/s:8SocketIO0A7ManagerC7emitAllyySS_AA0A4Data_pdtF"></a>
                     <a name="//apple_ref/swift/Method/emitAll(_:_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A7ManagerC7emitAllyySS_AA0A4Data_pdtF">emitAll(_:_:)</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC7emitAllyySS_AA0A4Data_pdtF">emitAll(_:<wbr>_:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1083,69 +1172,9 @@ releasing.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(im)emitAll:withItems:"></a>
-                    <a name="//apple_ref/swift/Method/emitAll(_:withItems:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)emitAll:withItems:">emitAll(_:withItems:)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Sends an event to the server on all namespaces in this manager.</p>
-
-<p>Same as <code><a href="../Classes/SocketManager.html#/s:8SocketIO0A7ManagerC7emitAllyySS_AA0A4Data_pdtF">emitAll(_:_:)</a></code>, but meant for Objective-C.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">emitAll</span><span class="p">(</span><span class="n">_</span> <span class="nv">event</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="n">withItems</span> <span class="nv">items</span><span class="p">:</span> <span class="p">[</span><span class="kt">Any</span><span class="p">])</span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>event</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The event to send.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>items</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The data to send with this event.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
                     <a name="/c:@M@SocketIO@objc(cs)SocketManager(im)engineDidCloseWithReason:"></a>
                     <a name="//apple_ref/swift/Method/engineDidClose(reason:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)engineDidCloseWithReason:">engineDidClose(reason:)</a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)engineDidCloseWithReason:">engineDidClose(reason:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1191,7 +1220,7 @@ releasing.</p>
                     <code>
                     <a name="/c:@M@SocketIO@objc(cs)SocketManager(im)engineDidErrorWithReason:"></a>
                     <a name="//apple_ref/swift/Method/engineDidError(reason:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)engineDidErrorWithReason:">engineDidError(reason:)</a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)engineDidErrorWithReason:">engineDidError(reason:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1237,7 +1266,7 @@ releasing.</p>
                     <code>
                     <a name="/c:@M@SocketIO@objc(cs)SocketManager(im)engineDidOpenWithReason:"></a>
                     <a name="//apple_ref/swift/Method/engineDidOpen(reason:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)engineDidOpenWithReason:">engineDidOpen(reason:)</a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)engineDidOpenWithReason:">engineDidOpen(reason:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1281,9 +1310,9 @@ releasing.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(im)engineDidReceivePong"></a>
-                    <a name="//apple_ref/swift/Method/engineDidReceivePong()" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)engineDidReceivePong">engineDidReceivePong()</a>
+                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(im)engineDidReceivePing"></a>
+                    <a name="//apple_ref/swift/Method/engineDidReceivePing()" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)engineDidReceivePing">engineDidReceivePing()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1291,14 +1320,14 @@ releasing.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Called when the engine receives a pong message.</p>
+                        <p>Called when the engine receives a ping message.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">engineDidReceivePong</span><span class="p">()</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">engineDidReceivePing</span><span class="p">()</span></code></pre>
 
                         </div>
                       </div>
@@ -1335,9 +1364,63 @@ releasing.</p>
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(im)engineDidReceivePong"></a>
+                    <a name="//apple_ref/swift/Method/engineDidReceivePong()" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)engineDidReceivePong">engineDidReceivePong()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Called when the engine receives a pong message.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">engineDidReceivePong</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(im)engineDidSendPong"></a>
+                    <a name="//apple_ref/swift/Method/engineDidSendPong()" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)engineDidSendPong">engineDidSendPong()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Called when the sends a pong to the server.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">engineDidSendPong</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/c:@M@SocketIO@objc(cs)SocketManager(im)engineDidWebsocketUpgradeWithHeaders:"></a>
                     <a name="//apple_ref/swift/Method/engineDidWebsocketUpgrade(headers:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)engineDidWebsocketUpgradeWithHeaders:">engineDidWebsocketUpgrade(headers:)</a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)engineDidWebsocketUpgradeWithHeaders:">engineDidWebsocketUpgrade(headers:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1383,7 +1466,7 @@ releasing.</p>
                     <code>
                     <a name="/c:@M@SocketIO@objc(cs)SocketManager(im)parseEngineMessage:"></a>
                     <a name="//apple_ref/swift/Method/parseEngineMessage(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)parseEngineMessage:">parseEngineMessage(_:)</a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)parseEngineMessage:">parseEngineMessage(_:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1429,7 +1512,7 @@ releasing.</p>
                     <code>
                     <a name="/c:@M@SocketIO@objc(cs)SocketManager(im)parseEngineBinaryData:"></a>
                     <a name="//apple_ref/swift/Method/parseEngineBinaryData(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)parseEngineBinaryData:">parseEngineBinaryData(_:)</a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)parseEngineBinaryData:">parseEngineBinaryData(_:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1473,9 +1556,9 @@ releasing.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(im)reconnect"></a>
+                    <a name="/s:8SocketIO0A7ManagerC9reconnectyyF"></a>
                     <a name="//apple_ref/swift/Method/reconnect()" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)reconnect">reconnect()</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC9reconnectyyF">reconnect()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1503,9 +1586,9 @@ releasing.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(im)removeSocket:"></a>
+                    <a name="/s:8SocketIO0A7ManagerC06removeA0yAA0A8IOClientCSgAFF"></a>
                     <a name="//apple_ref/swift/Method/removeSocket(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)removeSocket:">removeSocket(_:)</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC06removeA0yAA0A8IOClientCSgAFF">removeSocket(_:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1559,7 +1642,7 @@ method.</p>
                     <code>
                     <a name="/s:8SocketIO0A7ManagerC10setConfigsyyAA0A21IOClientConfigurationVF"></a>
                     <a name="//apple_ref/swift/Method/setConfigs(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A7ManagerC10setConfigsyyAA0A21IOClientConfigurationVF">setConfigs(_:)</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC10setConfigsyyAA0A21IOClientConfigurationVF">setConfigs(_:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1586,9 +1669,9 @@ method.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketManager(im)socketForNamespace:"></a>
+                    <a name="/s:8SocketIO0A7ManagerC6socket12forNamespaceAA0A8IOClientCSS_tF"></a>
                     <a name="//apple_ref/swift/Method/socket(forNamespace:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketManager(im)socketForNamespace:">socket(forNamespace:)</a>
+                    <a class="token" href="#/s:8SocketIO0A7ManagerC6socket12forNamespaceAA0A8IOClientCSS_tF">socket(forNamespace:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1602,7 +1685,7 @@ method.</p>
 
 <p>Sockets created from this method are retained by the manager.
 Call one of the <code>disconnectSocket</code> methods on this class to remove the socket from manager control.
-Or call <code><a href="../Classes/SocketIOClient.html#/c:@M@SocketIO@objc(cs)SocketIOClient(im)disconnect">SocketIOClient.disconnect()</a></code> on the client.</p>
+Or call <code><a href="../Classes/SocketIOClient.html#/s:8SocketIO0A8IOClientC10disconnectyyF">SocketIOClient.disconnect()</a></code> on the client.</p>
 
                       </div>
                       <div class="declaration">
@@ -1647,8 +1730,8 @@ Or call <code><a href="../Classes/SocketIOClient.html#/c:@M@SocketIO@objc(cs)Soc
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2019 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2019-05-28)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2021 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2021-02-01)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>

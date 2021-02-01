@@ -27,7 +27,7 @@ import Foundation
 import Starscream
 
 /// Specifies a SocketEngine.
-@objc public protocol SocketEngineSpec {
+public protocol SocketEngineSpec: class {
     // MARK: Properties
 
     /// The client for this engine.
@@ -80,6 +80,9 @@ import Starscream
 
     /// The url for WebSockets.
     var urlWebSocket: URL { get }
+
+    /// The version of engine.io being used. Default is three.
+    var version: SocketIOVersion { get }
 
     /// If `true`, then the engine is currently in WebSockets mode.
     @available(*, deprecated, message: "No longer needed, if we're not polling, then we must be doing websockets")
@@ -142,9 +145,22 @@ import Starscream
 }
 
 extension SocketEngineSpec {
+    var engineIOParam: String {
+        switch version {
+        case .two:
+            return "&EIO=3"
+        case .three:
+            return "&EIO=4"
+        }
+    }
+
     var urlPollingWithSid: URL {
         var com = URLComponents(url: urlPolling, resolvingAgainstBaseURL: false)!
         com.percentEncodedQuery = com.percentEncodedQuery! + "&sid=\(sid.urlEncode()!)"
+
+        if !com.percentEncodedQuery!.contains("EIO") {
+            com.percentEncodedQuery = com.percentEncodedQuery! + engineIOParam
+        }
 
         return com.url!
     }
@@ -152,6 +168,11 @@ extension SocketEngineSpec {
     var urlWebSocketWithSid: URL {
         var com = URLComponents(url: urlWebSocket, resolvingAgainstBaseURL: false)!
         com.percentEncodedQuery = com.percentEncodedQuery! + (sid == "" ? "" : "&sid=\(sid.urlEncode()!)")
+
+        if !com.percentEncodedQuery!.contains("EIO") {
+            com.percentEncodedQuery = com.percentEncodedQuery! + engineIOParam
+        }
+
 
         return com.url!
     }
@@ -172,10 +193,12 @@ extension SocketEngineSpec {
     }
 
     func createBinaryDataForSend(using data: Data) -> Either<Data, String> {
+        let prefixB64 = version.rawValue >= 3 ? "b" : "b4"
+
         if polling {
-            return .right("b4" + data.base64EncodedString(options: Data.Base64EncodingOptions(rawValue: 0)))
+            return .right(prefixB64 + data.base64EncodedString(options: Data.Base64EncodingOptions(rawValue: 0)))
         } else {
-            return .left(Data([0x4]) + data)
+            return .left(version.rawValue >= 3 ? data : Data([0x4]) + data)
         }
     }
 

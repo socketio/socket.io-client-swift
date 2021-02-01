@@ -21,7 +21,7 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="../index.html">
-          SocketIO Docs
+          SocketIO 16.0.0 Docs
         </a>
          (100% documented)
       </p>
@@ -51,6 +51,9 @@
                 <a class="nav-group-task-link" href="../12to13.html">12to13</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../15to16.html">15to16</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../faq.html">FAQ</a>
               </li>
             </ul>
@@ -60,9 +63,6 @@
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/OnAckCallback.html">OnAckCallback</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Classes/SSLSecurity.html">SSLSecurity</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/SocketAckEmitter.html">SocketAckEmitter</a>
@@ -106,7 +106,51 @@
                 <a class="nav-group-task-link" href="../Enums/SocketIOStatus.html">SocketIOStatus</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/SocketIOVersion.html">SocketIOVersion</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Enums/SocketParsableError.html">SocketParsableError</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:Sa">Array</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:Sb">Bool</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:10Foundation4DataV">Data</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:SD">Dictionary</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:Sd">Double</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:Si">Int</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSArray">NSArray</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSData">NSData</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSDictionary">NSDictionary</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSNull">NSNull</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSString">NSString</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:SS">String</a>
               </li>
             </ul>
           </li>
@@ -184,10 +228,11 @@
       <article class="main-content">
 
         <section class="section">
-          <div class="section-content">
+          <div class="section-content top-matter">
             <h1>SocketEngineClient</h1>
               <div class="declaration">
                 <div class="language">
+                  
                   <pre class="highlight swift"><code><span class="kd">@objc</span>
 <span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketEngineClient</span></code></pre>
 
@@ -204,9 +249,11 @@
               <div class="task-name-container">
                 <a name="/Methods"></a>
                 <a name="//apple_ref/swift/Section/Methods" class="dashAnchor"></a>
-                <a href="#/Methods">
-                  <h3 class="section-name">Methods</h3>
-                </a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/Methods"></a>
+                  <h3 class="section-name"><p>Methods</p>
+</h3>
+                </div>
               </div>
               <ul class="item-container">
                 <li class="item">
@@ -214,7 +261,7 @@
                     <code>
                     <a name="/c:@M@SocketIO@objc(pl)SocketEngineClient(im)engineDidErrorWithReason:"></a>
                     <a name="//apple_ref/swift/Method/engineDidError(reason:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(pl)SocketEngineClient(im)engineDidErrorWithReason:">engineDidError(reason:)</a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(pl)SocketEngineClient(im)engineDidErrorWithReason:">engineDidError(reason:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -260,7 +307,7 @@
                     <code>
                     <a name="/c:@M@SocketIO@objc(pl)SocketEngineClient(im)engineDidCloseWithReason:"></a>
                     <a name="//apple_ref/swift/Method/engineDidClose(reason:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(pl)SocketEngineClient(im)engineDidCloseWithReason:">engineDidClose(reason:)</a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(pl)SocketEngineClient(im)engineDidCloseWithReason:">engineDidClose(reason:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -306,7 +353,7 @@
                     <code>
                     <a name="/c:@M@SocketIO@objc(pl)SocketEngineClient(im)engineDidOpenWithReason:"></a>
                     <a name="//apple_ref/swift/Method/engineDidOpen(reason:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(pl)SocketEngineClient(im)engineDidOpenWithReason:">engineDidOpen(reason:)</a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(pl)SocketEngineClient(im)engineDidOpenWithReason:">engineDidOpen(reason:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -350,6 +397,33 @@
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/c:@M@SocketIO@objc(pl)SocketEngineClient(im)engineDidReceivePing"></a>
+                    <a name="//apple_ref/swift/Method/engineDidReceivePing()" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(pl)SocketEngineClient(im)engineDidReceivePing">engineDidReceivePing()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Called when the engine receives a ping message. Only called in socket.io &gt;3.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">engineDidReceivePing</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/c:@M@SocketIO@objc(pl)SocketEngineClient(im)engineDidReceivePong"></a>
                     <a name="//apple_ref/swift/Method/engineDidReceivePong()" class="dashAnchor"></a>
                     <a class="token" href="#/c:@M@SocketIO@objc(pl)SocketEngineClient(im)engineDidReceivePong">engineDidReceivePong()</a>
@@ -360,7 +434,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Called when the engine receives a pong message.</p>
+                        <p>Called when the engine receives a pong message. Only called in socket.io 2.</p>
 
                       </div>
                       <div class="declaration">
@@ -387,7 +461,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Called when the engine sends a ping to the server.</p>
+                        <p>Called when the engine sends a ping to the server. Only called in socket.io 2.</p>
 
                       </div>
                       <div class="declaration">
@@ -404,9 +478,36 @@
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/c:@M@SocketIO@objc(pl)SocketEngineClient(im)engineDidSendPong"></a>
+                    <a name="//apple_ref/swift/Method/engineDidSendPong()" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(pl)SocketEngineClient(im)engineDidSendPong">engineDidSendPong()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Called when the engine sends a pong to the server. Only called in socket.io &gt;3.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">engineDidSendPong</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/c:@M@SocketIO@objc(pl)SocketEngineClient(im)parseEngineMessage:"></a>
                     <a name="//apple_ref/swift/Method/parseEngineMessage(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(pl)SocketEngineClient(im)parseEngineMessage:">parseEngineMessage(_:)</a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(pl)SocketEngineClient(im)parseEngineMessage:">parseEngineMessage(_:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -452,7 +553,7 @@
                     <code>
                     <a name="/c:@M@SocketIO@objc(pl)SocketEngineClient(im)parseEngineBinaryData:"></a>
                     <a name="//apple_ref/swift/Method/parseEngineBinaryData(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(pl)SocketEngineClient(im)parseEngineBinaryData:">parseEngineBinaryData(_:)</a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(pl)SocketEngineClient(im)parseEngineBinaryData:">parseEngineBinaryData(_:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -498,7 +599,7 @@
                     <code>
                     <a name="/c:@M@SocketIO@objc(pl)SocketEngineClient(im)engineDidWebsocketUpgradeWithHeaders:"></a>
                     <a name="//apple_ref/swift/Method/engineDidWebsocketUpgrade(headers:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(pl)SocketEngineClient(im)engineDidWebsocketUpgradeWithHeaders:">engineDidWebsocketUpgrade(headers:)</a>
+                    <a class="token" href="#/c:@M@SocketIO@objc(pl)SocketEngineClient(im)engineDidWebsocketUpgradeWithHeaders:">engineDidWebsocketUpgrade(headers:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -547,8 +648,8 @@
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2019 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2019-05-28)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2021 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2021-02-01)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>

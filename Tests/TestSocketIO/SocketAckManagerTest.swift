@@ -38,7 +38,7 @@ class SocketAckManagerTest : XCTestCase {
                 return
             }
 
-            XCTAssertEqual(timeoutReason, SocketAckStatus.noAck.rawValue)
+            XCTAssert(timeoutReason == SocketAckStatus.noAck)
 
             callbackExpection.fulfill()
         }

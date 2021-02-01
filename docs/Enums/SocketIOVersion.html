@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>SocketData Protocol Reference</title>
+    <title>SocketIOVersion Enumeration Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset="utf-8">
@@ -14,9 +14,9 @@
   </head>
   <body>
 
-    <a name="//apple_ref/swift/Protocol/SocketData" class="dashAnchor"></a>
+    <a name="//apple_ref/swift/Enum/SocketIOVersion" class="dashAnchor"></a>
 
-    <a title="SocketData Protocol Reference"></a>
+    <a title="SocketIOVersion Enumeration Reference"></a>
 
     <header class="header">
       <p class="header-col header-col--primary">
@@ -38,7 +38,7 @@
     <p class="breadcrumbs">
       <a class="breadcrumb" href="../index.html">SocketIO Reference</a>
       <img class="carat" src="../img/carat.png" />
-      SocketData Protocol Reference
+      SocketIOVersion Enumeration Reference
     </p>
 
     <div class="content-wrapper">
@@ -229,28 +229,15 @@
 
         <section class="section">
           <div class="section-content top-matter">
-            <h1>SocketData</h1>
+            <h1>SocketIOVersion</h1>
               <div class="declaration">
                 <div class="language">
                   
-                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">SocketData</span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">SocketIOVersion</span> <span class="p">:</span> <span class="kt">Int</span></code></pre>
 
                 </div>
               </div>
-            <p>A marking protocol that says a type can be represented in a socket.io packet.</p>
-
-<p>Example:</p>
-<pre class="highlight swift"><code><span class="kd">struct</span> <span class="kt">CustomData</span> <span class="p">:</span> <span class="kt">SocketData</span> <span class="p">{</span>
-   <span class="k">let</span> <span class="nv">name</span><span class="p">:</span> <span class="kt">String</span>
-   <span class="k">let</span> <span class="nv">age</span><span class="p">:</span> <span class="kt">Int</span>
-
-   <span class="kd">func</span> <span class="nf">socketRepresentation</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">SocketData</span> <span class="p">{</span>
-       <span class="k">return</span> <span class="p">[</span><span class="s">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s">"age"</span><span class="p">:</span> <span class="n">age</span><span class="p">]</span>
-   <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="n">socket</span><span class="o">.</span><span class="nf">emit</span><span class="p">(</span><span class="s">"myEvent"</span><span class="p">,</span> <span class="kt">CustomData</span><span class="p">(</span><span class="nv">name</span><span class="p">:</span> <span class="s">"Erik"</span><span class="p">,</span> <span class="nv">age</span><span class="p">:</span> <span class="mi">24</span><span class="p">))</span>
-</code></pre>
+            <p>The socket.io version being used.</p>
 
           </div>
         </section>
@@ -258,45 +245,55 @@
         <section class="section">
           <div class="section-content">
             <div class="task-group">
-              <div class="task-name-container">
-                <a name="/Methods"></a>
-                <a name="//apple_ref/swift/Section/Methods" class="dashAnchor"></a>
-                <div class="section-name-container">
-                  <a class="section-name-link" href="#/Methods"></a>
-                  <h3 class="section-name"><p>Methods</p>
-</h3>
-                </div>
-              </div>
               <ul class="item-container">
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8SocketIO0A4DataP20socketRepresentationAaB_pyKF"></a>
-                    <a name="//apple_ref/swift/Method/socketRepresentation()" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A4DataP20socketRepresentationAaB_pyKF">socketRepresentation()</a>
+                    <a name="/s:8SocketIO0A9IOVersionO3twoyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/two" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A9IOVersionO3twoyA2CmF">two</a>
                     </code>
-                      <span class="declaration-note">
-                        Default implementation
-                      </span>
                   </div>
                   <div class="height-container">
                     <div class="pointer-container"></div>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>A representation of self that can sent over socket.io.</p>
-
-                      </div>
-                      <h4>Default Implementation</h4>
-                      <div class="default_impl abstract">
-                        <p>Default implementation. Only works for native Swift types and a few Foundation types.</p>
+                        <p>socket.io 2, engine.io 3</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">socketRepresentation</span><span class="p">()</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">SocketData</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">two</span> <span class="o">=</span> <span class="mi">2</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8SocketIO0A9IOVersionO5threeyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/three" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A9IOVersionO5threeyA2CmF">three</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>socket.io 3, engine.io 4</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">three</span> <span class="o">=</span> <span class="mi">3</span></code></pre>
 
                         </div>
                       </div>

@@ -25,7 +25,7 @@
 import Foundation
 
 /// Protocol that is used to implement socket.io polling support
-public protocol SocketEnginePollable : SocketEngineSpec {
+public protocol SocketEnginePollable: SocketEngineSpec {
     // MARK: Properties
 
     /// `true` If engine's session has been invalidated.
@@ -81,8 +81,12 @@ extension SocketEnginePollable {
 
         var postStr = ""
 
-        for packet in postWait {
-            postStr += "\(packet.msg.utf16.count):\(packet.msg)"
+        if version.rawValue >= 3 {
+            postStr = postWait.lazy.map({ $0.msg }).joined(separator: "\u{1e}")
+        } else {
+            for packet in postWait {
+                postStr += "\(packet.msg.utf16.count):\(packet.msg)"
+            }
         }
 
         DefaultSocketLogger.Logger.log("Created POST string: \(postStr)", type: "SocketEnginePolling")
@@ -195,18 +199,32 @@ extension SocketEnginePollable {
     }
 
     func parsePollingMessage(_ str: String) {
-        guard str.count != 1 else { return }
+        guard !str.isEmpty else { return }
 
         DefaultSocketLogger.Logger.log("Got poll message: \(str)", type: "SocketEnginePolling")
 
-        var reader = SocketStringReader(message: str)
+        if version.rawValue >= 3 {
+            let records = str.components(separatedBy: "\u{1e}")
 
-        while reader.hasNext {
-            if let n = Int(reader.readUntilOccurence(of: ":")) {
-                parseEngineMessage(reader.read(count: n))
-            } else {
+            for record in records {
+                parseEngineMessage(record)
+            }
+        } else {
+            guard str.count != 1 else {
                 parseEngineMessage(str)
-                break
+
+                return
+            }
+
+            var reader = SocketStringReader(message: str)
+
+            while reader.hasNext {
+                if let n = Int(reader.readUntilOccurence(of: ":")) {
+                    parseEngineMessage(reader.read(count: n))
+                } else {
+                    parseEngineMessage(str)
+                    break
+                }
             }
         }
     }

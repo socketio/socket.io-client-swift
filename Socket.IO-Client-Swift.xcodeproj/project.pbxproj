@@ -18,14 +18,12 @@
 		1C686BE61F869AFD007D8627 /* SocketAckManagerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C686BD61F869AF1007D8627 /* SocketAckManagerTest.swift */; };
 		1C686BE71F869AFD007D8627 /* SocketParserTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C686BD71F869AF1007D8627 /* SocketParserTest.swift */; };
 		1C686BE81F869AFD007D8627 /* SocketNamespacePacketTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C686BD81F869AF1007D8627 /* SocketNamespacePacketTest.swift */; };
-		1C686C001F869EAE007D8627 /* SocketObjectiveCTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C686BFE1F869E9D007D8627 /* SocketObjectiveCTest.m */; };
 		572EF2431B51F18A00EEBB58 /* SocketIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 572EF2381B51F18A00EEBB58 /* SocketIO.framework */; };
 		6CA08A981D615C0B0061FD2A /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6CA08A971D615C0B0061FD2A /* Security.framework */; };
 		74BF53581F894326004972D8 /* SocketIO.h in Headers */ = {isa = PBXBuildFile; fileRef = 572EF23C1B51F18A00EEBB58 /* SocketIO.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		74D0F5961F8053950037C4DC /* Starscream.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9432E00B1F77F883006AF628 /* Starscream.framework */; };
 		74DA21741F09440F009C19EE /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 74DA21731F09440F009C19EE /* libz.tbd */; };
 		74DA217C1F09457B009C19EE /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 74DA21731F09440F009C19EE /* libz.tbd */; };
-		9432E00F1F77F8C4006AF628 /* SSLSecurity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9432E0061F77F7CA006AF628 /* SSLSecurity.swift */; };
 		DD52B048C71D724ABBD18C71 /* SocketTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD52BDC9E66AADA2CC5E8246 /* SocketTypes.swift */; };
 		DD52B11AF936352BAE30B2C8 /* SocketStringReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD52BA240D139F72633D4159 /* SocketStringReader.swift */; };
 		DD52B1F8BA0455EBE7C1B93E /* SocketAckEmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD52BFF2E3216CDC364BB8AF /* SocketAckEmitter.swift */; };
@@ -34,7 +32,6 @@
 		DD52B3A6C1E082841C35C85D /* SocketEngineClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD52BE5FDCE1D684132E897C /* SocketEngineClient.swift */; };
 		DD52B44AE56F2E07F3F3F991 /* SocketAckManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD52B09F7984E730513AB7E5 /* SocketAckManager.swift */; };
 		DD52B4DFA12F2599410205D9 /* SocketEngineWebsocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD52BE9AD8B2BD7F841CD1D4 /* SocketEngineWebsocket.swift */; };
-		DD52B53F2609D91A683DFCDD /* ManagerObjectiveCTest.m in Sources */ = {isa = PBXBuildFile; fileRef = DD52BB5E907D283ACC31E17F /* ManagerObjectiveCTest.m */; };
 		DD52B56DE03CDB4F40BD1A23 /* SocketExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD52B471D780013E18DF9335 /* SocketExtensions.swift */; };
 		DD52B57E7ABC61B57EE2A4B8 /* SocketPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD52B59C11D3D2BC63612E50 /* SocketPacket.swift */; };
 		DD52B883F942CD5A9D29892B /* SocketEnginePollable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD52B2D110F55723F82B108E /* SocketEnginePollable.swift */; };
@@ -474,7 +471,6 @@
 				DD52BB69B6D260035B652CA4 /* SocketAnyEvent.swift in Sources */,
 				DD52BF924BEF05E1235CFD29 /* SocketIOClient.swift in Sources */,
 				DD52BFEB4DBD3BF8D93DAEFF /* SocketEventHandler.swift in Sources */,
-				9432E00F1F77F8C4006AF628 /* SSLSecurity.swift in Sources */,
 				DD52BB9A3E42FF2DD6BE7C2F /* SocketIOClientSpec.swift in Sources */,
 				DD52B2AFE7D46039C7AE4D19 /* SocketIOClientOption.swift in Sources */,
 				DD52BE4D1E6BB752CD9614A6 /* SocketIOStatus.swift in Sources */,
@@ -495,7 +491,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1C686C001F869EAE007D8627 /* SocketObjectiveCTest.m in Sources */,
 				1C686BE21F869AFD007D8627 /* SocketIOClientConfigurationTest.swift in Sources */,
 				1C686BE31F869AFD007D8627 /* SocketEngineTest.swift in Sources */,
 				1C686BE41F869AFD007D8627 /* SocketSideEffectTest.swift in Sources */,
@@ -504,7 +499,6 @@
 				1C686BE71F869AFD007D8627 /* SocketParserTest.swift in Sources */,
 				1C686BE81F869AFD007D8627 /* SocketNamespacePacketTest.swift in Sources */,
 				DD52BCCD25EFA76E0F9B313C /* SocketMangerTest.swift in Sources */,
-				DD52B53F2609D91A683DFCDD /* ManagerObjectiveCTest.m in Sources */,
 				1C657CDE5D510E8E2E573E39 /* utils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -583,16 +577,16 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = SocketIO;
 				SUPPORTED_PLATFORMS = "macosx appletvsimulator appletvos iphonesimulator iphoneos watchos watchsimulator";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
+				TVOS_DEPLOYMENT_TARGET = 10.0;
 				VALID_ARCHS = "i386 x86_64 armv7 armv7s arm64 armv7k";
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
+				WATCHOS_DEPLOYMENT_TARGET = 7.0;
 			};
 			name = Debug;
 		};
@@ -657,15 +651,15 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				PRODUCT_NAME = SocketIO;
 				SUPPORTED_PLATFORMS = "macosx appletvsimulator appletvos iphonesimulator iphoneos watchos watchsimulator";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 5.0;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
+				TVOS_DEPLOYMENT_TARGET = 10.0;
 				VALID_ARCHS = "i386 x86_64 armv7 armv7s arm64 armv7k";
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
+				WATCHOS_DEPLOYMENT_TARGET = 7.0;
 			};
 			name = Release;
 		};

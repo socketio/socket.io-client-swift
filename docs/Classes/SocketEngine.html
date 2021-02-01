@@ -21,7 +21,7 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="../index.html">
-          SocketIO Docs
+          SocketIO 16.0.0 Docs
         </a>
          (100% documented)
       </p>
@@ -51,6 +51,9 @@
                 <a class="nav-group-task-link" href="../12to13.html">12to13</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../15to16.html">15to16</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../faq.html">FAQ</a>
               </li>
             </ul>
@@ -60,9 +63,6 @@
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/OnAckCallback.html">OnAckCallback</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Classes/SSLSecurity.html">SSLSecurity</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/SocketAckEmitter.html">SocketAckEmitter</a>
@@ -106,7 +106,51 @@
                 <a class="nav-group-task-link" href="../Enums/SocketIOStatus.html">SocketIOStatus</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/SocketIOVersion.html">SocketIOVersion</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Enums/SocketParsableError.html">SocketParsableError</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:Sa">Array</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:Sb">Bool</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:10Foundation4DataV">Data</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:SD">Dictionary</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:Sd">Double</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:Si">Int</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSArray">NSArray</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSData">NSData</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSDictionary">NSDictionary</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSNull">NSNull</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/c:objc(cs)NSString">NSString</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions.html#/s:SS">String</a>
               </li>
             </ul>
           </li>
@@ -184,11 +228,13 @@
       <article class="main-content">
 
         <section class="section">
-          <div class="section-content">
+          <div class="section-content top-matter">
             <h1>SocketEngine</h1>
               <div class="declaration">
                 <div class="language">
-                  <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kt">SocketEngine</span> <span class="p">:</span> <span class="kt">NSObject</span><span class="p">,</span> <span class="kt">URLSessionDelegate</span><span class="p">,</span> <span class="kt"><a href="../Protocols/SocketEnginePollable.html">SocketEnginePollable</a></span><span class="p">,</span> <span class="kt"><a href="../Protocols/SocketEngineWebsocket.html">SocketEngineWebsocket</a></span><span class="p">,</span> <span class="kt"><a href="../Protocols/ConfigSettable.html">ConfigSettable</a></span></code></pre>
+                  
+                  <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kt">SocketEngine</span><span class="p">:</span>
+        <span class="kt">NSObject</span><span class="p">,</span> <span class="kt">WebSocketDelegate</span><span class="p">,</span> <span class="kt">URLSessionDelegate</span><span class="p">,</span> <span class="kt"><a href="../Protocols/SocketEnginePollable.html">SocketEnginePollable</a></span><span class="p">,</span> <span class="kt"><a href="../Protocols/SocketEngineWebsocket.html">SocketEngineWebsocket</a></span><span class="p">,</span> <span class="kt"><a href="../Protocols/ConfigSettable.html">ConfigSettable</a></span></code></pre>
 
                 </div>
               </div>
@@ -204,17 +250,19 @@ See <code><a href="../Protocols/SocketEnginePollable.html">SocketEnginePollable<
               <div class="task-name-container">
                 <a name="/Properties"></a>
                 <a name="//apple_ref/swift/Section/Properties" class="dashAnchor"></a>
-                <a href="#/Properties">
-                  <h3 class="section-name">Properties</h3>
-                </a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/Properties"></a>
+                  <h3 class="section-name"><p>Properties</p>
+</h3>
+                </div>
               </div>
               <ul class="item-container">
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(py)engineQueue"></a>
+                    <a name="/s:8SocketIO0A6EngineC11engineQueueSo17OS_dispatch_queueCvp"></a>
                     <a name="//apple_ref/swift/Property/engineQueue" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(py)engineQueue">engineQueue</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC11engineQueueSo17OS_dispatch_queueCvp">engineQueue</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -239,9 +287,9 @@ See <code><a href="../Protocols/SocketEnginePollable.html">SocketEnginePollable<
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(py)connectParams"></a>
+                    <a name="/s:8SocketIO0A6EngineC13connectParamsSDySSypGSgvp"></a>
                     <a name="//apple_ref/swift/Property/connectParams" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(py)connectParams">connectParams</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC13connectParamsSDySSypGSgvp">connectParams</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -266,9 +314,9 @@ See <code><a href="../Protocols/SocketEnginePollable.html">SocketEnginePollable<
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(py)extraHeaders"></a>
+                    <a name="/s:8SocketIO0A6EngineC12extraHeadersSDyS2SGSgvp"></a>
                     <a name="//apple_ref/swift/Property/extraHeaders" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(py)extraHeaders">extraHeaders</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC12extraHeadersSDyS2SGSgvp">extraHeaders</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -382,9 +430,9 @@ disconnect us.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(py)closed"></a>
+                    <a name="/s:8SocketIO0A6EngineC6closedSbvp"></a>
                     <a name="//apple_ref/swift/Property/closed" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(py)closed">closed</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC6closedSbvp">closed</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -399,9 +447,7 @@ disconnect us.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">closed</span><span class="p">:</span> <span class="nf">Bool</span> <span class="p">{</span>
-  <span class="k">get</span>
-  <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">closed</span><span class="p">:</span> <span class="kt">Bool</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -411,9 +457,9 @@ disconnect us.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(py)compress"></a>
+                    <a name="/s:8SocketIO0A6EngineC8compressSbvp"></a>
                     <a name="//apple_ref/swift/Property/compress" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(py)compress">compress</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC8compressSbvp">compress</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -428,9 +474,7 @@ disconnect us.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">compress</span><span class="p">:</span> <span class="nf">Bool</span> <span class="p">{</span>
-  <span class="k">get</span>
-  <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">compress</span><span class="p">:</span> <span class="kt">Bool</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -440,9 +484,9 @@ disconnect us.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(py)connected"></a>
+                    <a name="/s:8SocketIO0A6EngineC9connectedSbvp"></a>
                     <a name="//apple_ref/swift/Property/connected" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(py)connected">connected</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC9connectedSbvp">connected</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -457,9 +501,7 @@ disconnect us.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">connected</span><span class="p">:</span> <span class="nf">Bool</span> <span class="p">{</span>
-  <span class="k">get</span>
-  <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">connected</span><span class="p">:</span> <span class="kt">Bool</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -469,9 +511,9 @@ disconnect us.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(py)cookies"></a>
+                    <a name="/s:8SocketIO0A6EngineC7cookiesSaySo12NSHTTPCookieCGSgvp"></a>
                     <a name="//apple_ref/swift/Property/cookies" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(py)cookies">cookies</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC7cookiesSaySo12NSHTTPCookieCGSgvp">cookies</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -486,9 +528,7 @@ disconnect us.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">cookies</span><span class="p">:</span> <span class="p">[</span><span class="kt">HTTPCookie</span><span class="p">]?</span> <span class="p">{</span>
-  <span class="k">get</span>
-  <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">cookies</span><span class="p">:</span> <span class="p">[</span><span class="kt">HTTPCookie</span><span class="p">]?</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -498,9 +538,9 @@ disconnect us.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(py)fastUpgrade"></a>
+                    <a name="/s:8SocketIO0A6EngineC11fastUpgradeSbvp"></a>
                     <a name="//apple_ref/swift/Property/fastUpgrade" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(py)fastUpgrade">fastUpgrade</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC11fastUpgradeSbvp">fastUpgrade</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -517,9 +557,7 @@ disconnect us.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">fastUpgrade</span><span class="p">:</span> <span class="nf">Bool</span> <span class="p">{</span>
-  <span class="k">get</span>
-  <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">fastUpgrade</span><span class="p">:</span> <span class="kt">Bool</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -529,9 +567,9 @@ disconnect us.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(py)forcePolling"></a>
+                    <a name="/s:8SocketIO0A6EngineC12forcePollingSbvp"></a>
                     <a name="//apple_ref/swift/Property/forcePolling" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(py)forcePolling">forcePolling</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC12forcePollingSbvp">forcePolling</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -546,9 +584,7 @@ disconnect us.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">forcePolling</span><span class="p">:</span> <span class="nf">Bool</span> <span class="p">{</span>
-  <span class="k">get</span>
-  <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">forcePolling</span><span class="p">:</span> <span class="kt">Bool</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -558,9 +594,9 @@ disconnect us.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(py)forceWebsockets"></a>
+                    <a name="/s:8SocketIO0A6EngineC15forceWebsocketsSbvp"></a>
                     <a name="//apple_ref/swift/Property/forceWebsockets" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(py)forceWebsockets">forceWebsockets</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC15forceWebsocketsSbvp">forceWebsockets</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -575,9 +611,7 @@ disconnect us.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">forceWebsockets</span><span class="p">:</span> <span class="nf">Bool</span> <span class="p">{</span>
-  <span class="k">get</span>
-  <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">forceWebsockets</span><span class="p">:</span> <span class="kt">Bool</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -604,9 +638,7 @@ disconnect us.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">invalidated</span><span class="p">:</span> <span class="nf">Bool</span> <span class="p">{</span>
-  <span class="k">get</span>
-  <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">invalidated</span><span class="p">:</span> <span class="kt">Bool</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -616,9 +648,9 @@ disconnect us.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(py)polling"></a>
+                    <a name="/s:8SocketIO0A6EngineC7pollingSbvp"></a>
                     <a name="//apple_ref/swift/Property/polling" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(py)polling">polling</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC7pollingSbvp">polling</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -633,9 +665,7 @@ disconnect us.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">polling</span><span class="p">:</span> <span class="nf">Bool</span> <span class="p">{</span>
-  <span class="k">get</span>
-  <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">polling</span><span class="p">:</span> <span class="kt">Bool</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -645,9 +675,9 @@ disconnect us.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(py)probing"></a>
+                    <a name="/s:8SocketIO0A6EngineC7probingSbvp"></a>
                     <a name="//apple_ref/swift/Property/probing" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(py)probing">probing</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC7probingSbvp">probing</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -662,9 +692,7 @@ disconnect us.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">probing</span><span class="p">:</span> <span class="nf">Bool</span> <span class="p">{</span>
-  <span class="k">get</span>
-  <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">probing</span><span class="p">:</span> <span class="kt">Bool</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -691,9 +719,7 @@ disconnect us.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">session</span><span class="p">:</span> <span class="nf">URLSession</span><span class="p">?</span> <span class="p">{</span>
-  <span class="k">get</span>
-  <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">session</span><span class="p">:</span> <span class="kt">URLSession</span><span class="p">?</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -703,9 +729,9 @@ disconnect us.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(py)sid"></a>
+                    <a name="/s:8SocketIO0A6EngineC3sidSSvp"></a>
                     <a name="//apple_ref/swift/Property/sid" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(py)sid">sid</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC3sidSSvp">sid</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -720,9 +746,7 @@ disconnect us.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">sid</span><span class="p">:</span> <span class="nf">String</span> <span class="p">{</span>
-  <span class="k">get</span>
-  <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">sid</span><span class="p">:</span> <span class="kt">String</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -732,9 +756,9 @@ disconnect us.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(py)socketPath"></a>
+                    <a name="/s:8SocketIO0A6EngineC10socketPathSSvp"></a>
                     <a name="//apple_ref/swift/Property/socketPath" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(py)socketPath">socketPath</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC10socketPathSSvp">socketPath</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -749,9 +773,7 @@ disconnect us.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">socketPath</span><span class="p">:</span> <span class="nf">String</span> <span class="p">{</span>
-  <span class="k">get</span>
-  <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">socketPath</span><span class="p">:</span> <span class="kt">String</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -761,9 +783,9 @@ disconnect us.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(py)urlPolling"></a>
+                    <a name="/s:8SocketIO0A6EngineC10urlPolling10Foundation3URLVvp"></a>
                     <a name="//apple_ref/swift/Property/urlPolling" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(py)urlPolling">urlPolling</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC10urlPolling10Foundation3URLVvp">urlPolling</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -778,9 +800,7 @@ disconnect us.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">urlPolling</span><span class="p">:</span> <span class="nf">URL</span> <span class="p">{</span>
-  <span class="k">get</span>
-  <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">urlPolling</span><span class="p">:</span> <span class="kt">URL</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -790,9 +810,9 @@ disconnect us.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(py)urlWebSocket"></a>
+                    <a name="/s:8SocketIO0A6EngineC06urlWebA010Foundation3URLVvp"></a>
                     <a name="//apple_ref/swift/Property/urlWebSocket" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(py)urlWebSocket">urlWebSocket</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC06urlWebA010Foundation3URLVvp">urlWebSocket</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -807,9 +827,7 @@ disconnect us.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">urlWebSocket</span><span class="p">:</span> <span class="nf">URL</span> <span class="p">{</span>
-  <span class="k">get</span>
-  <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">urlWebSocket</span><span class="p">:</span> <span class="kt">URL</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -819,9 +837,36 @@ disconnect us.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(py)websocket"></a>
+                    <a name="/s:8SocketIO0A6EngineC7versionAA0A9IOVersionOvp"></a>
+                    <a name="//apple_ref/swift/Property/version" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC7versionAA0A9IOVersionOvp">version</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The version of engine.io being used. Default is three.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">version</span><span class="p">:</span> <span class="kt"><a href="../Enums/SocketIOVersion.html">SocketIOVersion</a></span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8SocketIO0A6EngineC9websocketSbvp"></a>
                     <a name="//apple_ref/swift/Property/websocket" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(py)websocket">websocket</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC9websocketSbvp">websocket</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -836,10 +881,8 @@ disconnect us.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">@available(*, deprecated, message: "No longer needed, if we're not polling, then we must be doing websockets")</span>
-<span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">websocket</span><span class="p">:</span> <span class="nf">Bool</span> <span class="p">{</span>
-  <span class="k">get</span>
-  <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">@available</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">deprecated</span><span class="p">,</span> <span class="nv">message</span><span class="p">:</span> <span class="s">"No longer needed, if we're not polling, then we must be doing websockets"</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">websocket</span><span class="p">:</span> <span class="kt">Bool</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -866,9 +909,7 @@ disconnect us.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">enableSOCKSProxy</span><span class="p">:</span> <span class="nf">Bool</span> <span class="p">{</span>
-  <span class="k">get</span>
-  <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">enableSOCKSProxy</span><span class="p">:</span> <span class="kt">Bool</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -878,9 +919,9 @@ disconnect us.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(py)ws"></a>
+                    <a name="/s:8SocketIO0A6EngineC2ws10Starscream03WebA0CSgvp"></a>
                     <a name="//apple_ref/swift/Property/ws" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(py)ws">ws</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC2ws10Starscream03WebA0CSgvp">ws</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -895,9 +936,7 @@ disconnect us.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">ws</span><span class="p">:</span> <span class="nf">WebSocket</span><span class="p">?</span> <span class="p">{</span>
-  <span class="k">get</span>
-  <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">ws</span><span class="p">:</span> <span class="kt">WebSocket</span><span class="p">?</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -907,9 +946,36 @@ disconnect us.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(py)client"></a>
+                    <a name="/s:8SocketIO0A6EngineC11wsConnectedSbvp"></a>
+                    <a name="//apple_ref/swift/Property/wsConnected" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC11wsConnectedSbvp">wsConnected</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Whether or not the WebSocket is currently connected.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">wsConnected</span><span class="p">:</span> <span class="kt">Bool</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8SocketIO0A6EngineC6clientAA0aC6Client_pSgvp"></a>
                     <a name="//apple_ref/swift/Property/client" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(py)client">client</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC6clientAA0aC6Client_pSgvp">client</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -937,9 +1003,11 @@ disconnect us.</p>
               <div class="task-name-container">
                 <a name="/Initializers"></a>
                 <a name="//apple_ref/swift/Section/Initializers" class="dashAnchor"></a>
-                <a href="#/Initializers">
-                  <h3 class="section-name">Initializers</h3>
-                </a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/Initializers"></a>
+                  <h3 class="section-name"><p>Initializers</p>
+</h3>
+                </div>
               </div>
               <ul class="item-container">
                 <li class="item">
@@ -947,7 +1015,7 @@ disconnect us.</p>
                     <code>
                     <a name="/s:8SocketIO0A6EngineC6client3url6configAcA0aC6Client_p_10Foundation3URLVAA0A21IOClientConfigurationVtcfc"></a>
                     <a name="//apple_ref/swift/Method/init(client:url:config:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A6EngineC6client3url6configAcA0aC6Client_p_10Foundation3URLVAA0A21IOClientConfigurationVtcfc">init(client:url:config:)</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC6client3url6configAcA0aC6Client_p_10Foundation3URLVAA0A21IOClientConfigurationVtcfc">init(client:<wbr>url:<wbr>config:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1015,9 +1083,9 @@ disconnect us.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(im)initWithClient:url:options:"></a>
+                    <a name="/s:8SocketIO0A6EngineC6client3url7optionsAcA0aC6Client_p_10Foundation3URLVSDySSypGSgtcfc"></a>
                     <a name="//apple_ref/swift/Method/init(client:url:options:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(im)initWithClient:url:options:">init(client:url:options:)</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC6client3url7optionsAcA0aC6Client_p_10Foundation3URLVSDySSypGSgtcfc">init(client:<wbr>url:<wbr>options:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1032,7 +1100,7 @@ disconnect us.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">required</span> <span class="n">convenience</span> <span class="nf">init</span><span class="p">(</span><span class="nv">client</span><span class="p">:</span> <span class="kt"><a href="../Protocols/SocketEngineClient.html">SocketEngineClient</a></span><span class="p">,</span> <span class="nv">url</span><span class="p">:</span> <span class="kt">URL</span><span class="p">,</span> <span class="nv">options</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">]?)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">required</span> <span class="kd">convenience</span> <span class="nf">init</span><span class="p">(</span><span class="nv">client</span><span class="p">:</span> <span class="kt"><a href="../Protocols/SocketEngineClient.html">SocketEngineClient</a></span><span class="p">,</span> <span class="nv">url</span><span class="p">:</span> <span class="kt">URL</span><span class="p">,</span> <span class="nv">options</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">]?)</span></code></pre>
 
                         </div>
                       </div>
@@ -1088,17 +1156,19 @@ disconnect us.</p>
               <div class="task-name-container">
                 <a name="/Methods"></a>
                 <a name="//apple_ref/swift/Section/Methods" class="dashAnchor"></a>
-                <a href="#/Methods">
-                  <h3 class="section-name">Methods</h3>
-                </a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/Methods"></a>
+                  <h3 class="section-name"><p>Methods</p>
+</h3>
+                </div>
               </div>
               <ul class="item-container">
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(im)connect"></a>
+                    <a name="/s:8SocketIO0A6EngineC7connectyyF"></a>
                     <a name="//apple_ref/swift/Method/connect()" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(im)connect">connect()</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC7connectyyF">connect()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1123,9 +1193,9 @@ disconnect us.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(im)didErrorWithReason:"></a>
+                    <a name="/s:8SocketIO0A6EngineC8didError6reasonySS_tF"></a>
                     <a name="//apple_ref/swift/Method/didError(reason:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(im)didErrorWithReason:">didError(reason:)</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC8didError6reasonySS_tF">didError(reason:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1150,9 +1220,9 @@ disconnect us.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(im)disconnectWithReason:"></a>
+                    <a name="/s:8SocketIO0A6EngineC10disconnect6reasonySS_tF"></a>
                     <a name="//apple_ref/swift/Method/disconnect(reason:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(im)disconnectWithReason:">disconnect(reason:)</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC10disconnect6reasonySS_tF">disconnect(reason:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1196,9 +1266,9 @@ disconnect us.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(im)doFastUpgrade"></a>
+                    <a name="/s:8SocketIO0A6EngineC13doFastUpgradeyyF"></a>
                     <a name="//apple_ref/swift/Method/doFastUpgrade()" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(im)doFastUpgrade">doFastUpgrade()</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC13doFastUpgradeyyF">doFastUpgrade()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1226,9 +1296,9 @@ WebSocket mode.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(im)flushWaitingForPostToWebSocket"></a>
+                    <a name="/s:8SocketIO0A6EngineC024flushWaitingForPostToWebA0yyF"></a>
                     <a name="//apple_ref/swift/Method/flushWaitingForPostToWebSocket()" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(im)flushWaitingForPostToWebSocket">flushWaitingForPostToWebSocket()</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC024flushWaitingForPostToWebA0yyF">flushWaitingForPostToWebSocket()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1256,9 +1326,9 @@ the engine is attempting to upgrade to WebSocket it does not do any POSTing.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(im)parseEngineData:"></a>
+                    <a name="/s:8SocketIO0A6EngineC05parseC4Datayy10Foundation0E0VF"></a>
                     <a name="//apple_ref/swift/Method/parseEngineData(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(im)parseEngineData:">parseEngineData(_:)</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC05parseC4Datayy10Foundation0E0VF">parseEngineData(_:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1302,9 +1372,9 @@ the engine is attempting to upgrade to WebSocket it does not do any POSTing.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(im)parseEngineMessage:"></a>
+                    <a name="/s:8SocketIO0A6EngineC05parseC7MessageyySSF"></a>
                     <a name="//apple_ref/swift/Method/parseEngineMessage(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(im)parseEngineMessage:">parseEngineMessage(_:)</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC05parseC7MessageyySSF">parseEngineMessage(_:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1350,7 +1420,7 @@ the engine is attempting to upgrade to WebSocket it does not do any POSTing.</p>
                     <code>
                     <a name="/s:8SocketIO0A6EngineC10setConfigsyyAA0A21IOClientConfigurationVF"></a>
                     <a name="//apple_ref/swift/Method/setConfigs(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A6EngineC10setConfigsyyAA0A21IOClientConfigurationVF">setConfigs(_:)</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC10setConfigsyyAA0A21IOClientConfigurationVF">setConfigs(_:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1377,9 +1447,9 @@ the engine is attempting to upgrade to WebSocket it does not do any POSTing.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@SocketIO@objc(cs)SocketEngine(im)write:withType:withData:completion:"></a>
+                    <a name="/s:8SocketIO0A6EngineC5write_8withType0E4Data10completionySS_AA0ac6PacketF0OSay10Foundation0G0VGyycSgtF"></a>
                     <a name="//apple_ref/swift/Method/write(_:withType:withData:completion:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@SocketIO@objc(cs)SocketEngine(im)write:withType:withData:completion:">write(_:withType:withData:completion:)</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC5write_8withType0E4Data10completionySS_AA0ac6PacketF0OSay10Foundation0G0VGyycSgtF">write(_:<wbr>withType:<wbr>withData:<wbr>completion:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1462,9 +1532,11 @@ the engine is attempting to upgrade to WebSocket it does not do any POSTing.</p>
               <div class="task-name-container">
                 <a name="/URLSessionDelegate%20methods"></a>
                 <a name="//apple_ref/swift/Section/URLSessionDelegate methods" class="dashAnchor"></a>
-                <a href="#/URLSessionDelegate%20methods">
-                  <h3 class="section-name">URLSessionDelegate methods</h3>
-                </a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/URLSessionDelegate%20methods"></a>
+                  <h3 class="section-name"><p>URLSessionDelegate methods</p>
+</h3>
+                </div>
               </div>
               <ul class="item-container">
                 <li class="item">
@@ -1472,7 +1544,7 @@ the engine is attempting to upgrade to WebSocket it does not do any POSTing.</p>
                     <code>
                     <a name="/s:8SocketIO0A6EngineC10URLSession7session25didBecomeInvalidWithErrorySo12NSURLSessionC_So7NSErrorCSgtF"></a>
                     <a name="//apple_ref/swift/Method/URLSession(session:didBecomeInvalidWithError:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A6EngineC10URLSession7session25didBecomeInvalidWithErrorySo12NSURLSessionC_So7NSErrorCSgtF">URLSession(session:didBecomeInvalidWithError:)</a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC10URLSession7session25didBecomeInvalidWithErrorySo12NSURLSessionC_So7NSErrorCSgtF">URLSession(session:<wbr>didBecomeInvalidWithError:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1487,9 +1559,67 @@ the engine is attempting to upgrade to WebSocket it does not do any POSTing.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">URLSession</span><span class="p">(</span><span class="nv">session</span><span class="p">:</span> <span class="kt">URLSession</span><span class="p">,</span> <span class="n">didBecomeInvalidWithError</span> <span class="nv">error</span><span class="p">:</span> <span class="kt">NSError</span><span class="p">?)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="kt">URLSession</span><span class="p">(</span><span class="nv">session</span><span class="p">:</span> <span class="kt">URLSession</span><span class="p">,</span> <span class="n">didBecomeInvalidWithError</span> <span class="nv">error</span><span class="p">:</span> <span class="kt">NSError</span><span class="p">?)</span></code></pre>
 
                         </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8SocketIO0A6EngineC10didReceive5event6clienty10Starscream03WebA5EventO_AG0iA0CtF"></a>
+                    <a name="//apple_ref/swift/Method/didReceive(event:client:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8SocketIO0A6EngineC10didReceive5event6clienty10Starscream03WebA5EventO_AG0iA0CtF">didReceive(event:<wbr>client:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Delegate method for WebSocketDelegate.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">didReceive</span><span class="p">(</span><span class="nv">event</span><span class="p">:</span> <span class="kt">WebSocketEvent</span><span class="p">,</span> <span class="n"><a href="../Classes/SocketEngine.html#/s:8SocketIO0A6EngineC6clientAA0aC6Client_pSgvp">client</a></span> <span class="nv">_</span><span class="p">:</span> <span class="kt">WebSocket</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>event</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>WS Event</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>_</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p></p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </section>
                   </div>
@@ -1502,8 +1632,8 @@ the engine is attempting to upgrade to WebSocket it does not do any POSTing.</p>
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2019 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2019-05-28)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2021 <a class="link" href="https://github.com/socketio/socket.io-client-swift" target="_blank" rel="external">Erik</a>. All rights reserved. (Last updated: 2021-02-01)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>

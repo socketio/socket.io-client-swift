@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Structures  Reference</title>
+    <title>15to16  Reference</title>
     <link rel="stylesheet" type="text/css" href="css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="css/highlight.css" />
     <meta charset="utf-8">
@@ -14,9 +14,8 @@
   </head>
   <body>
 
-    <a name="//apple_ref/swift/Section/Structures" class="dashAnchor"></a>
 
-    <a title="Structures  Reference"></a>
+    <a title="15to16  Reference"></a>
 
     <header class="header">
       <p class="header-col header-col--primary">
@@ -38,7 +37,7 @@
     <p class="breadcrumbs">
       <a class="breadcrumb" href="index.html">SocketIO Reference</a>
       <img class="carat" src="img/carat.png" />
-      Structures  Reference
+      15to16  Reference
     </p>
 
     <div class="content-wrapper">
@@ -229,104 +228,21 @@
 
         <section class="section">
           <div class="section-content top-matter">
-            <h1>Structures</h1>
-            <p>The following structures are available globally.</p>
+            
+            <h1 id='upgrading-from-v15-to-v16' class='heading'>Upgrading from v15 to v16</h1>
+
+<p>This guide will help you navigate the changes that were introduced in v16.</p>
+<h2 id='objective-c-is-no-longer-supported-you-must-now-use-swift' class='heading'>Objective-c is no longer supported. You must now use Swift.</h2>
+<h2 id='client-supports-multiple-socket-io-versions' class='heading'>Client supports multiple socket.io versions</h2>
+
+<p>The client now supports socket.io 3 servers. This is mostly a transparent change, however if your sever
+is socket.io 2, you must send <code>.version(.two)</code> as an option to the manager.</p>
+<pre class="highlight swift"><code><span class="kt">SocketManager</span><span class="p">(</span><span class="nv">socketURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">(</span><span class="nv">string</span><span class="p">:</span><span class="s">"http://localhost:8087/"</span><span class="p">)</span><span class="o">!</span><span class="p">,</span> <span class="nv">config</span><span class="p">:</span> <span class="p">[</span><span class="o">.</span><span class="nf">version</span><span class="p">(</span><span class="o">.</span><span class="n">two</span><span class="p">)])</span>
+</code></pre>
 
           </div>
         </section>
 
-        <section class="section">
-          <div class="section-content">
-            <div class="task-group">
-              <ul class="item-container">
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8SocketIO0A12EventHandlerV"></a>
-                    <a name="//apple_ref/swift/Struct/SocketEventHandler" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A12EventHandlerV">SocketEventHandler</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>A wrapper around a handler.</p>
-
-                        <a href="Structs/SocketEventHandler.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">SocketEventHandler</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8SocketIO0A21IOClientConfigurationV"></a>
-                    <a name="//apple_ref/swift/Struct/SocketIOClientConfiguration" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A21IOClientConfigurationV">SocketIOClientConfiguration</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>An array-like type that holds <code><a href="Enums/SocketIOClientOption.html">SocketIOClientOption</a></code>s</p>
-
-                        <a href="Structs/SocketIOClientConfiguration.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">SocketIOClientConfiguration</span> <span class="p">:</span> <span class="kt">ExpressibleByArrayLiteral</span><span class="p">,</span> <span class="kt">Collection</span><span class="p">,</span> <span class="kt">MutableCollection</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8SocketIO0A6PacketV"></a>
-                    <a name="//apple_ref/swift/Struct/SocketPacket" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8SocketIO0A6PacketV">SocketPacket</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>A struct that represents a socket.io packet.</p>
-
-                        <a href="Structs/SocketPacket.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">SocketPacket</span> <span class="p">:</span> <span class="kt">CustomStringConvertible</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </section>
 
       </article>
     </div>
