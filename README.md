@@ -32,7 +32,7 @@ socket.connect()
 ```
 
 ## Features
-- Supports socket.io 3.0+ (For socket.io 1.0 use v9.x, For socket.io 2.0 use 15.x)
+- Supports socket.io 2.0+/3.0+.
 - Supports Binary
 - Supports Polling and WebSockets
 - Supports TLS/SSL
