@@ -107,6 +107,16 @@ public protocol SocketIOClientSpec : AnyObject {
     /// - parameter items: The items to send with this event. May be left out.
     /// - parameter completion: Callback called on transport write completion.
     func emit(_ event: String, _ items: SocketData..., completion: (() -> ())?)
+    
+    /// Send an event to the server, with optional data items and optional write completion handler.
+    ///
+    /// If an error occurs trying to transform `items` into their socket representation, a `SocketClientEvent.error`
+    /// will be emitted. The structure of the error data is `[eventName, items, theError]`
+    ///
+    /// - parameter event: The event to send.
+    /// - parameter items: The items to send with this event. May be left out.
+    /// - parameter completion: Callback called on transport write completion.
+    func emit(_ event: String, _ items: [SocketData], completion: (() -> ())?)
 
     /// Call when you wish to tell the server that you've received the event for `ack`.
     ///
@@ -134,6 +144,27 @@ public protocol SocketIOClientSpec : AnyObject {
     /// - parameter items: The items to send with this event. May be left out.
     /// - returns: An `OnAckCallback`. You must call the `timingOut(after:)` method before the event will be sent.
     func emitWithAck(_ event: String, _ items: SocketData...) -> OnAckCallback
+    
+    /// Sends a message to the server, requesting an ack.
+    ///
+    /// **NOTE**: It is up to the server send an ack back, just calling this method does not mean the server will ack.
+    /// Check that your server's api will ack the event being sent.
+    ///
+    /// If an error occurs trying to transform `items` into their socket representation, a `SocketClientEvent.error`
+    /// will be emitted. The structure of the error data is `[eventName, items, theError]`
+    ///
+    /// Example:
+    ///
+    /// ```swift
+    /// socket.emitWithAck("myEvent", 1).timingOut(after: 1) {data in
+    ///     ...
+    /// }
+    /// ```
+    ///
+    /// - parameter event: The event to send.
+    /// - parameter items: The items to send with this event. May be left out.
+    /// - returns: An `OnAckCallback`. You must call the `timingOut(after:)` method before the event will be sent.
+    func emitWithAck(_ event: String, _ items: [SocketData]) -> OnAckCallback
 
     /// Called when socket.io has acked one of our emits. Causes the corresponding ack callback to be called.
     ///
