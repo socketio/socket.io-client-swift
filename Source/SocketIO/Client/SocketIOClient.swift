@@ -212,7 +212,7 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
     /// - parameter items: The items to send with this event. May be left out.
     /// - parameter completion: Callback called on transport write completion.
     open func emit(_ event: String, _ items: SocketData..., completion: (() -> ())? = nil)  {
-        emit(event, items, completion: completion)
+        emit(event, with: items, completion: completion)
     }
     
     /// Send an event to the server, with optional data items and optional write completion handler.
@@ -223,7 +223,7 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
     /// - parameter event: The event to send.
     /// - parameter items: The items to send with this event. May be left out.
     /// - parameter completion: Callback called on transport write completion.
-    open func emit(_ event: String, _ items: [SocketData], completion: (() -> ())?) {
+    open func emit(_ event: String, with items: [SocketData], completion: (() -> ())?) {
         
         do {
             emit([event] + (try items.map({ try $0.socketRepresentation() })), completion: completion)
@@ -255,7 +255,7 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
     /// - parameter items: The items to send with this event. May be left out.
     /// - returns: An `OnAckCallback`. You must call the `timingOut(after:)` method before the event will be sent.
     open func emitWithAck(_ event: String, _ items: SocketData...) -> OnAckCallback {
-        emitWithAck(event, items)
+        emitWithAck(event, with: items)
     }
     
     /// Sends a message to the server, requesting an ack.
@@ -277,7 +277,7 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
     /// - parameter event: The event to send.
     /// - parameter items: The items to send with this event. May be left out.
     /// - returns: An `OnAckCallback`. You must call the `timingOut(after:)` method before the event will be sent.
-    open func emitWithAck(_ event: String, _ items: [SocketData]) -> OnAckCallback {
+    open func emitWithAck(_ event: String, with items: [SocketData]) -> OnAckCallback {
         
         do {
             return createOnAck([event] + (try items.map({ try $0.socketRepresentation() })))
