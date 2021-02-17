@@ -344,6 +344,19 @@ class SocketSideEffectTest: XCTestCase {
         waitForExpectations(timeout: 2)
     }
 
+    func testConnectedAlready() {
+        let expect = expectation(description: "The client should call its handler if it's connected already")
+
+        socket.setTestStatus(.connected)
+        manager.engine = TestEngine(client: manager, url: manager.socketURL, options: nil)
+
+        socket.connect(timeoutAfter: 0.5, withHandler: {
+            expect.fulfill()
+        })
+
+        waitForExpectations(timeout: 0.8)
+    }
+
     func testErrorInCustomSocketDataCallsErrorHandler() {
         let expect = expectation(description: "The client should call the error handler for emit errors because of " +
                                               "custom data")
