@@ -24,6 +24,9 @@ import Foundation
 
 /// Defines that a type will be able to parse socket.io-protocol messages.
 public protocol SocketParsable : AnyObject {
+    /// if `true`, disable parsing event payloads
+    var disableEventMessageParsing: Bool { get }
+
     // MARK: Methods
 
     /// Called when the engine has received some binary data that should be attached to a packet.
@@ -117,6 +120,10 @@ public extension SocketParsable where Self: SocketManagerSpec & SocketDataBuffer
         }
 
         var dataArray = String(message.utf16[message.utf16.index(reader.currentIndex, offsetBy: 1)...])!
+
+        if type == .event, self.disableEventMessageParsing {
+            return SocketPacket(type: type, data: ["rawMessage", dataArray], id: Int(idString) ?? -1, nsp: namespace, placeholders: placeholders)
+        }
 
         if (type == .error || type == .connect) && !dataArray.hasPrefix("[") && !dataArray.hasSuffix("]") {
             dataArray = "[" + dataArray + "]"

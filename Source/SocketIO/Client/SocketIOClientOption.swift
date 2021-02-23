@@ -77,6 +77,10 @@ public enum SocketIOClientOption : ClientOption {
     /// Used to pass in a custom logger.
     case logger(SocketLogger)
 
+    /// If passed `true`, event message data will not be parsed, and all message events will be received with
+    /// `event` value of `"rawMessage"`; listen with `socketClient.on("rawMessage") { ... }`
+    case disableEventMessageParsing(Bool)
+
     /// A custom path to socket.io. Only use this if the socket.io server is configured to look for this path.
     case path(String)
 
@@ -124,6 +128,8 @@ public enum SocketIOClientOption : ClientOption {
             description = "connectParams"
         case .cookies:
             description = "cookies"
+        case .disableEventMessageParsing:
+            description = "disableEventMessageParsing"
         case .extraHeaders:
             description = "extraHeaders"
         case .forceNew:
@@ -177,6 +183,8 @@ public enum SocketIOClientOption : ClientOption {
             value = params
         case let .cookies(cookies):
             value = cookies
+        case let .disableEventMessageParsing(disable):
+            value = disable
         case let .extraHeaders(headers):
             value = headers
         case let .forceNew(force):

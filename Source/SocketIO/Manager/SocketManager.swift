@@ -79,6 +79,11 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
         }
     }
 
+    
+    /// If passed `true`, event message data will not be parsed, and all message events will be received with
+    /// `event` = "rawMessage"
+    public var disableEventMessageParsing = false
+    
     /// The engine for this manager.
     public var engine: SocketEngineSpec?
 
@@ -539,6 +544,8 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     open func setConfigs(_ config: SocketIOClientConfiguration) {
         for option in config {
             switch option {
+            case let .disableEventMessageParsing(disable):
+                disableEventMessageParsing = disable
             case let .forceNew(new):
                 forceNew = new
             case let .handleQueue(queue):
