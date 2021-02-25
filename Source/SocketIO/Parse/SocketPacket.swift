@@ -58,6 +58,9 @@ public struct SocketPacket : CustomStringConvertible {
         }
     }
 
+    /// don't do any additional encoding on non-binary events
+    private let disableEventMessageParsing: Bool
+
     private let placeholders: Int
 
     /// A string representation of this packet.
@@ -77,13 +80,14 @@ public struct SocketPacket : CustomStringConvertible {
     }
 
     init(type: PacketType, data: [Any] = [Any](), id: Int = -1, nsp: String, placeholders: Int = 0,
-         binary: [Data] = [Data]()) {
+         binary: [Data] = [Data](), disableEventMessageParsing: Bool = false) {
         self.data = data
         self.id = id
         self.nsp = nsp
         self.type = type
         self.placeholders = placeholders
         self.binary = binary
+        self.disableEventMessageParsing = disableEventMessageParsing
     }
 
     mutating func addData(_ data: Data) -> Bool {
@@ -102,6 +106,10 @@ public struct SocketPacket : CustomStringConvertible {
     }
 
     private func completeMessage(_ message: String) -> String {
+        if type == .event && disableEventMessageParsing {
+            return message + (args.first as? String ?? "[]")
+        }
+
         guard data.count != 0 else { return message + "[]" }
         guard let jsonSend = try? data.toJSON(), let jsonString = String(data: jsonSend, encoding: .utf8) else {
             DefaultSocketLogger.Logger.error("Error creating JSON object in SocketPacket.completeMessage",
@@ -207,14 +215,15 @@ extension SocketPacket {
         }
     }
 
-    static func packetFromEmit(_ items: [Any], id: Int, nsp: String, ack: Bool, checkForBinary: Bool = true) -> SocketPacket {
+    static func packetFromEmit(_ items: [Any], id: Int, nsp: String, ack: Bool, checkForBinary: Bool = true, disableEventMessageParsing: Bool = false) -> SocketPacket {
         if checkForBinary {
             let (parsedData, binary) = deconstructData(items)
 
             return SocketPacket(type: findType(binary.count, ack: ack), data: parsedData, id: id, nsp: nsp,
-                                binary: binary)
+                                binary: binary, disableEventMessageParsing: disableEventMessageParsing)
         } else {
-            return SocketPacket(type: findType(0, ack: ack), data: items, id: id, nsp: nsp)
+            return SocketPacket(type: findType(0, ack: ack), data: items, id: id, nsp: nsp,
+                                disableEventMessageParsing: disableEventMessageParsing)
         }
     }
 }

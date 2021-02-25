@@ -77,7 +77,7 @@ public enum SocketIOClientOption : ClientOption {
     /// Used to pass in a custom logger.
     case logger(SocketLogger)
 
-    /// If passed `true`, event message data will not be parsed, and all message events will be received with
+    /// If passed `true`, incoming and outgoing message data will not be parsed, and all message events will be received with
     /// `event` value of `"rawMessage"`; listen with `socketClient.on("rawMessage") { ... }`
     case disableEventMessageParsing(Bool)
 

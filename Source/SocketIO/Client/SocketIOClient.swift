@@ -311,7 +311,7 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
             return
         }
 
-        let packet = SocketPacket.packetFromEmit(data, id: ack ?? -1, nsp: nsp, ack: isAck, checkForBinary: binary)
+        let packet = SocketPacket.packetFromEmit(data, id: ack ?? -1, nsp: nsp, ack: isAck, checkForBinary: binary, disableEventMessageParsing: self.manager?.disableEventMessageParsing ?? false)
         let str = packet.packetString
 
         DefaultSocketLogger.Logger.log("Emitting: \(str), Ack: \(isAck)", type: logType)

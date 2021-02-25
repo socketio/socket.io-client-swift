@@ -51,6 +51,10 @@ public protocol SocketManagerSpec : AnyObject, SocketEngineClient {
     /// Returns the socket associated with the default namespace ("/").
     var defaultSocket: SocketIOClient { get }
 
+	/// If passed `true`, event message data will not be parsed, all message events will be received with
+	/// `event` = "rawMessage", and the eventName will be ignored on `emit()`. 
+	var disableEventMessageParsing: Bool { get set }
+
     /// The engine for this manager.
     var engine: SocketEngineSpec? { get set }
 
