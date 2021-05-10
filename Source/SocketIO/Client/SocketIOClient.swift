@@ -182,7 +182,7 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
     /// Called when the client has disconnected from socket.io.
     ///
     /// - parameter reason: The reason for the disconnection.
-    open func didDisconnect(reason: String) {
+    open func didDisconnect(reason: SocketConnectionChangeReason) {
         guard status != .disconnected else { return }
 
         DefaultSocketLogger.Logger.log("Disconnected: \(reason)", type: logType)
@@ -307,7 +307,7 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
 
         guard status == .connected else {
             wrappedCompletion?()
-            handleClientEvent(.error, data: ["Tried emitting when not connected"])
+            handleClientEvent(.error, data: [SocketError.triedEmittingWhenNotConnected])
             return
         }
 
@@ -382,7 +382,7 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
         case .connect:
             didConnect(toNamespace: nsp, payload: packet.data.isEmpty ? nil : packet.data[0] as? [String: Any])
         case .disconnect:
-            didDisconnect(reason: "Got Disconnect")
+            didDisconnect(reason: .gotDisconnectPacket)
         case .error:
             handleEvent("error", data: packet.data, isInternalMessage: true, withAck: packet.id)
         }
@@ -522,7 +522,7 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
     /// Called when the manager detects a broken connection, or when a manual reconnect is triggered.
     ///
     /// - parameter reason: The reason this socket is reconnecting.
-    open func setReconnecting(reason: String) {
+    open func setReconnecting(reason: SocketConnectionChangeReason) {
         status = .connecting
 
         handleClientEvent(.reconnect, data: [reason])

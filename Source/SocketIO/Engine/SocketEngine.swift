@@ -198,9 +198,9 @@ open class SocketEngine:
              2: Bad handshake request
              3: Bad request
              */
-            didError(reason: error)
+            didError(error: .engineErrorMessage(error))
         } catch {
-            client?.engineDidError(reason: "Got unknown error from server \(msg)")
+            client?.engineDidError(error: .engineUnknownMessage(msg))
         }
     }
 
@@ -214,12 +214,13 @@ open class SocketEngine:
         }
     }
 
-    private func closeOutEngine(reason: String) {
+    private func closeOutEngine(reason: SocketConnectionChangeReason) {
         sid = ""
         closed = true
         invalidated = true
         connected = false
-
+        // nil out the delegate here; we're getting callbacks from the old socket when closing and recreating the WS
+        ws?.delegate = nil
         ws?.disconnect()
         stopPolling()
         client?.engineDidClose(reason: reason)
@@ -236,7 +237,7 @@ open class SocketEngine:
         if connected {
             DefaultSocketLogger.Logger.error("Engine tried opening while connected. Assuming this was a reconnect",
                                              type: SocketEngine.logType)
-            _disconnect(reason: "reconnect")
+            _disconnect(reason: .socketError(.triedOpeningWhileConnected))
         }
 
         DefaultSocketLogger.Logger.log("Starting engine. Server: \(url)", type: SocketEngine.logType)
@@ -315,25 +316,25 @@ open class SocketEngine:
     }
 
     /// Called when an error happens during execution. Causes a disconnection.
-    open func didError(reason: String) {
-        DefaultSocketLogger.Logger.error("\(reason)", type: SocketEngine.logType)
-        client?.engineDidError(reason: reason)
-        disconnect(reason: reason)
+	open func didError(error: SocketError) {
+        DefaultSocketLogger.Logger.error("\(error)", type: SocketEngine.logType)
+        client?.engineDidError(error: error)
+        disconnect(reason: .socketError(error))
     }
 
     /// Disconnects from the server.
     ///
     /// - parameter reason: The reason for the disconnection. This is communicated up to the client.
-    open func disconnect(reason: String) {
+    open func disconnect(reason: SocketConnectionChangeReason) {
         engineQueue.async {
             self._disconnect(reason: reason)
         }
     }
 
-    private func _disconnect(reason: String) {
+    private func _disconnect(reason: SocketConnectionChangeReason) {
         guard connected && !closed else { return closeOutEngine(reason: reason) }
 
-        DefaultSocketLogger.Logger.log("Engine is being closed.", type: SocketEngine.logType)
+        DefaultSocketLogger.Logger.log("Engine is being closed. \(reason)", type: SocketEngine.logType)
 
         if polling {
             disconnectPolling(reason: reason)
@@ -345,7 +346,7 @@ open class SocketEngine:
 
     // We need to take special care when we're polling that we send it ASAP
     // Also make sure we're on the emitQueue since we're touching postWait
-    private func disconnectPolling(reason: String) {
+    private func disconnectPolling(reason: SocketConnectionChangeReason) {
         postWait.append((String(SocketEnginePacketType.close.rawValue), {}))
 
         doRequest(for: createRequestForPostWithPostWait()) {_, _, _ in }
@@ -402,7 +403,7 @@ open class SocketEngine:
         postWait.removeAll(keepingCapacity: false)
     }
 
-    private func handleClose(_ reason: String) {
+    private func handleClose(_ reason: SocketConnectionChangeReason) {
         client?.engineDidClose(reason: reason)
     }
 
@@ -416,13 +417,13 @@ open class SocketEngine:
 
     private func handleOpen(openData: String) {
         guard let json = try? openData.toDictionary() else {
-            didError(reason: "Error parsing open packet")
+            didError(error: .openPacketUnparseable)
 
             return
         }
 
         guard let sid = json["sid"] as? String else {
-            didError(reason: "Open packet contained no sid")
+            didError(error: .openPacketMissingSID)
 
             return
         }
@@ -458,7 +459,7 @@ open class SocketEngine:
             doPoll()
         }
 
-        client?.engineDidOpen(reason: "Connect")
+        client?.engineDidOpen(reason: .engineOpen)
     }
 
     private func handlePong(with message: String) {
@@ -492,8 +493,9 @@ open class SocketEngine:
             // Make sure not to ping old connections
             guard let this = self, this.sid == id else { return }
 
-            if abs(this.lastCommunication?.timeIntervalSinceNow ?? deadlineMs) >= deadlineMs {
-                this.closeOutEngine(reason: "Ping timeout")
+            let actualTime = this.lastCommunication?.timeIntervalSinceNow ?? deadlineMs
+            if abs(actualTime) >= deadlineMs {
+                this.closeOutEngine(reason: .socketError(.pingTimeout(actualTime)))
             } else {
                 this.checkPings()
             }
@@ -541,7 +543,7 @@ open class SocketEngine:
         case .open:
             handleOpen(openData: String(message.dropFirst()))
         case .close:
-            handleClose(message)
+            handleClose(.engineCloseMessage(message))
         default:
             DefaultSocketLogger.Logger.log("Got unknown packet type", type: SocketEngine.logType)
         }
@@ -571,7 +573,7 @@ open class SocketEngine:
 
         // Server is not responding
         if pongsMissed > pongsMissedMax {
-            closeOutEngine(reason: "Ping timeout")
+            closeOutEngine(reason: .socketError(.pongsMissed(pongsMissed)))
             return
         }
 
@@ -687,12 +689,11 @@ open class SocketEngine:
         }
     }
 
-    private func websocketDidDisconnect(error: Error?) {
+    private func websocketDidDisconnect(reason: SocketConnectionChangeReason) {
         probing = false
 
         if closed {
-            client?.engineDidClose(reason: "Disconnect")
-
+            client?.engineDidClose(reason: reason)
             return
         }
 
@@ -705,12 +706,13 @@ open class SocketEngine:
         connected = false
         polling = true
 
-        if let error = error as? WSError {
-            didError(reason: "\(error.message). code=\(error.code), type=\(error.type)")
-        } else if let reason = error?.localizedDescription {
-            didError(reason: reason)
-        } else {
-            client?.engineDidClose(reason: "Socket Disconnected")
+        //following existing patterns for these, just cleaning up a bit
+        switch(reason) {
+        case .socketError(let error):
+            didError(error: error)
+        default:
+            //following existing pattern, we close ourselves out here
+            client?.engineDidClose(reason: reason)
         }
     }
 
@@ -728,13 +730,13 @@ extension SocketEngine {
     public func URLSession(session: URLSession, didBecomeInvalidWithError error: NSError?) {
         DefaultSocketLogger.Logger.error("Engine URLSession became invalid", type: "SocketEngine")
 
-        didError(reason: "Engine URLSession became invalid")
+        didError(error: .urlSessionBecameInvalid(error))
     }
 }
 
-enum EngineError: Error {
-    case canceled
-}
+//enum EngineError: Error {
+//    case canceled
+//}
 
 extension SocketEngine {
     /// Delegate method for WebSocketDelegate.
@@ -742,7 +744,11 @@ extension SocketEngine {
     /// - Parameters:
     ///   - event: WS Event
     ///   - _:
-    public func didReceive(event: WebSocketEvent, client _: WebSocket) {
+    public func didReceive(event: WebSocketEvent, client websocket: WebSocket) {
+        guard websocket === self.ws else {
+            DefaultSocketLogger.Logger.log("Ignoring websocket event from wrong client: \(event)", type: SocketEngine.logType)
+            return
+        }
         switch event {
         case let .connected(headers):
             wsConnected = true
@@ -750,15 +756,21 @@ extension SocketEngine {
             websocketDidConnect()
         case .cancelled:
             wsConnected = false
-            websocketDidDisconnect(error: EngineError.canceled)
+            websocketDidDisconnect(reason: .websocketEngineCanceled)
         case let .disconnected(reason, code):
             wsConnected = false
-            websocketDidDisconnect(error: nil)
+            websocketDidDisconnect(reason: .socketError(.websocketEngineDisconnected(reason, Int(code))))
         case let .text(msg):
             parseEngineMessage(msg)
         case let .binary(data):
             parseEngineData(data)
+        case let .error(error):
+            DefaultSocketLogger.Logger.error("didReceive WebSocket error \(error as Any)", type: "SocketEngine")
+            //share the error with the clients.
+            client?.engineDidError(error: .websocketEngineError(error))
+
         case _:
+            //TODO: Handle or log other cases?
             break
         }
     }

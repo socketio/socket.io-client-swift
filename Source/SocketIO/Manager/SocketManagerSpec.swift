@@ -104,7 +104,7 @@ public protocol SocketManagerSpec : AnyObject, SocketEngineClient {
     /// Called when the manager has disconnected from socket.io.
     ///
     /// - parameter reason: The reason for the disconnection.
-    func didDisconnect(reason: String)
+    func didDisconnect(reason: SocketConnectionChangeReason)
 
     /// Disconnects the manager and all associated sockets.
     func disconnect()

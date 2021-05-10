@@ -137,7 +137,7 @@ extension SocketEnginePollable {
                 }
 
                 if this.polling {
-                    this.didError(reason: err?.localizedDescription ?? "Error")
+                    this.didError(error: .urlSessionError(err))
                 }
 
                 return
@@ -173,17 +173,17 @@ extension SocketEnginePollable {
 
         DefaultSocketLogger.Logger.log("POSTing", type: "SocketEnginePolling")
 
-        doRequest(for: req) {[weak self] _, res, err in
+        doRequest(for: req) {[weak self] _, responseOpt, errorOpt in
             guard let this = self else { return }
-            guard let res = res as? HTTPURLResponse, res.statusCode == 200 else {
-                if let err = err {
-                    DefaultSocketLogger.Logger.error(err.localizedDescription, type: "SocketEnginePolling")
+            guard let response = responseOpt as? HTTPURLResponse, response.statusCode == 200 else {
+                if let error = errorOpt {
+                    DefaultSocketLogger.Logger.error(error.localizedDescription, type: "SocketEnginePolling")
                 } else {
-                    DefaultSocketLogger.Logger.error("Error flushing waiting posts", type: "SocketEnginePolling")
+                    DefaultSocketLogger.Logger.error("Error flushing waiting posts: \((responseOpt as? HTTPURLResponse)?.statusCode ?? -1)", type: "SocketEnginePolling")
                 }
 
                 if this.polling {
-                    this.didError(reason: err?.localizedDescription ?? "Error")
+                    this.didError(error: .urlSessionError(errorOpt))
                 }
 
                 return

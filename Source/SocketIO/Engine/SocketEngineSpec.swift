@@ -106,12 +106,12 @@ public protocol SocketEngineSpec: class {
     func connect()
 
     /// Called when an error happens during execution. Causes a disconnection.
-    func didError(reason: String)
+    func didError(error: SocketError)
 
     /// Disconnects from the server.
     ///
     /// - parameter reason: The reason for the disconnection. This is communicated up to the client.
-    func disconnect(reason: String)
+    func disconnect(reason: SocketConnectionChangeReason)
 
     /// Called to switch from HTTP long-polling to WebSockets. After calling this method the engine will be in
     /// WebSocket mode.
