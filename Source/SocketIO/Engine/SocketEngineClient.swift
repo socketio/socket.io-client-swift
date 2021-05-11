@@ -26,23 +26,23 @@
 import Foundation
 
 /// Declares that a type will be a delegate to an engine.
-@objc public protocol SocketEngineClient {
+public protocol SocketEngineClient: AnyObject {
     // MARK: Methods
 
     /// Called when the engine errors.
     ///
     /// - parameter reason: The reason the engine errored.
-    func engineDidError(reason: String)
+    func engineDidError(error: SocketError)
 
     /// Called when the engine closes.
     ///
     /// - parameter reason: The reason that the engine closed.
-    func engineDidClose(reason: String)
+    func engineDidClose(reason: SocketConnectionChangeReason)
 
     /// Called when the engine opens.
     ///
     /// - parameter reason: The reason the engine opened.
-    func engineDidOpen(reason: String)
+    func engineDidOpen(reason: SocketConnectionChangeReason)
 
     /// Called when the engine receives a ping message. Only called in socket.io >3.
     func engineDidReceivePing()

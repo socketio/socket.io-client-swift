@@ -88,12 +88,12 @@ public protocol SocketIOClientSpec : AnyObject {
     /// Called when the client has disconnected from socket.io.
     ///
     /// - parameter reason: The reason for the disconnection.
-    func didDisconnect(reason: String)
+    func didDisconnect(reason: SocketConnectionChangeReason)
 
     /// Called when the client encounters an error.
     ///
     /// - parameter reason: The reason for the disconnection.
-    func didError(reason: String)
+    func didError(error: SocketError)
 
     /// Disconnects the socket.
     func disconnect()
@@ -271,15 +271,15 @@ public protocol SocketIOClientSpec : AnyObject {
     /// Called when the manager detects a broken connection, or when a manual reconnect is triggered.
     ///
     /// parameter reason: The reason this socket is going reconnecting.
-    func setReconnecting(reason: String)
+    func setReconnecting(reason: SocketConnectionChangeReason)
 }
 
 public extension SocketIOClientSpec {
     /// Default implementation.
-    func didError(reason: String) {
-        DefaultSocketLogger.Logger.error("\(reason)", type: "SocketIOClient")
+    func didError(error: SocketError) {
+        DefaultSocketLogger.Logger.error("\(error)", type: "SocketIOClient")
 
-        handleClientEvent(.error, data: [reason])
+        handleClientEvent(.error, data: [error])
     }
 }
 

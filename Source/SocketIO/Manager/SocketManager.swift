@@ -79,6 +79,11 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
         }
     }
 
+    
+    /// If passed `true`, event message data will not be parsed, and all message events will be received with
+    /// `event` = "rawMessage"
+    public var disableEventMessageParsing = false
+    
     /// The engine for this manager.
     public var engine: SocketEngineSpec?
 
@@ -164,7 +169,7 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     deinit {
         DefaultSocketLogger.Logger.log("Manager is being released", type: SocketManager.logType)
 
-        engine?.disconnect(reason: "Manager Deinit")
+        engine?.disconnect(reason: .managerDeinit)
     }
 
     // MARK: Methods
@@ -176,7 +181,7 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
             self.engine?.client = nil
 
             // Close old engine so it will not leak because of URLSession if in polling mode
-            self.engine?.disconnect(reason: "Adding new engine")
+            self.engine?.disconnect(reason: .addingNewEngine)
         }
 
         engine = SocketEngine(client: self, url: socketURL, config: config)
@@ -228,7 +233,7 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     /// Called when the manager has disconnected from socket.io.
     ///
     /// - parameter reason: The reason for the disconnection.
-    open func didDisconnect(reason: String) {
+    open func didDisconnect(reason: SocketConnectionChangeReason) {
         forAll {socket in
             socket.didDisconnect(reason: reason)
         }
@@ -240,7 +245,7 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
 
         status = .disconnected
 
-        engine?.disconnect(reason: "Disconnect")
+        engine?.disconnect(reason: .calledDisconnectManager)
     }
 
     /// Disconnects the given socket.
@@ -252,7 +257,7 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     open func disconnectSocket(_ socket: SocketIOClient) {
         engine?.send("1\(socket.nsp),", withData: [])
 
-        socket.didDisconnect(reason: "Namespace leave")
+        socket.didDisconnect(reason: .calledDisconnectSocket)
     }
 
     /// Disconnects the socket associated with `forNamespace`.
@@ -301,13 +306,13 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     /// Called when the engine closes.
     ///
     /// - parameter reason: The reason that the engine closed.
-    open func engineDidClose(reason: String) {
+    open func engineDidClose(reason: SocketConnectionChangeReason) {
         handleQueue.async {
             self._engineDidClose(reason: reason)
         }
     }
 
-    private func _engineDidClose(reason: String) {
+    private func _engineDidClose(reason: SocketConnectionChangeReason) {
         waitingPackets.removeAll()
 
         if status != .disconnected {
@@ -322,31 +327,31 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
         }
     }
 
-    /// Called when the engine errors.
+    /// Called when the engine errors. Emits the .error event
     ///
     /// - parameter reason: The reason the engine errored.
-    open func engineDidError(reason: String) {
+    open func engineDidError(error: SocketError) {
         handleQueue.async {
-            self._engineDidError(reason: reason)
+            self._engineDidError(error: error)
         }
     }
 
-    private func _engineDidError(reason: String) {
-        DefaultSocketLogger.Logger.error("\(reason)", type: SocketManager.logType)
+    private func _engineDidError(error: SocketError) {
+        DefaultSocketLogger.Logger.error("\(error)", type: SocketManager.logType)
 
-        emitAll(clientEvent: .error, data: [reason])
+        emitAll(clientEvent: .error, data: [error])
     }
 
     /// Called when the engine opens.
     ///
     /// - parameter reason: The reason the engine opened.
-    open func engineDidOpen(reason: String) {
+    open func engineDidOpen(reason: SocketConnectionChangeReason) {
         handleQueue.async {
             self._engineDidOpen(reason: reason)
         }
     }
 
-    private func _engineDidOpen(reason: String) {
+    private func _engineDidOpen(reason: SocketConnectionChangeReason) {
         DefaultSocketLogger.Logger.log("Engine opened \(reason)", type: SocketManager.logType)
 
         status = .connected
@@ -468,7 +473,7 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     open func reconnect() {
         guard !reconnecting else { return }
 
-        engine?.disconnect(reason: "manual reconnect")
+        engine?.disconnect(reason: .calledReconnect)
     }
 
     /// Removes the socket from the manager's control. One of the disconnect methods should be called before calling this
@@ -483,10 +488,10 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
         return nsps.removeValue(forKey: socket.nsp)
     }
 
-    private func tryReconnect(reason: String) {
+    private func tryReconnect(reason: SocketConnectionChangeReason) {
         guard reconnecting else { return }
 
-        DefaultSocketLogger.Logger.log("Starting reconnect", type: SocketManager.logType)
+        DefaultSocketLogger.Logger.log("Starting reconnect because \(reason)", type: SocketManager.logType)
 
         // Set status to connecting and emit reconnect for all sockets
         forAll {socket in
@@ -502,7 +507,7 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
         guard reconnects && reconnecting && status != .disconnected else { return }
 
         if reconnectAttempts != -1 && currentReconnectAttempt + 1 > reconnectAttempts {
-            return didDisconnect(reason: "Reconnect Failed")
+            return didDisconnect(reason: .socketError(.autoReconnectFailed(currentReconnectAttempt+1)))
         }
 
         DefaultSocketLogger.Logger.log("Trying to reconnect", type: SocketManager.logType)
@@ -539,6 +544,8 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     open func setConfigs(_ config: SocketIOClientConfiguration) {
         for option in config {
             switch option {
+            case let .disableEventMessageParsing(disable):
+                disableEventMessageParsing = disable
             case let .forceNew(new):
                 forceNew = new
             case let .handleQueue(queue):
