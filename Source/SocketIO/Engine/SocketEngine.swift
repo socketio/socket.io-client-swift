@@ -751,7 +751,7 @@ extension SocketEngine {
         case .cancelled:
             wsConnected = false
             websocketDidDisconnect(error: EngineError.canceled)
-        case let .disconnected(reason, code):
+        case .disconnected(_, _):
             wsConnected = false
             websocketDidDisconnect(error: nil)
         case let .text(msg):
