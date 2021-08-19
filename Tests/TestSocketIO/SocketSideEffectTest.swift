@@ -487,7 +487,7 @@ class TestEngine: SocketEngineSpec {
     private(set) var ws: WebSocket? = nil
     private(set) var version = SocketIOVersion.three
 
-    fileprivate var onConnect: (() -> ())?
+    internal var onConnect: (() -> ())?
 
     required init(client: SocketEngineClient, url: URL, options: [String: Any]?) {
         self.client = client
