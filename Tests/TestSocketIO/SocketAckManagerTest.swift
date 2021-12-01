@@ -28,7 +28,6 @@ class SocketAckManagerTest : XCTestCase {
 
     func testManagerTimeoutAck() {
         let callbackExpection = expectation(description: "Manager should timeout ack with noAck status")
-        let itemsArray = ["Hi", "ho"]
 
         func callback(_ items: [Any]) {
             XCTAssertEqual(items.count, 1, "Timed out ack should have one value")
