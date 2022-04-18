@@ -344,9 +344,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 572EF24B1B51F18A00EEBB58 /* Build configuration list for PBXNativeTarget "SocketIO" */;
 			buildPhases = (
+				572EF2351B51F18A00EEBB58 /* Headers */,
 				572EF2331B51F18A00EEBB58 /* Sources */,
 				572EF2341B51F18A00EEBB58 /* Frameworks */,
-				572EF2351B51F18A00EEBB58 /* Headers */,
 				572EF2361B51F18A00EEBB58 /* Resources */,
 			);
 			buildRules = (
