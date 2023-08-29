@@ -1,3 +1,8 @@
+# v16.1.0
+
+- Remove support for iOS 11.
+- Update to Starscream 4.0.6
+
 # v16.0.0
 
 - Removed Objective-C support. It's time for you to embrace Swift.

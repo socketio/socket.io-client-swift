@@ -28,7 +28,7 @@ import Foundation
 /// A class that represents a waiting ack call.
 ///
 /// **NOTE**: You should not store this beyond the life of the event handler.
-public final class SocketAckEmitter : NSObject {
+public final class SocketAckEmitter: NSObject {
     private unowned let socket: SocketIOClient
     private let ackNum: Int
 
@@ -101,7 +101,7 @@ public final class SocketAckEmitter : NSObject {
 ///     ...
 /// }
 /// ```
-public final class OnAckCallback : NSObject {
+public final class OnAckCallback: NSObject {
     private let ackNumber: Int
     private let binary: Bool
     private let items: [Any]
@@ -136,8 +136,8 @@ public final class OnAckCallback : NSObject {
 
         guard seconds != 0 else { return }
 
-        socket.manager?.handleQueue.asyncAfter(deadline: DispatchTime.now() + seconds) {[weak socket] in
-            guard let socket = socket else { return }
+        socket.manager?.handleQueue.asyncAfter(deadline: DispatchTime.now() + seconds) {[weak socket, weak self] in
+            guard let socket = socket, let `self` = self else { return }
 
             socket.ackHandlers.timeoutAck(self.ackNumber)
         }
