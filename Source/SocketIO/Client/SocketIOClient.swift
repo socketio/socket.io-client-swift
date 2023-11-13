@@ -150,7 +150,8 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
 
         manager.handleQueue.asyncAfter(deadline: DispatchTime.now() + timeoutAfter) {[weak self] in
             guard let this = self, this.status == .connecting || this.status == .notConnected else { return }
-
+            DefaultSocketLogger.Logger.log("Timeout: Socket not connected, so setting to disconnected", type: this.logType)
+            
             this.status = .disconnected
             this.leaveNamespace()
 
