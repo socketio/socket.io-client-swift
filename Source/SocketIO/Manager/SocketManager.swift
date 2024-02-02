@@ -308,6 +308,7 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     }
 
     private func _engineDidClose(reason: String) {
+        DefaultSocketLogger.Logger.log("engineDidClose: \(reason)", type: SocketManager.logType)
         waitingPackets.removeAll()
 
         if status != .disconnected {
@@ -489,7 +490,7 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
         DefaultSocketLogger.Logger.log("Starting reconnect", type: SocketManager.logType)
 
         // Set status to connecting and emit reconnect for all sockets
-        forAll {socket in
+        forAll { socket in
             guard socket.status == .connected else { return }
 
             socket.setReconnecting(reason: reason)
@@ -507,7 +508,7 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
 
         DefaultSocketLogger.Logger.log("Trying to reconnect", type: SocketManager.logType)
 
-        forAll {socket in
+        forAll { socket in
             guard socket.status == .connecting else { return }
 
             socket.handleClientEvent(.reconnectAttempt, data: [(reconnectAttempts - currentReconnectAttempt)])

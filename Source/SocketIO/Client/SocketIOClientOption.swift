@@ -114,6 +114,15 @@ public enum SocketIOClientOption : ClientOption {
     /// The version of socket.io being used. This should match the server version. Default is 3.
     case version(SocketIOVersion)
 
+    /// How long to wait for the web socket to connect before timing out. Default is 10.
+    case wsConnectionTimeout(TimeInterval)
+
+    /// Websocket event name to use as a heartbeat mechanism.
+    case wsHeartbeatEventName(String)
+
+    /// How frequently to send heartbeat events to the server. Only valid if `wsHeartbeatEventName` is set. Default is 10.
+    case wsHeartbeatInterval(TimeInterval)
+
     // MARK: Properties
 
     /// The description of this option.
@@ -167,6 +176,12 @@ public enum SocketIOClientOption : ClientOption {
             description = "customEngine"
         case .version:
             description = "version"
+        case .wsConnectionTimeout:
+            description = "wsConnectionTimeout"
+        case .wsHeartbeatEventName:
+            description = "wsHeartbeatEventName"
+        case .wsHeartbeatInterval:
+            description = "wsHeartbeatInterval"
         }
 
         return description
@@ -222,6 +237,12 @@ public enum SocketIOClientOption : ClientOption {
             value = enable
         case let.version(versionNum):
             value = versionNum
+        case let .wsConnectionTimeout(timeout):
+            value = timeout
+        case let .wsHeartbeatEventName(eventName):
+            value = eventName
+        case let .wsHeartbeatInterval(interval):
+            value = interval
         }
 
         return value

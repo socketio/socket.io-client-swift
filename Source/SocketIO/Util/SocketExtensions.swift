@@ -89,6 +89,12 @@ extension Dictionary where Key == String, Value == Any {
             return .enableSOCKSProxy(enable)
         case let ("version", version as Int):
             return .version(SocketIOVersion(rawValue: version) ?? .three)
+        case let ("wsConnectionTimeout", timeout as TimeInterval):
+            return .wsConnectionTimeout(timeout)
+        case let ("wsHeartbeatEventName", eventName as String):
+            return .wsHeartbeatEventName(eventName)
+        case let ("wsHeartbeatInterval", interval as TimeInterval):
+            return .wsHeartbeatInterval(interval)
         case _:
             return nil
         }

@@ -132,6 +132,12 @@ open class SocketEngine: NSObject, WebSocketDelegate, URLSessionDelegate,
     /// Whether or not the WebSocket is currently connected.
     public private(set) var wsConnected = false
 
+    /// How long to wait before closing the engine if a connection reply doesn't happen.
+    public private(set) var wsConnectionTimeout: TimeInterval = 10
+
+    private var wsHeartbeatEventName: String?
+    private var wsHeartbeatInterval: TimeInterval = 10
+
     /// The client for this engine.
     public weak var client: SocketEngineClient?
 
@@ -312,11 +318,23 @@ open class SocketEngine: NSObject, WebSocketDelegate, URLSessionDelegate,
             includingCookies: session?.configuration.httpCookieStorage?.cookies(for: urlPollingWithSid)
         )
 
-        ws = WebSocket(request: req, certPinner: certPinner, compressionHandler: compress ? WSCompression() : nil, useCustomEngine: useCustomEngine)
-        ws?.callbackQueue = engineQueue
-        ws?.delegate = self
+        let ws = WebSocket(request: req, certPinner: certPinner, compressionHandler: compress ? WSCompression() : nil, useCustomEngine: useCustomEngine)
+        ws.callbackQueue = engineQueue
+        ws.delegate = self
 
-        ws?.connect()
+        ws.connect()
+
+        engineQueue.asyncAfter(deadline: .now() + wsConnectionTimeout) {
+            if self.wsConnected {
+                // nothing to do here, all is well
+                return
+            }
+
+            ws.disconnect()
+            self.closeOutEngine(reason: "connection timed out")
+        }
+
+        self.ws = ws
     }
 
     /// Called when an error happens during execution. Causes a disconnection.
@@ -633,6 +651,12 @@ open class SocketEngine: NSObject, WebSocketDelegate, URLSessionDelegate,
                 self.useCustomEngine = enable
             case let .version(num):
                 version = num
+            case let .wsConnectionTimeout(timeout):
+                self.wsConnectionTimeout = timeout
+            case let .wsHeartbeatEventName(eventName):
+                self.wsHeartbeatEventName = eventName
+            case let .wsHeartbeatInterval(interval):
+                self.wsHeartbeatInterval = interval
             default:
                 continue
             }
@@ -677,6 +701,7 @@ open class SocketEngine: NSObject, WebSocketDelegate, URLSessionDelegate,
                 DefaultSocketLogger.Logger.log("Writing ws: \(msg) has data: \(data.count != 0)",
                                                type: SocketEngine.logType)
                 self.sendWebSocketMessage(msg, withType: type, withData: data, completion: completion)
+                self.scheduleHeartbeat()
             }
         }
     }
@@ -719,6 +744,41 @@ open class SocketEngine: NSObject, WebSocketDelegate, URLSessionDelegate,
         } else {
             client?.engineDidClose(reason: "Socket Disconnected")
         }
+    }
+
+    private var scheduledHeartbeat: DispatchWorkItem?
+
+    private func scheduleHeartbeat() {
+        scheduledHeartbeat?.cancel()
+
+        guard let eventName = wsHeartbeatEventName else {
+            return
+        }
+
+        let heartbeat = DispatchWorkItem {
+            DefaultSocketLogger.Logger.log("Sending heartbeat event [\(eventName)]", type: SocketEngine.logType)
+
+            let packet = SocketPacket.packetFromEmit([eventName], id: -1, nsp: "/", ack: false, checkForBinary: false)
+            let str = packet.packetString
+
+            self.write(str, withType: .message, withData: [])
+
+            self.engineQueue.asyncAfter(deadline: .now() + self.wsConnectionTimeout) { [weak self] in
+                guard let self else {
+                    return
+                }
+
+                let timeElapsed = abs(lastCommunication?.timeIntervalSinceNow ?? .infinity)
+
+                if timeElapsed >= wsConnectionTimeout {
+                    closeOutEngine(reason: "Heartbeat Timeout")
+                }
+            }
+        }
+
+        scheduledHeartbeat = heartbeat
+
+        engineQueue.asyncAfter(deadline: .now() + wsHeartbeatInterval, execute: heartbeat)
     }
 
     // Test Properties
@@ -765,6 +825,8 @@ extension SocketEngine {
             parseEngineMessage(msg)
         case let .binary(data):
             parseEngineData(data)
+        case let .viabilityChanged(isViable):
+            DefaultSocketLogger.Logger.log("viabilityChanged - isViable: \(isViable)", type: SocketEngine.logType)
         case _:
             break
         }
