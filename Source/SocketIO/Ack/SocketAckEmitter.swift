@@ -131,15 +131,17 @@ public final class OnAckCallback: NSObject {
     public func timingOut(after seconds: Double, callback: @escaping AckCallback) {
         guard let socket = self.socket, ackNumber != -1 else { return }
 
+        let ackNumber = self.ackNumber
+
         socket.ackHandlers.addAck(ackNumber, callback: callback)
         socket.emit(items, ack: ackNumber, binary: binary)
 
         guard seconds != 0 else { return }
 
-        socket.manager?.handleQueue.asyncAfter(deadline: DispatchTime.now() + seconds) {[weak socket, weak self] in
-            guard let socket = socket, let `self` = self else { return }
+        socket.manager?.handleQueue.asyncAfter(deadline: DispatchTime.now() + seconds) {[weak socket] in
+            guard let socket = socket else { return }
 
-            socket.ackHandlers.timeoutAck(self.ackNumber)
+            socket.ackHandlers.timeoutAck(ackNumber)
         }
     }
 
