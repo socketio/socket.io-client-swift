@@ -425,7 +425,8 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
         DefaultSocketLogger.Logger.log("Removing handler for event: \(event)", type: logType)
         
         queue.async(flags: .barrier) { [weak self] in
-            self?.handlers = handlers.filter({ $0.event != event })
+            guard let self = self else { return }
+            self.handlers = self.handlers.filter({ $0.event != event })
         }
     }
 
@@ -438,7 +439,8 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
         DefaultSocketLogger.Logger.log("Removing handler with id: \(id)", type: logType)
 
         queue.async(flags: .barrier) { [weak self] in
-            self?.handlers = handlers.filter({ $0.id != id })
+            guard let self = self else { return }
+            self.handlers = self.handlers.filter({ $0.id != id })
         }
     }
 
@@ -453,8 +455,7 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
 
         let handler = SocketEventHandler(event: event, id: UUID(), callback: callback)
         queue.async(flags: .barrier) { [weak self] in
-            self?.thread-safe-handlers
-            handlers.append(handler)
+            self?.handlers.append(handler)
         }
 
         return handler.id
