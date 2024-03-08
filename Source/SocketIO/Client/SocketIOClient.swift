@@ -424,8 +424,8 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
     open func off(_ event: String) {
         DefaultSocketLogger.Logger.log("Removing handler for event: \(event)", type: logType)
         
-        queue.async(flags: .barrier) {
-            handlers = handlers.filter({ $0.event != event })
+        queue.async(flags: .barrier) { [weak self] in
+            self?.handlers = handlers.filter({ $0.event != event })
         }
     }
 
@@ -437,8 +437,8 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
     open func off(id: UUID) {
         DefaultSocketLogger.Logger.log("Removing handler with id: \(id)", type: logType)
 
-        queue.async(flags: .barrier) {
-            handlers = handlers.filter({ $0.id != id })
+        queue.async(flags: .barrier) { [weak self] in
+            self?.handlers = handlers.filter({ $0.id != id })
         }
     }
 
@@ -452,7 +452,8 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
         DefaultSocketLogger.Logger.log("Adding handler for event: \(event)", type: logType)
 
         let handler = SocketEventHandler(event: event, id: UUID(), callback: callback)
-        queue.async(flags: .barrier) {
+        queue.async(flags: .barrier) { [weak self] in
+            self?.thread-safe-handlers
             handlers.append(handler)
         }
 
@@ -504,8 +505,8 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
             callback(data, ack)
         }
         
-        queue.async(flags: .barrier) {
-            handlers.append(handler)
+        queue.async(flags: .barrier) { [weak self] in
+            self?.handlers.append(handler)
         }
 
         return handler.id
@@ -526,8 +527,8 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
     ///
     /// Can be used after disconnecting to break any potential remaining retain cycles.
     open func removeAllHandlers() {
-        queue.async(flags: .barrier) {
-            handlers.removeAll(keepingCapacity: false)
+        queue.async(flags: .barrier) { [weak self] in
+            self?.handlers.removeAll(keepingCapacity: false)
         }
     }
 
