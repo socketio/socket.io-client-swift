@@ -265,6 +265,20 @@ open class SocketEngine: NSObject, WebSocketDelegate, URLSessionDelegate,
         if client == nil {
             return (URL(string: "http://localhost/")!, URL(string: "http://localhost/")!)
         }
+        
+        if let scheme = URLComponents(string: url.absoluteString)?.scheme {
+            switch scheme {
+            case let httpSheme where httpSheme.hasPrefix("http"):
+                forcePolling = true
+                secure = httpSheme.hasSuffix("s")
+                
+            case let webSocketSheme where webSocketSheme.hasPrefix("ws"):
+                forceWebsockets = true
+                secure = webSocketSheme.hasSuffix("ss")
+                
+            default:    break
+            }
+        }
 
         var urlPolling = URLComponents(string: url.absoluteString)!
         var urlWebSocket = URLComponents(string: url.absoluteString)!
