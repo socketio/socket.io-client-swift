@@ -105,7 +105,7 @@ open class SocketEngine: NSObject, WebSocketDelegate, URLSessionDelegate,
     public private(set) var sid = ""
 
     /// The path to engine.io.
-    public private(set) var socketPath = "/engine.io/"
+    public private(set) var socketPath = "/socket.io/"
 
     /// The url for polling.
     public private(set) var urlPolling = URL(string: "http://localhost/")!
@@ -114,7 +114,7 @@ open class SocketEngine: NSObject, WebSocketDelegate, URLSessionDelegate,
     public private(set) var urlWebSocket = URL(string: "http://localhost/")!
 
     /// When `false`, the WebSocket `stream` will be configured with the useCustomEngine `false`.
-    public private(set) var useCustomEngine = true
+    public private(set) var useCustomEngine = false
 
     /// The version of engine.io being used. Default is three.
     public private(set) var version: SocketIOVersion = .three
@@ -750,6 +750,8 @@ extension SocketEngine {
     ///   - event: WS Event
     ///   - _:
     public func didReceive(event: Starscream.WebSocketEvent, client: Starscream.WebSocketClient) {
+        DefaultSocketLogger.Logger.log("didReceive \(event)", type: "SocketEngine")
+
         switch event {
         case let .connected(headers):
             wsConnected = true
