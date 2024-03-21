@@ -8,7 +8,7 @@ let package = Package(
         .library(name: "SocketIO", targets: ["SocketIO"])
     ],
     dependencies: [
-        .package(url: "https://github.com/daltoniam/Starscream", .exactItem("4.0.6")),
+        .package(url: "https://github.com/daltoniam/Starscream", .exactItem("4.0.8")),
     ],
     targets: [
         .target(name: "SocketIO", dependencies: ["Starscream"]),
