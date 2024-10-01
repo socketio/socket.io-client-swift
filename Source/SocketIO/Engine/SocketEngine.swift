@@ -761,6 +761,12 @@ extension SocketEngine {
         case .disconnected(_, _):
             wsConnected = false
             websocketDidDisconnect(error: nil)
+        case .viabilityChanged(false):
+            wsConnected = false
+            websocketDidDisconnect(error: nil)
+        case .peerClosed:
+            wsConnected = false
+            websocketDidDisconnect(error: nil)
         case let .text(msg):
             parseEngineMessage(msg)
         case let .binary(data):
