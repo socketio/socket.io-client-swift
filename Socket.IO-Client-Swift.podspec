@@ -8,7 +8,7 @@ Pod::Spec.new do |s|
                    Supports ws/wss/polling connections and binary.
                    For socket.io 3.0+ and Swift.
                    DESC
-  s.homepage     = "https://github.com/socketio/socket.io-client-swift"
+  s.homepage     = "https://github.com/yuanyeer/socket.io-client-swift"
   s.license      = { :type => 'MIT' }
   s.author       = { "Erik" => "nuclear.ace@gmail.com" }
   s.ios.deployment_target = '12.0'
@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
   s.watchos.deployment_target = '5.0'
   s.requires_arc = true
   s.source = {
-    :git => "https://github.com/socketio/socket.io-client-swift.git",
+    :git => "https://github.com/yuanyeer/socket.io-client-swift",
     :tag => 'v16.1.0',
     :submodules => true
   }
@@ -27,5 +27,5 @@ Pod::Spec.new do |s|
       'SWIFT_VERSION' => '5.4'
   }
   s.source_files  = "Source/SocketIO/**/*.swift", "Source/SocketIO/*.swift"
-  s.dependency "Starscream", "~> 4.0.6"
+  s.dependency "Starscream", "~> 4.0.8"
 end
