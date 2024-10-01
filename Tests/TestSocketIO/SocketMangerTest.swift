@@ -60,6 +60,44 @@ class SocketMangerTest : XCTestCase {
         waitForExpectations(timeout: 0.3)
     }
 
+    func testManagerDoesNotCallConnectWhenConnectingWithLessThanOneReconnect() {
+        setUpSockets()
+        
+        let expect = expectation(description: "The manager should not call connect on the engine")
+        expect.isInverted = true
+        
+        let engine = TestEngine(client: manager, url: manager.socketURL, options: nil)
+        
+        engine.onConnect = {
+            expect.fulfill()
+        }
+        manager.setTestStatus(.connecting)
+        manager.setCurrentReconnect(currentReconnect: 0)
+        manager.engine = engine
+        
+        manager.connect()
+
+        waitForExpectations(timeout: 0.3)
+    }
+    
+    func testManagerCallConnectWhenConnectingAndMoreThanOneReconnect() {
+        setUpSockets()
+        
+        let expect = expectation(description: "The manager should call connect on the engine")
+        let engine = TestEngine(client: manager, url: manager.socketURL, options: nil)
+        
+        engine.onConnect = {
+            expect.fulfill()
+        }
+        manager.setTestStatus(.connecting)
+        manager.setCurrentReconnect(currentReconnect: 1)
+        manager.engine = engine
+        
+        manager.connect()
+
+        waitForExpectations(timeout: 0.8)
+    }
+
     func testManagerCallsDisconnect() {
         setUpSockets()
 
@@ -154,6 +192,10 @@ public enum ManagerExpectation: String {
 }
 
 public class TestManager: SocketManager {
+    public func setCurrentReconnect(currentReconnect: Int) {
+        self.currentReconnectAttempt = currentReconnect
+    }
+    
     public override func disconnect() {
         setTestStatus(.disconnected)
     }
