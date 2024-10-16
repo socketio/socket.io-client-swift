@@ -771,6 +771,13 @@ extension SocketEngine {
             parseEngineMessage(msg)
         case let .binary(data):
             parseEngineData(data)
+        case let .viabilityChanged(isViable):
+            if !isViable {
+                NSLog("------------ SIO: viabilityChanged inside")
+                wsConnected = false
+                websocketDidDisconnect(error: nil)
+            }
+            break
         case _:
             break
         }
