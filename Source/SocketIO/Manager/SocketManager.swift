@@ -565,7 +565,7 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
 
         _config = config
 
-        if socketURL.absoluteString.hasPrefix("https://") {
+        if socketURL.absoluteString.hasPrefix("https://") ||  socketURL.absoluteString.hasPrefix("wss://") {
             _config.insert(.secure(true))
         }
 
