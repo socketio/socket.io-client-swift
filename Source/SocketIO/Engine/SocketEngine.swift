@@ -77,6 +77,10 @@ open class SocketEngine: NSObject, WebSocketDelegate, URLSessionDelegate,
 
     /// An array of HTTPCookies that are sent during the connection.
     public private(set) var cookies: [HTTPCookie]?
+    
+    /// it `true` the engine will add all cookies from cookieStorage for the connectionURL
+    /// if you need to manual manage all cookies set this to `false`
+    public private(set) var useCookieStorageCookies: Bool = true
 
     /// When `true`, the engine is in the process of switching to WebSockets.
     ///
@@ -307,9 +311,11 @@ open class SocketEngine: NSObject, WebSocketDelegate, URLSessionDelegate,
     private func createWebSocketAndConnect() {
         var req = URLRequest(url: urlWebSocketWithSid)
 
+        var cookies:[HTTPCookie] = useCookieStorageCookies ? session?.configuration.httpCookieStorage?.cookies(for: urlPollingWithSid) ?? [] : []
+        
         addHeaders(
             to: &req,
-            includingCookies: session?.configuration.httpCookieStorage?.cookies(for: urlPollingWithSid)
+            includingCookies: cookies
         )
 
         ws = WebSocket(request: req, certPinner: certPinner, compressionHandler: compress ? WSCompression() : nil, useCustomEngine: useCustomEngine)
@@ -605,6 +611,8 @@ open class SocketEngine: NSObject, WebSocketDelegate, URLSessionDelegate,
                 connectParams = params
             case let .cookies(cookies):
                 self.cookies = cookies
+            case let .useCookieStorageCookies(useCookieStorageCookies):
+                self.useCookieStorageCookies = useCookieStorageCookies
             case let .extraHeaders(headers):
                 extraHeaders = headers
             case let .sessionDelegate(delegate):

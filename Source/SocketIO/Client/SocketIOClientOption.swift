@@ -48,6 +48,9 @@ public enum SocketIOClientOption : ClientOption {
 
     /// An array of cookies that will be sent during the initial connection.
     case cookies([HTTPCookie])
+    
+    /// if `false` cookies from cookieStorage will be ignored.
+    case useCookieStorageCookies(Bool)
 
     /// Any extra HTTP headers that should be sent during the initial connection.
     case extraHeaders([String: String])
@@ -127,6 +130,8 @@ public enum SocketIOClientOption : ClientOption {
             description = "connectParams"
         case .cookies:
             description = "cookies"
+        case .useCookieStorageCookies:
+            description = "useCookieStorageCookies"
         case .extraHeaders:
             description = "extraHeaders"
         case .forceNew:
@@ -182,6 +187,8 @@ public enum SocketIOClientOption : ClientOption {
             value = params
         case let .cookies(cookies):
             value = cookies
+        case let .useCookieStorageCookies(useCookieStorageCookies):
+            value = useCookieStorageCookies
         case let .extraHeaders(headers):
             value = headers
         case let .forceNew(force):
