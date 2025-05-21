@@ -714,6 +714,13 @@ open class SocketEngine: NSObject, WebSocketDelegate, URLSessionDelegate,
 
         if let error = error as? WSError {
             didError(reason: "\(error.message). code=\(error.code), type=\(error.type)")
+        } else  if let error = error as? HTTPUpgradeError {
+            switch error {
+            case .notAnUpgrade(let int, let dictionary):
+                didError(reason: "notAnUpgrade. code=\(int)")
+            case .invalidData:
+                didError(reason: "invalidData")
+            }
         } else if let reason = error?.localizedDescription {
             didError(reason: reason)
         } else {
@@ -771,6 +778,9 @@ extension SocketEngine {
             parseEngineMessage(msg)
         case let .binary(data):
             parseEngineData(data)
+        case let .error(error):
+            wsConnected = false
+            websocketDidDisconnect(error: error)
         case _:
             break
         }
