@@ -60,7 +60,6 @@ public final class SocketRawView : NSObject {
     ///
     /// - parameter event: The event to send.
     /// - parameter items: The items to send with this event. Send an empty array to send no data.
-    @objc
     public func emit(_ event: String, with items: [Any]) {
         socket.emit([event] + items, binary: false)
     }
@@ -113,7 +112,6 @@ public final class SocketRawView : NSObject {
     /// - parameter event: The event to send.
     /// - parameter items: The items to send with this event. Use `[]` to send nothing.
     /// - returns: An `OnAckCallback`. You must call the `timingOut(after:)` method before the event will be sent.
-    @objc
     public func emitWithAck(_ event: String, with items: [Any]) -> OnAckCallback {
         return socket.createOnAck([event] + items, binary: false)
     }
@@ -154,7 +152,6 @@ public final class SocketRawAckView : NSObject {
     /// Call to ack receiving this event.
     ///
     /// - parameter items: An array of items to send when acking. Use `[]` to send nothing.
-    @objc
     public func with(_ items: [Any]) {
         guard ackNum != -1 else { return }
 

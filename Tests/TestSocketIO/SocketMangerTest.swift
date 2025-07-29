@@ -48,8 +48,11 @@ class SocketMangerTest : XCTestCase {
     func testManagerCallsConnect() {
         setUpSockets()
 
-        socket.expectations[ManagerExpectation.didConnectCalled] = expectation(description: "The manager should call connect on the default socket")
-        socket2.expectations[ManagerExpectation.didConnectCalled] = expectation(description: "The manager should call connect on the socket")
+        let didConnectCalled = expectation(description: "The manager should call connect on the default socket")
+        let didConnectCalled2 = expectation(description: "The manager should call connect on the socket")
+
+        socket.expectations[ManagerExpectation.didConnectCalled] = didConnectCalled
+        socket2.expectations[ManagerExpectation.didConnectCalled] = didConnectCalled2
 
         socket.connect()
         socket2.connect()
@@ -57,7 +60,8 @@ class SocketMangerTest : XCTestCase {
         manager.fakeConnecting()
         manager.fakeConnecting(toNamespace: "/swift")
 
-        waitForExpectations(timeout: 0.3)
+        let result = XCTWaiter().wait(for: [didConnectCalled, didConnectCalled2], timeout: 0.3)
+        XCTAssert(result == .completed)
     }
 
     func testManagerDoesNotCallConnectWhenConnectingWithLessThanOneReconnect() {
@@ -77,7 +81,8 @@ class SocketMangerTest : XCTestCase {
         
         manager.connect()
 
-        waitForExpectations(timeout: 0.3)
+        let result = XCTWaiter().wait(for: [expect], timeout: 0.3)
+        XCTAssert(result == .completed)
     }
     
     func testManagerCallConnectWhenConnectingAndMoreThanOneReconnect() {
@@ -95,14 +100,18 @@ class SocketMangerTest : XCTestCase {
         
         manager.connect()
 
-        waitForExpectations(timeout: 0.8)
+        let result = XCTWaiter().wait(for: [expect], timeout: 0.8)
+        XCTAssert(result == .completed)
     }
 
     func testManagerCallsDisconnect() {
         setUpSockets()
 
-        socket.expectations[ManagerExpectation.didDisconnectCalled] = expectation(description: "The manager should call disconnect on the default socket")
-        socket2.expectations[ManagerExpectation.didDisconnectCalled] = expectation(description: "The manager should call disconnect on the socket")
+        let didDisconnectCalled = expectation(description: "The manager should call disconnect on the default socket")
+        let didDisconnectCalled2 = expectation(description: "The manager should call disconnect on the socket")
+
+        socket.expectations[ManagerExpectation.didDisconnectCalled] = didDisconnectCalled
+        socket2.expectations[ManagerExpectation.didDisconnectCalled] = didDisconnectCalled2
 
         socket2.on(clientEvent: .connect) {data, ack in
             self.manager.disconnect()
@@ -115,7 +124,8 @@ class SocketMangerTest : XCTestCase {
         manager.fakeConnecting()
         manager.fakeConnecting(toNamespace: "/swift")
 
-        waitForExpectations(timeout: 0.3)
+        let result = XCTWaiter().wait(for: [didDisconnectCalled, didDisconnectCalled2], timeout: 0.3)
+        XCTAssert(result == .completed)
     }
 
 //    func testManagerEmitAll() {
@@ -191,7 +201,7 @@ public enum ManagerExpectation: String {
     case emitAllEventCalled
 }
 
-public class TestManager: SocketManager {
+public class TestManager: SocketManager, @unchecked Sendable {
     public func setCurrentReconnect(currentReconnect: Int) {
         self.currentReconnectAttempt = currentReconnect
     }
@@ -223,7 +233,7 @@ public class TestManager: SocketManager {
     }
 }
 
-public class TestSocket: SocketIOClient {
+public class TestSocket: SocketIOClient, @unchecked Sendable {
     public var expectations = [ManagerExpectation: XCTestExpectation]()
 
     public override func didConnect(toNamespace nsp: String, payload: [String: Any]?) {
@@ -245,3 +255,12 @@ public class TestSocket: SocketIOClient {
         expectations[ManagerExpectation.emitAllEventCalled] = nil
     }
 }
+
+#if os(Android)
+/// I know comparing labels is stupid, but it's enough for now
+extension DispatchQueue: @retroactive Equatable {
+    public static func == (lhs: DispatchQueue, rhs: DispatchQueue) -> Bool {
+        return lhs.label == rhs.label
+    }
+}
+#endif

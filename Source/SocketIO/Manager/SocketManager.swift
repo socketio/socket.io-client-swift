@@ -45,7 +45,7 @@ import Foundation
 ///
 /// **NOTE**: The manager is not thread/queue safe, all interaction with the manager should be done on the `handleQueue`
 ///
-open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDataBufferable, ConfigSettable {
+open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDataBufferable, ConfigSettable, @unchecked Sendable {
     private static let logType = "SocketManager"
 
     // MARK: Properties
@@ -95,16 +95,16 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     public var nsps = [String: SocketIOClient]()
 
     /// If `true`, this client will try and reconnect on any disconnects.
-    public var reconnects = true
+    public var reconnects: Bool = true
 
     /// The minimum number of seconds to wait before attempting to reconnect.
-    public var reconnectWait = 10
+    public var reconnectWait: Int = 10
 
     /// The maximum number of seconds to wait before attempting to reconnect.
-    public var reconnectWaitMax = 30
+    public var reconnectWaitMax: Int = 30
 
     /// The randomization factor for calculating reconnect jitter.
-    public var randomizationFactor = 0.5
+    public var randomizationFactor: Double = 0.5
 
     /// The status of this manager.
     public private(set) var status: SocketIOStatus = .notConnected {
@@ -155,7 +155,6 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     ///
     /// - parameter socketURL: The url of the socket.io server.
     /// - parameter config: The config for this socket.
-    @objc
     public convenience init(socketURL: URL, config: [String: Any]?) {
         self.init(socketURL: socketURL, config: config?.toSocketConfiguration() ?? [])
     }
@@ -522,16 +521,17 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
 
     func reconnectInterval(attempts: Int) -> Double {
         // apply exponential factor
-        let backoffFactor = pow(1.5, attempts)
-        let interval = Double(reconnectWait) * Double(truncating: backoffFactor as NSNumber)
-        // add in a random factor smooth thundering herds
+        let backoffFactor = pow(1.5, Double(attempts))
+        let interval = Double(reconnectWait) * backoffFactor
+        // add in a random factor to smooth thundering herds
         let rand = Double.random(in: 0 ..< 1)
-        let randomFactor = rand * randomizationFactor * Double(truncating: interval as NSNumber)
+        let randomFactor = rand * randomizationFactor * interval
         // add in random factor, and clamp to min and max values
         let combined = interval + randomFactor
-        return Double(fmax(Double(reconnectWait), fmin(combined, Double(reconnectWaitMax))))
+        let value = Double(max(Double(reconnectWait), min(combined, Double(reconnectWaitMax))))
+        return value
     }
-
+    
     /// Sets manager specific configs.
     ///
     /// parameter config: The configs that should be set.

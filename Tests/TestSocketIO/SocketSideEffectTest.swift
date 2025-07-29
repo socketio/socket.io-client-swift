@@ -9,8 +9,12 @@
 import XCTest
 @testable import SocketIO
 import Starscream
+import Foundation
+#if os(Android)
+import FoundationNetworking
+#endif
 
-class SocketSideEffectTest: XCTestCase {
+class SocketSideEffectTest: XCTestCase, @unchecked Sendable {
     func testInitialCurrentAck() {
         XCTAssertEqual(socket.currentAck, -1)
     }
@@ -40,7 +44,8 @@ class SocketSideEffectTest: XCTestCase {
         }
 
         manager.parseEngineMessage("30[\"hello world\"]")
-        waitForExpectations(timeout: 3, handler: nil)
+        let result = XCTWaiter().wait(for: [expect], timeout: 3)
+        XCTAssert(result == .completed)
     }
 
     func testHandleAckWithAckEmit() {
@@ -53,7 +58,8 @@ class SocketSideEffectTest: XCTestCase {
         }
 
         manager.parseEngineMessage("30[\"hello world\"]")
-        waitForExpectations(timeout: 3, handler: nil)
+        let result = XCTWaiter().wait(for: [expect], timeout: 3)
+        XCTAssert(result == .completed)
     }
 
     func testHandleAck2() {
@@ -65,7 +71,8 @@ class SocketSideEffectTest: XCTestCase {
 
         manager.parseEngineMessage("61-0[{\"_placeholder\":true,\"num\":0},{\"test\":true}]")
         manager.parseEngineBinaryData(Data())
-        waitForExpectations(timeout: 3, handler: nil)
+        let result = XCTWaiter().wait(for: [expect], timeout: 3)
+        XCTAssert(result == .completed)
     }
 
     func testHandleEvent() {
@@ -76,7 +83,8 @@ class SocketSideEffectTest: XCTestCase {
         }
 
         manager.parseEngineMessage("2[\"test\",\"hello world\"]")
-        waitForExpectations(timeout: 3, handler: nil)
+        let result = XCTWaiter().wait(for: [expect], timeout: 3)
+        XCTAssert(result == .completed)
     }
 
     func testHandleStringEventWithQuotes() {
@@ -87,7 +95,8 @@ class SocketSideEffectTest: XCTestCase {
         }
 
         manager.parseEngineMessage("2[\"test\",\"\\\"hello world\\\"\"]")
-        waitForExpectations(timeout: 3, handler: nil)
+        let result = XCTWaiter().wait(for: [expect], timeout: 3)
+        XCTAssert(result == .completed)
     }
 
     func testHandleOnceEvent() {
@@ -99,7 +108,8 @@ class SocketSideEffectTest: XCTestCase {
         }
 
         manager.parseEngineMessage("2[\"test\",\"hello world\"]")
-        waitForExpectations(timeout: 3, handler: nil)
+        let result = XCTWaiter().wait(for: [expect], timeout: 3)
+        XCTAssert(result == .completed)
     }
 
     func testHandleOnceClientEvent() {
@@ -117,7 +127,8 @@ class SocketSideEffectTest: XCTestCase {
             self.manager.parseEngineMessage("0/")
         }
 
-        waitForExpectations(timeout: 3, handler: nil)
+        let result = XCTWaiter().wait(for: [expect], timeout: 3)
+        XCTAssert(result == .completed)
     }
 
     func testOffWithEvent() {
@@ -155,7 +166,8 @@ class SocketSideEffectTest: XCTestCase {
         }
 
         manager.parseEngineMessage("4\"test error\"")
-        waitForExpectations(timeout: 3, handler: nil)
+        let result = XCTWaiter().wait(for: [expect], timeout: 3)
+        XCTAssert(result == .completed)
     }
 
     func testHandleBinaryEvent() {
@@ -169,7 +181,8 @@ class SocketSideEffectTest: XCTestCase {
 
         manager.parseEngineMessage("51-[\"test\",{\"test\":{\"_placeholder\":true,\"num\":0}}]")
         manager.parseEngineBinaryData(data)
-        waitForExpectations(timeout: 3, handler: nil)
+        let result = XCTWaiter().wait(for: [expect], timeout: 3)
+        XCTAssert(result == .completed)
     }
 
     func testHandleMultipleBinaryEvent() {
@@ -186,7 +199,8 @@ class SocketSideEffectTest: XCTestCase {
         manager.parseEngineMessage("52-[\"test\",{\"test\":{\"_placeholder\":true,\"num\":0},\"test2\":{\"_placeholder\":true,\"num\":1}}]")
         manager.parseEngineBinaryData(data)
         manager.parseEngineBinaryData(data2)
-        waitForExpectations(timeout: 3, handler: nil)
+        let result = XCTWaiter().wait(for: [expect], timeout: 3)
+        XCTAssert(result == .completed)
     }
 
     func testChangingStatusCallsStatusChangeHandler() {
@@ -207,7 +221,8 @@ class SocketSideEffectTest: XCTestCase {
 
         socket.setTestStatus(statusChange)
 
-        waitForExpectations(timeout: 0.2)
+        let result = XCTWaiter().wait(for: [expect], timeout: 0.2)
+        XCTAssert(result == .completed)
     }
 
     func testOnClientEvent() {
@@ -229,7 +244,8 @@ class SocketSideEffectTest: XCTestCase {
 
         socket.handleClientEvent(event, data: [closeReason])
 
-        waitForExpectations(timeout: 0.2)
+        let result = XCTWaiter().wait(for: [expect], timeout: 0.2)
+        XCTAssert(result == .completed)
     }
 
     func testClientEventsAreBackwardsCompatible() {
@@ -251,7 +267,8 @@ class SocketSideEffectTest: XCTestCase {
 
         socket.handleClientEvent(event, data: [closeReason])
 
-        waitForExpectations(timeout: 0.2)
+        let result = XCTWaiter().wait(for: [expect], timeout: 0.2)
+        XCTAssert(result == .completed)
     }
 
     func testConnectTimesOutIfNotConnected() {
@@ -265,7 +282,8 @@ class SocketSideEffectTest: XCTestCase {
             expect.fulfill()
         })
 
-        waitForExpectations(timeout: 0.8)
+        let result = XCTWaiter().wait(for: [expect], timeout: 0.8)
+        XCTAssert(result == .completed)
     }
 
     func testConnectDoesNotTimeOutIfConnected() {
@@ -287,7 +305,8 @@ class SocketSideEffectTest: XCTestCase {
             self.manager.parseEngineMessage("0/")
         }
 
-        waitForExpectations(timeout: 2)
+        let result = XCTWaiter().wait(for: [expect], timeout: 2)
+        XCTAssert(result == .completed)
     }
 
     func testClientCallsConnectOnEngineOpen() {
@@ -309,7 +328,8 @@ class SocketSideEffectTest: XCTestCase {
             XCTFail("Should not call timeout handler if status is connected")
         })
 
-        waitForExpectations(timeout: 2)
+        let result = XCTWaiter().wait(for: [expect], timeout: 2)
+        XCTAssert(result == .completed)
     }
 
     func testConnectIsCalledWithNamespace() {
@@ -341,7 +361,8 @@ class SocketSideEffectTest: XCTestCase {
             self.manager.parseEngineMessage("0/swift")
         }
 
-        waitForExpectations(timeout: 2)
+        let result = XCTWaiter().wait(for: [expect], timeout: 2)
+        XCTAssert(result == .completed)
     }
 
     func testErrorInCustomSocketDataCallsErrorHandler() {
@@ -361,7 +382,8 @@ class SocketSideEffectTest: XCTestCase {
 
         socket.emit("myEvent", ThrowingData())
 
-        waitForExpectations(timeout: 0.2)
+        let result = XCTWaiter().wait(for: [expect], timeout: 0.2)
+        XCTAssert(result == .completed)
     }
 
     func testErrorInCustomSocketDataCallsErrorHandler_ack() {
@@ -383,7 +405,8 @@ class SocketSideEffectTest: XCTestCase {
             XCTFail("Ack callback should not be called")
         })
 
-        waitForExpectations(timeout: 0.2)
+        let result = XCTWaiter().wait(for: [expect], timeout: 0.2)
+        XCTAssert(result == .completed)
     }
 
     func testSettingConfigAfterInit() {
@@ -424,7 +447,8 @@ class SocketSideEffectTest: XCTestCase {
 
         manager.engineDidSendPong()
 
-        waitForExpectations(timeout: 0.2)
+        let result = XCTWaiter().wait(for: [expect], timeout: 0.2)
+        XCTAssert(result == .completed)
     }
 
     func testClientCallsGotPongHandler() {
@@ -436,7 +460,8 @@ class SocketSideEffectTest: XCTestCase {
 
         manager.engineDidReceivePing()
 
-        waitForExpectations(timeout: 0.2)
+        let result = XCTWaiter().wait(for: [expect], timeout: 0.2)
+        XCTAssert(result == .completed)
     }
 
     let data = "test".data(using: String.Encoding.utf8)!
@@ -465,7 +490,7 @@ struct ThrowingData: SocketData {
 
 }
 
-class TestEngine: SocketEngineSpec {
+class TestEngine: SocketEngineSpec, @unchecked Sendable {
     weak var client: SocketEngineClient?
     private(set) var closed = false
     private(set) var compress = false

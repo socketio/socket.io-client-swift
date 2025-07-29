@@ -77,7 +77,7 @@ public protocol SocketIOClientSpec : AnyObject {
     /// - parameter timeoutAfter: The number of seconds after which if we are not connected we assume the connection
     ///                           has failed. Pass 0 to never timeout.
     /// - parameter handler: The handler to call when the client fails to connect.
-    func connect(withPayload payload: [String: Any]?, timeoutAfter: Double, withHandler handler: (() -> ())?)
+    func connect(withPayload payload: [String: Any]?, timeoutAfter: Double, withHandler handler: (@Sendable() -> ())?)
 
     /// Called when the client connects to a namespace. If the client was created with a namespace upfront,
     /// then this is only called when the client connects to that namespace.
@@ -106,7 +106,7 @@ public protocol SocketIOClientSpec : AnyObject {
     /// - parameter event: The event to send.
     /// - parameter items: The items to send with this event. May be left out.
     /// - parameter completion: Callback called on transport write completion.
-    func emit(_ event: String, _ items: SocketData..., completion: (() -> ())?)
+    func emit(_ event: String, _ items: SocketData..., completion: (@Sendable () -> ())?)
     
     /// Send an event to the server, with optional data items and optional write completion handler.
     ///
@@ -116,7 +116,7 @@ public protocol SocketIOClientSpec : AnyObject {
     /// - parameter event: The event to send.
     /// - parameter items: The items to send with this event. May be left out.
     /// - parameter completion: Callback called on transport write completion.
-    func emit(_ event: String, with items: [SocketData], completion: (() -> ())?)
+    func emit(_ event: String, with items: [SocketData], completion: (@Sendable () -> ())?)
 
     /// Call when you wish to tell the server that you've received the event for `ack`.
     ///

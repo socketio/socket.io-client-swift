@@ -41,7 +41,6 @@ public final class SocketAckEmitter: NSObject {
     /// ```
     ///
     /// **NOTE**: It is not safe to hold on to this view beyond the life of the socket.
-    @objc
     public private(set) lazy var rawEmitView = SocketRawAckView(socket: socket, ackNum: ackNum)
 
     // MARK: Properties
@@ -83,7 +82,6 @@ public final class SocketAckEmitter: NSObject {
     /// Call to ack receiving this event.
     ///
     /// - parameter items: An array of items to send when acking. Use `[]` to send nothing.
-    @objc
     public func with(_ items: [Any]) {
         guard ackNum != -1 else { return }
 
@@ -127,7 +125,6 @@ public final class OnAckCallback: NSObject {
     /// - parameter seconds: The number of seconds before this emit times out if an ack hasn't been received.
     /// - parameter callback: The callback called when an ack is received, or when a timeout happens.
     ///                       To check for timeout, use `SocketAckStatus`'s `noAck` case.
-    @objc
     public func timingOut(after seconds: Double, callback: @escaping AckCallback) {
         guard let socket = self.socket, ackNumber != -1 else { return }
 
@@ -135,11 +132,11 @@ public final class OnAckCallback: NSObject {
         socket.emit(items, ack: ackNumber, binary: binary)
 
         guard seconds != 0 else { return }
-
+        let _ackNumber = ackNumber
         socket.manager?.handleQueue.asyncAfter(deadline: DispatchTime.now() + seconds) {[weak socket] in
             guard let socket = socket else { return }
 
-            socket.ackHandlers.timeoutAck(self.ackNumber)
+            socket.ackHandlers.timeoutAck(_ackNumber)
         }
     }
 

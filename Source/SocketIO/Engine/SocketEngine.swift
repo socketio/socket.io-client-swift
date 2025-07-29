@@ -25,11 +25,14 @@
 import Dispatch
 import Foundation
 import Starscream
+#if os(Android)
+import FoundationNetworking
+#endif
 
 /// The class that handles the engine.io protocol and transports.
 /// See `SocketEnginePollable` and `SocketEngineWebsocket` for transport specific methods.
 open class SocketEngine: NSObject, WebSocketDelegate, URLSessionDelegate,
-                         SocketEnginePollable, SocketEngineWebsocket, ConfigSettable {
+                         SocketEnginePollable, SocketEngineWebsocket, ConfigSettable, @unchecked Sendable {
   
   
     // MARK: Properties
@@ -563,7 +566,11 @@ open class SocketEngine: NSObject, WebSocketDelegate, URLSessionDelegate,
         polling = true
         probing = false
         invalidated = false
+        #if os(Android)
+        session = FoundationNetworking.URLSession(configuration: .default, delegate: sessionDelegate, delegateQueue: queue)
+        #else
         session = Foundation.URLSession(configuration: .default, delegate: sessionDelegate, delegateQueue: queue)
+        #endif
         sid = ""
         waitingForPoll = false
         waitingForPost = false
@@ -656,7 +663,7 @@ open class SocketEngine: NSObject, WebSocketDelegate, URLSessionDelegate,
     /// - parameter type: The type of this message.
     /// - parameter data: Any data that this message has.
     /// - parameter completion: Callback called on transport write completion.
-    open func write(_ msg: String, withType type: SocketEnginePacketType, withData data: [Data], completion: (() -> ())? = nil) {
+    open func write(_ msg: String, withType type: SocketEnginePacketType, withData data: [Data], completion: (@Sendable () -> ())? = nil) {
         engineQueue.async {
             guard self.connected else {
                 completion?()

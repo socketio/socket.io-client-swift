@@ -26,7 +26,7 @@
 import Foundation
 
 /// Represents the type of engine.io packet types.
-@objc public enum SocketEnginePacketType: Int {
+public enum SocketEnginePacketType: Int, Sendable {
     /// Open message.
     case open
 

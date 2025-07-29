@@ -25,9 +25,12 @@
 
 import Foundation
 import Starscream
+#if os(Android)
+import FoundationNetworking
+#endif
 
 /// Specifies a SocketEngine.
-public protocol SocketEngineSpec: AnyObject {
+public protocol SocketEngineSpec: AnyObject, Sendable {
     // MARK: Properties
 
     /// The client for this engine.
@@ -141,7 +144,7 @@ public protocol SocketEngineSpec: AnyObject {
     /// - parameter type: The type of this message.
     /// - parameter data: Any data that this message has.
     /// - parameter completion: Callback called on transport write completion.
-    func write(_ msg: String, withType type: SocketEnginePacketType, withData data: [Data], completion: (() -> ())?)
+    func write(_ msg: String, withType type: SocketEnginePacketType, withData data: [Data], completion: (@Sendable () -> ())?)
 }
 
 extension SocketEngineSpec {
@@ -203,7 +206,7 @@ extension SocketEngineSpec {
     }
 
     /// Send an engine message (4)
-    func send(_ msg: String, withData datas: [Data], completion: (() -> ())? = nil) {
+    func send(_ msg: String, withData datas: [Data], completion: (@Sendable () -> ())? = nil) {
         write(msg, withType: .message, withData: datas, completion: completion)
     }
 }

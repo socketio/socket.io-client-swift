@@ -24,6 +24,9 @@
 
 import Foundation
 import Starscream
+#if os(Android)
+import FoundationNetworking
+#endif
 
 /// The socket.io version being used.
 public enum SocketIOVersion: Int {

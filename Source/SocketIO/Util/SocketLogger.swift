@@ -68,8 +68,8 @@ public extension SocketLogger {
     }
 }
 
-class DefaultSocketLogger : SocketLogger {
-    static var Logger: SocketLogger = DefaultSocketLogger()
+final class DefaultSocketLogger : SocketLogger, Sendable {
+    static nonisolated(unsafe) var Logger: SocketLogger = DefaultSocketLogger()
 
-    var log = false
+    nonisolated(unsafe) var log = false
 }

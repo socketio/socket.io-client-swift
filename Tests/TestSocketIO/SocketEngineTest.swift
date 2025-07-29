@@ -20,7 +20,8 @@ class SocketEngineTest: XCTestCase {
         engine.setConfigs([.version(.two)])
         engine.parsePollingMessage("15:42[\"blankTest\"]")
 
-        waitForExpectations(timeout: 3, handler: nil)
+        let result = XCTWaiter().wait(for: [expect], timeout: 3)
+        XCTAssert(result == .completed)
     }
 
     func testBasicPollingMessage() {
@@ -30,7 +31,8 @@ class SocketEngineTest: XCTestCase {
         }
 
         engine.parsePollingMessage("42[\"blankTest\"]")
-        waitForExpectations(timeout: 3, handler: nil)
+        let result = XCTWaiter().wait(for: [expect], timeout: 3)
+        XCTAssert(result == .completed)
     }
 
     func testTwoPacketsInOnePollTest() {
@@ -50,7 +52,8 @@ class SocketEngineTest: XCTestCase {
         }
 
         engine.parsePollingMessage("42[\"blankTest\"]\u{1e}42[\"stringTest\",\"hello\"]")
-        waitForExpectations(timeout: 3, handler: nil)
+        let result = XCTWaiter().wait(for: [finalExpectation], timeout: 3)
+        XCTAssert(result == .completed)
     }
 
     func testEngineDoesErrorOnUnknownTransport() {
@@ -63,7 +66,8 @@ class SocketEngineTest: XCTestCase {
         }
 
         engine.parseEngineMessage("{\"code\": 0, \"message\": \"Unknown transport\"}")
-        waitForExpectations(timeout: 3, handler: nil)
+        let result = XCTWaiter().wait(for: [finalExpectation], timeout: 3)
+        XCTAssert(result == .completed)
     }
 
     func testEngineDoesErrorOnUnknownMessage() {
@@ -74,7 +78,8 @@ class SocketEngineTest: XCTestCase {
         }
 
         engine.parseEngineMessage("afafafda")
-        waitForExpectations(timeout: 3, handler: nil)
+        let result = XCTWaiter().wait(for: [finalExpectation], timeout: 3)
+        XCTAssert(result == .completed)
     }
 
     func testEngineDecodesUTF8Properly() {
@@ -88,7 +93,8 @@ class SocketEngineTest: XCTestCase {
         let stringMessage = "42[\"stringTest\",\"lïne one\\nlīne \\rtwo𦅙𦅛\"]"
 
         engine.parsePollingMessage("\(stringMessage)")
-        waitForExpectations(timeout: 3, handler: nil)
+        let result = XCTWaiter().wait(for: [expect], timeout: 3)
+        XCTAssert(result == .completed)
     }
 
     func testEncodeURLProperly() {
@@ -123,7 +129,8 @@ class SocketEngineTest: XCTestCase {
         engine.parseEngineMessage(packetString)
         engine.parseEngineMessage(b64String)
 
-        waitForExpectations(timeout: 3, handler: nil)
+        let result = XCTWaiter().wait(for: [expect], timeout: 3)
+        XCTAssert(result == .completed)
     }
 
     func testSettingExtraHeadersBeforeConnectSetsEngineExtraHeaders() {

@@ -24,9 +24,12 @@
 //
 
 import Foundation
+#if os(Android)
+import FoundationNetworking
+#endif
 
 /// Declares that a type will be a delegate to an engine.
-@objc public protocol SocketEngineClient {
+public protocol SocketEngineClient: AnyObject {
     // MARK: Methods
 
     /// Called when the engine errors.

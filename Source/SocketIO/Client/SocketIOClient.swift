@@ -40,7 +40,7 @@ import Foundation
 ///
 /// **NOTE**: The client is not thread/queue safe, all interaction with the socket should be done on the `manager.handleQueue`
 ///
-open class SocketIOClient: NSObject, SocketIOClientSpec {
+open class SocketIOClient: NSObject, SocketIOClientSpec, @unchecked Sendable {
     // MARK: Properties
 
     /// The namespace that this socket is currently connected to.
@@ -122,7 +122,7 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
     /// - parameter timeoutAfter: The number of seconds after which if we are not connected we assume the connection
     ///                           has failed. Pass 0 to never timeout.
     /// - parameter handler: The handler to call when the client fails to connect.
-    open func connect(withPayload payload: [String: Any]? = nil, timeoutAfter: Double, withHandler handler: (() -> ())?) {
+    open func connect(withPayload payload: [String: Any]? = nil, timeoutAfter: Double, withHandler handler: (@Sendable () -> ())?) {
         assert(timeoutAfter >= 0, "Invalid timeout: \(timeoutAfter)")
 
         guard let manager = self.manager, status != .connected else {
@@ -212,7 +212,7 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
     /// - parameter event: The event to send.
     /// - parameter items: The items to send with this event. May be left out.
     /// - parameter completion: Callback called on transport write completion.
-    open func emit(_ event: String, _ items: SocketData..., completion: (() -> ())? = nil)  {
+    open func emit(_ event: String, _ items: SocketData..., completion: (@Sendable() -> ())? = nil)  {
         emit(event, with: items, completion: completion)
     }
     
@@ -224,7 +224,7 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
     /// - parameter event: The event to send.
     /// - parameter items: The items to send with this event. May be left out.
     /// - parameter completion: Callback called on transport write completion.
-    open func emit(_ event: String, with items: [SocketData], completion: (() -> ())?) {
+    open func emit(_ event: String, with items: [SocketData], completion: (@Sendable () -> ())?) {
         
         do {
             emit([event] + (try items.map({ try $0.socketRepresentation() })), completion: completion)
@@ -296,15 +296,21 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
               ack: Int? = nil,
               binary: Bool = true,
               isAck: Bool = false,
-              completion: (() -> ())? = nil
+              completion: (@Sendable () -> ())? = nil
     ) {
         // wrap the completion handler so it always runs async via handlerQueue
-        let wrappedCompletion: (() -> ())? = (completion == nil) ? nil : {[weak self] in
-            guard let this = self else { return }
-            this.manager?.handleQueue.async {
-                completion!()
+        let wrappedCompletion: (@Sendable () -> ())? = {
+            if let completion {
+                return completion
+            } else {
+                return { [weak self] in
+                    guard let this = self else { return }
+                    this.manager?.handleQueue.async {
+                        completion!()
+                    }
+                }
             }
-        }
+        }()
 
         guard status == .connected else {
             wrappedCompletion?()

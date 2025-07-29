@@ -127,7 +127,7 @@ class SocketParserTest: XCTestCase {
     let testManager = SocketManager(socketURL: URL(string: "http://localhost/")!)
 
     //Format key: message; namespace-data-binary-id
-    static let packetTypes: [String: (String, [Any], [Data], Int)] = [
+    static let packetTypes: [String: (String, [any Sendable], [Data], Int)] = [
         "0": ("/", [], [], -1), "1": ("/", [], [], -1),
         "25[\"test\"]": ("/", ["test"], [], 5),
         "2[\"test\",\"~~0\"]": ("/", ["test", "~~0"], [], -1),
@@ -145,3 +145,6 @@ class SocketParserTest: XCTestCase {
         "4[1, \"hello\"]": ("/", [1, "hello"], [], -1)
     ]
 }
+
+extension NSArray: @retroactive @unchecked Sendable {}
+extension NSDictionary: @retroactive @unchecked Sendable {}

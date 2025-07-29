@@ -24,6 +24,9 @@
 
 import Foundation
 import Starscream
+#if os(Android)
+import FoundationNetworking
+#endif
 
 enum JSONError : Error {
     case notArray

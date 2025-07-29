@@ -25,7 +25,6 @@
 import Foundation
 
 /// Represents state of a manager or client.
-@objc
 public enum SocketIOStatus : Int, CustomStringConvertible {
     // MARK: Cases
 
