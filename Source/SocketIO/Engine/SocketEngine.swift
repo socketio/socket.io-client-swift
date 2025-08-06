@@ -563,6 +563,7 @@ open class SocketEngine: NSObject, WebSocketDelegate, URLSessionDelegate,
         polling = true
         probing = false
         invalidated = false
+        session?.invalidateAndCancel()
         session = Foundation.URLSession(configuration: .default, delegate: sessionDelegate, delegateQueue: queue)
         sid = ""
         waitingForPoll = false
