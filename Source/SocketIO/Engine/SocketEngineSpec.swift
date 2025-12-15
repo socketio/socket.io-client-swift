@@ -113,6 +113,11 @@ public protocol SocketEngineSpec: AnyObject {
     /// - parameter reason: The reason for the disconnection. This is communicated up to the client.
     func disconnect(reason: String)
 
+    /// Force close engine.
+    ///
+    /// - parameter reason: The reason for the disconnection. This is communicated up to the client.
+    func close(reason: String)
+
     /// Called to switch from HTTP long-polling to WebSockets. After calling this method the engine will be in
     /// WebSocket mode.
     ///

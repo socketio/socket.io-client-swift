@@ -107,7 +107,7 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     public var randomizationFactor = 0.5
 
     /// The status of this manager.
-    public private(set) var status: SocketIOStatus = .notConnected {
+    public var status: SocketIOStatus = .notConnected {
         didSet {
             switch status {
             case .connected:
@@ -241,6 +241,16 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
 
         engine?.disconnect(reason: "Disconnect")
     }
+
+    /// Force disconnects the manager and all associated sockets.
+    open func close() {
+        DefaultSocketLogger.Logger.log("Manager closing", type: SocketManager.logType)
+
+        status = .disconnected
+
+        engine?.close(reason: "Disconnect")
+    }
+
 
     /// Disconnects the given socket.
     ///
@@ -565,7 +575,7 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
 
         _config = config
 
-        if socketURL.absoluteString.hasPrefix("https://") {
+        if socketURL.absoluteString.hasPrefix("https://") || socketURL.absoluteString.hasPrefix("wss://") {
             _config.insert(.secure(true))
         }
 

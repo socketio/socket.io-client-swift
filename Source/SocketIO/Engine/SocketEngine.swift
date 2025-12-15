@@ -335,6 +335,15 @@ open class SocketEngine: NSObject, WebSocketDelegate, URLSessionDelegate,
         }
     }
 
+    /// Force close engine.
+    ///
+    /// - parameter reason: The reason for the disconnection. This is communicated up to the client.
+    open func close(reason: String) {
+        guard connected && !closed else { return closeOutEngine(reason: reason) }
+        DefaultSocketLogger.Logger.log("Engine is being force closed.", type: SocketEngine.logType)
+        closeOutEngine(reason: reason)
+    }
+
     private func _disconnect(reason: String) {
         guard connected && !closed else { return closeOutEngine(reason: reason) }
 
@@ -563,6 +572,7 @@ open class SocketEngine: NSObject, WebSocketDelegate, URLSessionDelegate,
         polling = true
         probing = false
         invalidated = false
+        session?.invalidateAndCancel()
         session = Foundation.URLSession(configuration: .default, delegate: sessionDelegate, delegateQueue: queue)
         sid = ""
         waitingForPoll = false
@@ -714,6 +724,13 @@ open class SocketEngine: NSObject, WebSocketDelegate, URLSessionDelegate,
 
         if let error = error as? WSError {
             didError(reason: "\(error.message). code=\(error.code), type=\(error.type)")
+        } else  if let error = error as? HTTPUpgradeError {
+            switch error {
+            case let .notAnUpgrade(int, _):
+                didError(reason: "notAnUpgrade. code=\(int)")
+            case .invalidData:
+                didError(reason: "invalidData")
+            }
         } else if let reason = error?.localizedDescription {
             didError(reason: reason)
         } else {

@@ -77,9 +77,28 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
 
     /// The id of this socket.io connect. This is different from the sid of the engine.io connection.
     public private(set) var sid: String?
+    /// The id of this socket.io connect for connection state recovery.
+    public private(set) var pid: String?
+
+    /// Offset of last socket.io event for connection state recovery.
+    public private(set) var lastEventOffset: String?
+    /// Boolean setted after connection to know if socket state is recovered or not.
+    public private(set) var recovered: Bool = false
+
+    /// Array of events (or binary events) to handle when socket is connected and recover packets from server
+    public private(set) var savedEvents = [SocketPacket]()
 
     let ackHandlers = SocketAckManager()
-    var connectPayload: [String: Any]?
+
+    private var _connectPayload: [String: Any]?
+    var connectPayload: [String: Any]? {
+        get {
+            getConnectionStateRecoveryPayload(with: _connectPayload)
+        }
+        set {
+            _connectPayload = newValue
+        }
+    }
 
     private(set) var currentAck = -1
 
@@ -131,7 +150,6 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
         }
 
         status = .connecting
-
         joinNamespace(withPayload: payload)
 
         switch manager.version {
@@ -159,6 +177,16 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
         }
     }
 
+    func getConnectionStateRecoveryPayload(with payload: [String: Any]?) -> [String: Any]? {
+        guard let pid else { return payload }
+        var recoveryPayload = payload ?? [:]
+        recoveryPayload["pid"] = pid
+        if let lastEventOffset {
+            recoveryPayload["offset"] = lastEventOffset
+        }
+        return recoveryPayload
+    }
+
     func createOnAck(_ items: [Any], binary: Bool = true) -> OnAckCallback {
         currentAck += 1
 
@@ -171,12 +199,16 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
     /// - parameter toNamespace: The namespace that was connected to.
     open func didConnect(toNamespace namespace: String, payload: [String: Any]?) {
         guard status != .connected else { return }
+        let pid = payload?["pid"] as? String
+        recovered = self.pid != nil && self.pid == pid
+        self.pid = pid
+        sid = payload?["sid"] as? String
 
         DefaultSocketLogger.Logger.log("Socket connected", type: logType)
 
         status = .connected
-        sid = payload?["sid"] as? String
 
+        handleSavedEventPackets()
         handleClientEvent(.connect, data: payload == nil ? [namespace] : [namespace, payload!])
     }
 
@@ -356,8 +388,10 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
     /// - parameter data: The data that was sent with this event.
     /// - parameter isInternalMessage: Whether this event was sent internally. If `true` it is always sent to handlers.
     /// - parameter ack: If > 0 then this event expects to get an ack back from the client.
-    open func handleEvent(_ event: String, data: [Any], isInternalMessage: Bool, withAck ack: Int = -1) {
-        guard status == .connected || isInternalMessage else { return }
+    /// - returns: true if event is handled, false if event need to be saved (not handled)
+    @discardableResult
+    open func handleEvent(_ event: String, data: [Any], isInternalMessage: Bool, withAck ack: Int = -1) -> Bool {
+        guard status == .connected || isInternalMessage else { return false }
 
         DefaultSocketLogger.Logger.log("Handling event: \(event) with data: \(data)", type: logType)
 
@@ -366,6 +400,12 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
         for handler in handlers where handler.event == event {
             handler.executeCallback(with: data, withAck: ack, withSocket: self)
         }
+
+        if !isInternalMessage && ack < 0 && pid != nil,
+           let eventOffset = data.last as? String {
+            self.lastEventOffset = eventOffset
+        }
+        return true
     }
 
     /// Causes a client to handle a socket.io packet. The namespace for the packet must match the namespace of the
@@ -377,7 +417,9 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
 
         switch packet.type {
         case .event, .binaryEvent:
-            handleEvent(packet.event, data: packet.args, isInternalMessage: false, withAck: packet.id)
+            if !handleEvent(packet.event, data: packet.args, isInternalMessage: false, withAck: packet.id) {
+                saveEventPacketIfNeeded(packet: packet, isInternalMessage: false)
+            }
         case .ack, .binaryAck:
             handleAck(packet.id, data: packet.data)
         case .connect:
@@ -386,6 +428,28 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
             didDisconnect(reason: "Got Disconnect")
         case .error:
             handleEvent("error", data: packet.data, isInternalMessage: true, withAck: packet.id)
+        }
+    }
+
+    /// Called when we get an event from socket.io
+    /// Save it to event array if an event is sent before socket is set to connected status.
+    /// Do not save event if pid is nil (cannot recover events from server)
+    ///
+    /// - parameter packet: The packet to handle.
+    /// - parameter isInternalMessage: Whether this event was sent internally. If `true` ignore it.
+    open func saveEventPacketIfNeeded(packet: SocketPacket, isInternalMessage: Bool) {
+        guard !isInternalMessage && pid != nil else { return }
+        savedEvents.append(packet)
+    }
+
+    /// Called when socket pass to connected state, handle events if socket recover data from server
+    open func handleSavedEventPackets() {
+        if recovered {
+            savedEvents.removeAll { packet in
+                return handleEvent(packet.event, data: packet.args, isInternalMessage: false)
+            }
+        } else {
+            savedEvents.removeAll()
         }
     }
 

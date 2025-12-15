@@ -105,6 +105,9 @@ public protocol SocketManagerSpec : SocketEngineClient {
     /// Disconnects the manager and all associated sockets.
     func disconnect()
 
+    /// Force disconnects the manager and all associated sockets.
+    func close()
+
     /// Disconnects the given socket.
     ///
     /// - parameter socket: The socket to disconnect.
