@@ -131,12 +131,18 @@ public final class OnAckCallback: NSObject {
     public func timingOut(after seconds: Double, callback: @escaping AckCallback) {
         guard let socket = self.socket, ackNumber != -1 else { return }
 
+        // Retained callback syntax shares retry ordering and per-attempt ACKs.
+        // Adapt typed failures to its historical NO ACK sentinel at the boundary.
+        if socket.enqueueRetriableIfActive(items, userAck: { error, data in
+            callback(error == nil ? data : [SocketAckStatus.noAck.rawValue])
+        }, attemptTimeout: seconds == 0 ? nil : seconds, binary: binary) { return }
+
         socket.ackHandlers.addAck(ackNumber, callback: callback)
         socket.emit(items, ack: ackNumber, binary: binary)
 
         guard seconds != 0 else { return }
 
-        socket.manager?.handleQueue.asyncAfter(deadline: DispatchTime.now() + seconds) {[weak socket] in
+        socket.manager?.handleQueue.socketAsyncAfter(deadline: DispatchTime.now() + seconds) {[weak socket] in
             guard let socket = socket else { return }
 
             socket.ackHandlers.timeoutAck(self.ackNumber)

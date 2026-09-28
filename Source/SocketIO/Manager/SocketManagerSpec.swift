@@ -22,8 +22,6 @@
 import Dispatch
 import Foundation
 
-// TODO Fix the types so that we aren't using concrete types
-
 ///
 /// A manager for a socket.io connection.
 ///
@@ -48,7 +46,7 @@ import Foundation
 public protocol SocketManagerSpec : SocketEngineClient {
     // MARK: Properties
 
-    /// Returns the socket associated with the default namespace ("/").
+    /// Returns the socket for the URL path namespace, or "/" when there is no path.
     var defaultSocket: SocketIOClient { get }
 
     /// The engine for this manager.
@@ -57,7 +55,7 @@ public protocol SocketManagerSpec : SocketEngineClient {
     /// If `true` then every time `connect` is called, a new engine will be created.
     var forceNew: Bool { get set }
 
-    // TODO Per socket queues?
+    // Namespaces share the manager queue to preserve packet and callback ordering.
     /// The queue that all interaction with the client should occur on. This is the queue that event handlers are
     /// called on.
     var handleQueue: DispatchQueue { get set }
@@ -83,8 +81,9 @@ public protocol SocketManagerSpec : SocketEngineClient {
     /// The status of this manager.
     var status: SocketIOStatus { get }
 
-    /// The version of socket.io in use.
-    var version: SocketIOVersion { get }
+
+    /// Bounds decoded packets and binary reassembly, independently of transport frame limits.
+    var parserOptions: SocketParserOptions { get }
 
     // MARK: Methods
 
@@ -145,4 +144,9 @@ public protocol SocketManagerSpec : SocketEngineClient {
     /// - parameter nsp: The namespace for the socket.
     /// - returns: A `SocketIOClient` for the given namespace.
     func socket(forNamespace nsp: String) -> SocketIOClient
+}
+
+public extension SocketManagerSpec {
+    /// Custom managers inherit the same safe parser defaults without another stored property.
+    var parserOptions: SocketParserOptions { SocketParserOptions() }
 }

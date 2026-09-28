@@ -69,7 +69,38 @@ public extension SocketLogger {
 }
 
 class DefaultSocketLogger : SocketLogger {
-    static var Logger: SocketLogger = DefaultSocketLogger()
+    private static let storage = SocketLoggerStorage(DefaultSocketLogger())
+    static var Logger: SocketLogger {
+        get { storage }
+        set { storage.replace(with: newValue) }
+    }
 
     var log = false
+}
+
+/// All access through the library is serialized, including configuration. A
+/// custom logger retained by its owner must also synchronize external access.
+private final class SocketLoggerStorage: SocketLogger, @unchecked Sendable {
+    private let lock = NSRecursiveLock()
+    private var logger: SocketLogger
+    init(_ logger: SocketLogger) { self.logger = logger }
+
+    func replace(with logger: SocketLogger) {
+        // Assigning the facade back to itself must not create a recursive logger.
+        guard logger !== self else { return }
+        lock.lock(); defer { lock.unlock() }
+        self.logger = logger
+    }
+    var log: Bool {
+        get { lock.lock(); defer { lock.unlock() }; return logger.log }
+        set { lock.lock(); defer { lock.unlock() }; logger.log = newValue }
+    }
+    func log(_ message: @autoclosure () -> String, type: String) {
+        lock.lock(); defer { lock.unlock() }
+        logger.log(message(), type: type)
+    }
+    func error(_ message: @autoclosure () -> String, type: String) {
+        lock.lock(); defer { lock.unlock() }
+        logger.error(message(), type: type)
+    }
 }

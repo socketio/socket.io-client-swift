@@ -2,18 +2,247 @@ name: Swift
 
 on:
   push:
-    branches: [ "master", "development" ]
+    branches: [ "**" ]
   pull_request:
-    branches: [ "master", "development" ]
+  workflow_dispatch:
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
+
+permissions:
+  contents: read
+
+concurrency:
+  group: swift-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
-
-    runs-on: macos-latest
-
+    name: Native library and full Socket.IO regression suite
+    runs-on: xcode-27
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v3
-      - name: Build
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      # E2E tests start their localhost fixtures using Node from PATH. TLS tests
+      # generate ephemeral private PKI with the runner's OpenSSL, not OS roots.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 26
+      - name: Verify Swift 6.4 toolchain
+        run: swift --version | grep -E 'Swift version 6\.4'
+      - name: Install pinned fixture dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+        working-directory: Tests/TestSocketIO/E2E/Fixtures
+      - name: Build without third-party Swift dependencies
         run: swift build -v
-      - name: Run tests
-        run: swift test -v
+      - name: Build and run an independent Swift Package consumer
+        run: bash scripts/test-spm-consumer.sh
+      - name: Compile and initialize the README quick start as an independent consumer
+        run: bash scripts/test-documentation-examples.sh
+      - name: Run complete unit and real-server test suite
+        run: |
+          set -o pipefail
+          swift test --enable-code-coverage 2>&1 | tee "$RUNNER_TEMP/native-swift-tests.log"
+      - name: Verify reviewed contracts actually passed and export library coverage
+        run: |
+          python3 scripts/check-parity-contracts.py --strict --swift-log "$RUNNER_TEMP/native-swift-tests.log"
+          coverage_path="$(swift test --show-codecov-path)"
+          cp "$coverage_path" "$RUNNER_TEMP/swift-coverage.json"
+          python3 scripts/report-swift-coverage.py "$coverage_path" "$RUNNER_TEMP/swift-coverage-summary.json"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        if: always()
+        with:
+          name: native-swift-test-log-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/native-swift-tests.log
+            ${{ runner.temp }}/swift-coverage.json
+            ${{ runner.temp }}/swift-coverage-summary.json
+          retention-days: 7
+
+  thread-sanitizer:
+    name: Unit suite under Thread Sanitizer (review gate R5)
+    runs-on: xcode-27
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      # The E2E suites need Node fixtures and real sockets; TSan runs the
+      # deterministic unit suites only. Every E2E class is named `*E2ETest`
+      # (plus the two fixture-harness checks), and this step keeps that true so
+      # the skip rule below cannot silently stop covering one.
+      - name: Check the E2E naming rule the skip list relies on
+        run: |
+          set -euo pipefail
+          bad=$(grep -hoE 'class [A-Za-z0-9]+ *: *XCTestCase' Tests/TestSocketIO/E2E/*.swift \
+                  | sed -E 's/class //; s/ *: *XCTestCase//' \
+                  | grep -vE '(E2ETest|HarnessSanityTest|TestServerProcessTest)$' || true)
+          if [ -n "$bad" ]; then
+            echo "E2E test classes must end in E2ETest so the TSan skip list stays complete:"
+            echo "$bad"
+            exit 1
+          fi
+      - name: Run the non-E2E unit suite under Thread Sanitizer
+        run: |
+          set -o pipefail
+          swift test --sanitize=thread \
+            --skip 'E2ETest' --skip 'HarnessSanityTest' --skip 'TestServerProcessTest' \
+            2>&1 | tee "$RUNNER_TEMP/tsan.log"
+      - name: Fail on any Thread Sanitizer report
+        run: |
+          if grep -q "ThreadSanitizer: data race" "$RUNNER_TEMP/tsan.log"; then
+            echo "Thread Sanitizer reported a data race:"
+            grep -n -A 40 "ThreadSanitizer: data race" "$RUNNER_TEMP/tsan.log" | head -200
+            exit 1
+          fi
+          echo "No Thread Sanitizer data race reports."
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        if: always()
+        with:
+          name: thread-sanitizer-log-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/tsan.log
+          retention-days: 7
+
+  strict-concurrency:
+    name: Strict-concurrency warning ratchet (review gate R5)
+    runs-on: xcode-27
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      # A ratchet, not a clean build: the recorded per-platform baseline may
+      # only go down. A platform with no baseline yet is reported, not failed,
+      # so the first run measures the number instead of producing a red build.
+      # Mutable classes are never stamped `@unchecked Sendable` to pass this.
+      - name: Build with -strict-concurrency=complete and compare the baseline
+        run: bash scripts/check-strict-concurrency.sh
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        if: always()
+        with:
+          name: strict-concurrency-log-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/strict-concurrency.log
+          retention-days: 7
+
+  apple-platforms:
+    name: Native Swift package builds (four Apple SDKs)
+    runs-on: xcode-27
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Verify dependency removal and all package platform builds
+        run: bash scripts/test-native-distributions.sh
+
+  protocol-proofs:
+    name: Protocol proofs (wire-level, no Swift toolchain)
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 26
+      - name: Check inventory evidence and fail-fast shell behavior
+        run: python3 scripts/test-review-regressions.py
+      - name: Install fixture server
+        run: npm ci --ignore-scripts --no-audit --no-fund
+        working-directory: Tests/TestSocketIO/E2E/Fixtures
+      - name: Verify polling observation never overlaps timed-out GETs
+        working-directory: Tests/TestSocketIO/E2E/Fixtures
+        run: node --test polling-proof-observer.test.mjs server-socket-id.test.mjs engine-parity-observer.test.mjs
+      - name: Prove the upgrade must wait for a pending POST
+        run: node upgrade-race-proof.mjs
+        working-directory: Tests/TestSocketIO/E2E/Fixtures
+      - name: Prove a polling batch must stay under maxPayload
+        run: node max-payload-proof.mjs
+        working-directory: Tests/TestSocketIO/E2E/Fixtures
+
+  parser-parity:
+    name: Decoder differential and malformed-input regressions
+    runs-on: xcode-27
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 26
+      - name: Check malformed-input regressions using actual Swift parser
+        run: |
+          set -o pipefail
+          bash scripts/test-parser-safety.sh 2>&1 | tee "$RUNNER_TEMP/parser-safety.log"
+      - name: Compare with hash-verified pinned official JavaScript decoder
+        run: |
+          npm install --prefix "$RUNNER_TEMP/parity-tools" --ignore-scripts --no-audit --no-fund typescript@5.8.3
+          git init "$RUNNER_TEMP/pinned-upstream"
+          git -C "$RUNNER_TEMP/pinned-upstream" remote add origin https://github.com/socketio/socket.io.git
+          git -C "$RUNNER_TEMP/pinned-upstream" fetch --depth=1 origin aaf2af36ec8ad05910f357a788e0e358bad32738
+          git -C "$RUNNER_TEMP/pinned-upstream" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/pinned-upstream" rev-parse HEAD)" = aaf2af36ec8ad05910f357a788e0e358bad32738
+          export NODE_PATH="$RUNNER_TEMP/parity-tools/node_modules"
+          set -o pipefail
+          bash scripts/test-parser-parity.sh "$RUNNER_TEMP/pinned-upstream" "$RUNNER_TEMP/decoder-results.json" 2>&1 | tee "$RUNNER_TEMP/decoder-parity.log"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        if: always()
+        with:
+          name: parser-parity-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 7
+          path: |
+            ${{ runner.temp }}/parser-safety.log
+            ${{ runner.temp }}/decoder-parity.log
+            ${{ runner.temp }}/decoder-results.json
+
+  upstream-clients:
+    name: Pinned upstream Node client suites and declaration inventory
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: socketio/socket.io
+          ref: aaf2af36ec8ad05910f357a788e0e358bad32738
+          path: upstream-reference
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          # The pinned upstream Mocha/tsx/yargs dependency graph fails to load
+          # under Node 26 (CommonJS require in an ESM-classified yargs file).
+          # Keep the reference-suite runtime on the validated Node 24 line.
+          node-version: 24
+      - name: Execute original Node suites (browser and WebTransport matrix excluded)
+        run: bash scripts/test-upstream-clients.sh "$GITHUB_WORKSPACE/upstream-reference" "$RUNNER_TEMP/upstream-client-results"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        if: always()
+        with:
+          name: upstream-client-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/upstream-client-results
+          retention-days: 7
+
+  repository-hygiene:
+    name: Documentation links, examples tooling and repository hygiene
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Test the offline documentation checker
+        run: python3 scripts/test-documentation.py
+      - name: Check current documentation paths and anchors
+        run: python3 scripts/check-documentation.py
+      - name: Check shell script syntax
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' script; do
+            bash -n "$script"
+          done < <(find scripts -name '*.sh' -print0)

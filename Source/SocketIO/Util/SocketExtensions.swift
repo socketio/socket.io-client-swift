@@ -23,36 +23,67 @@
 //  THE SOFTWARE.
 
 import Foundation
-import Starscream
 
 enum JSONError : Error {
-    case notArray
     case notNSDictionary
 }
 
-extension Array {
-    func toJSON() throws -> Data {
-        return try JSONSerialization.data(withJSONObject: self, options: JSONSerialization.WritingOptions(rawValue: 0))
-    }
-}
-
 extension CharacterSet {
+    // JavaScript encodeURIComponent: use an ASCII allowlist, never an inverted denylist.
     static var allowedURLCharacterSet: CharacterSet {
-        return CharacterSet(charactersIn: "!*'();:@&=+$,/?%#[]\" {}^|").inverted
+        return CharacterSet(charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.!~*'()")
     }
 }
 
 extension Dictionary where Key == String, Value == Any {
     private static func keyValueToSocketIOClientOption(key: String, value: Any) -> SocketIOClientOption? {
         switch (key, value) {
+        case let ("parserOptions", options as SocketParserOptions):
+            return .parserOptions(options)
+        case let ("webSocketOptions", options as SocketWebSocketOptions):
+            return .webSocketOptions(options)
+        case let ("bufferLimits", limits as SocketBufferLimits):
+            return .bufferLimits(limits)
+        case let ("ackTimeout", timeout as Double):
+            return .ackTimeout(timeout)
+        case let ("retries", count as Int):
+            return .retries(count)
+        case ("ackTimeout", _), ("retries", _):
+            return .invalidConfiguration("Invalid acknowledgement option: " + key)
+        case let ("requestTimeout", timeout as Double):
+            return .requestTimeout(timeout)
+        case ("requestTimeout", _):
+            return .invalidConfiguration("invalid value for requestTimeout; expected a positive finite number of seconds")
+        case let ("connectTimeout", timeout as Double):
+            return .connectTimeout(timeout)
+        case let ("autoConnect", autoConnect as Bool):
+            return .autoConnect(autoConnect)
         case let ("connectParams", params as [String: Any]):
             return .connectParams(params)
+        case let ("withCredentials", enabled as Bool):
+            return .withCredentials(enabled)
+        case let ("forceBase64", enabled as Bool):
+            return .forceBase64(enabled)
+        case let ("addTrailingSlash", enabled as Bool):
+            return .addTrailingSlash(enabled)
         case let ("cookies", cookies as [HTTPCookie]):
             return .cookies(cookies)
         case let ("extraHeaders", headers as [String: String]):
             return .extraHeaders(headers)
         case let ("forceNew", force as Bool):
             return .forceNew(force)
+        case let ("transports", values as [String]):
+            let transports = values.compactMap(SocketTransport.init(rawValue:))
+            guard transports.count == values.count else {
+                return .invalidConfiguration("Only polling and websocket transports are supported")
+            }
+            return .transports(transports)
+        case let ("tryAllTransports", enabled as Bool):
+            return .tryAllTransports(enabled)
+        case let ("rememberUpgrade", enabled as Bool):
+            return .rememberUpgrade(enabled)
+        case ("transports", _), ("tryAllTransports", _), ("rememberUpgrade", _):
+            return .invalidConfiguration("Invalid transport selection option: " + key)
         case let ("forcePolling", force as Bool):
             return .forcePolling(force)
         case let ("forceWebsockets", force as Bool):
@@ -77,18 +108,31 @@ extension Dictionary where Key == String, Value == Any {
             return .randomizationFactor(factor)
         case let ("secure", secure as Bool):
             return .secure(secure)
-        case let ("security", security as CertificatePinning):
+        case let ("timestampRequests", timestampRequests as Bool):
+            return .timestampRequests(timestampRequests)
+        case let ("timestampParam", timestampParam as String):
+            return .timestampParam(timestampParam)
+        case let ("clientCertificate", credential as URLCredential):
+            return .clientCertificate(credential)
+        case let ("security", security as SocketTLSConfiguration):
             return .security(security)
-        case let ("selfSigned", selfSigned as Bool):
-            return .selfSigned(selfSigned)
         case let ("sessionDelegate", delegate as URLSessionDelegate):
             return .sessionDelegate(delegate)
-        case let ("compress", compress as Bool):
-            return compress ? .compress : nil
-        case let ("enableSOCKSProxy", enable as Bool):
-            return .enableSOCKSProxy(enable)
-        case let ("version", version as Int):
-            return .version(SocketIOVersion(rawValue: version) ?? .three)
+        case ("compress", _), ("selfSigned", _), ("enableSOCKSProxy", _),
+             ("useCustomEngine", _), ("customEngine", _):
+            return .invalidConfiguration("The " + key + " option was removed. Use native URLSession transport and explicit SocketTLSConfiguration trust policies.")
+        case ("version", _):
+            return .invalidConfiguration("The version option was removed. Only Socket.IO 4.x (Engine.IO 4) is supported; remove version from configuration.")
+        case ("withCredentials", _), ("forceBase64", _), ("addTrailingSlash", _):
+            return .invalidConfiguration("invalid value for " + key + "; expected Bool")
+        case ("parserOptions", _):
+            return .invalidConfiguration("invalid value for parserOptions; expected SocketParserOptions")
+        case ("bufferLimits", _):
+            return .invalidConfiguration("invalid value for bufferLimits; expected SocketBufferLimits")
+        case ("clientCertificate", _):
+            return .invalidConfiguration("invalid value for clientCertificate; expected URLCredential with a client identity")
+        case ("security", _), ("secure", _), ("sessionDelegate", _), ("webSocketOptions", _):
+            return .invalidConfiguration("invalid value for " + key + "; legacy security objects must migrate to SocketTLSConfiguration")
         case _:
             return nil
         }
@@ -108,15 +152,6 @@ extension Dictionary where Key == String, Value == Any {
 }
 
 extension String {
-    func toArray() throws -> [Any] {
-        guard let stringData = data(using: .utf16, allowLossyConversion: false) else { return [] }
-        guard let array = try JSONSerialization.jsonObject(with: stringData, options: .mutableContainers) as? [Any] else {
-             throw JSONError.notArray
-        }
-
-        return array
-    }
-
     func toDictionary() throws -> [String: Any] {
         guard let binData = data(using: .utf16, allowLossyConversion: false) else { return [:] }
         guard let json = try JSONSerialization.jsonObject(with: binData, options: .allowFragments) as? [String: Any] else {

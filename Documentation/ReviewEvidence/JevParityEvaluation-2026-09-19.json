@@ -1,0 +1,370 @@
+{
+  "advisory_only": true,
+  "agent": "jev",
+  "coordinator": "google/gemini-3.8-flash",
+  "session_id": "see local /tmp/jev-parity-audit.jsonl",
+  "coordinator_reported_cost_usd": 0.22854735,
+  "note": "Inputs are coordinator-selected excerpts. Model decisions require source review. No runtime proof. See JevParityReview-2026-09-19.md for corrections to model interpretations.",
+  "calls": [
+    {
+      "input": {
+        "state": "# Evidence Batch 1: Automatic Reconnect & Manual Reconnect Flow\n\n## Upstream SHA\naaf2af36ec8ad05910f357a788e0e358bad32738\n\n## Scenario JS-014\n- File: packages/socket.io-client/test/connection.ts (line 160)\n- Title: \"should reconnect by default\"\n- Code:\n```typescript\n  it(\"should reconnect by default\", () => {\n    return wrap((done) => {\n      const socket = io(BASE_URL, { forceNew: true, reconnectionDelay: 10 });\n      socket.io.on(\"reconnect\", () => {\n        socket.disconnect();\n        done();\n      });\n\n      setTimeout(() => {\n        socket.io.engine.close();\n      }, 100);\n    });\n  });\n```\n\n- Swift Implementation Tests:\nFile: /tmp/jev-parity-20260919/SocketReconnectEventsTest.swift\nMethod 1 (lines 150-178):\n```swift\n    func testReconnectFiresOnSuccessWithTheAttemptNumberBeforeConnect() {\n        let manager = makeManager()\n        let socket = manager.socket(forNamespace: \"/\")\n        connect(socket)\n\n        var order = [String]()\n        var successfulAttempt: Int?\n        socket.on(clientEvent: .reconnect) { data, _ in\n            successfulAttempt = data.first as? Int\n            order.append(\"reconnect\")\n        }\n\n        let reconnected = expectation(description: \"connect after reconnect\")\n        reconnected.assertForOverFulfill = false\n        socket.on(clientEvent: .connect) { _, _ in\n            order.append(\"connect\")\n            reconnected.fulfill()\n        }\n\n        // A transport drop with reconnection enabled: the first retry fails,\n        // the second opens the transport.\n        engine.failuresRemaining = 1\n        manager.engineDidClose(reason: \"transport close\")\n\n        wait(for: [reconnected], timeout: 10)\n\n        XCTAssertEqual(successfulAttempt, 2, \"The second attempt is the one that opened the transport\")\n        XCTAssertEqual(order, [\"reconnect\", \"connect\"], \"JS emits `reconnect` before the namespaces re-join\")\n    }\n```\nMethod 2 (lines 185-205):\n```swift\n    func testTransportDropReportsTheRealReasonAsDisconnect() {\n        let manager = makeManager()\n        let socket = manager.socket(forNamespace: \"/\")\n        connect(socket)\n\n        let dropped = expectation(description: \"disconnect with the drop reason\")\n        dropped.assertForOverFulfill = false\n        var reason: String?\n        socket.on(clientEvent: .disconnect) { data, _ in\n            reason = data.first as? String\n            dropped.fulfill()\n        }\n\n        manager.engineDidClose(reason: \"ping timeout\")\n\n        wait(for: [dropped], timeout: 5)\n\n        XCTAssertEqual(reason, \"ping timeout\")\n        XCTAssertTrue(socket.sid?.isEmpty ?? true, \"JS `Socket.onclose` does `delete this.id`\")\n        XCTAssertTrue(socket.active, \"The socket stays subscribed, so the manager re-joins its namespace\")\n    }\n```\nHelper context:\n`makeManager()` configures `[.log(false), .reconnects(true), .reconnectWait(0)]`.\n\n---\n\n## Scenario JS-016\n- File: packages/socket.io-client/test/connection.ts (line 191)\n- Title: \"should reconnect automatically after reconnecting manually\"\n- Code:\n```typescript\n  it(\"should reconnect automatically after reconnecting manually\", () => {\n    return wrap((done) => {\n      const socket = io(BASE_URL, { forceNew: true, reconnectionDelay: 10 });\n      socket\n        .once(\"connect\", () => {\n          socket.disconnect();\n        })\n        .once(\"disconnect\", () => {\n          socket.io.on(\"reconnect\", () => {\n            socket.disconnect();\n            done();\n          });\n          socket.connect();\n          setTimeout(() => {\n            socket.io.engine.close();\n          }, 100);\n        });\n    });\n  });\n```\n\n- Swift Implementation Test:\nFile: /tmp/jev-parity-20260919/JSParityE2ETest.swift (lines 566-599):\n```swift\n    func testReconnectAutomaticallyAfterReconnectingManually() throws {\n        let manager = makeManager(.reconnectWait(1))\n        let socket = manager.socket(forNamespace: \"/\")\n        connect(socket)\n\n        let disconnected = expectation(description: \"manual disconnect\")\n        disconnected.assertForOverFulfill = false\n        socket.on(clientEvent: .disconnect) { _, _ in disconnected.fulfill() }\n        socket.disconnect()\n        wait(for: [disconnected], timeout: 5)\n\n        connect(socket)\n\n        // JS-aligned since 17.0.0: the drop reports `.disconnect(reason)`, the\n        // successful retry reports `.reconnect(attempt)` and the re-joined\n        // namespace then reports `.connect`.\n        var connects = 0\n        var transportKilled = false\n        let cameBack = expectation(description: \"reconnected after transport drop\")\n        cameBack.assertForOverFulfill = false\n        socket.on(clientEvent: .connect) { _, _ in\n            connects += 1\n            if transportKilled {\n                cameBack.fulfill()\n            }\n        }\n        let connectsBeforeKill = connects\n        try killTransport(ofSocketWithId: XCTUnwrap(socket.sid))\n        transportKilled = true\n        wait(for: [cameBack], timeout: 15)\n\n        XCTAssertEqual(socket.status, .connected)\n        XCTAssertGreaterThan(connects, connectsBeforeKill)\n    }\n```\nNote: In JS, the test asserts that `socket.io.on(\"reconnect\")` fires following the automatic drop. In Swift, the test registers `socket.on(clientEvent: .connect)` rather than `.reconnect`.\n",
+        "questions": [
+          {
+            "choices": [
+              {
+                "label": "full_assertion_equivalence",
+                "description": "Swift tests verify all stimuli, assertions, and outcomes of the upstream JS test."
+              },
+              {
+                "description": "Swift tests verify part of the behavior or assertions, but some upstream assertions, stimuli, or edge cases are missing or different.",
+                "label": "partial"
+              },
+              {
+                "label": "missing",
+                "description": "No Swift test implements the upstream scenario or assertions."
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Provided evidence is insufficient to make a determination."
+              }
+            ],
+            "instructions": "Evaluate assertion parity between upstream JS-014 and the cited Swift tests in SocketReconnectEventsTest.swift. Select full_assertion_equivalence if Swift assertions match all JS stimuli and assertions; partial if only partially equivalent; missing if not tested; insufficient_evidence if evidence is incomplete.",
+            "type": "choice",
+            "id": "JS-014-classification"
+          },
+          {
+            "id": "JS-014-priority",
+            "levels": [
+              "routine",
+              "important",
+              "high"
+            ],
+            "type": "score",
+            "instructions": "Score the priority of addressing any parity gaps for JS-014: routine (minor gap or fully covered), important (notable gap), high (critical missing coverage)."
+          },
+          {
+            "id": "JS-016-classification",
+            "instructions": "Evaluate assertion parity between upstream JS-016 and the cited Swift test JSParityE2ETest.testReconnectAutomaticallyAfterReconnectingManually. Select full_assertion_equivalence, partial, missing, or insufficient_evidence.",
+            "choices": [
+              {
+                "label": "full_assertion_equivalence",
+                "description": "Swift tests verify all stimuli, assertions, and outcomes of the upstream JS test."
+              },
+              {
+                "label": "partial",
+                "description": "Swift tests verify part of the behavior or assertions, but some upstream assertions, stimuli, or edge cases are missing or different."
+              },
+              {
+                "label": "missing",
+                "description": "No Swift test implements the upstream scenario or assertions."
+              },
+              {
+                "description": "Provided evidence is insufficient to make a determination.",
+                "label": "insufficient_evidence"
+              }
+            ],
+            "type": "choice"
+          },
+          {
+            "levels": [
+              "routine",
+              "important",
+              "high"
+            ],
+            "type": "score",
+            "id": "JS-016-priority",
+            "instructions": "Score the priority of addressing any parity gaps for JS-016: routine (minor gap or fully covered), important (notable gap), high (critical missing coverage)."
+          }
+        ]
+      },
+      "result": {
+        "model": "typesafe-ai/jev",
+        "advisoryOnly": true,
+        "answers": {
+          "JS-014-classification": {
+            "type": "choice",
+            "choice": "partial",
+            "probabilities": {
+              "full_assertion_equivalence": 0.02,
+              "partial": 0.93,
+              "missing": 0.05,
+              "insufficient_evidence": 0
+            }
+          },
+          "JS-014-priority": {
+            "type": "score",
+            "score": 0.68,
+            "probabilities": {
+              "0": 0.47,
+              "1": 0.38,
+              "2": 0.15
+            }
+          },
+          "JS-016-classification": {
+            "type": "choice",
+            "choice": "partial",
+            "probabilities": {
+              "full_assertion_equivalence": 0,
+              "partial": 1,
+              "missing": 0,
+              "insufficient_evidence": 0
+            }
+          },
+          "JS-016-priority": {
+            "type": "score",
+            "score": 1.1,
+            "probabilities": {
+              "0": 0.08,
+              "1": 0.73,
+              "2": 0.19
+            }
+          }
+        },
+        "usage": {
+          "inputTokens": 2221,
+          "outputTokens": 168,
+          "totalTokens": 2389
+        },
+        "rounding": {
+          "probabilityDecimals": 2,
+          "scoreDecimals": 2
+        },
+        "warningCount": 0,
+        "elapsedMs": 352
+      }
+    },
+    {
+      "input": {
+        "state": "# Evidence Batch 2: Reconnection Loop Budgets, Backoff Delays, and Manager Events\n\n## Upstream SHA\naaf2af36ec8ad05910f357a788e0e358bad32738\n\n## Scenario JS-017\n- File: packages/socket.io-client/test/connection.ts (line 211)\n- Title: \"should attempt reconnects after a failed reconnect\"\n- Code:\n```typescript\n  it(\"should attempt reconnects after a failed reconnect\", () => {\n    return wrap((done) => {\n      const manager = new Manager(BASE_URL, {\n        reconnection: true,\n        timeout: 0,\n        reconnectionAttempts: 2,\n        reconnectionDelay: 10,\n      });\n      const socket = manager.socket(\"/timeout\");\n      manager.once(\"reconnect_failed\", () => {\n        let reconnects = 0;\n        const reconnectCb = () => {\n          reconnects++;\n        };\n\n        manager.on(\"reconnect_attempt\", reconnectCb);\n        manager.on(\"reconnect_failed\", () => {\n          expect(reconnects).to.be(2);\n          socket.close();\n          manager._close();\n          done();\n        });\n        socket.connect();\n      });\n    });\n  });\n```\n\n- Swift Implementation Tests:\nFile: /tmp/jev-parity-20260919/SocketReconnectEventsTest.swift (lines 352-376):\n```swift\n    func testANewCycleStartedFromTheReconnectFailedHandlerGetsAFreshBudget() {\n        let manager = makeManager(alwaysFail: true, .reconnectAttempts(2))\n        let socket = manager.socket(forNamespace: \"/\")\n\n        var attempts = [Int]()\n        socket.on(clientEvent: .reconnectAttempt) { data, _ in attempts.append(data.first as? Int ?? -1) }\n\n        var failures = 0\n        let secondFailed = expectation(description: \"second reconnect_failed\")\n        secondFailed.assertForOverFulfill = false\n        socket.on(clientEvent: .reconnectFailed) { _, _ in\n            failures += 1\n            if failures == 1 {\n                socket.connect()\n            } else if failures == 2 {\n                secondFailed.fulfill()\n            }\n        }\n\n        socket.connect()\n\n        wait(for: [secondFailed], timeout: 15)\n\n        XCTAssertEqual(attempts, [1, 2, 1, 2], \"Each cycle counts its attempts from 1 again\")\n    }\n```\nFile: /tmp/jev-parity-20260919/JSParityE2ETest.swift (lines 944-971):\n```swift\n    func testAttemptReconnectsAfterAFailedReconnect() {\n        let manager = makeManager(.connectTimeout(0), .reconnectAttempts(2), .reconnectWait(1))\n        let socket = manager.socket(forNamespace: \"/\")\n\n        var attempts = 0\n        socket.on(clientEvent: .reconnectAttempt) { _, _ in attempts += 1 }\n\n        var failures = 0\n        let firstFailed = expectation(description: \"first reconnect failed\")\n        firstFailed.assertForOverFulfill = false\n        let secondFailed = expectation(description: \"second reconnect failed\")\n        secondFailed.assertForOverFulfill = false\n        socket.on(clientEvent: .reconnectFailed) { _, _ in\n            failures += 1\n            if failures == 1 {\n                firstFailed.fulfill()\n            } else if failures == 2 {\n                secondFailed.fulfill()\n            }\n        }\n        socket.connect()\n        wait(for: [firstFailed], timeout: 15)\n        XCTAssertEqual(attempts, 2, \"The first round must spend exactly its budget of 2 attempts\")\n\n        socket.connect()\n        wait(for: [secondFailed], timeout: 15)\n        XCTAssertEqual(attempts, 4, \"The second round must get a fresh budget of 2 attempts\")\n    }\n```\nFile: /tmp/jev-parity-20260919/SocketConnectTimeoutTest.swift (lines 104-134):\n```swift\n    func testAFailedReconnectCycleCanBeStartedAgain() {\n        makeManager(.connectTimeout(0.1), .reconnects(true), .reconnectAttempts(1), .reconnectWait(1))\n        installFake()\n\n        let firstFailed = expectation(description: \"first reconnect failed\")\n        firstFailed.assertForOverFulfill = false\n        let secondAttempt = expectation(description: \"new reconnect attempt after connect()\")\n        secondAttempt.assertForOverFulfill = false\n        let secondFailed = expectation(description: \"second reconnect failed\")\n        secondFailed.assertForOverFulfill = false\n\n        var failures = 0\n        socket.on(clientEvent: .reconnectAttempt) { _, _ in\n            if failures >= 1 {\n                secondAttempt.fulfill()\n            }\n        }\n        socket.on(clientEvent: .reconnectFailed) { _, _ in\n            failures += 1\n            if failures == 1 {\n                firstFailed.fulfill()\n                self.socket.connect()\n            } else if failures == 2 {\n                secondFailed.fulfill()\n            }\n        }\n\n        socket.connect()\n\n        wait(for: [firstFailed, secondAttempt, secondFailed], timeout: 8)\n    }\n```\n\n---\n\n## Scenario JS-018\n- File: packages/socket.io-client/test/connection.ts (line 238)\n- Title: \"reconnect delay should increase every time\"\n- Code:\n```typescript\n  it(\"reconnect delay should increase every time\", () => {\n    return wrap((done) => {\n      const manager = new Manager(BASE_URL, {\n        reconnection: true,\n        timeout: 0,\n        reconnectionAttempts: 3,\n        reconnectionDelay: 100,\n        randomizationFactor: 0.2,\n      });\n      const socket = manager.socket(\"/timeout\");\n      let reconnects = 0;\n      let increasingDelay = true;\n      let startTime;\n      let prevDelay = 0;\n\n      manager.on(\"error\", () => {\n        startTime = new Date().getTime();\n      });\n      manager.on(\"reconnect_attempt\", () => {\n        reconnects++;\n        const currentTime = new Date().getTime();\n        const delay = currentTime - startTime;\n        if (delay <= prevDelay) {\n          increasingDelay = false;\n        }\n        prevDelay = delay;\n      });\n\n      manager.on(\"reconnect_failed\", () => {\n        expect(reconnects).to.be(3);\n        expect(increasingDelay).to.be.ok();\n        socket.close();\n        manager._close();\n        done();\n      });\n    });\n  });\n```\n\n- Swift Implementation Tests:\nFile: Tests/TestSocketIO/SocketMangerTest.swift (lines 33-48):\n```swift\n    func testBackoffIntervalCalulation() {\n        // JS backo2: min * 2^attempts, jittered by up to randomizationFactor in\n        // either direction, capped at max (1 s base, 5 s cap, factor 0.5).\n        for _ in 0..<50 {\n            XCTAssertLessThanOrEqual(manager.reconnectInterval(attempts: -1), 1.5)\n            XCTAssertGreaterThanOrEqual(manager.reconnectInterval(attempts: -1), 0.5)\n            XCTAssertLessThanOrEqual(manager.reconnectInterval(attempts: 0), 1.5)\n            XCTAssertGreaterThanOrEqual(manager.reconnectInterval(attempts: 0), 0.5)\n            XCTAssertLessThanOrEqual(manager.reconnectInterval(attempts: 1), 3)\n            XCTAssertGreaterThanOrEqual(manager.reconnectInterval(attempts: 1), 1)\n            XCTAssertLessThanOrEqual(manager.reconnectInterval(attempts: 2), Double(manager.reconnectWaitMax))\n            XCTAssertGreaterThanOrEqual(manager.reconnectInterval(attempts: 2), 2)\n            XCTAssertEqual(manager.reconnectInterval(attempts: 50), Double(manager.reconnectWaitMax))\n            XCTAssertEqual(manager.reconnectInterval(attempts: 10000), Double(manager.reconnectWaitMax))\n        }\n    }\n```\nFile: /tmp/jev-parity-20260919/SocketReconnectEventsTest.swift (lines 256-275):\n```swift\n    func testReconnectAttemptWaitsForTheBackoffDelay() {\n        let manager = makeManager(alwaysFail: true, .reconnectWait(1), .reconnectAttempts(1))\n        let socket = manager.socket(forNamespace: \"/\")\n\n        let attempted = expectation(description: \"reconnect_attempt after the delay\")\n        attempted.assertForOverFulfill = false\n        var attemptedAt: Date?\n        socket.on(clientEvent: .reconnectAttempt) { _, _ in\n            attemptedAt = Date()\n            attempted.fulfill()\n        }\n\n        let startedAt = Date()\n        socket.connect()\n\n        wait(for: [attempted], timeout: 5)\n        let delay = attemptedAt!.timeIntervalSince(startedAt)\n        XCTAssertGreaterThanOrEqual(delay, 0.5, \"1 s base minus the maximum 50 % jitter\")\n        XCTAssertLessThanOrEqual(delay, 2.5, \"1 s base plus the maximum 50 % jitter, plus scheduling slack\")\n    }\n```\n\n---\n\n## Scenario JS-023\n- File: packages/socket.io-client/test/connection.ts (line 362)\n- Title: \"should try to reconnect twice and fail when requested two attempts with immediate timeout and reconnect enabled\"\n- Code:\n```typescript\n  it(\"should try to reconnect twice and fail when requested two attempts with immediate timeout and reconnect enabled\", () => {\n    return wrap((done) => {\n      const manager = new Manager(BASE_URL, {\n        reconnection: true,\n        timeout: 0,\n        reconnectionAttempts: 2,\n        reconnectionDelay: 10,\n      });\n      let socket;\n\n      let reconnects = 0;\n      const reconnectCb = () => {\n        reconnects++;\n      };\n\n      manager.on(\"reconnect_attempt\", reconnectCb);\n      manager.on(\"reconnect_failed\", () => {\n        expect(reconnects).to.be(2);\n        socket.close();\n        manager._close();\n        done();\n      });\n\n      socket = manager.socket(\"/timeout\");\n    });\n  });\n```\n\n- Swift Implementation Test:\nFile: /tmp/jev-parity-20260919/JSParityE2ETest.swift (lines 920-936):\n```swift\n    func testReconnectTwiceThenFailWithImmediateTimeout() {\n        let manager = makeManager(.connectTimeout(0), .reconnectAttempts(2), .reconnectWait(1))\n        let socket = manager.socket(forNamespace: \"/\")\n\n        var attempts = 0\n        socket.on(clientEvent: .reconnectAttempt) { _, _ in attempts += 1 }\n\n        let failed = expectation(description: \"reconnect failed\")\n        failed.assertForOverFulfill = false\n        // JS `reconnect_failed`; the Swift-only `.disconnect(\"Reconnect Failed\")`\n        // was removed in 17.0.0.\n        socket.on(clientEvent: .reconnectFailed) { _, _ in failed.fulfill() }\n        socket.connect()\n        wait(for: [failed], timeout: 15)\n\n        XCTAssertEqual(attempts, 2)\n    }\n```\n\n---\n\n## Scenario JS-024\n- File: packages/socket.io-client/test/connection.ts (line 389)\n- Title: \"should fire reconnect_* events on manager\"\n- Code:\n```typescript\n  it(\"should fire reconnect_* events on manager\", () => {\n    return wrap((done) => {\n      const manager = new Manager(BASE_URL, {\n        reconnection: true,\n        timeout: 0,\n        reconnectionAttempts: 2,\n        reconnectionDelay: 10,\n      });\n      const socket = manager.socket(\"/timeout_socket\");\n\n      let reconnects = 0;\n      const reconnectCb = (attempts) => {\n        reconnects++;\n        expect(attempts).to.be(reconnects);\n      };\n\n      manager.on(\"reconnect_attempt\", reconnectCb);\n      manager.on(\"reconnect_failed\", () => {\n        expect(reconnects).to.be(2);\n        socket.close();\n        manager._close();\n        done();\n      });\n    });\n  });\n```\n\n- Swift Implementation Tests:\nFile: /tmp/jev-parity-20260919/SocketReconnectEventsTest.swift:\nMethod 1 (lines 71-98):\n```swift\n    func testFiresReconnectEventsOnEverySocketOfTheManager() {\n        let manager = makeManager(alwaysFail: true, .reconnectAttempts(2))\n        let socket = manager.socket(forNamespace: \"/\")\n        let other = manager.socket(forNamespace: \"/asd\")\n\n        var attempts = [Int]()\n        var otherAttempts = [Int]()\n        socket.on(clientEvent: .reconnectAttempt) { data, _ in attempts.append(data.first as? Int ?? -1) }\n        other.on(clientEvent: .reconnectAttempt) { data, _ in otherAttempts.append(data.first as? Int ?? -1) }\n\n        let failed = expectation(description: \"reconnect_failed\")\n        failed.assertForOverFulfill = false\n        socket.on(clientEvent: .reconnectFailed) { data, _ in\n            XCTAssertTrue(data.isEmpty, \"JS `reconnect_failed` carries no payload\")\n            failed.fulfill()\n        }\n        let otherFailed = expectation(description: \"reconnect_failed on the second namespace\")\n        otherFailed.assertForOverFulfill = false\n        other.on(clientEvent: .reconnectFailed) { _, _ in otherFailed.fulfill() }\n\n        socket.connect()\n        other.connect()\n\n        wait(for: [failed, otherFailed], timeout: 10)\n\n        XCTAssertEqual(attempts, [1, 2], \"JS emits reconnect_attempt with the 1-based attempt number\")\n        XCTAssertEqual(otherAttempts, [1, 2])\n    }\n```\nMethod 2 (lines 127-144):\n```swift\n    func testEveryFailedAttemptFiresReconnectErrorWithTheReason() {\n        let manager = makeManager(alwaysFail: true, failureReason: \"transport error\", .reconnectAttempts(2))\n        let socket = manager.socket(forNamespace: \"/\")\n\n        var errors = [String]()\n        socket.on(clientEvent: .reconnectError) { data, _ in errors.append(data.first as? String ?? \"\") }\n\n        let failed = expectation(description: \"reconnect_failed\")\n        failed.assertForOverFulfill = false\n        socket.on(clientEvent: .reconnectFailed) { _, _ in failed.fulfill() }\n\n        socket.connect()\n\n        wait(for: [failed], timeout: 10)\n\n        XCTAssertEqual(errors, [\"transport error\", \"transport error\"],\n                       \"Each failed attempt reports its reason, like JS `reconnect_error(err)`\")\n    }\n```\nFile: /tmp/jev-parity-20260919/SocketConnectTimeoutTest.swift (lines 63-102):\n```swift\n    func testTimeoutStartsReconnectLoop() {\n        makeManager(.connectTimeout(0.2), .reconnects(true), .reconnectAttempts(1), .reconnectWait(1))\n        installFake()\n\n        let timedOut = expectation(description: \"timeout error\")\n        timedOut.assertForOverFulfill = false\n        socket.on(clientEvent: .connectError) { _, _ in timedOut.fulfill() }\n\n        let attempted = expectation(description: \"reconnect attempt\")\n        attempted.assertForOverFulfill = false\n        var attemptNumber: Int?\n        socket.on(clientEvent: .reconnectAttempt) { data, _ in\n            attemptNumber = data.first as? Int\n            attempted.fulfill()\n        }\n\n        let attemptFailed = expectation(description: \"reconnect error\")\n        attemptFailed.assertForOverFulfill = false\n        var attemptError: String?\n        socket.on(clientEvent: .reconnectError) { data, _ in\n            attemptError = data.first as? String\n            attemptFailed.fulfill()\n        }\n\n        let failed = expectation(description: \"reconnect failed\")\n        failed.assertForOverFulfill = false\n        socket.on(clientEvent: .reconnectFailed) { data, _ in\n            XCTAssertTrue(data.isEmpty, \"JS `reconnect_failed` carries no payload\")\n            failed.fulfill()\n        }\n\n        socket.connect()\n\n        wait(for: [timedOut, attempted, attemptFailed, failed], timeout: 8)\n        XCTAssertEqual(attemptNumber, 1, \"JS emits the 1-based attempt number\")\n        XCTAssertEqual(attemptError, \"timeout\")\n    }\n```\nArchitectural boundary note: Swift has no manager-level event bus; reconnect_* events are emitted on every socket of the manager.\n",
+        "questions": [
+          {
+            "type": "choice",
+            "id": "JS-017-classification",
+            "choices": [
+              {
+                "description": "Swift tests verify all stimuli, assertions, and outcomes of the upstream JS test.",
+                "label": "full_assertion_equivalence"
+              },
+              {
+                "description": "Swift tests verify part of the behavior or assertions, but some upstream assertions, stimuli, or edge cases are missing or different.",
+                "label": "partial"
+              },
+              {
+                "description": "No Swift test implements the upstream scenario or assertions.",
+                "label": "missing"
+              },
+              {
+                "description": "Provided evidence is insufficient to make a determination.",
+                "label": "insufficient_evidence"
+              }
+            ],
+            "instructions": "Evaluate assertion parity between upstream JS-017 (attempt reconnects after failed reconnect) and the cited Swift tests in SocketReconnectEventsTest.swift, JSParityE2ETest.swift, and SocketConnectTimeoutTest.swift. Select full_assertion_equivalence, partial, missing, or insufficient_evidence."
+          },
+          {
+            "type": "score",
+            "id": "JS-017-priority",
+            "instructions": "Score the priority of addressing any parity gaps for JS-017: routine (minor gap or fully covered), important (notable gap), high (critical missing coverage).",
+            "levels": [
+              "routine",
+              "important",
+              "high"
+            ]
+          },
+          {
+            "choices": [
+              {
+                "description": "Swift tests verify all stimuli, assertions, and outcomes of the upstream JS test.",
+                "label": "full_assertion_equivalence"
+              },
+              {
+                "label": "partial",
+                "description": "Swift tests verify part of the behavior or assertions, but some upstream assertions, stimuli, or edge cases are missing or different."
+              },
+              {
+                "label": "missing",
+                "description": "No Swift test implements the upstream scenario or assertions."
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Provided evidence is insufficient to make a determination."
+              }
+            ],
+            "instructions": "Evaluate assertion parity between upstream JS-018 (reconnect delay should increase every time) and the cited Swift tests in SocketMangerTest.swift and SocketReconnectEventsTest.swift. Select full_assertion_equivalence, partial, missing, or insufficient_evidence.",
+            "id": "JS-018-classification",
+            "type": "choice"
+          },
+          {
+            "id": "JS-018-priority",
+            "levels": [
+              "routine",
+              "important",
+              "high"
+            ],
+            "type": "score",
+            "instructions": "Score the priority of addressing any parity gaps for JS-018: routine (minor gap or fully covered), important (notable gap), high (critical missing coverage)."
+          },
+          {
+            "instructions": "Evaluate assertion parity between upstream JS-023 (reconnect twice and fail with immediate timeout) and the cited Swift test JSParityE2ETest.testReconnectTwiceThenFailWithImmediateTimeout. Select full_assertion_equivalence, partial, missing, or insufficient_evidence.",
+            "choices": [
+              {
+                "description": "Swift tests verify all stimuli, assertions, and outcomes of the upstream JS test.",
+                "label": "full_assertion_equivalence"
+              },
+              {
+                "label": "partial",
+                "description": "Swift tests verify part of the behavior or assertions, but some upstream assertions, stimuli, or edge cases are missing or different."
+              },
+              {
+                "description": "No Swift test implements the upstream scenario or assertions.",
+                "label": "missing"
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Provided evidence is insufficient to make a determination."
+              }
+            ],
+            "id": "JS-023-classification",
+            "type": "choice"
+          },
+          {
+            "type": "score",
+            "instructions": "Score the priority of addressing any parity gaps for JS-023: routine (minor gap or fully covered), important (notable gap), high (critical missing coverage).",
+            "id": "JS-023-priority",
+            "levels": [
+              "routine",
+              "important",
+              "high"
+            ]
+          },
+          {
+            "instructions": "Evaluate assertion parity between upstream JS-024 (fire reconnect_* events on manager) and the cited Swift tests in SocketReconnectEventsTest.swift and SocketConnectTimeoutTest.swift. Swift emits manager events on sockets due to lack of a manager-level event bus. Select full_assertion_equivalence, partial, missing, or insufficient_evidence.",
+            "choices": [
+              {
+                "label": "full_assertion_equivalence",
+                "description": "Swift tests verify all stimuli, assertions, and outcomes of the upstream JS test."
+              },
+              {
+                "label": "partial",
+                "description": "Swift tests verify part of the behavior or assertions, but some upstream assertions, stimuli, or edge cases are missing or different."
+              },
+              {
+                "description": "No Swift test implements the upstream scenario or assertions.",
+                "label": "missing"
+              },
+              {
+                "description": "Provided evidence is insufficient to make a determination.",
+                "label": "insufficient_evidence"
+              }
+            ],
+            "id": "JS-024-classification",
+            "type": "choice"
+          },
+          {
+            "type": "score",
+            "id": "JS-024-priority",
+            "levels": [
+              "routine",
+              "important",
+              "high"
+            ],
+            "instructions": "Score the priority of addressing any parity gaps for JS-024: routine (minor gap or fully covered), important (notable gap), high (critical missing coverage)."
+          }
+        ]
+      },
+      "result": {
+        "model": "typesafe-ai/jev",
+        "advisoryOnly": true,
+        "answers": {
+          "JS-017-classification": {
+            "type": "choice",
+            "choice": "partial",
+            "probabilities": {
+              "full_assertion_equivalence": 0.27,
+              "missing": 0,
+              "insufficient_evidence": 0,
+              "partial": 0.73
+            }
+          },
+          "JS-017-priority": {
+            "type": "score",
+            "score": 0.13,
+            "probabilities": {
+              "0": 0.9,
+              "1": 0.07,
+              "2": 0.03
+            }
+          },
+          "JS-018-classification": {
+            "type": "choice",
+            "choice": "partial",
+            "probabilities": {
+              "full_assertion_equivalence": 0,
+              "missing": 0.03,
+              "insufficient_evidence": 0,
+              "partial": 0.97
+            }
+          },
+          "JS-018-priority": {
+            "type": "score",
+            "score": 0.63,
+            "probabilities": {
+              "0": 0.45,
+              "1": 0.47,
+              "2": 0.08
+            }
+          },
+          "JS-023-classification": {
+            "type": "choice",
+            "choice": "full_assertion_equivalence",
+            "probabilities": {
+              "full_assertion_equivalence": 0.67,
+              "missing": 0,
+              "insufficient_evidence": 0,
+              "partial": 0.33
+            }
+          },
+          "JS-023-priority": {
+            "type": "score",
+            "score": 0.03,
+            "probabilities": {
+              "0": 0.97,
+              "1": 0.02,
+              "2": 0.01
+            }
+          },
+          "JS-024-classification": {
+            "type": "choice",
+            "choice": "partial",
+            "probabilities": {
+              "full_assertion_equivalence": 0.12,
+              "missing": 0,
+              "insufficient_evidence": 0,
+              "partial": 0.88
+            }
+          },
+          "JS-024-priority": {
+            "type": "score",
+            "score": 0.41,
+            "probabilities": {
+              "0": 0.64,
+              "1": 0.3,
+              "2": 0.06
+            }
+          }
+        },
+        "usage": {
+          "inputTokens": 5599,
+          "outputTokens": 338,
+          "totalTokens": 5937
+        },
+        "rounding": {
+          "probabilityDecimals": 2,
+          "scoreDecimals": 2
+        },
+        "warningCount": 0,
+        "elapsedMs": 502
+      }
+    }
+  ]
+}

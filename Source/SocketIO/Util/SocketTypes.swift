@@ -67,6 +67,12 @@ extension NSString : SocketData { }
 extension NSNull : SocketData { }
 extension String : SocketData { }
 
+/// A `Date` is emitted as the ISO-8601 string `Date.prototype.toJSON()`
+/// produces in JS (`"2024-01-02T03:04:05.678Z"`), at the top level and nested
+/// at any depth. See `SocketPacket.iso8601String(from:)`.
+extension Date : SocketData { }
+extension NSDate : SocketData { }
+
 /// A typealias for an ack callback.
 public typealias AckCallback = ([Any]) -> ()
 
@@ -77,10 +83,55 @@ public typealias NormalCallback = ([Any], SocketAckEmitter) -> ()
 public typealias Post = (msg: String, completion: (() -> ())?)
 
 typealias JSON = [String: Any]
-typealias Probe = (msg: String, type: SocketEnginePacketType, data: [Data], completion: (() -> ())?)
+typealias Probe = (msg: String, type: SocketEnginePacketType, data: [Data], rawBinary: Bool, completion: (() -> ())?)
 typealias ProbeWaitQueue = [Probe]
 
 enum Either<E, V> {
     case left(E)
     case right(V)
+}
+
+// MARK: - Serial-queue isolation boundary
+
+/// A one-shot handoff to the queue that owns the captured state. This is the
+/// GCD equivalent of an executor hop, not a claim that its captures are safe to
+/// use concurrently. Callers must never touch queue-owned captures before the
+/// hop, and must not share mutable payloads with the producer after submission.
+/// SocketIOClient and SocketManager intentionally remain non-Sendable.
+internal final class SocketQueueWork: @unchecked Sendable {
+    private let queue: DispatchQueue
+    private let body: () -> Void
+
+    internal init(queue: DispatchQueue, body: @escaping () -> Void) {
+        self.queue = queue
+        self.body = body
+    }
+
+    internal func run() {
+        dispatchPrecondition(condition: .onQueue(queue))
+        body()
+    }
+}
+
+internal extension DispatchQueue {
+    func socketAsync(execute body: @escaping () -> Void) {
+        let work = SocketQueueWork(queue: self, body: body)
+        async { work.run() }
+    }
+
+    func socketAsyncAfter(deadline: DispatchTime, execute body: @escaping () -> Void) {
+        let work = SocketQueueWork(queue: self, body: body)
+        asyncAfter(deadline: deadline) { work.run() }
+    }
+
+    func socketAsyncAfter(deadline: DispatchTime, execute work: DispatchWorkItem) {
+        asyncAfter(deadline: deadline, execute: work)
+    }
+}
+
+internal extension DispatchGroup {
+    func socketNotify(queue: DispatchQueue, execute body: @escaping () -> Void) {
+        let work = SocketQueueWork(queue: queue, body: body)
+        notify(queue: queue) { work.run() }
+    }
 }

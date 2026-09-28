@@ -49,7 +49,7 @@ public final class SocketRawView : NSObject {
         do {
             try emit(event, with: items.map({ try $0.socketRepresentation() }))
         } catch {
-            DefaultSocketLogger.Logger.error("Error creating socketRepresentation for emit: \(event), \(items)",
+            DefaultSocketLogger.Logger.error("Error creating socketRepresentation for emit: \(event): \(error)",
                                              type: "SocketIOClient")
 
             socket.handleClientEvent(.error, data: [event, items, error])
@@ -88,7 +88,7 @@ public final class SocketRawView : NSObject {
         do {
             return emitWithAck(event, with: try items.map({ try $0.socketRepresentation() }))
         } catch {
-            DefaultSocketLogger.Logger.error("Error creating socketRepresentation for emit: \(event), \(items)",
+            DefaultSocketLogger.Logger.error("Error creating socketRepresentation for emit: \(event): \(error)",
                                              type: "SocketIOClient")
 
             socket.handleClientEvent(.error, data: [event, items, error])

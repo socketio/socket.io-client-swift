@@ -1,0 +1,18 @@
+{
+  "upstream_sha": "aaf2af36ec8ad05910f357a788e0e358bad32738",
+  "method": "Static Mocha declaration inventory; not expanded executions or semantic-coverage percentages.",
+  "runtime_by_package": {
+    "socket.io-client": 116,
+    "engine.io-client": 109,
+    "socket.io-parser": 34,
+    "engine.io-parser": 38
+  },
+  "typescript_type_declarations": 14,
+  "review_statuses": {
+    "focused-regression": 195,
+    "api-difference": 28,
+    "platform-specific": 38,
+    "unsupported-feature": 36,
+    "typescript-only": 14
+  }
+}

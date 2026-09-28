@@ -24,7 +24,6 @@
 //
 
 import Foundation
-import Starscream
 
 /// Protocol that is used to implement socket.io WebSocket support
 public protocol SocketEngineWebsocket: SocketEngineSpec {
@@ -57,31 +56,4 @@ extension SocketEngineWebsocket {
         }
     }
 
-    /// Sends an engine.io message through the WebSocket transport.
-    ///
-    /// You shouldn't call this directly, instead call the `write` method on `SocketEngine`.
-    ///
-    /// - parameter message: The message to send.
-    /// - parameter withType: The type of message to send.
-    /// - parameter withData: The data associated with this message.
-    /// - parameter completion: Callback called on transport write completion.
-    public func sendWebSocketMessage(_ str: String,
-                                     withType type: SocketEnginePacketType,
-                                     withData data: [Data],
-                                     completion: (() -> ())?
-    ) {
-        DefaultSocketLogger.Logger.log("Sending ws: \(str) as type: \(type.rawValue)", type: "SocketEngineWebSocket")
-
-        ws?.write(string: "\(type.rawValue)\(str)")
-
-        for item in data {
-            if case let .left(bin) = createBinaryDataForSend(using: item) {
-                ws?.write(data: bin, completion: completion)
-            }
-        }
-
-        if data.count == 0 {
-            completion?()
-        }
-    }
 }

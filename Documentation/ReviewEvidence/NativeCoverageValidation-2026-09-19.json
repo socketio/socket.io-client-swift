@@ -1,0 +1,112 @@
+{
+  "source_sha": "fdf92809b9bea534ec56f134d1d63bcc96284efe",
+  "ci_run": "https://github.com/kaeferfreund/socket.io-client-swift/actions/runs/35442518457",
+  "ci_jobs_passed": 7,
+  "swift_tests": 842,
+  "swift_test_failures": 0,
+  "checker_self_tests": 9,
+  "coverage": {
+    "scope": "Source/SocketIO only; this is execution coverage, NOT JS scenario parity",
+    "sourceFiles": 33,
+    "lines": {
+      "count": 6701,
+      "covered": 6605,
+      "percent": 98.5673780032831
+    },
+    "functions": {
+      "count": 1084,
+      "covered": 1029,
+      "percent": 94.92619926199262
+    },
+    "regions": {
+      "count": 2745,
+      "covered": 2585,
+      "percent": 94.1712204007286
+    },
+    "branches": {
+      "count": 0,
+      "covered": 0,
+      "percent": null
+    }
+  },
+  "baseline": {
+    "source_sha": "43bbe473c3002871376ce015716d64c6379ba7b3",
+    "lines_covered": 6326,
+    "lines_total": 6732,
+    "uncovered_lines": 406
+  },
+  "uncovered_lines": 96,
+  "residual_files": [
+    {
+      "file": "Source/SocketIO/Ack/SocketAckManager.swift",
+      "uncovered_lines": 3
+    },
+    {
+      "file": "Source/SocketIO/Client/SocketIOClient.swift",
+      "uncovered_lines": 28
+    },
+    {
+      "file": "Source/SocketIO/Engine/SocketEngine.swift",
+      "uncovered_lines": 11
+    },
+    {
+      "file": "Source/SocketIO/Engine/SocketEngineClient.swift",
+      "uncovered_lines": 1
+    },
+    {
+      "file": "Source/SocketIO/Engine/SocketEnginePacketCodec.swift",
+      "uncovered_lines": 2
+    },
+    {
+      "file": "Source/SocketIO/Engine/SocketEnginePollable.swift",
+      "uncovered_lines": 7
+    },
+    {
+      "file": "Source/SocketIO/Engine/SocketEngineSpec.swift",
+      "uncovered_lines": 3
+    },
+    {
+      "file": "Source/SocketIO/Engine/Transport/URLSessionWebSocketTransport.swift",
+      "uncovered_lines": 2
+    },
+    {
+      "file": "Source/SocketIO/Engine/Transport/WebSocketSessionDelegateProxy.swift",
+      "uncovered_lines": 2
+    },
+    {
+      "file": "Source/SocketIO/Manager/SocketManager.swift",
+      "uncovered_lines": 18
+    },
+    {
+      "file": "Source/SocketIO/Parse/SocketPacket.swift",
+      "uncovered_lines": 8
+    },
+    {
+      "file": "Source/SocketIO/Parse/SocketParsable.swift",
+      "uncovered_lines": 4
+    },
+    {
+      "file": "Source/SocketIO/Security/SocketServerTrustEvaluator.swift",
+      "uncovered_lines": 1
+    },
+    {
+      "file": "Source/SocketIO/Security/SocketSessionDelegateProxy.swift",
+      "uncovered_lines": 5
+    },
+    {
+      "file": "Source/SocketIO/Util/SocketBufferLimits.swift",
+      "uncovered_lines": 1
+    }
+  ],
+  "artifacts_sha256": {
+    "swift-coverage-summary.json": "78bd0558bd284d889bf282069c7f4a83ca30fe2939c94c1146a52804fb7e6348",
+    "swift-coverage.json": "eff0304058f9f226d57c5111b0df746d4f16ee520cb266ef8b4bbd2641aa9252",
+    "native-swift-tests.log": "dd989f9905f03857886852dd0dc976127c68403f8be9fb3589f82fc5ce882c04"
+  },
+  "limitations": [
+    "Line coverage is not branch coverage or scenario parity.",
+    "Residual lines include diagnostic expressions and defensive lifecycle/serialization guards; they are not all claimed unreachable.",
+    "No source coverage exclusions were added.",
+    "Separate release acceptance gates are not certified by this report."
+  ]
+}

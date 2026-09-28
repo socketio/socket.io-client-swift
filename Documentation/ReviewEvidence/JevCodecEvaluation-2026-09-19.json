@@ -1,0 +1,558 @@
+{
+  "advisory_only": true,
+  "upstream_sha": "aaf2af36ec8ad05910f357a788e0e358bad32738",
+  "note": "Inputs preserve actual inspected source snippets. Coordinator recommendations were independently checked; this artifact is not runtime proof.",
+  "calls": [
+    {
+      "input": {
+        "questions": [
+          {
+            "instructions": "Evaluate parity classification for JS-283 (engine.io-parser single packet: should encode/decode a string '4test'). Swift has no standalone parser, maps to SocketEnginePacketCodecTest.testEncodeDecodeAString via wire string postBody and engine.parseEngineMessage.",
+            "choices": [
+              {
+                "label": "full_assertion_equivalence",
+                "description": "Executable Swift tests verify all stimuli, assertions, and semantics of the upstream JS test."
+              },
+              {
+                "description": "Swift tests verify some assertions or stimuli, but have concrete missing assertions, stimuli, or behavior divergence.",
+                "label": "partial_test"
+              },
+              {
+                "description": "No Swift test exercises this scenario.",
+                "label": "missing_test"
+              },
+              {
+                "label": "reviewed_api_platform_boundary",
+                "description": "Equivalence adapted to Swift language/platform boundaries (e.g. Data vs ArrayBuffer/Buffer, engine dispatch vs parser object) with equivalent assertions."
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Insufficient source or evidence to determine parity."
+              }
+            ],
+            "id": "status_JS_283",
+            "type": "choice"
+          },
+          {
+            "choices": [
+              {
+                "label": "full_assertion_equivalence",
+                "description": "Executable Swift tests verify all stimuli, assertions, and semantics of the upstream JS test."
+              },
+              {
+                "label": "partial_test",
+                "description": "Swift tests verify some assertions or stimuli, but have concrete missing assertions, stimuli, or behavior divergence."
+              },
+              {
+                "description": "No Swift test exercises this scenario.",
+                "label": "missing_test"
+              },
+              {
+                "label": "reviewed_api_platform_boundary",
+                "description": "Equivalence adapted to Swift language/platform boundaries (e.g. Data vs ArrayBuffer/Buffer, engine dispatch vs parser object) with equivalent assertions."
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Insufficient source or evidence to determine parity."
+              }
+            ],
+            "instructions": "Evaluate parity classification for JS-284 (engine.io-parser single packet: should fail to decode a malformed packet '' and 'a123'). Swift maps to SocketEnginePacketCodecTest.testFailToDecodeAMalformedPacket.",
+            "id": "status_JS_284",
+            "type": "choice"
+          },
+          {
+            "type": "choice",
+            "instructions": "Evaluate parity classification for JS-285 (engine.io-parser payload: should encode/decode all packet types in 0\\x1e1\\x1e2probe\\x1e3probe\\x1e4test). Swift maps to SocketEnginePacketCodecTest.testEncodeAllPacketTypesIntoOnePayload, testDecodeEveryPacketTypeOfAPayload, testCloseInsideAPayloadEndsTheSession.",
+            "choices": [
+              {
+                "label": "full_assertion_equivalence",
+                "description": "Executable Swift tests verify all stimuli, assertions, and semantics of the upstream JS test."
+              },
+              {
+                "label": "partial_test",
+                "description": "Swift tests verify some assertions or stimuli, but have concrete missing assertions, stimuli, or behavior divergence."
+              },
+              {
+                "label": "missing_test",
+                "description": "No Swift test exercises this scenario."
+              },
+              {
+                "label": "reviewed_api_platform_boundary",
+                "description": "Equivalence adapted to Swift language/platform boundaries (e.g. Data vs ArrayBuffer/Buffer, engine dispatch vs parser object) with equivalent assertions."
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Insufficient source or evidence to determine parity."
+              }
+            ],
+            "id": "status_JS_285"
+          },
+          {
+            "instructions": "Evaluate parity classification for JS-286 (engine.io-parser payload: should fail to decode a malformed payload '{', '{}', '[\\\"a123\\\", \\\"a456\\\"]'). Swift maps to SocketEngineTest.testEngineDoesErrorOnUnknownMessage and testEngineClosesOnEveryMalformedEnginePayload.",
+            "type": "choice",
+            "choices": [
+              {
+                "label": "full_assertion_equivalence",
+                "description": "Executable Swift tests verify all stimuli, assertions, and semantics of the upstream JS test."
+              },
+              {
+                "description": "Swift tests verify some assertions or stimuli, but have concrete missing assertions, stimuli, or behavior divergence.",
+                "label": "partial_test"
+              },
+              {
+                "label": "missing_test",
+                "description": "No Swift test exercises this scenario."
+              },
+              {
+                "description": "Equivalence adapted to Swift language/platform boundaries (e.g. Data vs ArrayBuffer/Buffer, engine dispatch vs parser object) with equivalent assertions.",
+                "label": "reviewed_api_platform_boundary"
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Insufficient source or evidence to determine parity."
+              }
+            ],
+            "id": "status_JS_286"
+          },
+          {
+            "type": "choice",
+            "instructions": "Evaluate parity classification for JS-302 (engine.io-parser node: should encode/decode a Buffer). Swift maps to SocketEnginePacketCodecTest.testEncodeDecodeABuffer.",
+            "choices": [
+              {
+                "description": "Executable Swift tests verify all stimuli, assertions, and semantics of the upstream JS test.",
+                "label": "full_assertion_equivalence"
+              },
+              {
+                "label": "partial_test",
+                "description": "Swift tests verify some assertions or stimuli, but have concrete missing assertions, stimuli, or behavior divergence."
+              },
+              {
+                "label": "missing_test",
+                "description": "No Swift test exercises this scenario."
+              },
+              {
+                "label": "reviewed_api_platform_boundary",
+                "description": "Equivalence adapted to Swift language/platform boundaries (e.g. Data vs ArrayBuffer/Buffer, engine dispatch vs parser object) with equivalent assertions."
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Insufficient source or evidence to determine parity."
+              }
+            ],
+            "id": "status_JS_302"
+          },
+          {
+            "type": "choice",
+            "id": "status_JS_303",
+            "instructions": "Evaluate parity classification for JS-303 (engine.io-parser node: should encode/decode a Buffer as base64 'bAQIDBA=='). Swift maps to SocketEnginePacketCodecTest.testEncodeDecodeABufferAsBase64.",
+            "choices": [
+              {
+                "label": "full_assertion_equivalence",
+                "description": "Executable Swift tests verify all stimuli, assertions, and semantics of the upstream JS test."
+              },
+              {
+                "label": "partial_test",
+                "description": "Swift tests verify some assertions or stimuli, but have concrete missing assertions, stimuli, or behavior divergence."
+              },
+              {
+                "label": "missing_test",
+                "description": "No Swift test exercises this scenario."
+              },
+              {
+                "description": "Equivalence adapted to Swift language/platform boundaries (e.g. Data vs ArrayBuffer/Buffer, engine dispatch vs parser object) with equivalent assertions.",
+                "label": "reviewed_api_platform_boundary"
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Insufficient source or evidence to determine parity."
+              }
+            ]
+          },
+          {
+            "choices": [
+              {
+                "label": "full_assertion_equivalence",
+                "description": "Executable Swift tests verify all stimuli, assertions, and semantics of the upstream JS test."
+              },
+              {
+                "description": "Swift tests verify some assertions or stimuli, but have concrete missing assertions, stimuli, or behavior divergence.",
+                "label": "partial_test"
+              },
+              {
+                "description": "No Swift test exercises this scenario.",
+                "label": "missing_test"
+              },
+              {
+                "description": "Equivalence adapted to Swift language/platform boundaries (e.g. Data vs ArrayBuffer/Buffer, engine dispatch vs parser object) with equivalent assertions.",
+                "label": "reviewed_api_platform_boundary"
+              },
+              {
+                "description": "Insufficient source or evidence to determine parity.",
+                "label": "insufficient_evidence"
+              }
+            ],
+            "id": "status_JS_308",
+            "instructions": "Evaluate parity classification for JS-308 (engine.io-parser node: should decode an ArrayBuffer as ArrayBuffer). Swift maps to SocketEnginePacketCodecTest.testDecodeBinaryAsData.",
+            "type": "choice"
+          },
+          {
+            "id": "status_JS_309",
+            "choices": [
+              {
+                "description": "Executable Swift tests verify all stimuli, assertions, and semantics of the upstream JS test.",
+                "label": "full_assertion_equivalence"
+              },
+              {
+                "label": "partial_test",
+                "description": "Swift tests verify some assertions or stimuli, but have concrete missing assertions, stimuli, or behavior divergence."
+              },
+              {
+                "label": "missing_test",
+                "description": "No Swift test exercises this scenario."
+              },
+              {
+                "description": "Equivalence adapted to Swift language/platform boundaries (e.g. Data vs ArrayBuffer/Buffer, engine dispatch vs parser object) with equivalent assertions.",
+                "label": "reviewed_api_platform_boundary"
+              },
+              {
+                "description": "Insufficient source or evidence to determine parity.",
+                "label": "insufficient_evidence"
+              }
+            ],
+            "instructions": "Evaluate parity classification for JS-309 (engine.io-parser node: should encode/decode a string + Buffer payload '4test\\x1ebAQIDBA=='). Swift maps to SocketEnginePacketCodecTest.testEncodeDecodeAStringPlusBufferPayload.",
+            "type": "choice"
+          },
+          {
+            "type": "boolean",
+            "id": "js283_native_api_adaptation",
+            "instructions": "True if JS-283 is adapted to Swift native architecture where the engine dispatches 'test' to client.messages instead of returning a Packet struct from a standalone parser."
+          },
+          {
+            "type": "boolean",
+            "id": "js284_error_payload_asserted",
+            "instructions": "True if Swift testFailToDecodeAMalformedPacket asserts the specific error payload string or error reason ('parser error' or 'Got unknown error from server') rather than only client.errors.count == 1 and engine.closed."
+          },
+          {
+            "type": "boolean",
+            "instructions": "True if Swift decodes all 5 packet types (open, close, ping, pong, message) in a single parsePollingMessage payload call matching JS decodePayload('0\\x1e1\\x1e2probe\\x1e3probe\\x1e4test').",
+            "id": "js285_all_types_in_single_payload"
+          },
+          {
+            "id": "js285_ping_pong_assertions_present",
+            "type": "boolean",
+            "instructions": "True if Swift testDecodeEveryPacketTypeOfAPayload asserts client.pings or client.pongs counts after parsing the payload containing '2probe' and '3probe'."
+          },
+          {
+            "instructions": "True if Swift parsePollingMessage stops iterating remaining packets when a CLOSE packet ('1') is encountered, because handleClose marks the engine closed and the loop guards !closed.",
+            "id": "js285_close_stops_payload_decode",
+            "type": "boolean"
+          },
+          {
+            "type": "boolean",
+            "id": "js285_open_packet_decoded_in_payload",
+            "instructions": "True if packet type '0' (open) is included in the payload string passed to parsePollingMessage in testDecodeEveryPacketTypeOfAPayload."
+          },
+          {
+            "id": "js286_tested_via_payload_decoder",
+            "instructions": "True if testEngineClosesOnEveryMalformedEnginePayload tests the malformed payloads '{', '{}', '[\\\"a123\\\", \\\"a456\\\"]' using the polling payload decoder parsePollingMessage rather than parseEngineMessage.",
+            "type": "boolean"
+          },
+          {
+            "type": "boolean",
+            "instructions": "True if Swift parsePollingMessage('') reports an error or closes the engine matching JS decodePayload('') which returns [{ type: 'error', data: 'parser error' }].",
+            "id": "js286_empty_payload_behavior_matches"
+          },
+          {
+            "id": "js302_websocket_binary_parity",
+            "type": "boolean",
+            "instructions": "True if Swift testEncodeDecodeABuffer asserts both that raw binary Data is sent unencoded when polling=false and that parseEngineData delivers the identical Data to client.binary."
+          },
+          {
+            "type": "boolean",
+            "instructions": "True if Swift testEncodeDecodeABufferAsBase64 asserts that polling binary creates 'bAQIDBA==' and parseEngineMessage('bAQIDBA==') delivers the decoded Data to client.binary.",
+            "id": "js303_polling_base64_parity"
+          },
+          {
+            "instructions": "True if JS-308 ArrayBuffer vs Buffer distinction is a reviewed platform boundary where Swift unifies binary representations into Foundation.Data while asserting byte preservation and non-text dispatch.",
+            "id": "js308_platform_boundary_data",
+            "type": "boolean"
+          },
+          {
+            "instructions": "True if Swift testEncodeDecodeAStringPlusBufferPayload verifies both encoding of '4test\\u{1e}bAQIDBA==' and payload decoding delivering both client.messages ['test'] and client.binary [payload].",
+            "id": "js309_mixed_payload_equivalence",
+            "type": "boolean"
+          }
+        ],
+        "state": "Repository: socket.io-client-swift\nUpstream commit: aaf2af36ec8ad05910f357a788e0e358bad32738\nUpstream files:\n- /tmp/pr18review/socket.io/packages/engine.io-parser/test/index.ts\n- /tmp/pr18review/socket.io/packages/engine.io-parser/test/node.ts\n- /tmp/pr18review/socket.io/packages/engine.io-parser/lib/decodePacket.ts\n- /tmp/pr18review/socket.io/packages/engine.io-parser/lib/encodePacket.ts\n- /tmp/pr18review/socket.io/packages/engine.io-parser/lib/index.ts\n\nSwift files:\n- Source/SocketIO/Engine/SocketEngine.swift\n- Source/SocketIO/Engine/SocketEnginePollable.swift\n- Source/SocketIO/Engine/SocketEngineSpec.swift\n- Tests/TestSocketIO/SocketEnginePacketCodecTest.swift\n- Tests/TestSocketIO/SocketEngineTest.swift\n- Tests/TestSocketIO/Mocks/MockEngine.swift\n- Documentation/JavaScriptTestInventory.csv\n\nEVIDENCE PER TEST ID:\n\n1. JS-283:\nUpstream (index.ts:17):\n```ts\nit(\"should encode/decode a string\", (done) => {\n  const packet: Packet = { type: \"message\", data: \"test\" };\n  encodePacket(packet, true, (encodedPacket) => {\n    expect(encodedPacket).to.eql(\"4test\");\n    expect(decodePacket(encodedPacket)).to.eql(packet);\n    done();\n  });\n});\n```\nSwift mapping: SocketEnginePacketCodecTest.testEncodeDecodeAString:\n```swift\nfunc testEncodeDecodeAString() {\n    XCTAssertEqual(postBody([\"4test\"]), \"4test\")\n    XCTAssertEqual(String(SocketEnginePacketType.message.rawValue) + \"test\", \"4test\")\n\n    engine.parseEngineMessage(\"4test\")\n    settle()\n\n    XCTAssertEqual(client.messages, [\"test\"])\n    XCTAssertTrue(client.errors.isEmpty)\n}\n```\nSwift has no standalone engine.io parser struct; parsing is fused with SocketEngine dispatch, delivering 'test' to client.messages. Wire format '4test' is verified via raw packet formatting and postBody.\n\n2. JS-284:\nUpstream (index.ts:26):\n```ts\nit(\"should fail to decode a malformed packet\", () => {\n  expect(decodePacket(\"\")).to.eql({\n    type: \"error\",\n    data: \"parser error\",\n  });\n  expect(decodePacket(\"a123\")).to.eql({\n    type: \"error\",\n    data: \"parser error\",\n  });\n});\n```\nSwift mapping: SocketEnginePacketCodecTest.testFailToDecodeAMalformedPacket:\n```swift\nfunc testFailToDecodeAMalformedPacket() {\n    for malformed in [\"\", \"a123\"] {\n        let client = EngineCodecClient()\n        let engine = SocketEngine(client: client, url: URL(string: \"http://localhost/\")!, config: [.log(false)])\n\n        engine.parseEngineMessage(malformed)\n        engine.engineQueue.sync { }\n\n        XCTAssertEqual(client.errors.count, 1, \"\\(malformed.debugDescription) must be reported as an error\")\n        XCTAssertTrue(client.messages.isEmpty)\n        engine.engineQueue.sync { XCTAssertTrue(engine.closed, \"\\(malformed.debugDescription) must close the engine\") }\n    }\n}\n```\nSwift exercises both '' and 'a123', asserting client.errors.count == 1, client.messages.isEmpty, and engine.closed. It does NOT assert the error string reason ('Got unknown error from server ...').\n\n3. JS-285:\nUpstream (index.ts:39):\n```ts\nit(\"should encode/decode all packet types\", (done) => {\n  const packets: Packet[] = [\n    { type: \"open\" },\n    { type: \"close\" },\n    { type: \"ping\", data: \"probe\" },\n    { type: \"pong\", data: \"probe\" },\n    { type: \"message\", data: \"test\" },\n  ];\n  encodePayload(packets, (payload) => {\n    expect(payload).to.eql(\"0\\x1e1\\x1e2probe\\x1e3probe\\x1e4test\");\n    expect(decodePayload(payload)).to.eql(packets);\n    done();\n  });\n});\n```\nIn upstream, decodePayload('0\\x1e1\\x1e2probe\\x1e3probe\\x1e4test') decodes all 5 packets and returns them in an array without stopping at '1' (close).\nSwift mappings:\n- SocketEnginePacketCodecTest.testEncodeAllPacketTypesIntoOnePayload:\n```swift\nfunc testEncodeAllPacketTypesIntoOnePayload() {\n    XCTAssertEqual(postBody([\"0\", \"1\", \"2probe\", \"3probe\", \"4test\"]),\n                   \"0\\u{1e}1\\u{1e}2probe\\u{1e}3probe\\u{1e}4test\")\n}\n```\n- SocketEnginePacketCodecTest.testDecodeEveryPacketTypeOfAPayload:\n```swift\nfunc testDecodeEveryPacketTypeOfAPayload() {\n    engine.parsePollingMessage(\"2probe\\u{1e}3probe\\u{1e}4test\")\n    settle()\n\n    XCTAssertEqual(client.messages, [\"test\"])\n    XCTAssertTrue(client.errors.isEmpty)\n\n    engine.parseEngineMessage(\"1\")\n    settle()\n\n    XCTAssertEqual(client.closes, [\"transport close\"])\n}\n```\n- SocketEnginePacketCodecTest.testCloseInsideAPayloadEndsTheSession:\n```swift\nfunc testCloseInsideAPayloadEndsTheSession() {\n    engine.parsePollingMessage(\"1\\u{1e}4test\")\n    settle()\n\n    XCTAssertEqual(client.closes, [\"transport close\"])\n    XCTAssertTrue(client.messages.isEmpty, \"Nothing after the CLOSE may still be delivered\")\n}\n```\nIn Swift, SocketEnginePollable.parsePollingMessage splits by \\u{1e} and iterates:\n```swift\nfor record in str.components(separatedBy: \"\\u{1e}\") {\n    guard !closed else { break }\n    parseEngineMessage(record)\n}\n```\nWhen CLOSE ('1') is encountered, handleClose closes the engine, so subsequent packets in the same payload are aborted and not decoded.\nBecause of this fused transport behavior, Swift cannot decode the full upstream payload '0\\u{1e}1\\u{1e}2probe\\u{1e}3probe\\u{1e}4test' in a single pass.\nFurthermore, in testDecodeEveryPacketTypeOfAPayload:\n- '0' (open) is omitted completely from the payload string;\n- '1' (close) is omitted from the payload and sent via single message engine.parseEngineMessage(\"1\");\n- '2probe' (ping) and '3probe' (pong) are in the payload string, but client.pings and client.pongs are NOT asserted (only client.messages == ['test'] is asserted).\n\n4. JS-286:\nUpstream (index.ts:54):\n```ts\nit(\"should fail to decode a malformed payload\", () => {\n  expect(decodePayload(\"{\")).to.eql([\n    { type: \"error\", data: \"parser error\" },\n  ]);\n  expect(decodePayload(\"{}\")).to.eql([\n    { type: \"error\", data: \"parser error\" },\n  ]);\n  expect(decodePayload('[\"a123\", \"a456\"]')).to.eql([\n    { type: \"error\", data: \"parser error\" },\n  ]);\n});\n```\nUpstream tests decodePayload on malformed payload strings. In upstream JS, decodePayload('') also produces [{ type: 'error', data: 'parser error' }].\nSwift mappings:\nSocketEngineTest.testEngineDoesErrorOnUnknownMessage:\n```swift\nengine.engineQueue.sync {\n    engine.parseEngineMessage(\"afafafda\")\n}\nwait(for: [finalExpectation], timeout: 3)\nengine.engineQueue.sync {\n    XCTAssertTrue(engine.closed)\n    XCTAssertFalse(engine.connected)\n}\n```\nSocketEngineTest.testEngineClosesOnEveryMalformedEnginePayload:\n```swift\nfor message in [\"{\", \"{}\", \"[\\\"a123\\\", \\\"a456\\\"]\"] {\n    let manager = SocketManager(socketURL: URL(string: \"http://localhost\")!,\n                                config: [.log(false), .reconnects(false)])\n    let engine = SocketEngine(client: manager, url: URL(string: \"http://localhost\")!, options: nil)\n    manager.engine = engine\n    engine.parseEngineMessage(message)\n    engine.engineQueue.sync { XCTAssertTrue(engine.closed, message) }\n}\n```\nIn Swift:\n- Both tests call engine.parseEngineMessage (single packet decoder), NOT engine.parsePollingMessage (the payload decoder).\n- In SocketEnginePollable.parsePollingMessage:\n```swift\nfunc parsePollingMessage(_ str: String) {\n    guard !str.isEmpty else { return }\n    ...\n}\n```\nIf an empty payload '' is passed to parsePollingMessage, it returns immediately without error or closing the engine.\n- In testEngineClosesOnEveryMalformedEnginePayload, it only asserts engine.closed, not client.errors or error reason.\n\n5. JS-302:\nUpstream (node.ts:15):\n```ts\nit(\"should encode/decode a Buffer\", (done) => {\n  const packet: Packet = {\n    type: \"message\",\n    data: Buffer.from([1, 2, 3, 4]),\n  };\n  encodePacket(packet, true, (encodedPacket) => {\n    expect(encodedPacket).to.eql(packet.data); // noop\n    expect(decodePacket(encodedPacket)).to.eql(packet);\n    done();\n  });\n});\n```\nSwift mapping: SocketEnginePacketCodecTest.testEncodeDecodeABuffer:\n```swift\nfunc testEncodeDecodeABuffer() {\n    let payload = Data([1, 2, 3, 4])\n    let websocket = MockEngine()\n    websocket.polling = false\n\n    guard case let .left(encoded) = websocket.createBinaryDataForSend(using: payload) else {\n        return XCTFail(\"A WebSocket transport sends binary without a prefix\")\n    }\n    XCTAssertEqual(encoded, payload)\n\n    engine.parseEngineData(payload)\n    settle()\n\n    XCTAssertEqual(client.binary, [payload])\n}\n```\nWebSocket binary is unprefixed Data, decoded via parseEngineData back to client.binary [Data([1, 2, 3, 4])].\n\n6. JS-303:\nUpstream (node.ts:27):\n```ts\nit(\"should encode/decode a Buffer as base64\", (done) => {\n  const packet: Packet = {\n    type: \"message\",\n    data: Buffer.from([1, 2, 3, 4]),\n  };\n  encodePacket(packet, false, (encodedPacket) => {\n    expect(encodedPacket).to.eql(\"bAQIDBA==\");\n    expect(decodePacket(encodedPacket, \"nodebuffer\")).to.eql(packet);\n    done();\n  });\n});\n```\nSwift mapping: SocketEnginePacketCodecTest.testEncodeDecodeABufferAsBase64:\n```swift\nfunc testEncodeDecodeABufferAsBase64() {\n    let payload = Data([1, 2, 3, 4])\n    let polling = MockEngine()\n    polling.polling = true\n\n    guard case let .right(encoded) = polling.createBinaryDataForSend(using: payload) else {\n        return XCTFail(\"A polling transport base64-encodes binary\")\n    }\n    XCTAssertEqual(encoded, \"bAQIDBA==\")\n\n    engine.parseEngineMessage(\"bAQIDBA==\")\n    settle()\n\n    XCTAssertEqual(client.binary, [payload])\n}\n```\nPolling binary creates 'bAQIDBA==', and parseEngineMessage('bAQIDBA==') decodes it to client.binary [Data([1, 2, 3, 4])].\n\n7. JS-308:\nUpstream (node.ts:89):\n```ts\nit(\"should decode an ArrayBuffer as ArrayBuffer\", () => {\n  const encodedPacket = Int8Array.from([1, 2, 3, 4]).buffer;\n  const decodedPacket = decodePacket(encodedPacket, \"arraybuffer\");\n  expect(decodedPacket.type).to.eql(\"message\");\n  expect(decodedPacket.data).to.be.an(ArrayBuffer);\n  expect(areArraysEqual(decodedPacket.data, encodedPacket)).to.be(true);\n});\n```\nSwift mapping: SocketEnginePacketCodecTest.testDecodeBinaryAsData:\n```swift\nfunc testDecodeBinaryAsData() {\n    let payload = Data([1, 2, 3, 4])\n\n    engine.parseEngineData(payload)\n    settle()\n\n    XCTAssertEqual(client.binary, [payload])\n    XCTAssertTrue(client.messages.isEmpty)\n}\n```\nPlatform boundary: JS differentiates ArrayBuffer, Buffer, Blob; Swift standard library has one binary representation (Foundation.Data). Test asserts binary data arrives unchanged in client.binary and is not treated as a text message.\n\n8. JS-309:\nUpstream (node.ts:99):\n```ts\nit(\"should encode/decode a string + Buffer payload\", (done) => {\n  const packets: Packet[] = [\n    { type: \"message\", data: \"test\" },\n    { type: \"message\", data: Buffer.from([1, 2, 3, 4]) },\n  ];\n  encodePayload(packets, (payload) => {\n    expect(payload).to.eql(\"4test\\x1ebAQIDBA==\");\n    expect(decodePayload(payload, \"nodebuffer\")).to.eql(packets);\n    done();\n  });\n});\n```\nSwift mapping: SocketEnginePacketCodecTest.testEncodeDecodeAStringPlusBufferPayload:\n```swift\nfunc testEncodeDecodeAStringPlusBufferPayload() {\n    let payload = Data([1, 2, 3, 4])\n    let polling = MockEngine()\n    polling.polling = true\n\n    guard case let .right(encodedBinary) = polling.createBinaryDataForSend(using: payload) else {\n        return XCTFail(\"A polling transport base64-encodes binary\")\n    }\n    XCTAssertEqual(postBody([\"4test\", encodedBinary]), \"4test\\u{1e}bAQIDBA==\")\n\n    engine.parsePollingMessage(\"4test\\u{1e}bAQIDBA==\")\n    settle()\n\n    XCTAssertEqual(client.messages, [\"test\"])\n    XCTAssertEqual(client.binary, [payload])\n}\n```\nEncodes '4test\\u{1e}bAQIDBA==' and decodes it through parsePollingMessage, asserting both client.messages == ['test'] and client.binary == [payload].\n"
+      },
+      "output": {
+        "model": "typesafe-ai/jev",
+        "advisoryOnly": true,
+        "answers": {
+          "status_JS_283": {
+            "type": "choice",
+            "choice": "reviewed_api_platform_boundary",
+            "probabilities": {
+              "full_assertion_equivalence": 0.04,
+              "reviewed_api_platform_boundary": 0.84,
+              "partial_test": 0.12,
+              "missing_test": 0,
+              "insufficient_evidence": 0
+            }
+          },
+          "status_JS_284": {
+            "type": "choice",
+            "choice": "partial_test",
+            "probabilities": {
+              "full_assertion_equivalence": 0,
+              "reviewed_api_platform_boundary": 0.03,
+              "partial_test": 0.97,
+              "missing_test": 0,
+              "insufficient_evidence": 0
+            }
+          },
+          "status_JS_285": {
+            "type": "choice",
+            "choice": "partial_test",
+            "probabilities": {
+              "full_assertion_equivalence": 0,
+              "reviewed_api_platform_boundary": 0.03,
+              "partial_test": 0.97,
+              "missing_test": 0,
+              "insufficient_evidence": 0
+            }
+          },
+          "status_JS_286": {
+            "type": "choice",
+            "choice": "partial_test",
+            "probabilities": {
+              "full_assertion_equivalence": 0,
+              "reviewed_api_platform_boundary": 0,
+              "partial_test": 0.99,
+              "missing_test": 0.01,
+              "insufficient_evidence": 0
+            }
+          },
+          "status_JS_302": {
+            "type": "choice",
+            "choice": "reviewed_api_platform_boundary",
+            "probabilities": {
+              "full_assertion_equivalence": 0.05,
+              "reviewed_api_platform_boundary": 0.9,
+              "partial_test": 0.05,
+              "missing_test": 0,
+              "insufficient_evidence": 0
+            }
+          },
+          "status_JS_303": {
+            "type": "choice",
+            "choice": "reviewed_api_platform_boundary",
+            "probabilities": {
+              "full_assertion_equivalence": 0.21,
+              "reviewed_api_platform_boundary": 0.73,
+              "partial_test": 0.06,
+              "missing_test": 0,
+              "insufficient_evidence": 0
+            }
+          },
+          "status_JS_308": {
+            "type": "choice",
+            "choice": "reviewed_api_platform_boundary",
+            "probabilities": {
+              "full_assertion_equivalence": 0,
+              "reviewed_api_platform_boundary": 0.97,
+              "partial_test": 0.03,
+              "missing_test": 0,
+              "insufficient_evidence": 0
+            }
+          },
+          "status_JS_309": {
+            "type": "choice",
+            "choice": "reviewed_api_platform_boundary",
+            "probabilities": {
+              "full_assertion_equivalence": 0.16,
+              "reviewed_api_platform_boundary": 0.79,
+              "partial_test": 0.05,
+              "missing_test": 0,
+              "insufficient_evidence": 0
+            }
+          },
+          "js283_native_api_adaptation": {
+            "type": "boolean",
+            "probability": 0.97
+          },
+          "js284_error_payload_asserted": {
+            "type": "boolean",
+            "probability": 0.03
+          },
+          "js285_all_types_in_single_payload": {
+            "type": "boolean",
+            "probability": 0.02
+          },
+          "js285_ping_pong_assertions_present": {
+            "type": "boolean",
+            "probability": 0.02
+          },
+          "js285_close_stops_payload_decode": {
+            "type": "boolean",
+            "probability": 0.97
+          },
+          "js285_open_packet_decoded_in_payload": {
+            "type": "boolean",
+            "probability": 0.03
+          },
+          "js286_tested_via_payload_decoder": {
+            "type": "boolean",
+            "probability": 0.02
+          },
+          "js286_empty_payload_behavior_matches": {
+            "type": "boolean",
+            "probability": 0.02
+          },
+          "js302_websocket_binary_parity": {
+            "type": "boolean",
+            "probability": 0.96
+          },
+          "js303_polling_base64_parity": {
+            "type": "boolean",
+            "probability": 0.98
+          },
+          "js308_platform_boundary_data": {
+            "type": "boolean",
+            "probability": 0.95
+          },
+          "js309_mixed_payload_equivalence": {
+            "type": "boolean",
+            "probability": 0.98
+          }
+        },
+        "usage": {
+          "inputTokens": 6486,
+          "outputTokens": 909,
+          "totalTokens": 7395
+        },
+        "rounding": {
+          "probabilityDecimals": 2,
+          "scoreDecimals": 2
+        },
+        "warningCount": 0,
+        "elapsedMs": 817
+      }
+    },
+    {
+      "input": {
+        "questions": [
+          {
+            "levels": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "type": "score",
+            "instructions": "Rate the remediation priority for JS-285 gaps (omitted open packet '0' in payload decode, unasserted ping/pong counts, and inability of fused parsePollingMessage to decode beyond CLOSE '1' in a single payload).",
+            "id": "priority_JS_285"
+          },
+          {
+            "levels": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "type": "score",
+            "instructions": "Rate the remediation priority for JS-286 gaps (malformed payload tests bypassing parsePollingMessage in favor of parseEngineMessage, and parsePollingMessage('') silently returning without closing or reporting error).",
+            "id": "priority_JS_286"
+          },
+          {
+            "instructions": "Rate the remediation priority for JS-284 gap (error message text reason is not asserted, only error count and closed state).",
+            "id": "priority_JS_284",
+            "levels": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "type": "score"
+          },
+          {
+            "type": "boolean",
+            "id": "js285_actionable_fix_ping_pong",
+            "instructions": "True if testDecodeEveryPacketTypeOfAPayload can immediately assert client.pings == 1 and client.pongs == 1 because EngineCodecClient already tracks engineDidReceivePing and engineDidReceivePong."
+          },
+          {
+            "type": "boolean",
+            "id": "js286_actionable_fix_parse_polling_message",
+            "instructions": "True if testEngineClosesOnEveryMalformedEnginePayload can be updated to exercise parsePollingMessage instead of parseEngineMessage to test payload decoding."
+          },
+          {
+            "type": "boolean",
+            "instructions": "True if changing guard !str.isEmpty in parsePollingMessage to handle empty string as malformed payload would be needed to match JS decodePayload('') error packet behavior.",
+            "id": "js286_actionable_fix_empty_polling_message"
+          }
+        ],
+        "state": "Repository: socket.io-client-swift\nUpstream commit: aaf2af36ec8ad05910f357a788e0e358bad32738\n\nFile: Source/SocketIO/Engine/SocketEnginePollable.swift\n```swift\nfunc parsePollingMessage(_ str: String) {\n    guard !str.isEmpty else { return }\n    DefaultSocketLogger.Logger.log(\"Got poll message: \\(str)\", type: \"SocketEnginePolling\")\n    for record in str.components(separatedBy: \"\\u{1e}\") {\n        guard !closed else { break }\n        parseEngineMessage(record)\n    }\n}\n```\n\nFile: Tests/TestSocketIO/SocketEnginePacketCodecTest.swift\n```swift\nprivate final class EngineCodecClient: NSObject, SocketEngineClient {\n    var errors = [String]()\n    var closes = [String]()\n    var opens = 0\n    var messages = [String]()\n    var binary = [Data]()\n    var pings = 0\n    var pongs = 0\n\n    func engineDidError(reason: String) { errors.append(reason) }\n    func engineDidClose(reason: String) { closes.append(reason) }\n    func engineDidOpen(reason: String) { opens += 1 }\n    func engineDidReceivePing() { pings += 1 }\n    func engineDidReceivePong() { pongs += 1 }\n    func engineDidSendPong() { pongs += 1 }\n    func parseEngineMessage(_ msg: String) { messages.append(msg) }\n    func parseEngineBinaryData(_ data: Data) { binary.append(data) }\n    func engineDidWebsocketUpgrade(headers: [String: String]) {}\n}\n\nfunc testDecodeEveryPacketTypeOfAPayload() {\n    engine.parsePollingMessage(\"2probe\\u{1e}3probe\\u{1e}4test\")\n    settle()\n\n    XCTAssertEqual(client.messages, [\"test\"])\n    XCTAssertTrue(client.errors.isEmpty)\n\n    engine.parseEngineMessage(\"1\")\n    settle()\n\n    XCTAssertEqual(client.closes, [\"transport close\"])\n}\n```\n\nFile: Tests/TestSocketIO/SocketEngineTest.swift\n```swift\nfunc testEngineClosesOnEveryMalformedEnginePayload() {\n    for message in [\"{\", \"{}\", \"[\\\"a123\\\", \\\"a456\\\"]\"] {\n        let manager = SocketManager(socketURL: URL(string: \"http://localhost\")!,\n                                    config: [.log(false), .reconnects(false)])\n        let engine = SocketEngine(client: manager, url: URL(string: \"http://localhost\")!, options: nil)\n        manager.engine = engine\n        engine.parseEngineMessage(message)\n        engine.engineQueue.sync { XCTAssertTrue(engine.closed, message) }\n    }\n}\n```\nJS Upstream behavior:\n- decodePayload('') produces [{ type: 'error', data: 'parser error' }].\n- decodePayload('{') produces [{ type: 'error', data: 'parser error' }].\n- decodePayload('0\\x1e1\\x1e2probe\\x1e3probe\\x1e4test') decodes all 5 packets in one array without aborting at packet 1.\n"
+      },
+      "output": {
+        "model": "typesafe-ai/jev",
+        "advisoryOnly": true,
+        "answers": {
+          "priority_JS_285": {
+            "type": "score",
+            "score": 2.14,
+            "probabilities": {
+              "0": 0.01,
+              "1": 0.09,
+              "2": 0.65,
+              "3": 0.25
+            }
+          },
+          "priority_JS_286": {
+            "type": "score",
+            "score": 2.02,
+            "probabilities": {
+              "0": 0.01,
+              "1": 0.12,
+              "2": 0.71,
+              "3": 0.16
+            }
+          },
+          "priority_JS_284": {
+            "type": "score",
+            "score": 1.26,
+            "probabilities": {
+              "0": 0.13,
+              "1": 0.52,
+              "2": 0.32,
+              "3": 0.03
+            }
+          },
+          "js285_actionable_fix_ping_pong": {
+            "type": "boolean",
+            "probability": 0.11
+          },
+          "js286_actionable_fix_parse_polling_message": {
+            "type": "boolean",
+            "probability": 0.69
+          },
+          "js286_actionable_fix_empty_polling_message": {
+            "type": "boolean",
+            "probability": 0.73
+          }
+        },
+        "usage": {
+          "inputTokens": 1442,
+          "outputTokens": 138,
+          "totalTokens": 1580
+        },
+        "rounding": {
+          "probabilityDecimals": 2,
+          "scoreDecimals": 2
+        },
+        "warningCount": 0,
+        "elapsedMs": 319
+      }
+    }
+  ],
+  "coordinator_reported_cost_usd": 0.433440825
+}

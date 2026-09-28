@@ -1,0 +1,32 @@
+name: Bug report
+description: Report a reproducible issue with the Swift client.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: "Include a minimal reproducer. Remove tokens, cookies, private keys and personal payloads from all logs."
+  - type: input
+    id: revision
+    attributes:
+      label: Client version or commit
+      description: Include the exact SPM version, branch or commit.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Xcode/Swift, OS/device, Socket.IO server version and transport configuration.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Steps, relevant client/server code, expected behavior and actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Sanitized logs and additional context

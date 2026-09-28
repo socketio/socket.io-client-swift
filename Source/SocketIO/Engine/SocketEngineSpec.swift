@@ -24,7 +24,6 @@
 //
 
 import Foundation
-import Starscream
 
 /// Specifies a SocketEngine.
 public protocol SocketEngineSpec: AnyObject {
@@ -36,17 +35,30 @@ public protocol SocketEngineSpec: AnyObject {
     /// `true` if this engine is closed.
     var closed: Bool { get }
 
-    /// If `true` the engine will attempt to use WebSocket compression.
-    var compress: Bool { get }
-
     /// `true` if this engine is connected. Connected means that the initial poll connect has succeeded.
     var connected: Bool { get }
+
+    /// Whether the underlying transport can accept a write right now without
+    /// queuing. Used by Phase 7 volatile-emit gate (`socket.volatile.emit(...)`
+    /// drops when this is `false`). JS-aligned per `socket.io-client/lib/socket.ts`
+    /// `emit()` body which gates `discardPacket = volatile && !transport.writable`.
+    /// Default impl returns `false` (fail-safe — any conformer that doesn't
+    /// override drops all volatile packets, which is safer than incorrectly
+    /// admitting them).
+    var writable: Bool { get }
+
+    /// Whether the server heartbeat deadline expired, even if its timer was delayed.
+    /// Reading a native engine schedules its once-only timeout close when necessary.
+    var hasPingExpired: Bool { get }
 
     /// The connect parameters sent during a connect.
     var connectParams: [String: Any]? { get set }
 
     /// An array of HTTPCookies that are sent during the connection.
     var cookies: [HTTPCookie]? { get }
+
+    /// Whether binary WebSocket payloads must use Engine.IO base64 text.
+    var forceBase64: Bool { get }
 
     /// The queue that all engine actions take place on.
     var engineQueue: DispatchQueue { get }
@@ -81,15 +93,17 @@ public protocol SocketEngineSpec: AnyObject {
     /// The url for WebSockets.
     var urlWebSocket: URL { get }
 
-    /// The version of engine.io being used. Default is three.
-    var version: SocketIOVersion { get }
 
-    /// If `true`, then the engine is currently in WebSockets mode.
-    @available(*, deprecated, message: "No longer needed, if we're not polling, then we must be doing websockets")
-    var websocket: Bool { get }
+    /// Whether polling (and WebSocket) requests carry a cache-busting
+    /// timestamp query parameter. `nil` is the JS default (`timestampRequests`
+    /// unset): polling requests carry it, WebSocket URLs do not. `true`:
+    /// both carry it. `false`: neither does.
+    var timestampRequests: Bool? { get }
 
-    /// The WebSocket for this engine.
-    var ws: WebSocket? { get }
+    /// The query parameter name used for the cache-busting timestamp.
+    /// Default `"t"`, JS-aligned with `timestampParam` in engine.io-client.
+    var timestampParam: String { get }
+
 
     // MARK: Initializers
 
@@ -107,6 +121,9 @@ public protocol SocketEngineSpec: AnyObject {
 
     /// Called when an error happens during execution. Causes a disconnection.
     func didError(reason: String)
+
+    /// Structured native details, with a source-compatible fallback for custom engines.
+    func didError(reason: String, error: SocketTransportError)
 
     /// Disconnects from the server.
     ///
@@ -145,36 +162,79 @@ public protocol SocketEngineSpec: AnyObject {
 }
 
 extension SocketEngineSpec {
-    var engineIOParam: String {
-        switch version {
-        case .two:
-            return "&EIO=3"
-        case .three:
-            return "&EIO=4"
-        }
+    /// Existing custom engines retain their historical binary transport behaviour.
+    public var forceBase64: Bool { false }
+    public func didError(reason: String, error: SocketTransportError) { didError(reason: reason) }
+
+    /// Default fail-safe — conformers that don't override drop all volatile
+    /// packets. See protocol declaration for rationale.
+    public var writable: Bool { return false }
+    public var hasPingExpired: Bool { return false }
+
+    /// JS default: `timestampRequests` unset, so polling requests are stamped
+    /// and WebSocket URLs are not.
+    public var timestampRequests: Bool? { return nil }
+
+    /// JS default parameter name (`timestampParam: "t"` in engine.io-client).
+    public var timestampParam: String { return "t" }
+
+    /// A unique-per-request, URL-safe cache-busting value: a monotonically
+    /// increasing base-36 millisecond timestamp plus a short random suffix so
+    /// two requests within the same millisecond still differ.
+    func cacheBustingValue() -> String {
+        let millis = UInt64(Date().timeIntervalSince1970 * 1000)
+        let rand = UInt64.random(in: 0..<1_679_616) // 36^4, up to 4 chars
+
+        return String(millis, radix: 36) + String(rand, radix: 36)
+    }
+
+    /// Appends the cache-busting parameter to an already-built engine URL.
+    /// Evaluated per call, so every request gets a fresh value.
+    func urlByAppendingCacheBuster(to url: URL) -> URL {
+        var com = URLComponents(url: url, resolvingAgainstBaseURL: false)!
+        com.percentEncodedQuery = (com.percentEncodedQuery ?? "") + "&\(timestampParam.urlEncode()!)=\(cacheBustingValue())"
+
+        return com.url!
+    }
+
+    var engineIOParam: String { "&EIO=4" }
+
+    /// The first polling GET (no `sid` yet — used by `_connect`); every later
+    /// poll and POST goes through `urlPollingWithSid`. Both carry the
+    /// cache-busting parameter unless `timestampRequests` is `false`.
+    /// JS-aligned with `Polling.uri()` in engine.io-client.
+    var urlPollingHandshake: URL {
+        guard timestampRequests != false else { return urlPolling }
+
+        return urlByAppendingCacheBuster(to: urlPolling)
     }
 
     var urlPollingWithSid: URL {
         var com = URLComponents(url: urlPolling, resolvingAgainstBaseURL: false)!
         com.percentEncodedQuery = com.percentEncodedQuery! + "&sid=\(sid.urlEncode()!)"
 
-        if !com.percentEncodedQuery!.contains("EIO") {
-            com.percentEncodedQuery = com.percentEncodedQuery! + engineIOParam
-        }
+        var query = (com.percentEncodedQueryItems ?? []).filter { $0.name.removingPercentEncoding != "EIO" }
+        query.append(URLQueryItem(name: "EIO", value: "4"))
+        com.percentEncodedQueryItems = query
 
-        return com.url!
+        guard timestampRequests != false else { return com.url! }
+
+        return urlByAppendingCacheBuster(to: com.url!)
     }
 
     var urlWebSocketWithSid: URL {
         var com = URLComponents(url: urlWebSocket, resolvingAgainstBaseURL: false)!
         com.percentEncodedQuery = com.percentEncodedQuery! + (sid == "" ? "" : "&sid=\(sid.urlEncode()!)")
 
-        if !com.percentEncodedQuery!.contains("EIO") {
-            com.percentEncodedQuery = com.percentEncodedQuery! + engineIOParam
-        }
+        var query = (com.percentEncodedQueryItems ?? []).filter { $0.name.removingPercentEncoding != "EIO" }
+        query.append(URLQueryItem(name: "EIO", value: "4"))
+        com.percentEncodedQueryItems = query
 
+        // JS-aligned with `WS.uri()` in engine.io-client: the WebSocket URL
+        // is only stamped when `timestampRequests` is explicitly `true`.
+        guard timestampRequests == true else { return com.url! }
 
-        return com.url!
+        return urlByAppendingCacheBuster(to: com.url!)
     }
 
     func addHeaders(to req: inout URLRequest, includingCookies additionalCookies: [HTTPCookie]? = nil) {
@@ -193,12 +253,9 @@ extension SocketEngineSpec {
     }
 
     func createBinaryDataForSend(using data: Data) -> Either<Data, String> {
-        let prefixB64 = version.rawValue >= 3 ? "b" : "b4"
-
-        if polling {
-            return .right(prefixB64 + data.base64EncodedString(options: Data.Base64EncodingOptions(rawValue: 0)))
-        } else {
-            return .left(version.rawValue >= 3 ? data : Data([0x4]) + data)
+        switch SocketEnginePacketCodec.encode(.init(type: .message, data: .binary(data)), supportsBinary: !polling && !forceBase64) {
+        case .text(let value): return .right(value)
+        case .binary(let value): return .left(value)
         }
     }
 

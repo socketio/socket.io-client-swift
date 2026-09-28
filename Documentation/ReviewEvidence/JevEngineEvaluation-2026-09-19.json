@@ -1,0 +1,684 @@
+{
+  "advisory_only": true,
+  "upstream_sha": "aaf2af36ec8ad05910f357a788e0e358bad32738",
+  "note": "Inputs preserve actual inspected source snippets. Coordinator recommendations were independently checked; this artifact is not runtime proof.",
+  "calls": [
+    {
+      "input": {
+        "questions": [
+          {
+            "instructions": "Categorize the parity status of JS-149 given the upstream JS source and mapped Swift test SocketPollingCloseTest.testSendAfterCloseProducesNoPacket.",
+            "type": "choice",
+            "choices": [
+              {
+                "label": "full_assertion_equivalence",
+                "description": "Swift test has complete assertion and stimulus equivalence to upstream JS-149."
+              },
+              {
+                "description": "Swift tests part of the scenario but has gaps in stimulus, transport, or assertions.",
+                "label": "partial_test"
+              },
+              {
+                "description": "No substantive test exists for the JS-149 scenario.",
+                "label": "missing_test"
+              },
+              {
+                "label": "reviewed_platform_boundary",
+                "description": "Reviewed native/platform boundary adaptation where native APIs differ."
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Insufficient evidence to determine parity status."
+              }
+            ],
+            "id": "js_149_status"
+          },
+          {
+            "type": "boolean",
+            "instructions": "Does SocketPollingCloseTest.testSendAfterCloseProducesNoPacket run against a real network/transport rather than a mock URLProtocol fixture?",
+            "id": "js_149_uses_real_transport"
+          },
+          {
+            "instructions": "Does the Swift test assert the suppression of packetCreate event directly as upstream JS does?",
+            "type": "boolean",
+            "id": "js_149_asserts_packet_create_event"
+          },
+          {
+            "type": "choice",
+            "instructions": "Categorize the parity status of JS-150 given upstream JS source and mapped Swift tests (SocketEngineTest, SocketMaxPayloadE2ETest, max-payload-proof.mjs, EngineRemainingParityE2ETest).",
+            "id": "js_150_status",
+            "choices": [
+              {
+                "label": "full_assertion_equivalence",
+                "description": "Swift test has complete assertion and stimulus equivalence to upstream JS-150."
+              },
+              {
+                "label": "partial_test",
+                "description": "Swift tests part of the scenario but has gaps in stimulus, transport, or assertions."
+              },
+              {
+                "description": "No substantive test exists for the JS-150 scenario.",
+                "label": "missing_test"
+              },
+              {
+                "description": "Reviewed native/platform boundary adaptation where native APIs differ.",
+                "label": "reviewed_platform_boundary"
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Insufficient evidence to determine parity status."
+              }
+            ]
+          },
+          {
+            "instructions": "Do the mapped Swift tests execute the exact 6-packet sequence from JS-150 including the 33-character multibyte UTF-8 euro symbol (\u20ac) packet and merged batches up to maxPayload=100 on real polling transport?",
+            "id": "js_150_exercises_exact_multibyte_and_batch_payloads",
+            "type": "boolean"
+          },
+          {
+            "choices": [
+              {
+                "label": "full_assertion_equivalence",
+                "description": "Swift test has complete assertion and stimulus equivalence to upstream JS-151."
+              },
+              {
+                "description": "Swift tests part of the scenario but has gaps in stimulus, transport, or assertions.",
+                "label": "partial_test"
+              },
+              {
+                "description": "No substantive test exists for the JS-151 scenario.",
+                "label": "missing_test"
+              },
+              {
+                "description": "Reviewed native/platform boundary adaptation where native APIs differ.",
+                "label": "reviewed_platform_boundary"
+              },
+              {
+                "description": "Insufficient evidence to determine parity status.",
+                "label": "insufficient_evidence"
+              }
+            ],
+            "id": "js_151_status",
+            "type": "choice",
+            "instructions": "Categorize the parity status of JS-151 given upstream JS source and mapped Swift tests."
+          },
+          {
+            "instructions": "Does any Swift test send an oversized packet (length > maxPayload) followed by a subsequent packet over live polling transport and assert that the socket closes?",
+            "type": "boolean",
+            "id": "js_151_sends_oversized_plus_subsequent_packet_to_close"
+          },
+          {
+            "type": "choice",
+            "id": "js_194_status",
+            "instructions": "Categorize the parity status of JS-194 given upstream JS source and EngineRemainingParityE2ETest.testOversizePollingReports413AndCloseDetail.",
+            "choices": [
+              {
+                "description": "Swift test has complete assertion and stimulus equivalence to upstream JS-194.",
+                "label": "full_assertion_equivalence"
+              },
+              {
+                "label": "partial_test",
+                "description": "Swift tests part of the scenario but has gaps in stimulus, transport, or assertions."
+              },
+              {
+                "description": "No substantive test exists for the JS-194 scenario.",
+                "label": "missing_test"
+              },
+              {
+                "description": "Reviewed native/platform boundary adaptation where native APIs differ.",
+                "label": "reviewed_platform_boundary"
+              },
+              {
+                "description": "Insufficient evidence to determine parity status.",
+                "label": "insufficient_evidence"
+              }
+            ]
+          },
+          {
+            "id": "js_194_asserts_413_and_error_before_close",
+            "instructions": "Does EngineRemainingParityE2ETest.testOversizePollingReports413AndCloseDetail assert HTTP 413, write operation, and that the error failure precedes the close callback?",
+            "type": "boolean"
+          },
+          {
+            "id": "js_195_status",
+            "instructions": "Categorize the parity status of JS-195 given upstream JS source and mapped Swift tests.",
+            "type": "choice",
+            "choices": [
+              {
+                "label": "full_assertion_equivalence",
+                "description": "Swift test has complete assertion and stimulus equivalence to upstream JS-195."
+              },
+              {
+                "label": "partial_test",
+                "description": "Swift tests part of the scenario but has gaps in stimulus, transport, or assertions."
+              },
+              {
+                "label": "missing_test",
+                "description": "No substantive test exists for the JS-195 scenario."
+              },
+              {
+                "description": "Reviewed native/platform boundary adaptation where native APIs differ.",
+                "label": "reviewed_platform_boundary"
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Insufficient evidence to determine parity status."
+              }
+            ]
+          },
+          {
+            "id": "js_195_asserts_close_code_1009_on_wire",
+            "instructions": "Does EngineRemainingParityE2ETest.testOversizeWebSocketReports1009AndCloseDetail assert WebSocket close code 1009 over real WebSocket transport against the server?",
+            "type": "boolean"
+          },
+          {
+            "instructions": "Does EngineRemainingParityE2ETest.testOversizeWebSocketReports1009AndCloseDetail assert that client.failed / errors was NOT called (i.e. negative assertion that transport close carries no error)?",
+            "id": "js_195_asserts_negative_error_suppression_in_e2e",
+            "type": "boolean"
+          },
+          {
+            "type": "choice",
+            "instructions": "Categorize the parity status of JS-196 given upstream JS source and EngineRemainingParityE2ETest.testUnknownSIDPollingReports400BodyAndCloseDetail.",
+            "choices": [
+              {
+                "label": "full_assertion_equivalence",
+                "description": "Swift test has complete assertion and stimulus equivalence to upstream JS-196."
+              },
+              {
+                "label": "partial_test",
+                "description": "Swift tests part of the scenario but has gaps in stimulus, transport, or assertions."
+              },
+              {
+                "label": "missing_test",
+                "description": "No substantive test exists for the JS-196 scenario."
+              },
+              {
+                "label": "reviewed_platform_boundary",
+                "description": "Reviewed native/platform boundary adaptation where native APIs differ."
+              },
+              {
+                "description": "Insufficient evidence to determine parity status.",
+                "label": "insufficient_evidence"
+              }
+            ],
+            "id": "js_196_status"
+          },
+          {
+            "type": "boolean",
+            "instructions": "Does testUnknownSIDPollingReports400BodyAndCloseDetail assert HTTP status 400, operation read, and exact responseText '{\\\"code\\\":1,\\\"message\\\":\\\"Session ID unknown\\\"}'?",
+            "id": "js_196_asserts_400_and_exact_json_body"
+          },
+          {
+            "id": "js_197_status",
+            "choices": [
+              {
+                "description": "Swift test has complete assertion and stimulus equivalence to upstream JS-197.",
+                "label": "full_assertion_equivalence"
+              },
+              {
+                "description": "Swift tests part of the scenario but has gaps in stimulus, transport, or assertions.",
+                "label": "partial_test"
+              },
+              {
+                "label": "missing_test",
+                "description": "No substantive test exists for the JS-197 scenario."
+              },
+              {
+                "description": "Reviewed native/platform boundary adaptation where native APIs differ.",
+                "label": "reviewed_platform_boundary"
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Insufficient evidence to determine parity status."
+              }
+            ],
+            "type": "choice",
+            "instructions": "Categorize the parity status of JS-197 given upstream JS source and EngineRemainingParityE2ETest.testUnknownSIDWebSocketReportsErrorAndCloseDetail."
+          },
+          {
+            "type": "boolean",
+            "instructions": "Does testUnknownSIDWebSocketReportsErrorAndCloseDetail assert that a stale-SID WebSocket handshake failure produces an error failure followed by a transport error close?",
+            "id": "js_197_asserts_transport_error_close"
+          },
+          {
+            "instructions": "Categorize the parity status of JS-200 given upstream JS source and SocketNativeEngineTest.testRememberUpgradeDisabledStillStartsWithPolling.",
+            "id": "js_200_status",
+            "choices": [
+              {
+                "description": "Swift test has complete assertion and stimulus equivalence to upstream JS-200.",
+                "label": "full_assertion_equivalence"
+              },
+              {
+                "description": "Swift tests part of the scenario but has gaps in stimulus, transport, or assertions.",
+                "label": "partial_test"
+              },
+              {
+                "label": "missing_test",
+                "description": "No substantive test exists for the JS-200 scenario."
+              },
+              {
+                "label": "reviewed_platform_boundary",
+                "description": "Reviewed native/platform boundary adaptation where native APIs differ."
+              },
+              {
+                "description": "Insufficient evidence to determine parity status.",
+                "label": "insufficient_evidence"
+              }
+            ],
+            "type": "choice"
+          },
+          {
+            "id": "js_200_tests_explicit_remember_upgrade_false",
+            "instructions": "Does SocketNativeEngineTest.testRememberUpgradeDisabledStillStartsWithPolling explicitly configure the second engine with rememberUpgrade(false)?",
+            "type": "boolean"
+          },
+          {
+            "id": "js_200_seeds_upgrade_via_actual_upgrade",
+            "type": "boolean",
+            "instructions": "Does SocketNativeEngineTest.testRememberUpgradeDisabledStillStartsWithPolling seed WebSocket memory via a polling-to-websocket upgrade as upstream does, rather than a direct websocket connection?"
+          }
+        ],
+        "state": "# Evidence State for Parity Audit\nPinned Upstream SHA: aaf2af36ec8ad05910f357a788e0e358bad32738\nTarget Swift repo: /home/monkey/code/socket.io-client-swift\n\n================================================================================\nCase 1: JS-149\nUpstream Source: packages/engine.io-client/test/connection.js (lines 63-77)\n```javascript\n  it(\"should not send packets if socket closes\", (done) => {\n    const socket = new Socket();\n    socket.on(\"open\", () => {\n      let noPacket = true;\n      socket.on(\"packetCreate\", () => {\n        noPacket = false;\n      });\n      socket.close();\n      socket.send(\"hi\");\n      setTimeout(() => {\n        expect(noPacket).to.be(true);\n        done();\n      }, 200);\n    });\n  });\n```\nUpstream behavior: Connects against live test server with default transport (starts polling). On \"open\", sets a listener for \"packetCreate\". Calls socket.close(), then socket.send(\"hi\"). Checks 200ms later that noPacket is true.\nMapped Swift Test: Tests/TestSocketIO/SocketPollingCloseTest.swift (lines 325-341)\n```swift\n    func testSendAfterCloseProducesNoPacket() {\n        connect()\n        let closedOnWire = expectation(description: \"close-only POST\")\n        fixture.observePosts { post in\n            XCTAssertEqual(post.body, \"1\")\n            closedOnWire.fulfill()\n        }\n        var completed = false\n        engine.disconnect(reason: \"io client disconnect\")\n        engine.write(\"hi\", withType: .message, withData: []) { completed = true }\n        wait(for: [closedOnWire], timeout: 5)\n        engine.engineQueue.sync {\n            XCTAssertTrue(engine.postWait.isEmpty)\n            XCTAssertTrue(completed, \"a refused write still completes locally\")\n        }\n        XCTAssertEqual(fixture.posts.map { $0.body }, [\"1\"])\n    }\n```\nFixture: PollingCloseFixture is a mock URLProtocol intercepting HTTP requests for a dummy host `*.polling.test`. It responds to handshake and checks posts. It is not a real transport/network server.\nNotice: Upstream asserts event 'packetCreate' not emitted on Engine.IO socket. Swift SocketEngine has no 'packetCreate' event API, so it asserts wire posts contain only \"1\" and postWait is empty.\n\n================================================================================\nCase 2: JS-150\nUpstream Source: packages/engine.io-client/test/connection.js (lines 79-98)\nServer config: packages/engine.io-client/test/support/server.js has maxHttpBufferSize: 100.\n```javascript\n  it(\"should merge packets according to maxPayload value\", (done) => {\n    const socket = new Socket({ transports: [\"polling\"] });\n    socket.on(\"open\", () => {\n      socket.send(repeat(\"a\", 99));\n      socket.send(repeat(\"b\", 30));\n      socket.send(repeat(\"c\", 30));\n      socket.send(repeat(\"d\", 35)); // 3 * 1 (packet type) + 2 * 1 (separator) + 30 + 30 + 35 = 100\n      socket.send(repeat(\"\u20ac\", 33));\n      socket.send(repeat(\"f\", 99));\n\n      let count = 0;\n      socket.on(\"message\", () => {\n        count++;\n        if (count === 6) {\n          socket.close();\n          done();\n        }\n      });\n    });\n  });\n```\nUpstream behavior: Real polling transport against server with maxHttpBufferSize: 100. Sends 6 exact payloads engineered to fit maxPayload=100 boundaries:\n- 99 'a' (1 type + 99 = 100)\n- 30 'b' + 30 'c' + 35 'd' (3 types + 2 seps + 95 = 100)\n- 33 '\u20ac' (each \u20ac is 3 UTF-8 bytes: 1 type + 99 = 100)\n- 99 'f' (1 type + 99 = 100)\nAsserts all 6 messages received.\nMapped Swift Tests:\n1. Tests/TestSocketIO/SocketEngineTest.swift (lines 272-327): Unit tests on createRequestForPostWithPostWait().\n   - testPostBatchStopsAtTheServersMaxPayload: maxPayload=20, 3 x 10 byte packets. Body has 1 packet, postWait has 2.\n   - testPostBatchFillsUpToTheLimitExactly: maxPayload=21, body has 2 packets (21 bytes).\n   - testMaxPayloadCountsBytesNotCharacters: maxPayload=12, tests German umlauts \\u{e4} (2 bytes).\n2. Tests/TestSocketIO/E2E/SocketMaxPayloadE2ETest.swift (lines 57-75):\n   - testQueuedEventsSurviveABatchLargerThanTheLimit: Emits 10 Socket.IO events (emitWithAck) of 120 bytes against server with limit 200.\n3. Tests/TestSocketIO/E2E/Fixtures/max-payload-proof.mjs: Node.js external script.\n4. Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift (line 169):\n   - testBinaryMaxPayloadBatching: Binary batching with maxHttpBufferSize 100.\nNote in Documentation/JavaScriptTestInventory.csv: \"Existing byte-budget/oversized-single-packet tests are relevant; complete binary/UTF-8 parameter expansion is not certified here.\"\n\n================================================================================\nCase 3: JS-151\nUpstream Source: packages/engine.io-client/test/connection.js (lines 100-110)\n```javascript\n  it(\"should send a packet whose length is above the maxPayload value anyway\", (done) => {\n    const socket = new Socket({ transports: [\"polling\"] });\n    socket.on(\"open\", () => {\n      socket.send(repeat(\"a\", 101));\n      socket.send(\"b\");\n\n      socket.on(\"close\", () => {\n        done();\n      });\n    });\n  });\n```\nUpstream behavior: Against server with maxHttpBufferSize: 100, sends packet of 101 'a's (above maxPayload) AND packet \"b\". The oversized packet cannot be split, so it is sent on its own, causing the server to reject it and close the socket.\nMapped Swift Tests:\n1. Tests/TestSocketIO/SocketEngineTest.swift:302:\n```swift\n    func testAPacketLargerThanMaxPayloadIsStillSentOnItsOwn() {\n        engine.setMaxPayload(5)\n        engine.postWait = [\n            (msg: \"4aaaaaaaaa\", completion: nil),\n            (msg: \"4b\", completion: nil)\n        ]\n        let req = engine.createRequestForPostWithPostWait()\n        XCTAssertEqual(String(data: req.httpBody!, encoding: .utf8), \"4aaaaaaaaa\")\n        XCTAssertEqual(engine.postWait.count, 1)\n    }\n```\nUnit test only: checks request creation on postWait, does not connect to server or test close.\n2. Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift:232:\n```swift\n    func testOversizePollingReports413AndCloseDetail() throws {\n        try make([.forcePolling(true)], maximum: 100)\n        client.opened = { [self] in engine.send(String(repeating: \"a\", count: 101), withData: []) }\n        expectFailure(status: 413, code: nil, operation: \"write\") { engine.connect() }\n    }\n```\nConnects to real server, sends 101 'a's, but does NOT send subsequent packet \"b\".\n\n================================================================================\nCase 4: JS-194\nUpstream Source: packages/engine.io-client/test/socket.js (lines 187-212)\n```javascript\n    it(\"provides details when maxHttpBufferSize is reached (polling)\", (done) => {\n      const socket = new Socket({ transports: [\"polling\"] });\n      socket.on(\"open\", () => {\n        socket.send(repeat(\"a\", 101)); // over the maxHttpBufferSize value of the server\n      });\n\n      socket.on(\"error\", (err) => {\n        expect(err).to.be.an(Error);\n        expect(err.type).to.eql(\"TransportError\");\n        expect(err.description).to.eql(413);\n        if (useFetch) {\n          expect(err.message).to.eql(\"fetch write error\");\n        } else {\n          expect(err.message).to.eql(\"xhr post error\");\n          expect(err.context.readyState).to.eql(4);\n          expect(err.context.responseText).to.eql(\"\");\n        }\n      });\n\n      socket.on(\"close\", (reason, details) => {\n        expect(reason).to.eql(\"transport error\");\n        expect(details).to.be.an(Error);\n        done();\n      });\n    });\n```\nMapped Swift Test: Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift (lines 232-236, helper 211-231):\n```swift\n    private func expectFailure(status: Int?, code: Int?, operation: String,\n                              start: () -> Void) {\n        let closed = expectation(description: \"one detailed close\")\n        closed.assertForOverFulfill = true\n        var failures: [SocketTransportError] = []\n        client.failed = { _, detail in if let detail = detail { failures.append(detail) } }\n        client.closed = { reason, detail in\n            XCTAssertEqual(reason, code == nil ? \"transport error\" : \"transport close\")\n            XCTAssertNotNil(detail)\n            XCTAssertEqual(detail?.httpStatusCode, status)\n            XCTAssertEqual(detail?.closeCode, code)\n            XCTAssertEqual(detail?.operation, operation)\n            if code == nil { XCTAssertEqual(failures.count, 1) }\n            if status == 400 {\n                XCTAssertEqual(detail?.responseText, \"{\\\"code\\\":1,\\\"message\\\":\\\"Session ID unknown\\\"}\")\n            }\n            closed.fulfill()\n        }\n        start()\n        wait(for: [closed], timeout: 10)\n    }\n\n    func testOversizePollingReports413AndCloseDetail() throws {\n        try make([.forcePolling(true)], maximum: 100)\n        client.opened = { [self] in engine.send(String(repeating: \"a\", count: 101), withData: []) }\n        expectFailure(status: 413, code: nil, operation: \"write\") { engine.connect() }\n    }\n```\nPlatform adaptation: In JavaScript, XHR/Fetch error has `readyState: 4`, `responseText: \"\"`. In Swift, `SocketTransportError` is surfaced with `httpStatusCode: 413`, `operation: \"write\"`, `transport: \"polling\"`. Tested on real Node process running `engine-parity-server.mjs`.\n\n================================================================================\nCase 5: JS-195\nUpstream Source: packages/engine.io-client/test/socket.js (lines 214-234)\n```javascript\n    it(\"provides details when maxHttpBufferSize is reached (websocket)\", (done) => {\n      const socket = new Socket({ transports: [\"websocket\"] });\n      socket.on(\"open\", () => {\n        socket.send(repeat(\"a\", 101)); // over the maxHttpBufferSize value of the server\n      });\n\n      socket.on(\"close\", (reason, details) => {\n        if (isIE11) {\n          expect(reason).to.eql(\"transport error\");\n          expect(details).to.be.an(Error);\n        } else {\n          expect(reason).to.eql(\"transport close\");\n          expect(details.description).to.eql(\"websocket connection closed\");\n          expect(details.context.code).to.eql(1009); // \"Message Too Big\"\n          expect(details.context.reason).to.eql(\"\");\n        }\n        done();\n      });\n    });\n```\nMapped Swift Tests:\n1. Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift (lines 237-241):\n```swift\n    func testOversizeWebSocketReports1009AndCloseDetail() throws {\n        try make([.forceWebsockets(true)], maximum: 100)\n        client.opened = { [self] in engine.send(String(repeating: \"a\", count: 101), withData: []) }\n        expectFailure(status: nil, code: 1009, operation: \"close\") { engine.connect() }\n    }\n```\n`expectFailure` asserts: `reason == \"transport close\"`, `detail?.closeCode == 1009`, `detail?.operation == \"close\"`.\nNote: It does not check that `detail?.closeReason == \"\"` (upstream checks reason is empty string), and in `expectFailure`, when `code != nil` (1009), it does not assert `failures.isEmpty`.\n2. Tests/TestSocketIO/SocketRemainingParityTest.swift (line 198):\n```swift\n    func testCloseDetailIncludesPeerCodeEvenWithReceiveError() {\n        let instance = engine([.forceWebsockets(true)])\n        let transport = RemainingUnitTransport()\n        instance.webSocketTransportFactory = { _ in transport }\n        instance.connect(); settle(instance)\n        transport.onEvent?(.opened(protocol: nil)); settle(instance)\n        transport.onEvent?(.closed(code: 1009, reason: Data(\"too big\".utf8),\n                                   error: NSError(domain: NSURLErrorDomain, code: -1005)))\n        settle(instance)\n        instance.engineQueue.sync {\n            XCTAssertEqual(client.closes, [\"transport close\"])\n            XCTAssertTrue(client.errors.isEmpty)\n            XCTAssertEqual(client.closeError?.closeCode, 1009)\n            XCTAssertEqual(client.closeError?.closeReason, \"too big\")\n        }\n    }\n```\nAsserts unit mock receives close code 1009 and no errors.\n\n================================================================================\nCase 6: JS-196\nUpstream Source: packages/engine.io-client/test/socket.js (lines 236-263)\n```javascript\n    it(\"provides details when the session ID is unknown (polling)\", (done) => {\n      const socket = new Socket({\n        transports: [\"polling\"],\n        query: { sid: \"abc\" },\n      });\n\n      socket.on(\"error\", (err) => {\n        expect(err).to.be.an(Error);\n        expect(err.type).to.eql(\"TransportError\");\n        expect(err.description).to.eql(400);\n        if (useFetch) {\n          expect(err.message).to.eql(\"fetch read error\");\n        } else {\n          expect(err.message).to.eql(\"xhr poll error\");\n          expect(err.context.readyState).to.eql(4);\n          expect(err.context.responseText).to.eql(\n            '{\"code\":1,\"message\":\"Session ID unknown\"}',\n          );\n        }\n      });\n\n      socket.on(\"close\", (reason, details) => {\n        expect(reason).to.eql(\"transport error\");\n        expect(details).to.be.an(Error);\n        done();\n      });\n    });\n```\nMapped Swift Test: Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift (lines 242-253):\n```swift\n    func testUnknownSIDPollingReports400BodyAndCloseDetail() throws {\n        try make([.forcePolling(true)])\n        // Inject a stale transport request, not a user query (sid is engine-owned).\n        let url = URL(string: \"http://127.0.0.1:\\(server.port)/engine.io/?EIO=4&transport=polling&sid=missing\")!\n        expectFailure(status: 400, code: nil, operation: \"read\") {\n            engine.engineQueue.sync {\n                engine.setConnected(true)\n                engine.setTestSession(URLSession(configuration: .ephemeral))\n                engine.doLongPoll(for: URLRequest(url: url))\n            }\n        }\n    }\n```\n`expectFailure` asserts: `httpStatusCode == 400`, `operation == \"read\"`, `reason == \"transport error\"`, `failures.count == 1`, and `detail?.responseText == \"{\\\"code\\\":1,\\\"message\\\":\\\"Session ID unknown\\\"}\"`.\nPlatform adaptation: `sid` is engine-owned internal state; the test initiates a long poll request with a stale sid to real server process and checks exact HTTP 400 and JSON body.\n\n================================================================================\nCase 7: JS-197\nUpstream Source: packages/engine.io-client/test/socket.js (lines 265-284)\n```javascript\n    it(\"provides details when the session ID is unknown (websocket)\", (done) => {\n      const socket = new Socket({\n        transports: [\"websocket\"],\n        query: { sid: \"abc\" },\n      });\n\n      socket.on(\"error\", (err) => {\n        expect(err).to.be.an(Error);\n        expect(err.type).to.eql(\"TransportError\");\n        expect(err.message).to.eql(\"websocket error\");\n        expect(err.description.type).to.be(\"error\");\n      });\n\n      socket.on(\"close\", (reason, details) => {\n        expect(reason).to.eql(\"transport error\");\n        expect(details).to.be.an(Error);\n        done();\n      });\n    });\n```\nMapped Swift Test: Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift (lines 254-262):\n```swift\n    func testUnknownSIDWebSocketReportsErrorAndCloseDetail() throws {\n        try make([.forceWebsockets(true)])\n        let url = URL(string: \"ws://127.0.0.1:\\(server.port)/engine.io/?EIO=4&transport=websocket&sid=missing\")!\n        engine.webSocketTransportFactory = { [weak engine] _ in\n            URLSessionWebSocketTransport(request: URLRequest(url: url), queue: engine!.engineQueue,\n                                         configuration: .ephemeral)\n        }\n        expectFailure(status: nil, code: nil, operation: \"close\") { engine.connect() }\n    }\n```\n`expectFailure` asserts: `reason == \"transport error\"`, `failures.count == 1`, `detail?.operation == \"close\"`.\nPlatform adaptation: Apple's URLSessionWebSocketTransport does not expose HTTP rejection body or status when WebSocket handshake fails; it reports an underlying connection/transport error. The test checks native SocketTransportError with reason \"transport error\" and operation \"close\".\n\n================================================================================\nCase 8: JS-200\nUpstream Source: packages/engine.io-client/test/transport.js (lines 33-54)\n```javascript\n    it(\"should not remember websocket connection\", (done) => {\n      const socket = new eio.Socket();\n      expect(socket.transport.name).to.be(\"polling\");\n\n      let timedout = false;\n      const timeout = setTimeout(() => {\n        timedout = true;\n        socket.close();\n        done();\n      }, 300);\n\n      socket.on(\"upgrade\", (transport) => {\n        if (timedout) return;\n        clearTimeout(timeout);\n        socket.close();\n        if (transport.name === \"websocket\") {\n          const socket2 = new eio.Socket({ rememberUpgrade: false });\n          expect(socket2.transport.name).to.not.be(\"websocket\");\n        }\n        done();\n      });\n    });\n```\nUpstream behavior:\n1. socket starts with default transports (polling).\n2. Live server offers websocket upgrade; socket emits \"upgrade\" with transport \"websocket\".\n3. Socket is closed.\n4. Second socket is created with explicit option `{ rememberUpgrade: false }`.\n5. Verifies immediately that socket2.transport.name is NOT \"websocket\".\nMapped Swift Test: Tests/TestSocketIO/SocketNativeEngineTest.swift (lines 750-764)\n```swift\n    func testRememberUpgradeDisabledStillStartsWithPolling() {\n        let (first, _, firstTransport) = make()\n        open(first, firstTransport)\n        first.disconnect(reason: \"test\"); drain(first)\n        let (second, client, transport) = selectionEngine(host: \"accept.polling.test\", transports: [.polling, .websocket])\n        let opened = expectation(description: \"default remains polling\")\n        client.onOpen = { opened.fulfill() }\n        second.connect()\n        wait(for: [opened], timeout: 3)\n        second.engineQueue.sync {\n            XCTAssertTrue(second.polling)\n            XCTAssertEqual(transport.connects, 0)\n        }\n        second.disconnect(reason: \"test\"); drain(second)\n    }\n```\nDiscrepancies:\n- `first` uses `make()` which forces `.forceWebsockets(true)` - it does not test a polling-to-websocket upgrade.\n- `second` is created via `selectionEngine(host: ..., transports: [.polling, .websocket])` WITHOUT passing `.rememberUpgrade(false)`. It tests default configuration behavior, not the explicit `.rememberUpgrade(false)` option.\n- Both engines use mock transports (`NativeEngineTransport`, `TransportSelectionProtocol`), not a live server.\n"
+      },
+      "output": {
+        "model": "typesafe-ai/jev",
+        "advisoryOnly": true,
+        "answers": {
+          "js_149_status": {
+            "type": "choice",
+            "choice": "partial_test",
+            "probabilities": {
+              "missing_test": 0,
+              "reviewed_platform_boundary": 0.24,
+              "insufficient_evidence": 0,
+              "full_assertion_equivalence": 0.23,
+              "partial_test": 0.53
+            }
+          },
+          "js_149_uses_real_transport": {
+            "type": "boolean",
+            "probability": 0.02
+          },
+          "js_149_asserts_packet_create_event": {
+            "type": "boolean",
+            "probability": 0.04
+          },
+          "js_150_status": {
+            "type": "choice",
+            "choice": "partial_test",
+            "probabilities": {
+              "missing_test": 0,
+              "reviewed_platform_boundary": 0,
+              "insufficient_evidence": 0,
+              "full_assertion_equivalence": 0,
+              "partial_test": 1
+            }
+          },
+          "js_150_exercises_exact_multibyte_and_batch_payloads": {
+            "type": "boolean",
+            "probability": 0.04
+          },
+          "js_151_status": {
+            "type": "choice",
+            "choice": "partial_test",
+            "probabilities": {
+              "missing_test": 0,
+              "reviewed_platform_boundary": 0,
+              "insufficient_evidence": 0,
+              "full_assertion_equivalence": 0,
+              "partial_test": 1
+            }
+          },
+          "js_151_sends_oversized_plus_subsequent_packet_to_close": {
+            "type": "boolean",
+            "probability": 0.12
+          },
+          "js_194_status": {
+            "type": "choice",
+            "choice": "reviewed_platform_boundary",
+            "probabilities": {
+              "missing_test": 0,
+              "reviewed_platform_boundary": 0.53,
+              "insufficient_evidence": 0,
+              "full_assertion_equivalence": 0.03,
+              "partial_test": 0.44
+            }
+          },
+          "js_194_asserts_413_and_error_before_close": {
+            "type": "boolean",
+            "probability": 0.59
+          },
+          "js_195_status": {
+            "type": "choice",
+            "choice": "partial_test",
+            "probabilities": {
+              "missing_test": 0,
+              "reviewed_platform_boundary": 0.05,
+              "insufficient_evidence": 0,
+              "full_assertion_equivalence": 0,
+              "partial_test": 0.95
+            }
+          },
+          "js_195_asserts_close_code_1009_on_wire": {
+            "type": "boolean",
+            "probability": 0.93
+          },
+          "js_195_asserts_negative_error_suppression_in_e2e": {
+            "type": "boolean",
+            "probability": 0.09
+          },
+          "js_196_status": {
+            "type": "choice",
+            "choice": "partial_test",
+            "probabilities": {
+              "missing_test": 0,
+              "reviewed_platform_boundary": 0.16,
+              "insufficient_evidence": 0,
+              "full_assertion_equivalence": 0.19,
+              "partial_test": 0.65
+            }
+          },
+          "js_196_asserts_400_and_exact_json_body": {
+            "type": "boolean",
+            "probability": 0.98
+          },
+          "js_197_status": {
+            "type": "choice",
+            "choice": "reviewed_platform_boundary",
+            "probabilities": {
+              "missing_test": 0,
+              "reviewed_platform_boundary": 0.86,
+              "insufficient_evidence": 0,
+              "full_assertion_equivalence": 0,
+              "partial_test": 0.14
+            }
+          },
+          "js_197_asserts_transport_error_close": {
+            "type": "boolean",
+            "probability": 0.89
+          },
+          "js_200_status": {
+            "type": "choice",
+            "choice": "partial_test",
+            "probabilities": {
+              "missing_test": 0,
+              "reviewed_platform_boundary": 0,
+              "insufficient_evidence": 0,
+              "full_assertion_equivalence": 0,
+              "partial_test": 1
+            }
+          },
+          "js_200_tests_explicit_remember_upgrade_false": {
+            "type": "boolean",
+            "probability": 0.04
+          },
+          "js_200_seeds_upgrade_via_actual_upgrade": {
+            "type": "boolean",
+            "probability": 0.08
+          }
+        },
+        "usage": {
+          "inputTokens": 7602,
+          "outputTokens": 910,
+          "totalTokens": 8512
+        },
+        "rounding": {
+          "probabilityDecimals": 2,
+          "scoreDecimals": 2
+        },
+        "warningCount": 0,
+        "elapsedMs": 1040
+      }
+    },
+    {
+      "input": {
+        "state": "# Evidence State for Remediation & Boundary Analysis\nPinned Upstream SHA: aaf2af36ec8ad05910f357a788e0e358bad32738\nTarget Swift repo: /home/monkey/code/socket.io-client-swift\n\n1. JS-149:\nUpstream: socket.on(\"open\") -> socket.close() -> socket.send(\"hi\") -> 200ms -> assert no 'packetCreate' event.\nSwift current: SocketPollingCloseTest.testSendAfterCloseProducesNoPacket uses mock PollingCloseFixture (URLProtocol interceptor). Asserts postWait is empty, refused write completes locally, fixture.posts == [\"1\"].\nProposed fix: In EngineRemainingParityE2ETest, add a test against real TestServerProcess where after engine.disconnect() (or during close), an engine.send(\"hi\") is invoked, verifying no subsequent POST or WS frame reaches the server snapshot and no unexpected error is reported.\n\n2. JS-150:\nUpstream: Against maxHttpBufferSize: 100, sends:\n  - 99 'a'\n  - 30 'b', 30 'c', 35 'd' (batched into 100 bytes)\n  - 33 '\u20ac' (33 * 3 + 1 = 100 bytes UTF-8)\n  - 99 'f'\nAsserts 6 'message' events echoed back.\nSwift current: SocketEngineTest has unit tests for maxPayload batch cutting; SocketMaxPayloadE2ETest has Socket.IO level ack test with 10 x 120 bytes against limit 200; EngineRemainingParityE2ETest has binary batching test. The exact 6-packet sequence with UTF-8 multi-byte symbol '\u20ac' on live polling is uncertified.\nProposed fix: In EngineRemainingParityE2ETest, add test sending the exact 6 messages over polling against maximum: 100, asserting all 6 messages are round-tripped and snapshot shows proper batching.\n\n3. JS-151:\nUpstream: Sends 101 'a's (exceeds maxPayload 100) and \"b\". Asserts socket closes upon the server's rejection of the oversized packet.\nSwift current: SocketEngineTest.testAPacketLargerThanMaxPayloadIsStillSentOnItsOwn is unit-only. EngineRemainingParityE2ETest.testOversizePollingReports413AndCloseDetail sends 101 'a's alone (does not queue \"b\").\nProposed fix: Send 101 'a's followed by \"b\" in polling E2E test, verifying that 101 'a's goes out alone, triggers 413, closes the engine, and \"b\" is never transmitted.\n\n4. JS-194:\nUpstream: 101 'a's on polling produces TransportError with description 413, xhr post error, and close with transport error.\nSwift current: EngineRemainingParityE2ETest.testOversizePollingReports413AndCloseDetail asserts detail?.httpStatusCode == 413, operation == \"write\", reason == \"transport error\", failures.count == 1 before close. Native SocketTransportError replaces XHR object.\n\n5. JS-195:\nUpstream: 101 'a's on websocket closes with reason \"transport close\", description \"websocket connection closed\", code 1009, reason \"\". No error event.\nSwift current: EngineRemainingParityE2ETest.testOversizeWebSocketReports1009AndCloseDetail asserts reason \"transport close\", code 1009, operation \"close\". SocketRemainingParityTest unit test asserts errors.isEmpty and code 1009.\nMinor gap in E2E: Does not assert detail?.closeReason == \"\" or failures.isEmpty in expectFailure for code 1009.\nProposed fix: Assert failures.isEmpty and XCTAssertEqual(detail?.closeReason ?? \"\", \"\") in expectFailure when code == 1009.\n\n6. JS-196:\nUpstream: Connects with query: { sid: \"abc\" } on polling. Server returns HTTP 400 '{\"code\":1,\"message\":\"Session ID unknown\"}'. Socket receives TransportError 400 and closes with transport error.\nSwift current: Source/SocketIO/Engine/SocketEngine.swift line 484 reserves \"sid\", \"EIO\", \"transport\", \"b64\", filtering them out of user query parameters. Thus, a user cannot supply sid via connectParams. EngineRemainingParityE2ETest.testUnknownSIDPollingReports400BodyAndCloseDetail injects the stale SID URL into doLongPoll, asserting HTTP 400, exact JSON body, operation \"read\", and transport error close.\nThis is a documented native architectural constraint: sid is an internal protocol token, not an open user parameter.\n\n7. JS-197:\nUpstream: Connects with query: { sid: \"abc\" } on websocket. Fails with TransportError \"websocket error\" and closes with transport error.\nSwift current: In EngineRemainingParityE2ETest.testUnknownSIDWebSocketReportsErrorAndCloseDetail, URLSessionWebSocketTransport fails handshake with stale SID, producing native SocketTransportError with operation \"close\" and reason \"transport error\". Documented platform adaptation (URLSessionWebSocketTask does not expose HTTP response body/status on failed WS upgrade).\n\n8. JS-200:\nUpstream: Upgrades polling to websocket, closes socket, creates new Socket with { rememberUpgrade: false }, asserts socket2.transport.name !== \"websocket\".\nSwift current: SocketNativeEngineTest.testRememberUpgradeDisabledStillStartsWithPolling uses make() with .forceWebsockets(true) to seed upgrade memory (not an upgrade), and does not explicitly pass .rememberUpgrade(false) to the second engine (relies on default false).\nProposed fix: Update test to explicitly pass .rememberUpgrade(false) to the second engine, and seed via a polling-to-websocket upgrade flow (or documented unit simulation).\n",
+        "questions": [
+          {
+            "instructions": "Given that Source/SocketIO/Engine/SocketEngine.swift line 484 explicitly marks sid as a reserved key filtered from user connectParams, is testUnknownSIDPollingReports400BodyAndCloseDetail better understood as a reviewed platform boundary adaptation or an incomplete partial test?",
+            "type": "choice",
+            "id": "js_196_boundary_rationale",
+            "choices": [
+              {
+                "description": "Reviewed native platform boundary adaptation: sid is engine-reserved and filtered from user query params, so stale-SID injection directly tests the protocol response.",
+                "label": "reviewed_platform_boundary"
+              },
+              {
+                "label": "partial_test",
+                "description": "Partial test because user configuration query mechanism is bypassed without full equivalence."
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Insufficient evidence to evaluate."
+              }
+            ]
+          },
+          {
+            "id": "js_149_real_e2e_remediation",
+            "instructions": "Would adding an E2E test against engine-parity-server.mjs where engine.disconnect() is followed by engine.send(\\\"hi\\\") asserting no wire request and no error callback close the JS-149 transport/stimulus gap?",
+            "type": "boolean"
+          },
+          {
+            "type": "boolean",
+            "id": "js_150_exact_payload_remediation",
+            "instructions": "Would executing the exact 6-packet payload sequence (99 'a', 30 'b'+30 'c'+35 'd', 33 '\u20ac', 99 'f') against engine-parity-server.mjs with maxHttpBufferSize: 100 and asserting 6 echoed messages close the JS-150 gap?"
+          },
+          {
+            "instructions": "Would testing that an oversized packet (101 bytes) followed by packet 'b' over live polling results in rejection and socket close without delivering 'b' close the JS-151 gap?",
+            "id": "js_151_followup_packet_remediation",
+            "type": "boolean"
+          },
+          {
+            "instructions": "Would asserting failures.isEmpty and detail?.closeReason == \\\"\\\" in expectFailure for the WebSocket 1009 case in EngineRemainingParityE2ETest complete the assertions of JS-195?",
+            "type": "boolean",
+            "id": "js_195_close_reason_and_error_suppression_remediation"
+          },
+          {
+            "type": "boolean",
+            "instructions": "Would passing .rememberUpgrade(false) explicitly to the second engine and asserting that it opens with polling close the JS-200 option testing gap?",
+            "id": "js_200_explicit_false_remediation"
+          },
+          {
+            "instructions": "Rank the priority of fixing JS-149 parity gaps.",
+            "levels": [
+              "P3_low",
+              "P2_medium",
+              "P1_high"
+            ],
+            "id": "js_149_priority",
+            "type": "score"
+          },
+          {
+            "id": "js_150_priority",
+            "type": "score",
+            "levels": [
+              "P3_low",
+              "P2_medium",
+              "P1_high"
+            ],
+            "instructions": "Rank the priority of fixing JS-150 parity gaps."
+          },
+          {
+            "id": "js_151_priority",
+            "instructions": "Rank the priority of fixing JS-151 parity gaps.",
+            "type": "score",
+            "levels": [
+              "P3_low",
+              "P2_medium",
+              "P1_high"
+            ]
+          },
+          {
+            "levels": [
+              "P3_low",
+              "P2_medium",
+              "P1_high"
+            ],
+            "instructions": "Rank the priority of fixing JS-194 parity gaps.",
+            "id": "js_194_priority",
+            "type": "score"
+          },
+          {
+            "levels": [
+              "P3_low",
+              "P2_medium",
+              "P1_high"
+            ],
+            "type": "score",
+            "instructions": "Rank the priority of fixing JS-195 parity gaps.",
+            "id": "js_195_priority"
+          },
+          {
+            "type": "score",
+            "levels": [
+              "P3_low",
+              "P2_medium",
+              "P1_high"
+            ],
+            "id": "js_196_priority",
+            "instructions": "Rank the priority of fixing JS-196 parity gaps."
+          },
+          {
+            "id": "js_197_priority",
+            "instructions": "Rank the priority of fixing JS-197 parity gaps.",
+            "levels": [
+              "P3_low",
+              "P2_medium",
+              "P1_high"
+            ],
+            "type": "score"
+          },
+          {
+            "instructions": "Rank the priority of fixing JS-200 parity gaps.",
+            "id": "js_200_priority",
+            "type": "score",
+            "levels": [
+              "P3_low",
+              "P2_medium",
+              "P1_high"
+            ]
+          }
+        ]
+      },
+      "output": {
+        "model": "typesafe-ai/jev",
+        "advisoryOnly": true,
+        "answers": {
+          "js_196_boundary_rationale": {
+            "type": "choice",
+            "choice": "reviewed_platform_boundary",
+            "probabilities": {
+              "partial_test": 0.1,
+              "reviewed_platform_boundary": 0.9,
+              "insufficient_evidence": 0
+            }
+          },
+          "js_149_real_e2e_remediation": {
+            "type": "boolean",
+            "probability": 0.87
+          },
+          "js_150_exact_payload_remediation": {
+            "type": "boolean",
+            "probability": 0.85
+          },
+          "js_151_followup_packet_remediation": {
+            "type": "boolean",
+            "probability": 0.92
+          },
+          "js_195_close_reason_and_error_suppression_remediation": {
+            "type": "boolean",
+            "probability": 0.86
+          },
+          "js_200_explicit_false_remediation": {
+            "type": "boolean",
+            "probability": 0.72
+          },
+          "js_149_priority": {
+            "type": "score",
+            "score": 1.58,
+            "probabilities": {
+              "0": 0.04,
+              "1": 0.34,
+              "2": 0.62
+            }
+          },
+          "js_150_priority": {
+            "type": "score",
+            "score": 1.3,
+            "probabilities": {
+              "0": 0.05,
+              "1": 0.6,
+              "2": 0.35
+            }
+          },
+          "js_151_priority": {
+            "type": "score",
+            "score": 1.57,
+            "probabilities": {
+              "0": 0.02,
+              "1": 0.39,
+              "2": 0.59
+            }
+          },
+          "js_194_priority": {
+            "type": "score",
+            "score": 0.69,
+            "probabilities": {
+              "0": 0.43,
+              "1": 0.44,
+              "2": 0.13
+            }
+          },
+          "js_195_priority": {
+            "type": "score",
+            "score": 0.63,
+            "probabilities": {
+              "0": 0.42,
+              "1": 0.52,
+              "2": 0.06
+            }
+          },
+          "js_196_priority": {
+            "type": "score",
+            "score": 0.16,
+            "probabilities": {
+              "0": 0.88,
+              "1": 0.08,
+              "2": 0.04
+            }
+          },
+          "js_197_priority": {
+            "type": "score",
+            "score": 0.41,
+            "probabilities": {
+              "0": 0.64,
+              "1": 0.31,
+              "2": 0.05
+            }
+          },
+          "js_200_priority": {
+            "type": "score",
+            "score": 0.65,
+            "probabilities": {
+              "0": 0.39,
+              "1": 0.56,
+              "2": 0.05
+            }
+          }
+        },
+        "usage": {
+          "inputTokens": 2650,
+          "outputTokens": 343,
+          "totalTokens": 2993
+        },
+        "rounding": {
+          "probabilityDecimals": 2,
+          "scoreDecimals": 2
+        },
+        "warningCount": 0,
+        "elapsedMs": 318
+      }
+    }
+  ],
+  "coordinator_reported_cost_usd": 0.513710175
+}

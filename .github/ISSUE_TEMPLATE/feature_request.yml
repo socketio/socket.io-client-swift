@@ -1,0 +1,18 @@
+name: Feature request
+description: Describe a use case or improvement for the Swift client.
+title: "[Feature]: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: Explain what is difficult or missing for your application.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior and alternatives
+      description: Include compatibility considerations and a reference to upstream behavior where relevant.
+    validations:
+      required: true

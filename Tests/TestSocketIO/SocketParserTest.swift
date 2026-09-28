@@ -61,8 +61,7 @@ class SocketParserTest: XCTestCase {
     }
 
     func testNamespaceErrorParse() {
-        let message = "4/swift,"
-        validateParseResult(message)
+        XCTAssertThrowsError(try testManager.parseString("4/swift,"))
     }
 
     func testErrorTypeString() {
@@ -75,15 +74,6 @@ class SocketParserTest: XCTestCase {
         validateParseResult(message)
     }
 
-    func testErrorTypeInt() {
-        let message = "41"
-        validateParseResult(message)
-    }
-
-    func testErrorTypeArray() {
-        let message = "4[1, \"hello\"]"
-        validateParseResult(message)
-    }
 
     func testInvalidInput() {
         let message = "8"
@@ -95,13 +85,6 @@ class SocketParserTest: XCTestCase {
         }
     }
 
-    func testGenericParser() {
-        var parser = SocketStringReader(message: "61-/swift,")
-        XCTAssertEqual(parser.read(count: 1), "6")
-        XCTAssertEqual(parser.currentCharacter, "1")
-        XCTAssertEqual(parser.readUntilOccurence(of: "-"), "1")
-        XCTAssertEqual(parser.currentCharacter, "/")
-    }
 
     func validateParseResult(_ message: String) {
         let validValues = SocketParserTest.packetTypes[message]!
@@ -124,10 +107,16 @@ class SocketParserTest: XCTestCase {
         }
     }
 
-    let testManager = SocketManager(socketURL: URL(string: "http://localhost/")!)
+    let testManager = SocketManager(socketURL: URL(string: "http://localhost/")!, config: [])
+
+    func testLegacyConnectErrorPayloadsAreRejected() {
+        for message in ["41", "4[1, \"hello\"]", "4/swift,"] {
+            XCTAssertThrowsError(try testManager.parseString(message), message)
+        }
+    }
 
     //Format key: message; namespace-data-binary-id
-    static let packetTypes: [String: (String, [Any], [Data], Int)] = [
+    static var packetTypes: [String: (String, [Any], [Data], Int)] { [
         "0": ("/", [], [], -1), "1": ("/", [], [], -1),
         "25[\"test\"]": ("/", ["test"], [], 5),
         "2[\"test\",\"~~0\"]": ("/", ["test", "~~0"], [], -1),
@@ -136,12 +125,9 @@ class SocketParserTest: XCTestCase {
         "3/swift,0[[\"test3\",\"test4\"]]": ("/swift", [["test3", "test4"] as NSArray], [], 0),
         "61-/swift,19[[1,2],{\"test\":\"bob\"},25,\"polo\",{\"_placeholder\":true,\"num\":0}]":
         ("/swift", [ [1, 2] as NSArray, ["test": "bob"] as NSDictionary, 25, "polo", ["_placeholder": true, "num": 0] as NSDictionary], [], 19),
-        "4/swift,": ("/swift", [], [], -1),
         "0/swift": ("/swift", [], [], -1),
         "1/swift": ("/swift", [], [], -1),
         "4\"ERROR\"": ("/", ["ERROR"], [], -1),
         "4{\"test\":2}": ("/", [["test": 2]], [], -1),
-        "41": ("/", [1], [], -1),
-        "4[1, \"hello\"]": ("/", [1, "hello"], [], -1)
-    ]
+    ] }
 }

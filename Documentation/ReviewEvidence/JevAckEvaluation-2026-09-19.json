@@ -1,0 +1,538 @@
+{
+  "advisory_only": true,
+  "scope": [
+    "JS-094",
+    "JS-095",
+    "JS-096",
+    "JS-097",
+    "JS-098",
+    "JS-100",
+    "JS-101",
+    "JS-105"
+  ],
+  "upstream_sha": "aaf2af36ec8ad05910f357a788e0e358bad32738",
+  "note": "Read-only Jev run while reconnect changes were committed as 7be2fa5. Inputs preserve the actual inspected sources; not runtime proof. Coordinator prose is not automatically accepted.",
+  "calls": [
+    {
+      "input": {
+        "state": "# Upstream Revision SHA\naaf2af36ec8ad05910f357a788e0e358bad32738\nFile: /tmp/pr18review/socket.io/packages/socket.io-client/test/socket.ts\n\n## 1. JS-094\n- Upstream (lines 584-597):\n```typescript\n    it(\"should timeout after the given delay when socket is not connected\", () => {\n      return wrap((done) => {\n        const socket = io(BASE_URL + \"/\", {\n          autoConnect: false,\n        });\n\n        socket.timeout(50).emit(\"event\", (err) => {\n          expect(err).to.be.an(Error);\n          expect(socket.sendBuffer).to.be.empty();\n\n          success(done, socket);\n        });\n      });\n    });\n```\n- Swift Implementations:\n  File: Tests/TestSocketIO/SocketTimedEmitterTest.swift (lines 198-210)\n  ```swift\n    func testRegistrationBeforeFunnel_DisconnectedEmitStillTimesOut() {\n        socket.setTestStatus(.disconnected)\n        let exp = expectation(description: \"timeout fires even though emit early-returned\")\n        socket.timeout(after: 0.2).emit(\"ping\") { err, _ in\n            XCTAssertEqual(err as? SocketAckError, .timeout)\n            exp.fulfill()\n        }\n        wait(for: [exp], timeout: 1)\n    }\n  ```\n  File: Tests/TestSocketIO/SocketSendBufferTest.swift (lines 114-130)\n  ```swift\n    /// JS removes the packet from `sendBuffer` when its ack times out\n    /// (`_registerAckCallback`), so an emit the caller already gave up on is not\n    /// delivered later by a reconnect.\n    func testATimedOutEmitIsDroppedFromTheBuffer() {\n        let timedOut = expectation(description: \"ack times out\")\n\n        socket.timeout(after: 0.1).emit(\"msg\", \"hello\") { err, _ in\n            XCTAssertEqual(err as? SocketAckError, .timeout)\n            timedOut.fulfill()\n        }\n\n        wait(for: [timedOut], timeout: 2)\n\n        connect()\n\n        XCTAssertTrue(engine.sentPackets.isEmpty, \"The caller already saw this emit fail\")\n    }\n  ```\n\n---\n\n## 2. JS-095\n- Upstream (lines 599-608):\n```typescript\n    it(\"should timeout when the server does not acknowledge the event\", () => {\n      return wrap((done) => {\n        const socket = io(BASE_URL + \"/\");\n\n        socket.timeout(50).emit(\"unknown\", (err) => {\n          expect(err).to.be.an(Error);\n          success(done, socket);\n        });\n      });\n    });\n```\n- Swift Implementation:\n  File: Tests/TestSocketIO/E2E/SocketTimedEmitterE2ETest.swift (lines 49-62)\n  ```swift\n    func testTimeoutWhenServerNeverAcks() {\n        let (_, socket) = makeClient()\n        let connected = expectation(description: \"connect\")\n        socket.on(clientEvent: .connect) { _, _ in connected.fulfill() }\n        socket.connect()\n        wait(for: [connected], timeout: 5)\n\n        let timedOut = expectation(description: \".timeout\")\n        socket.timeout(after: 0.3).emit(\"never_ack\") { err, _ in\n            XCTAssertEqual(err as? SocketAckError, .timeout)\n            timedOut.fulfill()\n        }\n        wait(for: [timedOut], timeout: 2)\n    }\n  ```\n  Also: Tests/TestSocketIO/SocketTimedEmitterTest.swift (lines 157-165)\n  ```swift\n    func testTimedEmitTimesOutWhenNoServer() {\n        let exp = expectation(description: \".timeout fires\")\n        socket.timeout(after: 0.1).emit(\"ping\") { err, data in\n            XCTAssertEqual(err as? SocketAckError, .timeout)\n            XCTAssertTrue(data.isEmpty)\n            exp.fulfill()\n        }\n        wait(for: [exp], timeout: 1)\n    }\n  ```\n\n---\n\n## 3. JS-096\n- Upstream (lines 610-626):\n```typescript\n    it(\"should timeout when the server does not acknowledge the event in time\", () => {\n      return wrap((done) => {\n        const socket = io(BASE_URL + \"/\");\n\n        let count = 0;\n\n        socket.timeout(0).emit(\"echo\", 42, (err) => {\n          expect(err).to.be.an(Error);\n          count++;\n        });\n\n        setTimeout(() => {\n          expect(count).to.eql(1);\n          success(done, socket);\n        }, 200);\n      });\n    });\n```\n- Swift Implementation / Evidence:\n  File: Tests/TestSocketIO/SocketTimedEmitterTest.swift (lines 180-187)\n  ```swift\n    func testNegativeTimeoutFiresImmediately() {\n        let exp = expectation(description: \".timeout fires next tick\")\n        socket.timeout(after: -1).emit(\"ping\") { err, _ in\n            XCTAssertEqual(err as? SocketAckError, .timeout)\n            exp.fulfill()\n        }\n        wait(for: [exp], timeout: 1)\n    }\n  ```\n  File: Tests/TestSocketIO/SocketTimedEmitterTest.swift (lines 515-551)\n  ```swift\n    func testTimerAckRaceFiresOnce() {\n        let manager = self.manager!, socket = self.socket!\n        let iterations = 200\n        for _ in 0..<iterations {\n            let counter = FireCounter()\n            let exp = expectation(description: \"single fire\")\n            exp.assertForOverFulfill = true\n            let ackProcessed = expectation(description: \"racing server ack processed\")\n            socket.timeout(after: 0.001).emit(\"ping\") { _, _ in\n                counter.bump()\n                exp.fulfill()\n            }\n            let ackId = manager.handleQueue.sync { socket.currentAck }\n            DispatchQueue.global().socketAsyncAfter(deadline: .now() + 0.001) {\n                manager.handleQueue.socketAsync {\n                    socket.handleAck(ackId, data: [\"x\"])\n                    ackProcessed.fulfill()\n                }\n            }\n            wait(for: [exp, ackProcessed], timeout: 1)\n            manager.handleQueue.sync {\n                XCTAssertEqual(counter.count, 1, \"must fire exactly once\")\n                XCTAssertFalse(socket.ackHandlers.pendingTimedAckIDs.contains(ackId))\n            }\n        }\n    }\n  ```\n  File: Tests/TestSocketIO/SocketTimedEmitterTest.swift (lines 103-119)\n  ```swift\n    func testOneShotGuard() {\n        let exp = expectation(description: \"first execute fires once\")\n        let firesBox = FireCounter()\n        queue.sync {\n            ackManager.addTimedAck(6, on: queue,\n                                   callback: { _, _ in\n                                       firesBox.bump()\n                                       exp.fulfill()\n                                   },\n                                   timeout: 60)\n        }\n        queue.socketAsync { self.ackManager.executeTimedAck(6, with: [\"a\"]) }\n        queue.socketAsync { self.ackManager.executeTimedAck(6, with: [\"b\"]) } // duplicate\n        wait(for: [exp], timeout: 1)\n        queue.sync { } // drain\n        XCTAssertEqual(firesBox.count, 1, \"duplicate must be silently dropped\")\n    }\n  ```\n  Missing: Direct E2E or unit test where an emit with timeout 0 fires `.timeout`, the server's delayed ack for \"echo\" arrives afterwards, and a delayed check asserts the callback was not invoked again (count == 1).\n\n---\n\n## 4. JS-097\n- Upstream (lines 628-638):\n```typescript\n    it(\"should not timeout when the server does acknowledge the event\", () => {\n      return wrap((done) => {\n        const socket = io(BASE_URL + \"/\");\n\n        socket.timeout(50).emit(\"echo\", 42, (err, value) => {\n          expect(err).to.be.null;\n          expect(value).to.be(42);\n          success(done, socket);\n        });\n      });\n    });\n```\n- Swift Implementations:\n  File: Tests/TestSocketIO/E2E/SocketTimedEmitterE2ETest.swift (lines 33-47)\n  ```swift\n    func testServerAckArrivesBeforeTimeout() {\n        let (_, socket) = makeClient()\n        let connected = expectation(description: \"connect\")\n        socket.on(clientEvent: .connect) { _, _ in connected.fulfill() }\n        socket.connect()\n        wait(for: [connected], timeout: 5)\n\n        let acked = expectation(description: \"server ack\")\n        socket.timeout(after: 2).emit(\"ping\") { err, data in\n            XCTAssertNil(err)\n            XCTAssertEqual(data.first as? String, \"pong\")\n            acked.fulfill()\n        }\n        wait(for: [acked], timeout: 3)\n    }\n  ```\n  File: Tests/TestSocketIO/SocketAckTimeoutTest.swift (lines 94-127)\n  ```swift\n    func testServerAckDeliversDataWithNilError() throws {\n        makeSocket(config: [.log(false), .ackTimeout(5)])\n        connect()\n\n        let acked = expectation(description: \"server ack delivered\")\n        var receivedError: Error?\n        var receivedData: [Any] = []\n        socket.emit(\"unknown\", ack: { err, data in\n            receivedError = err\n            receivedData = data\n            acked.fulfill()\n        })\n        waitForAckRegistration()\n        // ... parse ackId ...\n        socket.handleAck(ackId, data: [\"pong\"])\n        wait(for: [acked], timeout: 2)\n        XCTAssertNil(receivedError)\n        XCTAssertEqual(receivedData.first as? String, \"pong\")\n    }\n  ```\n\n---\n\n## 5. JS-098\n- Upstream (lines 640-651):\n```typescript\n    it(\"should timeout when the server does not acknowledge the event (promise)\", () => {\n      return wrap(async (done) => {\n        const socket = io(BASE_URL + \"/\");\n\n        try {\n          await socket.timeout(50).emitWithAck(\"unknown\");\n          done(new Error(\"should not happen\"));\n        } catch (e) {\n          success(done, socket);\n        }\n      });\n    });\n```\n- Swift Implementations:\n  File: Tests/TestSocketIO/SocketTimedEmitterTest.swift (lines 437-446)\n  ```swift\n    @MainActor\n    func testAsyncTimedEmitWithAckTimesOutWhenNoAckArrives() async {\n        do {\n            _ = try await socket.timeout(after: 0.1).emitWithAck(\"unknown\")\n            XCTFail(\"should have thrown\")\n        } catch let error as SocketAckError {\n            XCTAssertEqual(error, .timeout)\n        } catch {\n            XCTFail(\"wrong error type: \\(error)\")\n        }\n    }\n  ```\n  File: Tests/TestSocketIO/SocketTimedEmitterTest.swift (lines 254-263)\n  ```swift\n    @MainActor\n    func testAsyncTimeoutThrows() async {\n        do {\n            _ = try await socket.timeout(after: 0.1).emit(\"ping\")\n            XCTFail(\"should have thrown\")\n        } catch let error as SocketAckError {\n            XCTAssertEqual(error, .timeout)\n        } catch {\n            XCTFail(\"wrong error type: \\(error)\")\n        }\n    }\n  ```\n\n---\n\n## 6. JS-100\n- Upstream (lines 667-678):\n```typescript\n    it(\"should use the default timeout value\", () => {\n      return wrap((done) => {\n        const socket = io(BASE_URL + \"/\", {\n          ackTimeout: 50,\n        });\n\n        socket.emit(\"unknown\", (err) => {\n          expect(err).to.be.an(Error);\n          success(done, socket);\n        });\n      });\n    });\n```\n- Swift Implementations:\n  File: Tests/TestSocketIO/E2E/JSParityE2ETest.swift (lines 1150-1159)\n  ```swift\n    func testDefaultAckTimeoutApplies() {\n        let socket = connect(makeManager(.ackTimeout(0.05)).socket(forNamespace: \"/\"))\n\n        let timedOut = expectation(description: \"default timeout fires\")\n        socket.emit(\"never_ack\", ack: { err, _ in\n            XCTAssertEqual(err as? SocketAckError, .timeout)\n            timedOut.fulfill()\n        })\n        wait(for: [timedOut], timeout: 5)\n    }\n  ```\n  File: Tests/TestSocketIO/SocketAckTimeoutTest.swift (lines 35-47)\n  ```swift\n    func testDefaultTimeoutAppliesToEmitWithAck() {\n        makeSocket(config: [.log(false), .ackTimeout(0.1)])\n        connect()\n\n        let timedOut = expectation(description: \"default timeout fires\")\n        socket.emit(\"unknown\", ack: { err, _ in\n            XCTAssertEqual(err as? SocketAckError, .timeout)\n            timedOut.fulfill()\n        })\n\n        wait(for: [timedOut], timeout: 2)\n        XCTAssertEqual(engine.sentPackets.count, 1, \"The packet must still go out; only the wait is bounded\")\n    }\n  ```\n\n---\n\n## 7. JS-101\n- Upstream (lines 681-700):\n```typescript\n    describe(\"acknowledgement upon disconnection\", () => {\n      it(\"should not ack upon disconnection (callback)\", () => {\n        return wrap((done) => {\n          const socket = io(BASE_URL, {\n            forceNew: true,\n          });\n\n          socket.on(\"connect\", () => {\n            socket.emit(\"echo\", \"a\", (_value) => {\n              done(new Error(\"should not happen\"));\n            });\n\n            socket.disconnect();\n\n            // @ts-ignore property 'acks' is private\n            expect(Object.keys(socket.acks).length).to.eql(0);\n\n            setTimeout(() => success(done, socket), 100);\n          });\n        });\n      });\n```\n- Swift Implementations:\n  File: Tests/TestSocketIO/E2E/JSParityE2ETest.swift (lines 228-249)\n  ```swift\n    func testANoTimeoutAckIsNotCalledAfterDisconnecting() {\n        let socket = makeManager().socket(forNamespace: \"/\")\n        connect(socket)\n\n        let neverAcked = expectation(description: \"the ack must not fire after disconnecting\")\n        neverAcked.isInverted = true\n        socket.emit(\"echo\", \"a\", ack: { _, _ in neverAcked.fulfill() })\n        manager.handleQueue.socketAsync { socket.disconnect() }\n        settle(0.2)\n        XCTAssertTrue(socket.ackHandlers.pendingTimedAckIDs.isEmpty)\n\n        settle(1)\n        wait(for: [neverAcked], timeout: 0.1)\n    }\n  ```\n  File: Tests/TestSocketIO/SocketRetrySafetyTest.swift (lines 163-173)\n  ```swift\n    func testNoTimeoutModernAckIsRemovedSilentlyOnDisconnect() {\n        make([])\n        var callbacks = 0\n        socket.emit(\"x\", ack: { _, _ in callbacks += 1 })\n        drain()\n        XCTAssertEqual(socket.ackHandlers.pendingTimedAckIDs.count, 1)\n        socket.didDisconnect(reason: \"transport close\")\n        drain()\n        XCTAssertTrue(socket.ackHandlers.pendingTimedAckIDs.isEmpty)\n        XCTAssertEqual(callbacks, 0)\n    }\n  ```\n\n---\n\n## 8. JS-105\n- Upstream (lines 760-779):\n```typescript\n      it(\"should ack with an error upon disconnection (promise & timeout)\", () => {\n        return wrap((done) => {\n          const socket = io(BASE_URL, {\n            forceNew: true,\n          });\n\n          socket.on(\"connect\", () => {\n            socket\n              .timeout(10_000)\n              .emitWithAck(\"echo\", \"a\")\n              .catch((err) => {\n                expect(err).to.be.an(Error);\n\n                success(done, socket);\n              });\n\n            socket.disconnect();\n          });\n        });\n      });\n```\n- Swift Implementation:\n  File: Tests/TestSocketIO/SocketTimedEmitterTest.swift (lines 368-387)\n  ```swift\n    /// socket.io-client/test/socket.ts \u2014 \"should ack with an error upon\n    /// disconnection (promise & timeout)\": the disconnect wins over the timer.\n    @MainActor\n    func testAsyncEmitWithTimeoutThrowsDisconnectedOnDisconnect() async {\n        let socket = self.socket!\n        let expectedID = manager.handleQueue.sync { socket.currentAck + 1 }\n        let task = Task { () -> Error? in\n            do {\n                _ = try await socket.timeout(after: 30).emit(\"echo\", \"a\")\n                return nil\n            } catch {\n                return error\n            }\n        }\n        guard await waitForTimedAckRegistration(expectedID) else {\n            task.cancel()\n            return\n        }\n        manager.handleQueue.socketAsync { socket.didDisconnect(reason: \"test\") }\n        let error = await task.value\n        XCTAssertEqual(error as? SocketAckError, .disconnected)\n    }\n  ```\n  Also: Tests/TestSocketIO/SocketClearAcksOnCloseTest.swift (lines 284-318)\n  `testAsyncEmitWithAckThrowsDisconnectedOnATransportDropThatReconnects()`\n  And: Tests/TestSocketIO/SocketTimedEmitterTest.swift (lines 344-364)\n  `testAsyncEmitThrowsDisconnectedOnDisconnect()`\n",
+        "questions": [
+          {
+            "type": "choice",
+            "instructions": "Evaluate assertion equivalence for JS-094 (timeout after delay when disconnected, verify error and sendBuffer empty) against Swift test evidence (SocketTimedEmitterCallbackTest.testRegistrationBeforeFunnel_DisconnectedEmitStillTimesOut and SocketSendBufferTest.testATimedOutEmitIsDroppedFromTheBuffer).",
+            "choices": [
+              {
+                "label": "full_assertion_equivalence",
+                "description": "All upstream setup, stimuli, callback error, and sendBuffer emptiness assertions are covered by equivalent Swift tests"
+              },
+              {
+                "description": "Some assertions (e.g. timeout error) are covered but others (e.g. sendBuffer cleanup or specific stimuli) are missing or split across suites",
+                "label": "partial"
+              },
+              {
+                "label": "missing",
+                "description": "No corresponding Swift test exists"
+              },
+              {
+                "label": "reviewed_platform_boundary",
+                "description": "Difference is an intentional reviewed platform/API boundary"
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Insufficient evidence to evaluate"
+              }
+            ],
+            "id": "js094_classification"
+          },
+          {
+            "type": "boolean",
+            "id": "js094_sendbuffer_assertion_covered",
+            "instructions": "Is the upstream JS-094 assertion 'expect(socket.sendBuffer).to.be.empty()' covered in Swift tests either by direct state check or by verifying that connecting later transmits zero packets?"
+          },
+          {
+            "instructions": "Evaluate assertion equivalence for JS-095 (timeout when server does not acknowledge event) against SocketTimedEmitterE2ETest.testTimeoutWhenServerNeverAcks.",
+            "id": "js095_classification",
+            "choices": [
+              {
+                "description": "All upstream assertions (emit unacknowledged event to server, timeout expires, callback receives Error) are matched",
+                "label": "full_assertion_equivalence"
+              },
+              {
+                "label": "partial",
+                "description": "Partial coverage of assertions"
+              },
+              {
+                "description": "No test exists",
+                "label": "missing"
+              },
+              {
+                "label": "reviewed_platform_boundary",
+                "description": "Reviewed API or platform boundary"
+              },
+              {
+                "description": "Insufficient evidence",
+                "label": "insufficient_evidence"
+              }
+            ],
+            "type": "choice"
+          },
+          {
+            "id": "js096_classification",
+            "choices": [
+              {
+                "description": "All upstream assertions including the negative assertion that the late server ack does not trigger a second invocation are fully covered",
+                "label": "full_assertion_equivalence"
+              },
+              {
+                "description": "Timeout error is asserted, but the specific negative assertion that late-arriving server ack after timeout is ignored is missing or only partially tested in concurrent stress tests",
+                "label": "partial"
+              },
+              {
+                "label": "missing",
+                "description": "No test exists"
+              },
+              {
+                "label": "reviewed_platform_boundary",
+                "description": "Reviewed API or platform boundary"
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Insufficient evidence"
+              }
+            ],
+            "instructions": "Evaluate assertion equivalence for JS-096 (timeout when server does not ack in time; timeout=0; assert error AND assert count remains 1 after late server ack arrives).",
+            "type": "choice"
+          },
+          {
+            "type": "boolean",
+            "instructions": "Does any Swift test specifically execute timeout(0) or low timeout against an echo ack and then assert that a delayed server response does not invoke the callback a second time?",
+            "id": "js096_late_ack_suppression_tested"
+          },
+          {
+            "id": "js097_classification",
+            "instructions": "Evaluate assertion equivalence for JS-097 (should not timeout when server acknowledges event) against SocketTimedEmitterE2ETest.testServerAckArrivesBeforeTimeout and SocketAckTimeoutTest.testServerAckDeliversDataWithNilError.",
+            "type": "choice",
+            "choices": [
+              {
+                "label": "full_assertion_equivalence",
+                "description": "All upstream assertions (server ack arrives before timeout, error is nil, ack value is received) are matched"
+              },
+              {
+                "label": "partial",
+                "description": "Partial coverage of assertions"
+              },
+              {
+                "description": "No test exists",
+                "label": "missing"
+              },
+              {
+                "label": "reviewed_platform_boundary",
+                "description": "Reviewed API or platform boundary"
+              },
+              {
+                "description": "Insufficient evidence",
+                "label": "insufficient_evidence"
+              }
+            ]
+          },
+          {
+            "type": "choice",
+            "instructions": "Evaluate assertion equivalence for JS-098 (timeout when server does not acknowledge event - promise) against SocketTimedEmitterAsyncTest.testAsyncTimedEmitWithAckTimesOutWhenNoAckArrives and testAsyncTimeoutThrows.",
+            "choices": [
+              {
+                "description": "All upstream assertions (async emitWithAck with timeout throws error when unacknowledged) are matched",
+                "label": "full_assertion_equivalence"
+              },
+              {
+                "label": "partial",
+                "description": "Partial coverage"
+              },
+              {
+                "label": "missing",
+                "description": "No test exists"
+              },
+              {
+                "label": "reviewed_platform_boundary",
+                "description": "Reviewed API or platform boundary"
+              },
+              {
+                "description": "Insufficient evidence",
+                "label": "insufficient_evidence"
+              }
+            ],
+            "id": "js098_classification"
+          },
+          {
+            "type": "choice",
+            "instructions": "Evaluate assertion equivalence for JS-100 (should use default ackTimeout value) against JSParityE2ETest.testDefaultAckTimeoutApplies and SocketAckTimeoutTest.testDefaultTimeoutAppliesToEmitWithAck.",
+            "choices": [
+              {
+                "label": "full_assertion_equivalence",
+                "description": "All upstream assertions (configured ackTimeout applies to plain emit with ack without explicit timeout) are matched"
+              },
+              {
+                "label": "partial",
+                "description": "Partial coverage"
+              },
+              {
+                "description": "No test exists",
+                "label": "missing"
+              },
+              {
+                "label": "reviewed_platform_boundary",
+                "description": "Reviewed API or platform boundary"
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Insufficient evidence"
+              }
+            ],
+            "id": "js100_classification"
+          },
+          {
+            "instructions": "Evaluate assertion equivalence for JS-101 (should not ack upon disconnection - callback) against JSParityE2ETest.testANoTimeoutAckIsNotCalledAfterDisconnecting and SocketRetrySafetyTest.testNoTimeoutModernAckIsRemovedSilentlyOnDisconnect.",
+            "type": "choice",
+            "id": "js101_classification",
+            "choices": [
+              {
+                "label": "full_assertion_equivalence",
+                "description": "All upstream assertions (plain ack callback not called upon disconnect, acks registry emptied immediately, and still not called after delay) are matched"
+              },
+              {
+                "label": "partial",
+                "description": "Partial coverage"
+              },
+              {
+                "label": "missing",
+                "description": "No test exists"
+              },
+              {
+                "label": "reviewed_platform_boundary",
+                "description": "Reviewed API or platform boundary"
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Insufficient evidence"
+              }
+            ]
+          },
+          {
+            "choices": [
+              {
+                "label": "full_assertion_equivalence",
+                "description": "All upstream assertions (async emitWithAck with timeout throws error on disconnect before timer expires) are matched"
+              },
+              {
+                "description": "Partial coverage",
+                "label": "partial"
+              },
+              {
+                "label": "missing",
+                "description": "No test exists"
+              },
+              {
+                "description": "Reviewed API or platform boundary",
+                "label": "reviewed_platform_boundary"
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Insufficient evidence"
+              }
+            ],
+            "type": "choice",
+            "instructions": "Evaluate assertion equivalence for JS-105 (should ack with an error upon disconnection - promise & timeout) against SocketTimedEmitterAsyncTest.testAsyncEmitWithTimeoutThrowsDisconnectedOnDisconnect.",
+            "id": "js105_classification"
+          },
+          {
+            "type": "boolean",
+            "id": "js105_real_server_e2e_presence",
+            "instructions": "Is JS-105 tested against a real server end-to-end, or is it tested only against simulated / unconnected test status fixtures?"
+          },
+          {
+            "levels": [
+              "P0_critical_parity_hole",
+              "P1_missing_assertion_or_stimulus",
+              "P2_minor_variance_or_e2e_gap",
+              "P3_equivalent_no_action"
+            ],
+            "id": "js096_remediation_priority",
+            "instructions": "What is the remediation priority for the gap in JS-096 (missing direct end-to-end or unit assertion that late ack after timeout does not fire callback)?",
+            "type": "score"
+          }
+        ]
+      },
+      "output": {
+        "model": "typesafe-ai/jev",
+        "advisoryOnly": true,
+        "answers": {
+          "js094_classification": {
+            "type": "choice",
+            "choice": "partial",
+            "probabilities": {
+              "insufficient_evidence": 0,
+              "full_assertion_equivalence": 0.2,
+              "reviewed_platform_boundary": 0.01,
+              "partial": 0.79,
+              "missing": 0
+            }
+          },
+          "js094_sendbuffer_assertion_covered": {
+            "type": "boolean",
+            "probability": 0.95
+          },
+          "js095_classification": {
+            "type": "choice",
+            "choice": "full_assertion_equivalence",
+            "probabilities": {
+              "insufficient_evidence": 0,
+              "full_assertion_equivalence": 0.88,
+              "reviewed_platform_boundary": 0.01,
+              "partial": 0.11,
+              "missing": 0
+            }
+          },
+          "js096_classification": {
+            "type": "choice",
+            "choice": "partial",
+            "probabilities": {
+              "insufficient_evidence": 0,
+              "full_assertion_equivalence": 0,
+              "missing": 0,
+              "partial": 1,
+              "reviewed_platform_boundary": 0
+            }
+          },
+          "js096_late_ack_suppression_tested": {
+            "type": "boolean",
+            "probability": 0.15
+          },
+          "js097_classification": {
+            "type": "choice",
+            "choice": "full_assertion_equivalence",
+            "probabilities": {
+              "insufficient_evidence": 0,
+              "full_assertion_equivalence": 0.95,
+              "missing": 0,
+              "partial": 0.05,
+              "reviewed_platform_boundary": 0
+            }
+          },
+          "js098_classification": {
+            "type": "choice",
+            "choice": "full_assertion_equivalence",
+            "probabilities": {
+              "insufficient_evidence": 0,
+              "full_assertion_equivalence": 0.55,
+              "reviewed_platform_boundary": 0.01,
+              "partial": 0.44,
+              "missing": 0
+            }
+          },
+          "js100_classification": {
+            "type": "choice",
+            "choice": "full_assertion_equivalence",
+            "probabilities": {
+              "insufficient_evidence": 0,
+              "full_assertion_equivalence": 0.84,
+              "missing": 0,
+              "partial": 0.15,
+              "reviewed_platform_boundary": 0.01
+            }
+          },
+          "js101_classification": {
+            "type": "choice",
+            "choice": "partial",
+            "probabilities": {
+              "insufficient_evidence": 0,
+              "full_assertion_equivalence": 0.41,
+              "missing": 0,
+              "partial": 0.57,
+              "reviewed_platform_boundary": 0.02
+            }
+          },
+          "js105_classification": {
+            "type": "choice",
+            "choice": "full_assertion_equivalence",
+            "probabilities": {
+              "insufficient_evidence": 0.01,
+              "full_assertion_equivalence": 0.55,
+              "missing": 0.01,
+              "partial": 0.34,
+              "reviewed_platform_boundary": 0.09
+            }
+          },
+          "js105_real_server_e2e_presence": {
+            "type": "boolean",
+            "probability": 0.34
+          },
+          "js096_remediation_priority": {
+            "type": "score",
+            "score": 1.35,
+            "probabilities": {
+              "0": 0.04,
+              "1": 0.63,
+              "2": 0.28,
+              "3": 0.05
+            }
+          }
+        },
+        "usage": {
+          "inputTokens": 6348,
+          "outputTokens": 712,
+          "totalTokens": 7060
+        },
+        "rounding": {
+          "probabilityDecimals": 2,
+          "scoreDecimals": 2
+        },
+        "warningCount": 0,
+        "elapsedMs": 698
+      }
+    },
+    {
+      "input": {
+        "state": "# Additional Analysis Context: Pinned Upstream vs Swift Tests\n\n## Upstream SHA: aaf2af36ec8ad05910f357a788e0e358bad32738\n\n### JS-094\n- Upstream:\n```typescript\n    it(\"should timeout after the given delay when socket is not connected\", () => {\n      return wrap((done) => {\n        const socket = io(BASE_URL + \"/\", { autoConnect: false });\n        socket.timeout(50).emit(\"event\", (err) => {\n          expect(err).to.be.an(Error);\n          expect(socket.sendBuffer).to.be.empty();\n          success(done, socket);\n        });\n      });\n    });\n```\n- Swift has:\n  1. `testRegistrationBeforeFunnel_DisconnectedEmitStillTimesOut`: starts with socket `.disconnected`, emits with timeout 0.2s, verifies `err as? SocketAckError == .timeout`.\n  2. `testATimedOutEmitIsDroppedFromTheBuffer`: starts disconnected, emits with timeout 0.1s, awaits timeout, calls `connect()`, verifies `engine.sentPackets.isEmpty`.\n- Question: Does taking these two mapped tests together provide composite assertion equivalence?\n\n### JS-096\n- Upstream:\n```typescript\n    it(\"should timeout when the server does not acknowledge the event in time\", () => {\n      return wrap((done) => {\n        const socket = io(BASE_URL + \"/\");\n        let count = 0;\n        socket.timeout(0).emit(\"echo\", 42, (err) => {\n          expect(err).to.be.an(Error);\n          count++;\n        });\n        setTimeout(() => {\n          expect(count).to.eql(1);\n          success(done, socket);\n        }, 200);\n      });\n    });\n```\n- Swift has `testTimerAckRaceFiresOnce` (races timer and ack at 1ms concurrently over 200 iterations), but NO test where an emit times out with 0 delay and then a subsequent late server ack is proven not to increment count / re-invoke the callback.\n\n### JS-098\n- Upstream:\n```typescript\n    it(\"should timeout when the server does not acknowledge the event (promise)\", () => {\n      return wrap(async (done) => {\n        const socket = io(BASE_URL + \"/\");\n        try {\n          await socket.timeout(50).emitWithAck(\"unknown\");\n          done(new Error(\"should not happen\"));\n        } catch (e) {\n          success(done, socket);\n        }\n      });\n    });\n```\n- Swift has:\n  `testAsyncTimedEmitWithAckTimesOutWhenNoAckArrives`:\n  `try await socket.timeout(after: 0.1).emitWithAck(\"unknown\")` catching `.timeout` and `XCTFail(\"should have thrown\")`.\n  Executed with local mock socket (status `.connected`, but no real network packet/server).\n\n### JS-101\n- Upstream:\n```typescript\n      it(\"should not ack upon disconnection (callback)\", () => {\n        return wrap((done) => {\n          const socket = io(BASE_URL, { forceNew: true });\n          socket.on(\"connect\", () => {\n            socket.emit(\"echo\", \"a\", (_value) => {\n              done(new Error(\"should not happen\"));\n            });\n            socket.disconnect();\n            expect(Object.keys(socket.acks).length).to.eql(0);\n            setTimeout(() => success(done, socket), 100);\n          });\n        });\n      });\n```\n- Swift E2E has `testANoTimeoutAckIsNotCalledAfterDisconnecting`:\n  Connected to real server, emits with plain ack callback, calls `socket.disconnect()`, asserts `socket.ackHandlers.pendingTimedAckIDs.isEmpty`, asserts callback is never called via inverted expectation with 1s delay.\n- In Swift, legacy `emitWithAck().timingOut()` is a separate API that is intentionally not cleared on disconnect (documented backcompat divergence). Modern API is `emit(_:_:ack:)` which IS cleared silently on disconnect.\n\n### JS-105\n- Upstream:\n```typescript\n      it(\"should ack with an error upon disconnection (promise & timeout)\", () => {\n        return wrap((done) => {\n          const socket = io(BASE_URL, { forceNew: true });\n          socket.on(\"connect\", () => {\n            socket.timeout(10_000).emitWithAck(\"echo\", \"a\").catch((err) => {\n              expect(err).to.be.an(Error);\n              success(done, socket);\n            });\n            socket.disconnect();\n          });\n        });\n      });\n```\n- Swift has `testAsyncEmitWithTimeoutThrowsDisconnectedOnDisconnect`:\n  Task awaiting `socket.timeout(after: 30).emit(\"echo\", \"a\")`, calls `socket.didDisconnect(reason: \"test\")`, awaits Task value, asserts `error as? SocketAckError == .disconnected`.\n  Also `testAsyncEmitWithAckThrowsDisconnectedOnATransportDropThatReconnects` on `ClearAcksTestEngine`.\n",
+        "questions": [
+          {
+            "type": "choice",
+            "choices": [
+              {
+                "label": "composite_assertion_equivalent",
+                "description": "When combining the unit timeout test and the buffer drop test, all JS-094 assertions are behaviorally covered across the two tests"
+              },
+              {
+                "description": "A single unified test asserting both the timeout error and sendBuffer eviction is required for parity",
+                "label": "partial_unified_test_missing"
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Insufficient evidence"
+              }
+            ],
+            "id": "js094_composite_parity",
+            "instructions": "Evaluate whether JS-094 is satisfied when taking all mapped tests together (SocketTimedEmitterCallbackTest.testRegistrationBeforeFunnel_DisconnectedEmitStillTimesOut + SocketSendBufferTest.testATimedOutEmitIsDroppedFromTheBuffer)."
+          },
+          {
+            "type": "boolean",
+            "id": "js096_concrete_gap_identified",
+            "instructions": "Is the missing assertion in JS-096 specifically: an emit with timeout 0 to a server endpoint that echoes back a payload, confirming that the server ack arriving after timeout expiration does not invoke the callback a second time (count == 1)?"
+          },
+          {
+            "choices": [
+              {
+                "description": "Full assertion equivalence at unit level (SocketTimedEmitterAsyncTest); real server E2E not strictly required because timeout handling is client-local",
+                "label": "full_unit_assertion_equivalence"
+              },
+              {
+                "label": "partial_due_to_live_server_absence",
+                "description": "Partial because upstream ran against a live server endpoint (BASE_URL + '/') whereas Swift tests on an unconnected mock"
+              },
+              {
+                "description": "Insufficient evidence",
+                "label": "insufficient_evidence"
+              }
+            ],
+            "instructions": "Evaluate whether JS-098's unit test SocketTimedEmitterAsyncTest.testAsyncTimedEmitWithAckTimesOutWhenNoAckArrives provides full assertion equivalence despite using a mock/unconnected client vs JS live server.",
+            "type": "choice",
+            "id": "js098_test_environment_equivalence"
+          },
+          {
+            "choices": [
+              {
+                "label": "full_assertion_equivalence_modern_api",
+                "description": "Full assertion equivalence for modern API; legacy divergence is documented reviewed boundary"
+              },
+              {
+                "label": "partial_legacy_divergence",
+                "description": "Partial because legacy emitWithAck is not cleared on disconnect"
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Insufficient evidence"
+              }
+            ],
+            "type": "choice",
+            "id": "js101_modern_parity",
+            "instructions": "For JS-101, does JSParityE2ETest.testANoTimeoutAckIsNotCalledAfterDisconnecting provide full assertion equivalence for the modern API, given that the legacy API divergence is an intentional backward-compatibility boundary?"
+          },
+          {
+            "id": "js105_assertion_equivalence_granularity",
+            "choices": [
+              {
+                "description": "Full assertion equivalence at unit level; disconnection and timeout race logic is completely verified",
+                "label": "full_unit_assertion_equivalence"
+              },
+              {
+                "label": "partial_mock_vs_live",
+                "description": "Partial because JS runs against live server (io(BASE_URL)) and Swift runs against local mock (didDisconnect)"
+              },
+              {
+                "label": "insufficient_evidence",
+                "description": "Insufficient evidence"
+              }
+            ],
+            "instructions": "Evaluate JS-105: does testAsyncEmitWithTimeoutThrowsDisconnectedOnDisconnect provide full assertion equivalence or partial due to synthetic disconnect vs live server?",
+            "type": "choice"
+          }
+        ]
+      },
+      "output": {
+        "model": "typesafe-ai/jev",
+        "advisoryOnly": true,
+        "answers": {
+          "js094_composite_parity": {
+            "type": "choice",
+            "choice": "composite_assertion_equivalent",
+            "probabilities": {
+              "partial_unified_test_missing": 0.1,
+              "composite_assertion_equivalent": 0.88,
+              "insufficient_evidence": 0.02
+            }
+          },
+          "js096_concrete_gap_identified": {
+            "type": "boolean",
+            "probability": 0.92
+          },
+          "js098_test_environment_equivalence": {
+            "type": "choice",
+            "choice": "partial_due_to_live_server_absence",
+            "probabilities": {
+              "partial_due_to_live_server_absence": 0.63,
+              "full_unit_assertion_equivalence": 0.36,
+              "insufficient_evidence": 0.01
+            }
+          },
+          "js101_modern_parity": {
+            "type": "choice",
+            "choice": "full_assertion_equivalence_modern_api",
+            "probabilities": {
+              "partial_legacy_divergence": 0.11,
+              "full_assertion_equivalence_modern_api": 0.88,
+              "insufficient_evidence": 0.01
+            }
+          },
+          "js105_assertion_equivalence_granularity": {
+            "type": "choice",
+            "choice": "partial_mock_vs_live",
+            "probabilities": {
+              "full_unit_assertion_equivalence": 0.01,
+              "partial_mock_vs_live": 0.99,
+              "insufficient_evidence": 0
+            }
+          }
+        },
+        "usage": {
+          "inputTokens": 2182,
+          "outputTokens": 303,
+          "totalTokens": 2485
+        },
+        "rounding": {
+          "probabilityDecimals": 2,
+          "scoreDecimals": 2
+        },
+        "warningCount": 0,
+        "elapsedMs": 274
+      }
+    }
+  ]
+}
