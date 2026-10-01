@@ -21,7 +21,7 @@ example = readme.split(start)[1].split(end)[0].strip()
 match = re.fullmatch(r'```swift\n(.*?)\n```', example, re.S)
 if not match:
     raise SystemExit('Marked quick start must contain exactly one Swift code fence')
-(consumer / 'Package.swift').write_text('''// swift-tools-version:6.4
+(consumer / 'Package.swift').write_text('''// swift-tools-version:6.2
 import PackageDescription
 let package = Package(
     name: "DocumentationSmoke",

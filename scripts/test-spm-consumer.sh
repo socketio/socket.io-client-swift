@@ -18,7 +18,7 @@ if os.environ.get('GITHUB_REF_TYPE') == 'tag':
     dependency = '.package(url: "https://github.com/kaeferfreund/socket.io-client-swift.git", exact: "17.1.0")'
 else:
     dependency = '.package(path: ' + json.dumps(os.environ['SOCKETIO_CONSUMER_ROOT']) + ')'
-(root / 'Package.swift').write_text('''// swift-tools-version:6.4
+(root / 'Package.swift').write_text('''// swift-tools-version:6.2
 import PackageDescription
 let package = Package(
     name: "ReleaseConsumer",
