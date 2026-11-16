@@ -63,7 +63,9 @@ jobs:
 
   swift-tools-floor:
     name: Full suite on the declared swift-tools-version floor
-    runs-on: xcode-27
+    # The xcode-27 image ships only Swift 6.4 toolchains; the macOS 26 image
+    # carries the Xcode 26.x releases that provide Swift 6.2.
+    runs-on: macos-26
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
