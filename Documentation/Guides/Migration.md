@@ -11,7 +11,7 @@ The major architectural change is the move from Starscream and historical compat
 The most important changes are:
 
 - Socket.IO 4 / Engine.IO 4 only
-- Swift 6.4 toolchain, Swift 6 language mode
+- Swift 6.2 or newer toolchain, Swift 6 language mode
 - Starscream removed
 - URLSessionWebSocketTask is the WebSocket backend
 - .version(...) and SocketIOVersion removed

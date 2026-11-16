@@ -26,7 +26,7 @@ WebSocket closes the engine and lets the existing manager decide about reconnect
 Normal SocketManager/SocketIOClient use does not require a backend selection.
 Minimum deployment versions: iOS 15, macOS 12, tvOS 15, watchOS 9. These are
 compile baselines, not a claim that every runtime/device has been exercised.
-The current fork requires Swift 6.4 with Swift 6 language mode and supports
+The current fork requires Swift 6.2 or newer with Swift 6 language mode and supports
 Socket.IO 4.x / Engine.IO 4 only. See the subsequent
 [Socket.IO 4 and Swift 6 migration](SocketIO4Swift6Migration.md).
 

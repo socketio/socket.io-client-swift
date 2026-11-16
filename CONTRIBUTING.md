@@ -8,7 +8,8 @@ which user-visible behavior or maintenance problem it addresses.
 
 ## Set up and validate
 
-Use macOS with Xcode 27 / Swift 6.4, Node.js for the real-server fixtures, Python 3.9+
+Use macOS with Xcode 27 / Swift 6.4 (CI additionally runs the suite on the Swift 6.2
+floor declared in `Package.swift`), Node.js for the real-server fixtures, Python 3.9+
 and OpenSSL. The [testing guide](Documentation/Development/Testing.md#local-setup)
 records the fixture/runtime split and all validation commands.
 

@@ -48,9 +48,15 @@ Always use the CI result for the exact commit you intend to ship rather than rel
 
 ## Local setup
 
-The full package suite requires **macOS with Xcode 27 / Swift 6.4**, its Apple
-SDKs, Bash, Python 3.9+, Node.js and OpenSSL. Select the intended Xcode before
+The full package suite runs on **macOS with Xcode 26 / Swift 6.2 or newer**, its
+Apple SDKs, Bash, Python 3.9+, Node.js and OpenSSL. Select the intended Xcode before
 running `swift --version`; do not lower the package's Swift language mode.
+CI runs most jobs on Xcode 27 / Swift 6.4. The `swift-tools-floor` job runs the
+build, both consumers and the complete suite with the Xcode whose Swift matches the
+`swift-tools-version` in `Package.swift`
+(`bash scripts/select-floor-toolchain.sh`), because a newer compiler can accept code
+the declared floor rejects. Raise or lower the floor only in `Package.swift`; the
+consumer scripts and that job read it from there.
 CI uses Node 26 for fixtures and **Node 24 for the pinned upstream Node suites**.
 The latter intentionally avoids an incompatibility in the reference dependency
 graph. See the [workflow](../../.github/workflows/swift.yml) for exact versions.

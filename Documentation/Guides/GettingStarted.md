@@ -28,9 +28,9 @@ This library implements the Socket.IO protocol. It is not a generic WebSocket cl
 
 | Minimum | |
 | --- | --- |
-| Swift toolchain | Swift 6.4 |
+| Swift toolchain | Swift 6.2 |
 | Swift language mode | Swift 6 |
-| Xcode | Xcode 27 |
+| Xcode | Xcode 26 |
 | iOS | 15 |
 | macOS | 12 |
 | tvOS | 15 |

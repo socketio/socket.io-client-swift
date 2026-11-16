@@ -141,7 +141,7 @@ own production scenarios. See [the testing guide](../Development/Testing.md).
 | --- | --- | --- |
 | Server compatibility | Advertises Socket.IO 2.x, 3.x and 4.x support. [README][upstream-readme] | Supports and tests Socket.IO 4.x / Engine.IO 4 only. [Migration][fork-migration] |
 | WebSocket implementation | Declares a Starscream dependency starting at 4.0.8. [Manifest][upstream-package] | Uses `URLSessionWebSocketTask` and a separate polling `URLSession`; no third-party Swift dependencies. [Transport][fork-transport], [manifest][fork-package] |
-| Swift baseline | Declares tools version 5.4; no explicit Swift 6 language-mode setting in the manifest. [Manifest][upstream-package] | Declares tools version 6.4 and `swiftLanguageModes: [.v6]`. [Manifest][fork-package] |
+| Swift baseline | Declares tools version 5.4; no explicit Swift 6 language-mode setting in the manifest. [Manifest][upstream-package] | Declares tools version 6.2 and `swiftLanguageModes: [.v6]`. [Manifest][fork-package] |
 | Acknowledgements and delivery | Callback-based `emitWithAck(...).timingOut(after:)`; no ordered retry queue or async acknowledgement entry point in the inspected client. [Client][upstream-client] | Callback, async and legacy acknowledgement entry points, ordered retries and cancellation handling. [Client][fork-client], [async emitter][fork-emitter] |
 | Session recovery and authentication | Connect payload handling; no recovery `pid`/offset state or per-CONNECT auth-provider API in the inspected client. [Client][upstream-client] | Recovery state and `recovered`, plus a dynamic auth provider for initial connection and reconnects. [Client][fork-client] |
 
@@ -179,7 +179,7 @@ requirements can also make this fork's narrower support policy unsuitable.
 Check the exact release requirements rather than migrating just because a fork
 exists.
 
-This fork requires Swift 6.4 / Xcode 27 and iOS 15, macOS 12, tvOS 15 or watchOS 9.
+This fork requires Swift 6.2 / Xcode 26 or newer and iOS 15, macOS 12, tvOS 15 or watchOS 9.
 It does not offer WebTransport, JavaScript compression controls or custom
 JavaScript transport constructors. Version 17 removes legacy APIs and changes
 some reconnect and acknowledgement behavior; **changing the package URL is not

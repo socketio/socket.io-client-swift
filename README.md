@@ -13,7 +13,7 @@
 
 <p align="center">
   <a href="https://github.com/kaeferfreund/socket.io-client-swift/actions/workflows/swift.yml?query=branch%3Amaster"><img src="https://github.com/kaeferfreund/socket.io-client-swift/actions/workflows/swift.yml/badge.svg?branch=master" alt="CI on master"></a>
-  <a href="Package.swift"><img src="https://img.shields.io/badge/Swift-6.4-F05138?logo=swift&amp;logoColor=white" alt="Swift 6.4 toolchain"></a>
+  <a href="Package.swift"><img src="https://img.shields.io/badge/Swift-6.2%2B-F05138?logo=swift&amp;logoColor=white" alt="Swift 6.2 or newer toolchain"></a>
   <a href="#installation"><img src="https://img.shields.io/badge/SPM-only-2E7D32" alt="Swift Package Manager only"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-0969DA" alt="MIT License"></a>
 </p>
@@ -64,7 +64,7 @@ should read the [17.x migration guide](Documentation/Guides/Migration.md).
 
 | Component | Minimum / supported range |
 | --- | --- |
-| Toolchain | Swift 6.4, **Swift 6 language mode**; Xcode 27 for Apple SDKs |
+| Toolchain | Swift 6.2 or newer, **Swift 6 language mode**; Xcode 26 or newer for Apple SDKs |
 | Platforms | iOS 15, macOS 12, tvOS 15, watchOS 9 |
 | Server | Socket.IO 4.x, Engine.IO 4 |
 | Transports | HTTP long-polling and WebSocket; no WebTransport |

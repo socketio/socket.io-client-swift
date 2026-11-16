@@ -61,6 +61,54 @@ jobs:
             ${{ runner.temp }}/swift-coverage-summary.json
           retention-days: 7
 
+  swift-tools-floor:
+    name: Full suite on the declared swift-tools-version floor
+    runs-on: xcode-27
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 26
+      # The manifest's tools version is the oldest compiler the package admits.
+      # The other jobs use the newest Xcode, which can accept code the floor
+      # rejects, so this job selects the Xcode matching Package.swift itself.
+      - name: Select the Xcode whose Swift matches Package.swift
+        id: toolchain
+        run: bash scripts/select-floor-toolchain.sh
+      - name: Install pinned fixture dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+        working-directory: Tests/TestSocketIO/E2E/Fixtures
+      - name: Build on the floor toolchain
+        env:
+          DEVELOPER_DIR: ${{ steps.toolchain.outputs.developer_dir }}
+        run: |
+          swift --version
+          swift build -v
+      - name: Build and run an independent Swift Package consumer
+        env:
+          DEVELOPER_DIR: ${{ steps.toolchain.outputs.developer_dir }}
+        run: bash scripts/test-spm-consumer.sh
+      - name: Compile and initialize the README quick start as an independent consumer
+        env:
+          DEVELOPER_DIR: ${{ steps.toolchain.outputs.developer_dir }}
+        run: bash scripts/test-documentation-examples.sh
+      - name: Run complete unit and real-server test suite
+        env:
+          DEVELOPER_DIR: ${{ steps.toolchain.outputs.developer_dir }}
+        run: |
+          set -o pipefail
+          swift test 2>&1 | tee "$RUNNER_TEMP/floor-swift-tests.log"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        if: always()
+        with:
+          name: floor-swift-test-log-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/floor-swift-tests.log
+          if-no-files-found: ignore
+          retention-days: 7
+
   thread-sanitizer:
     name: Unit suite under Thread Sanitizer (review gate R5)
     runs-on: xcode-27
