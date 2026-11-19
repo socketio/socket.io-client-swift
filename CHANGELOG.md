@@ -1,8 +1,9 @@
-## Unreleased
+## 17.2.0 — 2026-11-19
 
 - Lower the declared toolchain floor from `swift-tools-version:6.4` to `6.2`, so the package resolves and builds with Xcode 26.x (socketio/socket.io-client-swift#1527). No source or API changes; Xcode 27 builds are unaffected. Releases up to and including 17.1.0 still require Swift 6.4 / Xcode 27.
 - Add the `swift-tools-floor` CI job, which builds the package, runs both independent consumers and the complete unit/real-server suite with the Xcode whose Swift matches `Package.swift`, so the declared floor is verified rather than assumed.
 - Derive the consumer manifests' tools version from `Package.swift`, and the tag-run consumer's expected version from the release tag (checked against the newest CHANGELOG heading) instead of a hard-coded `17.1.0`.
+- See [17.2.0 release notes](Documentation/Release17.2.0.md) for the supported toolchains and validation scope.
 
 ## 17.1.0 — 2026-09-21
 
