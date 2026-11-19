@@ -13,7 +13,7 @@
 
 <p align="center">
   <a href="https://github.com/kaeferfreund/socket.io-client-swift/actions/workflows/swift.yml?query=branch%3Amaster"><img src="https://github.com/kaeferfreund/socket.io-client-swift/actions/workflows/swift.yml/badge.svg?branch=master" alt="CI on master"></a>
-  <a href="Package.swift"><img src="https://img.shields.io/badge/Swift-6.4-F05138?logo=swift&amp;logoColor=white" alt="Swift 6.4 toolchain"></a>
+  <a href="Package.swift"><img src="https://img.shields.io/badge/Swift-6.2%2B-F05138?logo=swift&amp;logoColor=white" alt="Swift 6.2 or newer toolchain"></a>
   <a href="#installation"><img src="https://img.shields.io/badge/SPM-only-2E7D32" alt="Swift Package Manager only"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-0969DA" alt="MIT License"></a>
 </p>
@@ -64,7 +64,7 @@ should read the [17.x migration guide](Documentation/Guides/Migration.md).
 
 | Component | Minimum / supported range |
 | --- | --- |
-| Toolchain | Swift 6.4, **Swift 6 language mode**; Xcode 27 for Apple SDKs |
+| Toolchain | Swift 6.2 or newer, **Swift 6 language mode**; Xcode 26 or newer for Apple SDKs |
 | Platforms | iOS 15, macOS 12, tvOS 15, watchOS 9 |
 | Server | Socket.IO 4.x, Engine.IO 4 |
 | Transports | HTTP long-polling and WebSocket; no WebTransport |
@@ -77,7 +77,7 @@ and [the package manifest](Package.swift) for deployment targets.
 **Swift Package Manager is the only supported installation method.**
 
 In Xcode, choose **File → Add Package Dependencies**, enter the URL below and select
-**Up to Next Major Version** from **17.1.0**. Add the **SocketIO** product to your app target.
+**Up to Next Major Version** from **17.2.0**. Add the **SocketIO** product to your app target.
 
 ```text
 https://github.com/kaeferfreund/socket.io-client-swift.git
@@ -92,7 +92,7 @@ Add the dependency and the product to the appropriate arrays:
 // In Package.dependencies:
 .package(
     url: "https://github.com/kaeferfreund/socket.io-client-swift.git",
-    from: "17.1.0"
+    from: "17.2.0"
 )
 
 // In your target's dependencies:
@@ -103,7 +103,7 @@ Add the dependency and the product to the appropriate arrays:
 
 A version requirement installs a **published release**, not the development branch
 you are viewing. To evaluate unreleased changes, explicitly select the reviewed
-branch or commit in Xcode/SPM. The [17.1.0 release notes](Documentation/Release17.1.0.md)
+branch or commit in Xcode/SPM. The [17.2.0 release notes](Documentation/Release17.2.0.md)
 describe the published release.
 
 ## Quick start

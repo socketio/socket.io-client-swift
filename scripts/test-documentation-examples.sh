@@ -21,7 +21,12 @@ example = readme.split(start)[1].split(end)[0].strip()
 match = re.fullmatch(r'```swift\n(.*?)\n```', example, re.S)
 if not match:
     raise SystemExit('Marked quick start must contain exactly one Swift code fence')
-(consumer / 'Package.swift').write_text('''// swift-tools-version:6.4
+# Declare the package's own tools version so the smoke test checks the floor
+# the root manifest admits instead of a separately maintained copy.
+tools_version = (repository / 'Package.swift').read_text(encoding='utf-8').splitlines()[0]
+if not re.fullmatch(r'// swift-tools-version: *\d+\.\d+(\.\d+)?', tools_version):
+    raise SystemExit('Package.swift must start with a swift-tools-version line, got ' + repr(tools_version))
+(consumer / 'Package.swift').write_text('''TOOLS_VERSION
 import PackageDescription
 let package = Package(
     name: "DocumentationSmoke",
@@ -32,7 +37,7 @@ let package = Package(
     ])],
     swiftLanguageModes: [.v6]
 )
-'''.replace('PATH', json.dumps(str(repository))))
+'''.replace('TOOLS_VERSION', tools_version).replace('PATH', json.dumps(str(repository))))
 source = consumer / 'Sources' / 'DocumentationSmoke'
 source.mkdir(parents=True)
 (source / 'RealtimeClient.swift').write_text(match[1] + '\n')

@@ -10,13 +10,16 @@ branch. Treat published tags as immutable: fix later issues in a new version.
 
 Review the changelog, migration instructions, supported platform/toolchain values,
 installation examples and parity scope. Preserve explicit unsupported-feature
-reasons. Update version-specific tooling deliberately: `test-spm-consumer.sh`
-currently accepts `v17.1.0` for remote exact-version validation; a future release
-must update that expected tag/version before using the same check.
+reasons. On a tag run, `test-spm-consumer.sh` derives the expected version from the
+`vMAJOR.MINOR.PATCH` tag and fails unless it matches the newest `CHANGELOG.md`
+release heading, so promote the `Unreleased` section to a dated version first.
+The toolchain floor is the `swift-tools-version` line in `Package.swift`; the
+`swift-tools-floor` CI job must pass on a matching Xcode before a release.
 
 Require every CI job in the [workflow](../../.github/workflows/swift.yml) to pass
 on the exact candidate commit. This includes documentation checks, the native
-suite and executed parity contracts, both independent consumers, Thread Sanitizer,
+suite and executed parity contracts, the suite on the declared toolchain floor,
+both independent consumers, Thread Sanitizer,
 strict concurrency, Apple SDK builds, wire proofs and the pinned reference suites.
 Do not publish using evidence from an earlier SHA just because only docs changed.
 

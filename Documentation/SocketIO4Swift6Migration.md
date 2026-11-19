@@ -4,10 +4,12 @@ This is a breaking API/toolchain change, not a new runtime switch.
 
 ## Toolchain and deployment
 
-Use Swift 6.4 or newer (Xcode 27 for the Apple SDKs). `Package.swift` requires
-`swift-tools-version:6.4` and explicitly selects `swiftLanguageModes: [.v6]`.
+Use Swift 6.2 or newer (Xcode 26 or newer for the Apple SDKs). `Package.swift`
+requires `swift-tools-version:6.2` and explicitly selects `swiftLanguageModes: [.v6]`.
+Releases up to and including 17.1.0 declared `swift-tools-version:6.4` and need
+Xcode 27.
 Xcode's `SWIFT_VERSION = 6.0` is a language mode, not a compiler version;
-`SWIFT_VERSION = 6.4` is not a valid language mode.
+`SWIFT_VERSION = 6.2` is not a valid language mode.
 Deployment targets remain iOS/tvOS 15 and macOS 12. The watchOS minimum is
 raised from 8 to 9 because Xcode 27 rejects a watchOS 8 deployment target.
 
@@ -71,7 +73,7 @@ the pending acknowledgement on its owning queue. This does not turn arbitrary
 ## Validation
 
 The normal CI selects `xcode-27`, checks the Swift 6.4 toolchain, runs the complete
-unit/real-server suite, builds the Swift package for all four Apple SDKs and compares the
+unit/real-server suite (again on the Swift 6.2 floor from `Package.swift`), builds the Swift package for all four Apple SDKs and compares the
 parser with the pinned official JavaScript decoder. Historical review evidence
 under `Documentation/ReviewEvidence` describes its recorded commit, not this
 migration. Socket.IO 2 fixtures and tests are removed, not counted as passing.

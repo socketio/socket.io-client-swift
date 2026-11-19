@@ -29,8 +29,9 @@ Connection State Recovery requires Socket.IO 4.6+ and server-side configuration.
 
 ## Swift and deployment targets
 
-Use the Swift 6.4 toolchain, or newer, with Swift 6 language mode. Xcode 27 is used
-by CI. Minimum deployment targets are iOS 15, macOS 12, tvOS 15 and watchOS 9.
+Use the Swift 6.2 toolchain (Xcode 26), or newer, with Swift 6 language mode. CI runs
+the complete suite on both Xcode 27 and the Swift 6.2 floor. Releases up to and
+including 17.1.0 require Swift 6.4 / Xcode 27. Minimum deployment targets are iOS 15, macOS 12, tvOS 15 and watchOS 9.
 [Package.swift](../../Package.swift) is the source of truth for the build baseline.
 
 The client remains serial-queue-owned, not actor-based. Consult
