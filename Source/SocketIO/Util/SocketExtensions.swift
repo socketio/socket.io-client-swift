@@ -151,34 +151,6 @@ extension Dictionary where Key == String, Value == Any {
     }
 }
 
-/// Bounded bracket scan run before `JSONSerialization`, whose recursion depth
-/// is otherwise only limited by the stack.
-internal enum SocketJSONNesting {
-    /// The parser's default `maximumNestingDepth`.
-    static let defaultMaximum = 512
-
-    static func isBounded<Bytes: Sequence>(_ bytes: Bytes, maximum: Int) -> Bool where Bytes.Element == UInt8 {
-        var depth = 0
-        var quoted = false
-        var escaped = false
-        for byte in bytes {
-            if quoted {
-                if escaped { escaped = false }
-                else if byte == 92 { escaped = true }
-                else if byte == 34 { quoted = false }
-            } else if byte == 34 { quoted = true }
-            else if byte == 91 || byte == 123 {
-                depth += 1
-                if depth > maximum { return false }
-            } else if byte == 93 || byte == 125 {
-                depth -= 1
-                if depth < 0 { return false }
-            }
-        }
-        return depth == 0 && !quoted
-    }
-}
-
 extension String {
     /// Parses server-controlled Engine.IO JSON (handshake, error bodies).
     func toDictionary() throws -> [String: Any] {
