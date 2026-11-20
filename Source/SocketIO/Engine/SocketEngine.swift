@@ -899,12 +899,13 @@ open class SocketEngine: NSObject,
         // session is over, so late packets — e.g. a handshake that finished
         // after a timeout-close — must not revive the engine.
         guard !closed else {
-            DefaultSocketLogger.Logger.log("Ignoring packet received after close: \(message)", type: SocketEngine.logType)
+            DefaultSocketLogger.Logger.log("Ignoring packet received after close: \(SocketLogRedaction.enginePayload(message))",
+                                           type: SocketEngine.logType)
 
             return
         }
 
-        DefaultSocketLogger.Logger.log("Got message: \(message)", type: SocketEngine.logType)
+        DefaultSocketLogger.Logger.log("Got message: \(SocketLogRedaction.enginePayload(message))", type: SocketEngine.logType)
 
         switch SocketEnginePacketCodec.decode(.text(message)) {
         case .success(let packet): dispatchDecodedPacket(packet)
@@ -1047,7 +1048,9 @@ open class SocketEngine: NSObject,
             case let .forceWebsockets(force):
                 forceWebsockets = force
             case let .path(path):
-                socketPath = path
+                // Normalize at once: a later option (`connectParams`' didSet)
+                // already builds URLs, and a relative path cannot form one.
+                socketPath = path.hasPrefix("/") ? path : "/" + path
             case let .secure(secure):
                 self.secure = secure || schemeIsSecure
             case let .clientCertificate(credential):
@@ -1069,9 +1072,6 @@ open class SocketEngine: NSObject,
             }
         }
         // Normalize after all options: configuration ordering must not matter.
-        // A relative path cannot form a URL with a host and used to crash
-        // URL construction.
-        if !socketPath.hasPrefix("/") { socketPath = "/" + socketPath }
         if socketPath.hasSuffix("/") { socketPath.removeLast() }
         if addTrailingSlash { socketPath += "/" }
         (urlPolling, urlWebSocket) = createURLs()

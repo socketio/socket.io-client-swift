@@ -342,7 +342,8 @@ extension SocketEnginePollable {
     }
 
     func parsePollingMessage(_ str: String) {
-        DefaultSocketLogger.Logger.log("Got poll message: \(str)", type: "SocketEnginePolling")
+        DefaultSocketLogger.Logger.log("Got poll message: \(SocketLogRedaction.enginePayload(str))",
+                                       type: "SocketEnginePolling")
         // Concrete engines share the standalone codec while keeping lifecycle
         // dispatch separate. Protocol conformers retain their packet callback.
         if let engine = self as? SocketEngine { engine.dispatchPollingPayload(str) }

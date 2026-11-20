@@ -1515,6 +1515,9 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
                 didConnect(toNamespace: nsp, payload: packet.data.isEmpty ? nil : packet.data[0] as? [String: Any])
             }
         case .disconnect:
+            // Like CONNECT: a namespace the app is not joining or using is not
+            // subscribed in JS, so its packets are dropped.
+            guard wantsNamespace || status == .connected else { return }
             // JS-aligned: server-initiated DISCONNECT calls `destroy()` which
             // clears `subs` (and therefore `active`) before emitting the
             // disconnect event — see `socket.io-client/lib/socket.ts`
@@ -1522,6 +1525,7 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
             active = false
             didDisconnect(reason: "io server disconnect")
         case .error:
+            guard wantsNamespace || status == .connected else { return }
             // JS-aligned: receipt of CONNECT_ERROR calls `destroy()` before
             // emitting `connect_error`. The server has refused the namespace
             // connect; the manager will not auto-rejoin without explicit
@@ -1863,7 +1867,9 @@ public extension SocketIOClient {
     /// multiple CONNECT packets (mirrors `socket.io-client/lib/socket.ts`
     /// `onopen()` calling `this.auth(cb)` without dedup).
     func setAuth(_ provider: @escaping SocketAuthProvider) {
-        manager?.handleQueue.socketAsync { [weak self] in
+        // Takes effect at once on the handle queue, so `setAuth(...)` followed
+        // by `connect()` uses the new provider (JS: `socket.auth = ...`).
+        performOnHandleQueue { [weak self] in
             guard let self = self else { return }
             self.pendingAuthTask?()
             self.pendingAuthTask = nil
@@ -1875,7 +1881,7 @@ public extension SocketIOClient {
 
     /// Remove the installed provider; cancels any in-flight async `Task`.
     func clearAuth() {
-        manager?.handleQueue.socketAsync { [weak self] in
+        performOnHandleQueue { [weak self] in
             guard let self = self else { return }
             self.pendingAuthTask?()
             self.pendingAuthTask = nil
@@ -1907,6 +1913,9 @@ public extension SocketIOClient {
             // the generation now so a late async result can be discarded if the
             // socket has reconnected / re-auth'd in the meantime.
             let generation = self.authGeneration
+            // resolveConnectPayload bumps the resolution before invoking the
+            // provider; a newer attempt must not be aborted by this result.
+            let resolution = self.connectResolution
             let box = WeakClientBox(ref: self)
             guard let queue = self.manager?.handleQueue else { cb(nil); return }
             let callback = SocketUncheckedSendableBox(cb)
@@ -1915,7 +1924,7 @@ public extension SocketIOClient {
                     let payload = try await provider()
                     queue.socketAsync {
                         guard let client = box.ref else { return }
-                        guard client.authGeneration == generation,
+                        guard client.authGeneration == generation, client.connectResolution == resolution,
                               client.status == .connecting else {
                             DefaultSocketLogger.Logger.log(
                                 "auth result discarded; generation mismatch or socket no longer .connecting",
@@ -1928,7 +1937,8 @@ public extension SocketIOClient {
                 } catch {
                     queue.socketAsync {
                         guard let client = box.ref else { return }
-                        guard client.authGeneration == generation else { return }
+                        guard client.authGeneration == generation,
+                              client.connectResolution == resolution else { return }
                         client.handleClientEvent(.error, data: [
                             "auth provider failed: \(error.localizedDescription)"
                         ])

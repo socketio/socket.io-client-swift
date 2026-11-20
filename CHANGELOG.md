@@ -9,6 +9,7 @@
 - Apply the configured `maximumPollingResponseBytes` to the final POSTs of a gracefully closing polling session, count event names against `maximumRecoveryReplayBytes`, and bound the nesting depth of Engine.IO handshake and error JSON like the packet parser.
 - Fix crashes from `reconnectWait`/`reconnectWaitMax` of `Int.min` and from a `path` without a leading slash, and stop passing namespace text to `NSLog` as part of its format string.
 - Remove local machine paths from review evidence; create the local strict-concurrency log with `mktemp`.
+- Follow-up from a Gemini security scan: `setAuth`/`clearAuth` take effect immediately when called on the handle queue; a late async auth failure no longer aborts a newer attempt; server DISCONNECT/CONNECT_ERROR packets for a namespace that is neither connected nor joining are ignored; the recovery `pid` of incoming CONNECT packets is redacted in logs; a relative `path` combined with `connectParams` no longer crashes; local Xcode derived data uses `mktemp`.
 
 ## 17.2.0 — 2026-11-19
 

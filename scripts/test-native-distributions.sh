@@ -10,6 +10,14 @@ if grep -n Starscream Package.swift; then
 fi
 echo 'Resolving Swift package schemes'
 xcodebuild -list
+# CI provides a private RUNNER_TEMP; locally a fresh directory avoids a
+# predictable shared path in /tmp.
+if [ -n "${RUNNER_TEMP:-}" ]; then
+  DERIVED_DATA="$RUNNER_TEMP/socketio-native-distributions"
+else
+  DERIVED_DATA="$(mktemp -d "${TMPDIR:-/tmp}/socketio-native-distributions.XXXXXX")"
+fi
+
 for DESTINATION in \
   'platform=macOS' \
   'generic/platform=iOS Simulator' \
@@ -18,6 +26,6 @@ for DESTINATION in \
 do
   echo "Building Swift package for $DESTINATION"
   xcodebuild -quiet -scheme SocketIO -destination "$DESTINATION" \
-    -derivedDataPath "${RUNNER_TEMP:-/tmp}/socketio-native-distributions" \
+    -derivedDataPath "$DERIVED_DATA" \
     CODE_SIGNING_ALLOWED=NO build
 done

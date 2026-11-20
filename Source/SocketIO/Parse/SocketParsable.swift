@@ -220,16 +220,21 @@ public extension SocketParsable where Self: SocketManagerSpec & SocketDataBuffer
     func parseSocketMessage(_ message: String) -> SocketPacket? {
         guard !message.isEmpty else { return nil }
 
-        DefaultSocketLogger.Logger.log("Parsing \(message)", type: "SocketParser")
+        // CONNECT carries auth on the way out and the recovery `pid` on the way
+        // in; the parser is compiled standalone, so it redacts without helpers.
+        let loggable = message.first == "0" ? "CONNECT (payload redacted)" : message
+        DefaultSocketLogger.Logger.log("Parsing \(loggable)", type: "SocketParser")
 
         do {
             let packet = try parseString(message)
 
-            DefaultSocketLogger.Logger.log("Decoded packet as: \(packet.description)", type: "SocketParser")
+            DefaultSocketLogger.Logger.log(
+                "Decoded packet as: \(packet.type == .connect ? "CONNECT for \(packet.nsp)" : packet.description)",
+                type: "SocketParser")
 
             return packet
         } catch {
-            DefaultSocketLogger.Logger.error("\(error): \(message)", type: "SocketParser")
+            DefaultSocketLogger.Logger.error("\(error): \(loggable)", type: "SocketParser")
 
             return nil
         }

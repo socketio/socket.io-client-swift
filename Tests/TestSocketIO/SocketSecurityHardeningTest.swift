@@ -230,4 +230,102 @@ final class SocketSecurityHardeningTest: XCTestCase {
         XCTAssertEqual(errors.first?.buffer, .recoveryReplay)
         XCTAssertEqual(socket.testRetainedBuffers.replayPackets, 0)
     }
+
+    // MARK: Gemini follow-up (F-01 … F-04)
+
+    func testSetAuthThenConnectOnTheHandleQueueUsesTheNewProvider() {
+        let queue = DispatchQueue(label: "test.security.auth.same-turn")
+        let manager = SocketManager(socketURL: url, config: [.log(false), .handleQueue(queue), .autoConnect(false)])
+        let engine = CaptureEngine()
+        let socket = manager.defaultSocket
+        queue.sync {
+            manager.engine = engine
+            manager.setTestStatus(.connected)
+            socket.setAuth { callback in callback(["token": "new-user"]) }
+            socket.connect(timeoutAfter: 0, withHandler: nil)
+        }
+        queue.sync {}
+        queue.sync {}
+
+        XCTAssertEqual(engine.sentPackets.filter { $0.hasPrefix("0") }, ["0/,{\"token\":\"new-user\"}"])
+    }
+
+    func testLateAsyncAuthFailureDoesNotAbortANewerAttempt() {
+        final class Calls: @unchecked Sendable {
+            private let lock = NSLock()
+            private var count = 0
+            func next() -> Int { lock.lock(); defer { lock.unlock() }; count += 1; return count }
+        }
+        let queue = DispatchQueue(label: "test.security.auth.async")
+        let manager = SocketManager(socketURL: url, config: [.log(false), .handleQueue(queue), .autoConnect(false)])
+        manager.engine = CaptureEngine()
+        let socket = manager.defaultSocket
+        let calls = Calls()
+        var errors = 0
+        socket.on(clientEvent: .error) { _, _ in errors += 1 }
+        socket.setAuth {
+            if calls.next() == 1 {
+                try? await Task.sleep(nanoseconds: 300_000_000)
+                throw URLError(.userAuthenticationRequired)
+            }
+            return ["token": "fresh"]
+        }
+        queue.sync {}
+        queue.sync {
+            manager.setTestStatus(.connected)
+            socket.connect(timeoutAfter: 0, withHandler: nil)
+        }
+        // A newer resolution of the same attempt (e.g. after the engine reopened).
+        let newer = expectation(description: "newer resolution completed")
+        queue.async { socket.resolveConnectPayload(explicit: nil) { _ in newer.fulfill() } }
+        wait(for: [newer], timeout: 2)
+
+        Thread.sleep(forTimeInterval: 0.6)
+        queue.sync {}
+        queue.sync {
+            XCTAssertEqual(errors, 0, "the retired provider call must not report its failure")
+            XCTAssertEqual(socket.status, .connecting, "the retired provider call must not abort the newer attempt")
+        }
+    }
+
+    func testRelativePathBeforeConnectParamsDoesNotCrash() {
+        let manager = SocketManager(socketURL: url, config: [.autoConnect(false)])
+        let engine = SocketEngine(client: manager, url: url,
+                                  config: [.path("socket.io"), .connectParams(["token": "t"])])
+        XCTAssertEqual(engine.socketPath, "/socket.io/")
+        XCTAssertTrue(engine.urlPolling.absoluteString.contains("/socket.io/?"))
+    }
+
+    func testParserLogDoesNotContainTheRecoveryPid() {
+        final class CaptureLogger: SocketLogger {
+            var log = true
+            var lines = [String]()
+            func log(_ message: @autoclosure () -> String, type: String) { lines.append(message()) }
+            func error(_ message: @autoclosure () -> String, type: String) { lines.append(message()) }
+        }
+        let logger = CaptureLogger()
+        DefaultSocketLogger.Logger = logger
+        defer { DefaultSocketLogger.Logger = DefaultSocketLogger() }
+        let manager = SocketManager(socketURL: url, config: [.autoConnect(false)])
+
+        XCTAssertNotNil(manager.parseSocketMessage("0{\"sid\":\"s1\",\"pid\":\"recovery-secret\"}"))
+
+        XCTAssertFalse(logger.lines.isEmpty)
+        XCTAssertFalse(logger.lines.contains { $0.contains("recovery-secret") }, "\(logger.lines)")
+    }
+
+    func testDisconnectedSocketIgnoresServerDisconnectAndConnectError() {
+        let manager = SocketManager(socketURL: url, config: [.log(false), .autoConnect(false)])
+        manager.engine = CaptureEngine()
+        let socket = manager.defaultSocket
+        var lifecycle = [String]()
+        socket.on(clientEvent: .disconnect) { _, _ in lifecycle.append("disconnect") }
+        socket.on(clientEvent: .connectError) { _, _ in lifecycle.append("connect_error") }
+
+        socket.handlePacket(SocketPacket(type: .disconnect, data: [], id: -1, nsp: "/", placeholders: 0))
+        socket.handlePacket(SocketPacket(type: .error, data: ["denied"], id: -1, nsp: "/", placeholders: 0))
+
+        XCTAssertEqual(lifecycle, [])
+        XCTAssertEqual(socket.status, .notConnected)
+    }
 }
