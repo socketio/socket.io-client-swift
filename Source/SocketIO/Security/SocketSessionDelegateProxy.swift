@@ -125,8 +125,11 @@ internal class SocketSessionDelegateProxy: NSObject, URLSessionDataDelegate {
             let secureDestination = ["https", "wss"].contains(candidate.url?.scheme?.lowercased() ?? "")
             guard !(secureOrigin && !secureDestination) else { once.call(nil); return }
             // URLSession drops Authorization on redirects but copies an explicit
-            // Cookie header (`.cookies`) to any destination. Like curl and
-            // browsers, never carry it to another origin.
+            // Cookie header (`.cookies`) to any destination, which hands the
+            // session to whatever origin the server redirects to. The same flaw
+            // was fixed as CVE-2022-0155 (follow-redirects), CVE-2023-43804
+            // (urllib3), CVE-2022-27776 (curl, other port) and in undici
+            // (GHSA-q768-x9m6-m9qp): never carry it to another origin.
             let destination = SocketSessionDelegateProxy.origin(of: candidate.url)
             if destination != currentOrigin || destination != firstOrigin {
                 candidate.setValue(nil, forHTTPHeaderField: "Cookie")
