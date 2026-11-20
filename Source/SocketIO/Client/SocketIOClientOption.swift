@@ -86,7 +86,11 @@ public enum SocketIOClientOption : ClientOption {
     /// Unlike JavaScript's milliseconds, this value uses seconds. Does not affect WebSocket.
     case requestTimeout(Double)
 
-    /// An array of cookies that will be sent during the initial connection.
+    /// Cookies sent with the connection's HTTP requests (polling and the WebSocket handshake).
+    ///
+    /// Like a browser cookie jar, each cookie is only sent to URLs its domain, path, `Secure` flag and
+    /// expiry allow (RFC 6265). A cookie without a leading dot in its domain is host-only. Since 18.0.0;
+    /// earlier versions sent every configured cookie to the server regardless of its domain.
     case cookies([HTTPCookie])
 
     /// Accept and resend server cookies in an isolated, engine-owned cookie jar.

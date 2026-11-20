@@ -238,7 +238,13 @@ extension SocketEngineSpec {
     }
 
     func addHeaders(to req: inout URLRequest, includingCookies additionalCookies: [HTTPCookie]? = nil) {
-        var cookiesToAdd: [HTTPCookie] = cookies ?? []
+        // Configured cookies follow RFC 6265 like a browser jar: only those whose
+        // domain, path, Secure flag and expiry allow this URL are sent. The
+        // engine-owned jar (`additionalCookies`) is already scoped by Foundation.
+        var cookiesToAdd: [HTTPCookie] = []
+        if let cookies = cookies, let url = req.url {
+            cookiesToAdd = SocketCookieScope.cookies(cookies, allowedFor: url)
+        }
         cookiesToAdd += additionalCookies ?? []
 
         if !cookiesToAdd.isEmpty {

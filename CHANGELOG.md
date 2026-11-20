@@ -1,4 +1,10 @@
-## Unreleased
+## Unreleased (next release: 18.0.0)
+
+### Breaking changes
+
+- **`.cookies(...)` are scoped by RFC 6265 rules.** Configured cookies used to go to the server whatever their domain and path, and URLSession copied them to any host a redirect pointed to (verified on macOS 27.0.1 and 27.2; reported to Apple as OE11044480357213). Each cookie is now sent only to URLs that its domain (host-only, or with subdomains when the domain has a leading dot), path, `Secure` flag and expiry allow. This applies to the first polling and WebSocket request and to every redirect. Migration: give each cookie the domain of the Socket.IO server, or its parent domain with a leading dot, and drop `Secure` for plain `http`/`ws` servers. An explicit `Cookie` entry in `.extraHeaders` is still sent as written. See [Configuration](Documentation/Guides/Configuration.md#cookies).
+
+### Fixes
 
 - Reset every omitted credential and trust option when a manager applies a new configuration to a reused engine: `extraHeaders`, `cookies`, `connectParams`, `withCredentials`, `sessionDelegate` and `security` now behave like `clientCertificate` and `requestTimeout` since 17.1.0, so removed credentials are not sent in later sessions.
 - Discard an auth provider callback that arrives after its connect attempt ended (disconnect, transport drop, aborted connect or a newer resolution); it no longer sends CONNECT with the earlier credentials. Several callbacks for the current attempt still send one CONNECT each.

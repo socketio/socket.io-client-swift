@@ -106,30 +106,6 @@ internal class SocketSessionDelegateProxy: NSObject, URLSessionDataDelegate {
         #endif
     }
 
-    /// RFC 6265 request matching: domain (Foundation marks domain cookies with
-    /// a leading dot, others are host-only), path, Secure and expiry. Cookies
-    /// are not port-scoped.
-    static func cookies(_ cookies: [HTTPCookie], allowedFor url: URL, now: Date = Date()) -> [HTTPCookie] {
-        guard let host = url.host?.lowercased(), let scheme = url.scheme?.lowercased() else { return [] }
-        let secure = scheme == "https" || scheme == "wss"
-        let path = url.path.isEmpty ? "/" : url.path
-        return cookies.filter { cookie in
-            if let expires = cookie.expiresDate, expires < now { return false }
-            if cookie.isSecure && !secure { return false }
-            let domain = cookie.domain.lowercased()
-            if domain.hasPrefix(".") {
-                let parent = String(domain.dropFirst())
-                guard host == parent || host.hasSuffix("." + parent) else { return false }
-            } else {
-                guard host == domain else { return false }
-            }
-            let cookiePath = cookie.path.isEmpty ? "/" : cookie.path
-            guard path == cookiePath || (path.hasPrefix(cookiePath) &&
-                (cookiePath.hasSuffix("/") || path.dropFirst(cookiePath.count).hasPrefix("/"))) else { return false }
-            return true
-        }
-    }
-
     /// Scheme, host and effective port; nil for a URL without a host.
     static func origin(of url: URL?) -> String? {
         guard let url = url, let scheme = url.scheme?.lowercased(), let host = url.host?.lowercased() else {
@@ -168,7 +144,7 @@ internal class SocketSessionDelegateProxy: NSObject, URLSessionDataDelegate {
             if destination != currentOrigin || destination != firstOrigin {
                 candidate.setValue(nil, forHTTPHeaderField: "Cookie")
                 if let url = candidate.url {
-                    let allowed = SocketSessionDelegateProxy.cookies(configuredCookies.value, allowedFor: url)
+                    let allowed = SocketCookieScope.cookies(configuredCookies.value, allowedFor: url)
                     if let header = HTTPCookie.requestHeaderFields(with: allowed)["Cookie"] {
                         candidate.setValue(header, forHTTPHeaderField: "Cookie")
                     }
@@ -329,3 +305,33 @@ internal final class SocketOnce<Value>: @unchecked Sendable {
 #if compiler(>=5.5)
 extension SocketSessionDelegateProxy: @unchecked Sendable {}
 #endif
+
+/// Which configured cookies a request may carry. Used for the first request
+/// and again for every redirect, so `.cookies` behave like a browser cookie jar.
+internal enum SocketCookieScope {
+    /// RFC 6265 request matching: domain (Foundation marks domain cookies with
+    /// a leading dot, others are host-only), path, Secure and expiry. Cookies
+    /// are not port-scoped.
+    static func cookies(_ cookies: [HTTPCookie], allowedFor url: URL, now: Date = Date()) -> [HTTPCookie] {
+        guard let host = url.host?.lowercased(), let scheme = url.scheme?.lowercased() else { return [] }
+        let secure = scheme == "https" || scheme == "wss"
+        // URLComponents keeps a trailing slash that `URL.path` drops.
+        let rawPath = URLComponents(url: url, resolvingAgainstBaseURL: false)?.path ?? url.path
+        let path = rawPath.isEmpty ? "/" : rawPath
+        return cookies.filter { cookie in
+            if let expires = cookie.expiresDate, expires < now { return false }
+            if cookie.isSecure && !secure { return false }
+            let domain = cookie.domain.lowercased()
+            if domain.hasPrefix(".") {
+                let parent = String(domain.dropFirst())
+                guard host == parent || host.hasSuffix("." + parent) else { return false }
+            } else {
+                guard host == domain else { return false }
+            }
+            let cookiePath = cookie.path.isEmpty ? "/" : cookie.path
+            guard path == cookiePath || (path.hasPrefix(cookiePath) &&
+                (cookiePath.hasSuffix("/") || path.dropFirst(cookiePath.count).hasPrefix("/"))) else { return false }
+            return true
+        }
+    }
+}

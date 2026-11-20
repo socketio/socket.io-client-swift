@@ -437,3 +437,44 @@ extension SocketSecurityHardeningTest {
                                 cookies: [scoped, parent]), "parent=v")
     }
 }
+
+// MARK: Scoped configured cookies (scan finding G, breaking in 18.0.0)
+
+extension SocketSecurityHardeningTest {
+    private func cookieHeader(engineURL: String, request: String, cookies: [HTTPCookie]) -> String? {
+        let url = URL(string: engineURL)!
+        let manager = SocketManager(socketURL: url, config: [.autoConnect(false)])
+        let engine = SocketEngine(client: manager, url: url, config: [.cookies(cookies)])
+        var urlRequest = URLRequest(url: URL(string: request)!)
+        engine.addHeaders(to: &urlRequest)
+        return urlRequest.value(forHTTPHeaderField: "Cookie")
+    }
+
+    func testConfiguredCookiesOnlyReachHostsTheyAreScopedTo() {
+        let own = cookie("own", domain: "chat.example.com")
+        let parent = cookie("parent", domain: ".example.com")
+        let foreign = cookie("foreign", domain: "evil.test")
+        let secure = cookie("secure", domain: "chat.example.com", secure: true)
+        let all = [own, parent, foreign, secure]
+
+        XCTAssertEqual(cookieHeader(engineURL: "http://chat.example.com/",
+                                    request: "http://chat.example.com/socket.io/?EIO=4&transport=polling",
+                                    cookies: all), "own=v; parent=v")
+        XCTAssertEqual(cookieHeader(engineURL: "https://chat.example.com/",
+                                    request: "wss://chat.example.com/socket.io/?EIO=4&transport=websocket",
+                                    cookies: all), "own=v; parent=v; secure=v")
+        XCTAssertNil(cookieHeader(engineURL: "https://other.test/", request: "https://other.test/socket.io/",
+                                  cookies: [own, foreign]))
+    }
+
+    func testExplicitCookieHeaderIsStillSentAsWritten() {
+        let url = URL(string: "https://chat.example.com/")!
+        let manager = SocketManager(socketURL: url, config: [.autoConnect(false)])
+        let engine = SocketEngine(client: manager, url: url, config: [
+            .cookies([cookie("foreign", domain: "evil.test")]), .extraHeaders(["Cookie": "app=explicit"])
+        ])
+        var request = URLRequest(url: URL(string: "https://chat.example.com/socket.io/")!)
+        engine.addHeaders(to: &request)
+        XCTAssertEqual(request.value(forHTTPHeaderField: "Cookie"), "app=explicit")
+    }
+}
