@@ -14,6 +14,8 @@ extension URLSessionWebSocketTransport {
                               tlsConfiguration: SocketTLSConfiguration = .systemDefault,
                               sessionDelegate: URLSessionDelegate? = nil,
                               clientCertificate: URLCredential? = nil,
+                              redirectCookies: [HTTPCookie] = [],
+                              redirectCookieStorage: HTTPCookieStorage? = nil,
                               maximumMessageSize: Int = 16 * 1024 * 1024,
                               maximumPendingBytes: Int = URLSessionWebSocketTransport.defaultMaximumPendingBytes,
                               maximumPendingBatches: Int = URLSessionWebSocketTransport.defaultMaximumPendingBatches,
@@ -27,7 +29,9 @@ extension URLSessionWebSocketTransport {
                                           configuration: snapshot,
                                           maximumMessageSize: maximumMessageSize,
                                           tlsConfiguration: tlsConfiguration, sessionDelegate: sessionDelegate,
-                                          clientCertificate: clientCertificate)
+                                          clientCertificate: clientCertificate,
+                                          redirectCookies: redirectCookies,
+                                          redirectCookieStorage: redirectCookieStorage)
         }
     }
 }
@@ -47,11 +51,16 @@ internal final class URLSessionWebSocketConnection: EngineWebSocketConnection {
     private let clientCertificate: URLCredential?
     private let tlsConfiguration: SocketTLSConfiguration
     private weak var sessionDelegate: URLSessionDelegate?
+    private let redirectCookies: [HTTPCookie]
+    private let redirectCookieStorage: HTTPCookieStorage?
 
     internal init(request: URLRequest, queue: DispatchQueue,
                   configuration: URLSessionConfiguration, maximumMessageSize: Int,
                   tlsConfiguration: SocketTLSConfiguration = .systemDefault, sessionDelegate: URLSessionDelegate? = nil,
-                  clientCertificate: URLCredential? = nil) {
+                  clientCertificate: URLCredential? = nil,
+                  redirectCookies: [HTTPCookie] = [], redirectCookieStorage: HTTPCookieStorage? = nil) {
+        self.redirectCookies = redirectCookies
+        self.redirectCookieStorage = redirectCookieStorage
         self.request = request
         self.queue = queue
         self.configuration = configuration
@@ -69,9 +78,14 @@ internal final class URLSessionWebSocketConnection: EngineWebSocketConnection {
     internal func start() {
         guard !started else { return }
         started = true
+        // URLSessionWebSocketTask follows handshake redirects (verified on macOS
+        // 27) and copies the Cookie header to any host; the inherited redirect
+        // handler re-scopes it, so it needs the cookies the request was built from.
         let proxy = WebSocketSessionDelegateProxy(owner: self, tlsConfiguration: tlsConfiguration,
                                                   forwardingDelegate: sessionDelegate,
-                                                  clientCertificate: clientCertificate, credentialOrigin: request.url)
+                                                  clientCertificate: clientCertificate, credentialOrigin: request.url,
+                                                  redirectCookies: redirectCookies,
+                                                  redirectCookieStorage: redirectCookieStorage)
         let session = URLSession(configuration: configuration, delegate: proxy, delegateQueue: nil)
         let task = session.webSocketTask(with: request)
         task.maximumMessageSize = maximumMessageSize
@@ -191,11 +205,13 @@ internal final class WebSocketSessionDelegateProxy: SocketSessionDelegateProxy, 
 
     internal init(owner: URLSessionWebSocketConnection, tlsConfiguration: SocketTLSConfiguration,
                   forwardingDelegate: URLSessionDelegate?,
-                  clientCertificate: URLCredential? = nil, credentialOrigin: URL? = nil) {
+                  clientCertificate: URLCredential? = nil, credentialOrigin: URL? = nil,
+                  redirectCookies: [HTTPCookie] = [], redirectCookieStorage: HTTPCookieStorage? = nil) {
         self.owner = owner
         self.queue = owner.queue
         super.init(tlsConfiguration: tlsConfiguration, forwardingDelegate: forwardingDelegate,
-                   clientCertificate: clientCertificate, credentialOrigin: credentialOrigin)
+                   clientCertificate: clientCertificate, credentialOrigin: credentialOrigin,
+                   redirectCookies: redirectCookies, redirectCookieStorage: redirectCookieStorage)
     }
 
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask,

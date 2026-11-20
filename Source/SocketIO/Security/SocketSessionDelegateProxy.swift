@@ -26,12 +26,16 @@ internal class SocketSessionDelegateProxy: NSObject, URLSessionDataDelegate {
     /// The explicitly configured `.cookies`; a redirect to another origin
     /// carries only those that cookie rules allow for the new URL.
     private let redirectCookies: [HTTPCookie]
+    /// The engine-owned jar when the request carried its cookies explicitly
+    /// (the WebSocket handshake); Foundation scopes its `cookies(for:)`.
+    private let redirectCookieStorage: HTTPCookieStorage?
 
     internal init(tlsConfiguration: SocketTLSConfiguration,
                   forwardingDelegate: URLSessionDelegate?,
                   clientCertificate: URLCredential? = nil, credentialOrigin: URL? = nil,
-                  redirectCookies: [HTTPCookie] = []) {
+                  redirectCookies: [HTTPCookie] = [], redirectCookieStorage: HTTPCookieStorage? = nil) {
         self.redirectCookies = redirectCookies
+        self.redirectCookieStorage = redirectCookieStorage
         self.clientCertificate = clientCertificate
         self.credentialOrigin = credentialOrigin
         self.tlsConfiguration = tlsConfiguration
@@ -127,6 +131,7 @@ internal class SocketSessionDelegateProxy: NSObject, URLSessionDataDelegate {
         let currentOrigin = SocketSessionDelegateProxy.origin(of: response.url)
         let firstOrigin = SocketSessionDelegateProxy.origin(of: task.originalRequest?.url)
         let configuredCookies = SocketUncheckedSendableBox(redirectCookies)
+        let cookieJar = SocketUncheckedSendableBox(redirectCookieStorage)
         let finish: @Sendable (URLRequest?) -> Void = { candidate in
             guard var candidate = candidate else { once.call(nil); return }
             let secureDestination = ["https", "wss"].contains(candidate.url?.scheme?.lowercased() ?? "")
@@ -145,6 +150,7 @@ internal class SocketSessionDelegateProxy: NSObject, URLSessionDataDelegate {
                 candidate.setValue(nil, forHTTPHeaderField: "Cookie")
                 if let url = candidate.url {
                     let allowed = SocketCookieScope.cookies(configuredCookies.value, allowedFor: url)
+                        + (cookieJar.value?.cookies(for: url) ?? [])
                     if let header = HTTPCookie.requestHeaderFields(with: allowed)["Cookie"] {
                         candidate.setValue(header, forHTTPHeaderField: "Cookie")
                     }

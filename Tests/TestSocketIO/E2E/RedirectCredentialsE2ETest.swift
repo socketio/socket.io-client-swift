@@ -54,4 +54,47 @@ final class RedirectCredentialsE2ETest: XCTestCase {
             XCTAssertEqual(host["apiKey"] as? String, "key-value", "other extra headers still follow")
         }
     }
+
+    /// URLSessionWebSocketTask follows handshake redirects too (verified on
+    /// macOS 27) and copied the Cookie header to any host.
+    private func webSocketThroughRedirect(_ path: String, port: Int) throws -> [String: Any] {
+        let cookie = try XCTUnwrap(HTTPCookie(properties: [
+            .name: "session", .value: "cookie-secret", .domain: "127.0.0.1", .path: "/"
+        ]))
+        var request = URLRequest(url: URL(string: "ws://127.0.0.1:\(port)/\(path)")!)
+        request.setValue(HTTPCookie.requestHeaderFields(with: [cookie])["Cookie"], forHTTPHeaderField: "Cookie")
+        request.httpShouldHandleCookies = false
+        let queue = DispatchQueue(label: "redirect.websocket.e2e")
+        let connection = URLSessionWebSocketConnection(request: request, queue: queue, configuration: .ephemeral,
+                                                       maximumMessageSize: 4096, redirectCookies: [cookie])
+        defer { queue.sync { connection.cancel() } }
+        let observed = Observed()
+        let received = expectation(description: "echo over \(path)")
+        queue.sync {
+            connection.start()
+            connection.receive { result in
+                switch result {
+                case .success(.text(let text)):
+                    observed.body = try? JSONSerialization.jsonObject(with: Data(text.utf8)) as? [String: Any]
+                case .success(.binary): break
+                case .failure(let error): observed.error = error
+                }
+                received.fulfill()
+            }
+        }
+        wait(for: [received], timeout: 10)
+        XCTAssertNil(observed.error, path)
+        return try XCTUnwrap(observed.body, path)
+    }
+
+    func testWebSocketHandshakeRedirectKeepsCookiesWithinTheirScope() throws {
+        let server = try TestServerProcess.start(serverScript: "redirect-headers.mjs")
+        defer { server.stop() }
+        let same = try webSocketThroughRedirect("ws-same", port: server.port)
+        XCTAssertEqual(same["cookie"] as? String, "session=cookie-secret")
+        let otherPort = try webSocketThroughRedirect("ws-port", port: server.port)
+        XCTAssertEqual(otherPort["cookie"] as? String, "session=cookie-secret", "cookies are not port-scoped")
+        let otherHost = try webSocketThroughRedirect("ws-host", port: server.port)
+        XCTAssertTrue(otherHost["cookie"] is NSNull, "\(otherHost)")
+    }
 }
