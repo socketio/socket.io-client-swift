@@ -328,4 +328,52 @@ final class SocketSecurityHardeningTest: XCTestCase {
         XCTAssertEqual(lifecycle, [])
         XCTAssertEqual(socket.status, .notConnected)
     }
+
+    // MARK: Cross-queue configuration (Gemini F-06)
+
+    func testReceivePermitsAreReleasedWhenLimitsChangeInFlight() {
+        let queue = DispatchQueue(label: "test.security.permits")
+        let bounded = SocketBufferLimits(maximumUnparsedPackets: 10)
+        let manager = SocketManager(socketURL: url, config: [
+            .log(false), .autoConnect(false), .handleQueue(queue), .bufferLimits(bounded)
+        ])
+        queue.suspend()
+        manager.parseEngineMessage("2[\"x\"]")
+        XCTAssertEqual(manager.testReceiveBacklog.packets, 1)
+
+        manager.config = [.log(false), .autoConnect(false), .handleQueue(queue), .bufferLimits(.unlimited)]
+        queue.resume()
+        queue.sync {}
+
+        XCTAssertEqual(manager.testReceiveBacklog.packets, 0, "a counted permit is released under new limits")
+        XCTAssertEqual(manager.testReceiveBacklog.bytes, 0)
+
+        manager.config = [.log(false), .autoConnect(false), .handleQueue(queue), .bufferLimits(bounded)]
+        manager.parseEngineMessage("2[\"y\"]")
+        queue.sync {}
+        XCTAssertEqual(manager.testReceiveBacklog.packets, 0)
+    }
+
+    func testManagerStateCanBeReconfiguredWhileTheEngineQueueReadsIt() {
+        let manager = SocketManager(socketURL: url, config: [.log(false), .autoConnect(false)])
+        let limits = SocketBufferLimits(maximumUnparsedPackets: 1_000_000)
+        final class Box: @unchecked Sendable { let manager: SocketManager; init(_ m: SocketManager) { manager = m } }
+        let box = Box(manager)
+        let reader = DispatchQueue(label: "test.security.reader")
+        let done = expectation(description: "concurrent reads finished")
+        reader.async {
+            // What engine-queue callbacks read while the app reconfigures.
+            for _ in 0..<2_000 {
+                _ = box.manager.bufferLimits.boundsReceive
+                _ = box.manager.handleQueue
+                _ = box.manager.engine
+            }
+            done.fulfill()
+        }
+        for index in 0..<2_000 {
+            manager.config = [.log(false), .autoConnect(false),
+                              .bufferLimits(index.isMultiple(of: 2) ? limits : .unlimited)]
+        }
+        wait(for: [done], timeout: 10)
+    }
 }
