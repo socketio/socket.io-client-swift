@@ -76,8 +76,9 @@ final class SocketSecurityHardeningTest: XCTestCase {
         let manager = SocketManager(socketURL: url, config: [.autoConnect(false), .path("socket.io")])
         let engine = SocketEngine(client: manager, url: url, config: manager.config)
         XCTAssertEqual(engine.socketPath, "/socket.io/")
-        XCTAssertEqual(engine.urlPolling.path, "/socket.io/")
-        XCTAssertEqual(engine.urlWebSocket.path, "/socket.io/")
+        // `URL.path` drops the trailing slash; compare the encoded path.
+        XCTAssertEqual(URLComponents(url: engine.urlPolling, resolvingAgainstBaseURL: false)?.path, "/socket.io/")
+        XCTAssertEqual(URLComponents(url: engine.urlWebSocket, resolvingAgainstBaseURL: false)?.path, "/socket.io/")
     }
 
     // MARK: Header injection (finding M)
