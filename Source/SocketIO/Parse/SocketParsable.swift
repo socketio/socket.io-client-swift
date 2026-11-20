@@ -210,24 +210,7 @@ public extension SocketParsable where Self: SocketManagerSpec & SocketDataBuffer
     /// Reject excessive nesting before JSONSerialization can allocate a deeply
     /// recursive object graph. Quoted brackets and escaped quotes do not count.
     private func jsonNestingIsBounded(_ bytes: ArraySlice<UInt8>, maximum: Int) -> Bool {
-        var depth = 0
-        var quoted = false
-        var escaped = false
-        for byte in bytes {
-            if quoted {
-                if escaped { escaped = false }
-                else if byte == 92 { escaped = true }
-                else if byte == 34 { quoted = false }
-            } else if byte == 34 { quoted = true }
-            else if byte == 91 || byte == 123 {
-                depth += 1
-                if depth > maximum { return false }
-            } else if byte == 93 || byte == 125 {
-                depth -= 1
-                if depth < 0 { return false }
-            }
-        }
-        return depth == 0 && !quoted
+        SocketJSONNesting.isBounded(bytes, maximum: maximum)
     }
 
     /// Called when the engine has received a string that should be parsed into a socket.io packet.
@@ -237,16 +220,21 @@ public extension SocketParsable where Self: SocketManagerSpec & SocketDataBuffer
     func parseSocketMessage(_ message: String) -> SocketPacket? {
         guard !message.isEmpty else { return nil }
 
-        DefaultSocketLogger.Logger.log("Parsing \(message)", type: "SocketParser")
+        // CONNECT carries auth on the way out and the recovery `pid` on the way
+        // in; the parser is compiled standalone, so it redacts without helpers.
+        let loggable = message.first == "0" ? "CONNECT (payload redacted)" : message
+        DefaultSocketLogger.Logger.log("Parsing \(loggable)", type: "SocketParser")
 
         do {
             let packet = try parseString(message)
 
-            DefaultSocketLogger.Logger.log("Decoded packet as: \(packet.description)", type: "SocketParser")
+            DefaultSocketLogger.Logger.log(
+                "Decoded packet as: \(packet.type == .connect ? "CONNECT for \(packet.nsp)" : packet.description)",
+                type: "SocketParser")
 
             return packet
         } catch {
-            DefaultSocketLogger.Logger.error("\(error): \(message)", type: "SocketParser")
+            DefaultSocketLogger.Logger.error("\(error): \(loggable)", type: "SocketParser")
 
             return nil
         }
@@ -280,5 +268,33 @@ public extension SocketParsable where Self: SocketManagerSpec & SocketDataBuffer
             return nil
         }
         return complete ? waitingPackets.removeFirst() : nil
+    }
+}
+
+/// Bounded bracket scan run before `JSONSerialization`, whose recursion depth
+/// is otherwise only limited by the stack.
+internal enum SocketJSONNesting {
+    /// The parser's default `maximumNestingDepth`.
+    static let defaultMaximum = 512
+
+    static func isBounded<Bytes: Sequence>(_ bytes: Bytes, maximum: Int) -> Bool where Bytes.Element == UInt8 {
+        var depth = 0
+        var quoted = false
+        var escaped = false
+        for byte in bytes {
+            if quoted {
+                if escaped { escaped = false }
+                else if byte == 92 { escaped = true }
+                else if byte == 34 { quoted = false }
+            } else if byte == 34 { quoted = true }
+            else if byte == 91 || byte == 123 {
+                depth += 1
+                if depth > maximum { return false }
+            } else if byte == 93 || byte == 125 {
+                depth -= 1
+                if depth < 0 { return false }
+            }
+        }
+        return depth == 0 && !quoted
     }
 }

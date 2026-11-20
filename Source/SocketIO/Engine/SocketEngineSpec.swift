@@ -238,7 +238,13 @@ extension SocketEngineSpec {
     }
 
     func addHeaders(to req: inout URLRequest, includingCookies additionalCookies: [HTTPCookie]? = nil) {
-        var cookiesToAdd: [HTTPCookie] = cookies ?? []
+        // Configured cookies follow RFC 6265 like a browser jar: only those whose
+        // domain, path, Secure flag and expiry allow this URL are sent. The
+        // engine-owned jar (`additionalCookies`) is already scoped by Foundation.
+        var cookiesToAdd: [HTTPCookie] = []
+        if let cookies = cookies, let url = req.url {
+            cookiesToAdd = SocketCookieScope.cookies(cookies, allowedFor: url)
+        }
         cookiesToAdd += additionalCookies ?? []
 
         if !cookiesToAdd.isEmpty {
@@ -247,6 +253,14 @@ extension SocketEngineSpec {
 
         if let extraHeaders = extraHeaders {
             for (headerName, value) in extraHeaders {
+                // CR, LF and NUL are never valid in a field; they could start
+                // a second header. Such a header is skipped, not rewritten.
+                guard !(headerName + value).unicodeScalars.contains(where: { $0 == "\r" || $0 == "\n" || $0 == "\0" })
+                else {
+                    DefaultSocketLogger.Logger.error("Skipping extra header with a control character",
+                                                     type: "SocketEngine")
+                    continue
+                }
                 req.setValue(value, forHTTPHeaderField: headerName)
             }
         }

@@ -133,6 +133,20 @@ The application's shared cookie store is not used automatically.
 
 Explicit .cookies(...) and explicit Cookie headers remain available when your application wants to control cookies directly.
 
+Since 18.0.0, `.cookies(...)` are scoped like a browser cookie jar (RFC 6265). Each
+cookie is sent only to URLs that its domain, path, `Secure` flag and expiry allow,
+on the first request and again after every redirect:
+
+- A domain without a leading dot (`api.example.com`) is host-only: the cookie goes to that host only.
+- A domain with a leading dot (`.example.com`) also covers subdomains such as `node3.example.com`.
+- A `Secure` cookie is never sent over `http`/`ws`.
+- Cookies are not port-scoped, so another port on the same host still receives them.
+
+Before 18.0.0, every configured cookie went to the server whatever its domain, and
+URLSession copied it to any host a redirect pointed to. Give each cookie the domain
+of your Socket.IO server, or that server's parent domain with a leading dot.
+An explicit `Cookie` entry in `.extraHeaders` is sent as written and is not scoped.
+
 ## Threading and Swift concurrency
 
 SocketManager and SocketIOClient use an explicit serial-queue ownership model.

@@ -21,7 +21,15 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BASELINE="$REPO_ROOT/Documentation/ReviewEvidence/StrictConcurrencyBaseline.json"
-LOG="${STRICT_CONCURRENCY_LOG:-${RUNNER_TEMP:-/tmp}/strict-concurrency.log}"
+# CI provides a private RUNNER_TEMP; locally a fresh mktemp file avoids a
+# predictable path in a shared /tmp.
+if [ -n "${STRICT_CONCURRENCY_LOG:-}" ]; then
+  LOG="$STRICT_CONCURRENCY_LOG"
+elif [ -n "${RUNNER_TEMP:-}" ]; then
+  LOG="$RUNNER_TEMP/strict-concurrency.log"
+else
+  LOG="$(mktemp "${TMPDIR:-/tmp}/strict-concurrency.XXXXXX")"
+fi
 RECORD=0
 [ "${1:-}" = "--record" ] && RECORD=1
 

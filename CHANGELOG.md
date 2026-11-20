@@ -1,3 +1,24 @@
+## Unreleased (next release: 18.0.0)
+
+### Breaking changes
+
+- **`.cookies(...)` are scoped by RFC 6265 rules.** Configured cookies used to go to the server whatever their domain and path, and URLSession copied them to any host a redirect pointed to (verified on macOS 27.0.1 and 27.2; reported to Apple as OE11044480357213). Each cookie is now sent only to URLs that its domain (host-only, or with subdomains when the domain has a leading dot), path, `Secure` flag and expiry allow. This applies to the first polling and WebSocket request and to every redirect. Migration: give each cookie the domain of the Socket.IO server, or its parent domain with a leading dot, and drop `Secure` for plain `http`/`ws` servers. An explicit `Cookie` entry in `.extraHeaders` is still sent as written. See [Configuration](Documentation/Guides/Configuration.md#cookies).
+
+### Fixes
+
+- Reset every omitted credential and trust option when a manager applies a new configuration to a reused engine: `extraHeaders`, `cookies`, `connectParams`, `withCredentials`, `sessionDelegate` and `security` now behave like `clientCertificate` and `requestTimeout` since 17.1.0, so removed credentials are not sent in later sessions.
+- Discard an auth provider callback that arrives after its connect attempt ended (disconnect, transport drop, aborted connect or a newer resolution); it no longer sends CONNECT with the earlier credentials. Several callbacks for the current attempt still send one CONNECT each.
+- Ignore server CONNECT and event packets for a namespace the app has not connected or has disconnected, as the JavaScript client does; they no longer revive the socket, flush its send buffer or accumulate in its receive buffer.
+- Redact CONNECT auth payloads and query values (`connectParams`) in log output; the logger is process-wide and also logs other managers.
+- An `https`/`wss` server URL is no longer downgraded to plaintext by `.secure(false)`, including upper-case schemes.
+- Skip `extraHeaders` entries containing CR, LF or NUL instead of passing them to `URLRequest`.
+- Apply the configured `maximumPollingResponseBytes` to the final POSTs of a gracefully closing polling session, count event names against `maximumRecoveryReplayBytes`, and bound the nesting depth of Engine.IO handshake and error JSON like the packet parser.
+- Fix crashes from `reconnectWait`/`reconnectWaitMax` of `Int.min` and from a `path` without a leading slash, and stop passing namespace text to `NSLog` as part of its format string.
+- Remove local machine paths from review evidence; create the local strict-concurrency log with `mktemp`.
+- Follow-up from a Gemini security scan: `setAuth`/`clearAuth` take effect immediately when called on the handle queue; a late async auth failure no longer aborts a newer attempt; server DISCONNECT/CONNECT_ERROR packets for a namespace that is neither connected nor joining are ignored; the recovery `pid` of incoming CONNECT packets is redacted in logs; a relative `path` combined with `connectParams` no longer crashes; local Xcode derived data uses `mktemp`.
+- Lock the manager state that engine-queue callbacks read (`engine`, `handleQueue`, `bufferLimits`), so reconfiguring a manager from another thread no longer races with incoming packets, and release receive-backlog permits by what was reserved, so changing `bufferLimits` while packets are in flight cannot leak backlog quota.
+- Security: when a polling request or a WebSocket handshake is redirected to another origin (scheme, host or port), rebuild the explicit `Cookie` header from `.cookies` with RFC 6265 rules (domain, path, `Secure`, expiry) instead of letting URLSession copy it. Verified on macOS 27: URLSession and `URLSessionWebSocketTask` (which follows handshake redirects) remove `Authorization` themselves but copied the cookie to any host, so a redirecting server could hand the session to a third party. The same flaw was fixed as CVE-2022-0155 (follow-redirects), CVE-2023-43804 (urllib3), CVE-2022-27776 (curl) and GHSA-q768-x9m6-m9qp (undici). Legitimate redirects keep their cookies like in a browser: http → https on the same host, a parent-domain cookie on a sibling host, another port of the same host. Other `extraHeaders` still follow redirects, as in those libraries.
+
 ## 17.2.0 — 2026-11-19
 
 - Lower the declared toolchain floor from `swift-tools-version:6.4` to `6.2`, so the package resolves and builds with Xcode 26.x (socketio/socket.io-client-swift#1527). No source or API changes; Xcode 27 builds are unaffected. Releases up to and including 17.1.0 still require Swift 6.4 / Xcode 27.

@@ -245,6 +245,12 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
     /// generation has moved on by the time they hop back to `handleQueue`.
     private var authGeneration: UInt64 = 0
 
+    /// Bumped for every CONNECT payload resolution and when the attempt ends
+    /// (disconnect, transport drop, aborted connect). A provider callback that
+    /// arrives after that belongs to a retired attempt and must not send its
+    /// credentials on a later connection.
+    private var connectResolution: UInt64 = 0
+
     // MARK: Initializers
 
     /// Type safe way to create a new SocketIOClient. `opts` can be omitted.
@@ -448,7 +454,8 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
         // engine.io-client's `_onError` → `_onClose("transport error")` does.
         let limits = bufferLimits
         if !limits.isUnlimited {
-            let bytes = SocketBufferLimits.retainedBytes(of: packet.args)
+            // `data` includes the event name, which the buffer retains as well.
+            let bytes = SocketBufferLimits.retainedBytes(of: packet.data)
             let packets = receiveBuffer.count + 1
             let total = receiveBufferBytes + bytes
             if packets > limits.maximumRecoveryReplayPackets || total > limits.maximumRecoveryReplayBytes {
@@ -577,6 +584,7 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
     /// Snapshot IDs before status and disconnect listeners so this close cannot
     /// sweep a registration created by a listener for a replacement connection.
     private func notifyDisconnectAndClearAcks(reason: String, updatingState: () -> Void) {
+        connectResolution &+= 1
         let retiringAckIDs = ackHandlers.pendingTimedAckIDs
         let stillBuffered = bufferedAckIds
         let error = pendingTransportCloseError
@@ -593,6 +601,7 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
     func abortPendingConnect() {
         guard status == .connecting else { return }
 
+        connectResolution &+= 1
         clearReceiveBuffer()
         status = .notConnected
     }
@@ -1463,6 +1472,12 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
         dispatchEvent(event, data: data, withAck: ack, isInternalMessage: isInternalMessage)
     }
 
+    /// Whether this socket is still joining or using its namespace. `connect()`
+    /// sets `active` before the status moves to `.connecting`.
+    private var wantsNamespace: Bool {
+        active || status == .connecting
+    }
+
     /// Causes a client to handle a socket.io packet. The namespace for the packet must match the namespace of the
     /// socket.
     ///
@@ -1473,6 +1488,10 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
         switch packet.type {
         case .event, .binaryEvent:
             if status != .connected {
+                // JS: a socket the app has not connected, or has disconnected,
+                // is not subscribed to the manager and drops every packet.
+                // Buffering here would hand the events to a later session.
+                guard wantsNamespace else { return }
                 bufferReceivedEvent(packet)
             } else {
                 guard status == .connected else { return }
@@ -1482,6 +1501,10 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
         case .ack, .binaryAck:
             handleAck(packet.id, data: packet.data)
         case .connect:
+            // A server CONNECT must not revive a namespace the app left: it
+            // would flush the send buffer and fire `.connect` for a socket the
+            // app disconnected (JS drops packets for unsubscribed sockets).
+            guard wantsNamespace else { return }
             // JS-aligned with `socket.io-client/lib/socket.ts` `onpacket`: a
             // CONNECT without a `sid` means an incompatible server, so
             // fire `connect_error` instead of connecting.
@@ -1492,6 +1515,9 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
                 didConnect(toNamespace: nsp, payload: packet.data.isEmpty ? nil : packet.data[0] as? [String: Any])
             }
         case .disconnect:
+            // Like CONNECT: a namespace the app is not joining or using is not
+            // subscribed in JS, so its packets are dropped.
+            guard wantsNamespace || status == .connected else { return }
             // JS-aligned: server-initiated DISCONNECT calls `destroy()` which
             // clears `subs` (and therefore `active`) before emitting the
             // disconnect event — see `socket.io-client/lib/socket.ts`
@@ -1499,6 +1525,7 @@ open class SocketIOClient: NSObject, SocketIOClientSpec {
             active = false
             didDisconnect(reason: "io server disconnect")
         case .error:
+            guard wantsNamespace || status == .connected else { return }
             // JS-aligned: receipt of CONNECT_ERROR calls `destroy()` before
             // emitting `connect_error`. The server has refused the namespace
             // connect; the manager will not auto-rejoin without explicit
@@ -1840,7 +1867,9 @@ public extension SocketIOClient {
     /// multiple CONNECT packets (mirrors `socket.io-client/lib/socket.ts`
     /// `onopen()` calling `this.auth(cb)` without dedup).
     func setAuth(_ provider: @escaping SocketAuthProvider) {
-        manager?.handleQueue.socketAsync { [weak self] in
+        // Takes effect at once on the handle queue, so `setAuth(...)` followed
+        // by `connect()` uses the new provider (JS: `socket.auth = ...`).
+        performOnHandleQueue { [weak self] in
             guard let self = self else { return }
             self.pendingAuthTask?()
             self.pendingAuthTask = nil
@@ -1852,7 +1881,7 @@ public extension SocketIOClient {
 
     /// Remove the installed provider; cancels any in-flight async `Task`.
     func clearAuth() {
-        manager?.handleQueue.socketAsync { [weak self] in
+        performOnHandleQueue { [weak self] in
             guard let self = self else { return }
             self.pendingAuthTask?()
             self.pendingAuthTask = nil
@@ -1884,6 +1913,9 @@ public extension SocketIOClient {
             // the generation now so a late async result can be discarded if the
             // socket has reconnected / re-auth'd in the meantime.
             let generation = self.authGeneration
+            // resolveConnectPayload bumps the resolution before invoking the
+            // provider; a newer attempt must not be aborted by this result.
+            let resolution = self.connectResolution
             let box = WeakClientBox(ref: self)
             guard let queue = self.manager?.handleQueue else { cb(nil); return }
             let callback = SocketUncheckedSendableBox(cb)
@@ -1892,7 +1924,7 @@ public extension SocketIOClient {
                     let payload = try await provider()
                     queue.socketAsync {
                         guard let client = box.ref else { return }
-                        guard client.authGeneration == generation,
+                        guard client.authGeneration == generation, client.connectResolution == resolution,
                               client.status == .connecting else {
                             DefaultSocketLogger.Logger.log(
                                 "auth result discarded; generation mismatch or socket no longer .connecting",
@@ -1905,7 +1937,8 @@ public extension SocketIOClient {
                 } catch {
                     queue.socketAsync {
                         guard let client = box.ref else { return }
-                        guard client.authGeneration == generation else { return }
+                        guard client.authGeneration == generation,
+                              client.connectResolution == resolution else { return }
                         client.handleClientEvent(.error, data: [
                             "auth provider failed: \(error.localizedDescription)"
                         ])
@@ -1938,12 +1971,24 @@ extension SocketIOClient {
 
 
         guard let queue = manager?.handleQueue else { return }
-        provider { resolved in
+        connectResolution &+= 1
+        let resolution = connectResolution
+        let generation = authGeneration
+        provider { [weak self] resolved in
             // Always async-hop back. NEVER sync — callers like _engineDidOpen
             // are already on `handleQueue` and a sync re-entry would deadlock
             // on `handleQueue.sync` (and at minimum re-enter the dispatch chain
             // mid-iteration).
             queue.socketAsync {
+                // Several callbacks for the same resolution still produce one
+                // CONNECT each (JS-aligned). A callback for a retired attempt,
+                // a replaced provider or a later connect is discarded.
+                guard let self = self, self.connectResolution == resolution,
+                      self.authGeneration == generation else {
+                    DefaultSocketLogger.Logger.log("auth result discarded; connect attempt was retired",
+                                                   type: "SocketIOClient")
+                    return
+                }
                 completion(resolved ?? explicit)
             }
         }

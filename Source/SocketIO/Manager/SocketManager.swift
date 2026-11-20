@@ -82,7 +82,18 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     }
 
     /// The engine for this manager.
-    public var engine: SocketEngineSpec?
+    ///
+    /// Read from the engine queue too (receive backpressure), so access is locked.
+    public var engine: SocketEngineSpec? {
+        get { crossQueueLock.lock(); defer { crossQueueLock.unlock() }; return _engine }
+        set { crossQueueLock.lock(); _engine = newValue; crossQueueLock.unlock() }
+    }
+    private var _engine: SocketEngineSpec?
+
+    /// Guards the properties that engine-queue callbacks read while the app may
+    /// reconfigure the manager: `engine`, `handleQueue` and `bufferLimits`.
+    /// Held only for the read or write itself, never across a call out.
+    private let crossQueueLock = NSLock()
 
     /// If `true` then every time `connect` is called, a new engine will be created.
     public var forceNew = false
@@ -113,12 +124,18 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     ///
     /// **This should be a serial queue! Concurrent queues are not supported and might cause crashes and races**.
     private let handleQueueKey = DispatchSpecificKey<UInt8>()
-    public var handleQueue = DispatchQueue.main {
-        didSet {
+    public var handleQueue: DispatchQueue {
+        get { crossQueueLock.lock(); defer { crossQueueLock.unlock() }; return _handleQueue }
+        set {
+            crossQueueLock.lock()
+            let oldValue = _handleQueue
+            _handleQueue = newValue
+            crossQueueLock.unlock()
             oldValue.setSpecific(key: handleQueueKey, value: nil)
-            handleQueue.setSpecific(key: handleQueueKey, value: 1)
+            newValue.setSpecific(key: handleQueueKey, value: 1)
         }
     }
+    private var _handleQueue = DispatchQueue.main
 
     /// Registration is synchronous when the caller obeys the handleQueue contract.
     /// This preserves emit(); disconnect() ordering without synchronous cross-queue hops.
@@ -186,7 +203,11 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
 
     /// Pipeline-wide buffer/queue limits. Set via `.bufferLimits` before
     /// connecting; unlimited by default, which is the JavaScript behaviour.
-    public private(set) var bufferLimits = SocketBufferLimits.unlimited
+    public private(set) var bufferLimits: SocketBufferLimits {
+        get { crossQueueLock.lock(); defer { crossQueueLock.unlock() }; return _bufferLimits }
+        set { crossQueueLock.lock(); _bufferLimits = newValue; crossQueueLock.unlock() }
+    }
+    private var _bufferLimits = SocketBufferLimits.unlimited
 
     /// Packets handed to `handleQueue` that have not finished parsing.
     ///
@@ -761,10 +782,10 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     /// - parameter msg: The message that needs parsing.
     open func parseEngineMessage(_ msg: String) {
         let size = msg.utf8.count
-        guard reserveReceivePermit(bytes: size) else { return }
+        guard let permit = reserveReceivePermit(bytes: size) else { return }
 
         handleQueue.socketAsync {
-            defer { self.releaseReceivePermit(bytes: size) }
+            defer { self.releaseReceivePermit(permit, bytes: size) }
 
             self._parseEngineMessage(msg)
         }
@@ -798,10 +819,10 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     /// - parameter data: The data the engine received.
     open func parseEngineBinaryData(_ data: Data) {
         let size = data.count
-        guard reserveReceivePermit(bytes: size) else { return }
+        guard let permit = reserveReceivePermit(bytes: size) else { return }
 
         handleQueue.socketAsync {
-            defer { self.releaseReceivePermit(bytes: size) }
+            defer { self.releaseReceivePermit(permit, bytes: size) }
 
             self._parseEngineBinaryData(data)
         }
@@ -832,15 +853,15 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     /// backlog is full, in which case the packet is not dispatched and the
     /// connection is closed — dispatching it anyway would be the unbounded
     /// growth this gate exists to prevent.
-    private func reserveReceivePermit(bytes: Int) -> Bool {
+    private func reserveReceivePermit(bytes: Int) -> ReceivePermit? {
         let limits = bufferLimits
-        guard limits.boundsReceive else { return true }
+        guard limits.boundsReceive else { return .uncounted }
 
         receiveBacklogLock.lock()
         if receiveBacklogOverflowed {
             receiveBacklogLock.unlock()
 
-            return false
+            return nil
         }
 
         let packets = unparsedPackets + 1
@@ -862,19 +883,24 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
             // behind exactly the backlog it is meant to stop.
             engine?.disconnect(reason: "transport error")
 
-            return false
+            return nil
         }
 
         unparsedPackets = packets
         unparsedBytes = total
         receiveBacklogLock.unlock()
 
-        return true
+        return .counted
     }
 
+    /// Whether a dispatched packet was counted against the receive backlog.
+    /// Releasing by the permit, not by the current limits, keeps the counters
+    /// right when `bufferLimits` changes while packets are in flight.
+    private enum ReceivePermit { case counted, uncounted }
+
     /// Releases the permit after parsing has finished, not after the dispatch.
-    private func releaseReceivePermit(bytes: Int) {
-        guard bufferLimits.boundsReceive else { return }
+    private func releaseReceivePermit(_ permit: ReceivePermit, bytes: Int) {
+        guard permit == .counted else { return }
 
         receiveBacklogLock.lock()
         unparsedPackets = max(0, unparsedPackets - 1)
@@ -1105,9 +1131,10 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
             case let .reconnectAttempts(attempts):
                 reconnectAttempts = attempts
             case let .reconnectWait(wait):
-                reconnectWait = abs(wait)
+                // `abs(Int.min)` traps; saturate instead.
+                reconnectWait = Int(clamping: wait.magnitude)
             case let .reconnectWaitMax(wait):
-                reconnectWaitMax = abs(wait)
+                reconnectWaitMax = Int(clamping: wait.magnitude)
             case let .randomizationFactor(factor):
                 randomizationFactor = factor
             case let .connectTimeout(value):

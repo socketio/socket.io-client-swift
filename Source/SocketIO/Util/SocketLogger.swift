@@ -64,7 +64,8 @@ public extension SocketLogger {
     }
 
     private func abstractLog(_ logType: String, message: @autoclosure () -> String, type: String) {
-        NSLog("\(logType) \(type): %@", message())
+        // `type` can contain a namespace; it must never become part of the format string.
+        NSLog("%@ %@: %@", logType, type, message())
     }
 }
 
@@ -102,5 +103,53 @@ private final class SocketLoggerStorage: SocketLogger, @unchecked Sendable {
     func error(_ message: @autoclosure () -> String, type: String) {
         lock.lock(); defer { lock.unlock() }
         logger.error(message(), type: type)
+    }
+}
+
+/// The default logger is process-wide, so enabling it for one manager also
+/// logs the traffic of every other manager. Log lines therefore never carry
+/// the application's credentials: CONNECT auth payloads and query values
+/// (`connectParams` often hold tokens) are replaced before they are logged.
+internal enum SocketLogRedaction {
+    static let placeholder = "<redacted>"
+    private static let engineQueryKeys: Set<String> = ["EIO", "transport", "sid", "b64"]
+
+    /// A Socket.IO packet string (`0/nsp,{...}`); only CONNECT is changed.
+    static func socketIOPacket(_ packet: String) -> String {
+        guard packet.first == "0" else { return packet }
+        var body = packet.dropFirst()
+        var prefix = "0"
+        if body.first == "/" {
+            guard let comma = body.firstIndex(of: ",") else { return packet }
+            prefix += body[...comma]
+            body = body[body.index(after: comma)...]
+        }
+        return body.isEmpty ? packet : prefix + placeholder
+    }
+
+    /// An Engine.IO polling payload: records separated by U+001E, each starting
+    /// with its Engine.IO packet type; `4` carries a Socket.IO packet.
+    static func enginePayload(_ payload: String) -> String {
+        payload.split(separator: "\u{1e}", omittingEmptySubsequences: false).map { record -> String in
+            guard record.first == "4" else { return String(record) }
+            return "4" + socketIOPacket(String(record.dropFirst()))
+        }.joined(separator: "\u{1e}")
+    }
+
+    /// Keeps the endpoint and the Engine.IO-owned query values only.
+    static func url(_ url: URL?) -> String {
+        guard let url = url, var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return "nil"
+        }
+        components.user = nil
+        components.password = nil
+        components.fragment = nil
+        components.percentEncodedQueryItems = components.percentEncodedQueryItems?.map { item in
+            let name = item.name.removingPercentEncoding ?? item.name
+            guard item.value != nil, !engineQueryKeys.contains(name) else { return item }
+            // Percent-encoded items must stay valid percent-encoding.
+            return URLQueryItem(name: item.name, value: "REDACTED")
+        }
+        return components.string ?? "nil"
     }
 }

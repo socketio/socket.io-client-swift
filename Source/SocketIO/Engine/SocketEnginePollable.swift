@@ -157,7 +157,8 @@ extension SocketEnginePollable {
     /// Used by normal batches and the close-only request for a retiring session.
     func createRequestForPost(with messages: [String]) -> URLRequest {
         let postStr = SocketEnginePacketCodec.join(messages)
-        DefaultSocketLogger.Logger.log("Created POST string: \(postStr)", type: "SocketEnginePolling")
+        DefaultSocketLogger.Logger.log("Created POST string: \(SocketLogRedaction.enginePayload(postStr))",
+                                       type: "SocketEnginePolling")
         let postData = Data(postStr.utf8)
         var req = createPollingRequest(for: urlPollingWithSid)
         addHeaders(to: &req)
@@ -205,7 +206,8 @@ extension SocketEnginePollable {
         // the pre-timeout handshake) cannot reach the new session's state. JS gets this
         // by creating a fresh transport per attempt.
 
-        DefaultSocketLogger.Logger.log("Doing polling \(req.httpMethod ?? "") \(req)", type: "SocketEnginePolling")
+        DefaultSocketLogger.Logger.log("Doing polling \(req.httpMethod ?? "") \(SocketLogRedaction.url(req.url))",
+                                       type: "SocketEnginePolling")
 
         guard let requestSession = session else { return }
         // Capture the concrete attempt's barrier, not the engine's future one.
@@ -340,7 +342,8 @@ extension SocketEnginePollable {
     }
 
     func parsePollingMessage(_ str: String) {
-        DefaultSocketLogger.Logger.log("Got poll message: \(str)", type: "SocketEnginePolling")
+        DefaultSocketLogger.Logger.log("Got poll message: \(SocketLogRedaction.enginePayload(str))",
+                                       type: "SocketEnginePolling")
         // Concrete engines share the standalone codec while keeping lifecycle
         // dispatch separate. Protocol conformers retain their packet callback.
         if let engine = self as? SocketEngine { engine.dispatchPollingPayload(str) }
@@ -365,7 +368,9 @@ extension SocketEnginePollable {
     }
 
     func performPollingWrite(_ message: String, withType type: SocketEnginePacketType, withData datas: [Data], completion: (() -> ())?) {
-        DefaultSocketLogger.Logger.log("Sending poll: \(message) as type: \(type.rawValue)", type: "SocketEnginePolling")
+        DefaultSocketLogger.Logger.log(
+            "Sending poll: \(type == .message ? SocketLogRedaction.socketIOPacket(message) : message) as type: \(type.rawValue)",
+            type: "SocketEnginePolling")
 
         postWait.append((SocketEnginePacketCodec.encodeText(message, type: type), completion))
 

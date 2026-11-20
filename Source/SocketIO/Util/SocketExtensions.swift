@@ -152,7 +152,12 @@ extension Dictionary where Key == String, Value == Any {
 }
 
 extension String {
+    /// Parses server-controlled Engine.IO JSON (handshake, error bodies).
     func toDictionary() throws -> [String: Any] {
+        // Malformed or too deeply nested input is rejected like any non-object.
+        guard SocketJSONNesting.isBounded(utf8, maximum: SocketJSONNesting.defaultMaximum) else {
+            throw JSONError.notNSDictionary
+        }
         guard let binData = data(using: .utf16, allowLossyConversion: false) else { return [:] }
         guard let json = try JSONSerialization.jsonObject(with: binData, options: .allowFragments) as? [String: Any] else {
             throw JSONError.notNSDictionary

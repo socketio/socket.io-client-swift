@@ -86,7 +86,11 @@ public enum SocketIOClientOption : ClientOption {
     /// Unlike JavaScript's milliseconds, this value uses seconds. Does not affect WebSocket.
     case requestTimeout(Double)
 
-    /// An array of cookies that will be sent during the initial connection.
+    /// Cookies sent with the connection's HTTP requests (polling and the WebSocket handshake).
+    ///
+    /// Like a browser cookie jar, each cookie is only sent to URLs its domain, path, `Secure` flag and
+    /// expiry allow (RFC 6265). A cookie without a leading dot in its domain is host-only. Since 18.0.0;
+    /// earlier versions sent every configured cookie to the server regardless of its domain.
     case cookies([HTTPCookie])
 
     /// Accept and resend server cookies in an isolated, engine-owned cookie jar.
@@ -100,6 +104,7 @@ public enum SocketIOClientOption : ClientOption {
     case addTrailingSlash(Bool)
 
     /// Any extra HTTP headers that should be sent during the initial connection.
+    /// A header whose name or value contains CR, LF or NUL is not sent.
     case extraHeaders([String: String])
 
     /// If passed `true`, will cause the client to always create a new engine. Useful for debugging,
@@ -128,9 +133,12 @@ public enum SocketIOClientOption : ClientOption {
     case handleQueue(DispatchQueue)
 
     /// If passed `true`, the client will log debug information. This should be turned off in production code.
+    ///
+    /// The logger is process-wide: it also logs the traffic of other managers. CONNECT auth payloads
+    /// and query values are redacted, event payloads are not.
     case log(Bool)
 
-    /// Used to pass in a custom logger.
+    /// Used to pass in a custom logger. Like `log`, this replaces the process-wide logger.
     case logger(SocketLogger)
 
     /// A custom path to socket.io. Only use this if the socket.io server is configured to look for this path.
@@ -152,7 +160,8 @@ public enum SocketIOClientOption : ClientOption {
     /// The randomization factor for calculating reconnect jitter.
     case randomizationFactor(Double)
 
-    /// Set `true` if your server is using secure transports.
+    /// Set `true` if your server is using secure transports. An `https`/`wss` server URL is
+    /// always secure; `false` cannot downgrade it.
     case secure(Bool)
 
     /// Whether to add a cache-busting timestamp query parameter with each
