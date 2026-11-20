@@ -11,6 +11,7 @@
 - Remove local machine paths from review evidence; create the local strict-concurrency log with `mktemp`.
 - Follow-up from a Gemini security scan: `setAuth`/`clearAuth` take effect immediately when called on the handle queue; a late async auth failure no longer aborts a newer attempt; server DISCONNECT/CONNECT_ERROR packets for a namespace that is neither connected nor joining are ignored; the recovery `pid` of incoming CONNECT packets is redacted in logs; a relative `path` combined with `connectParams` no longer crashes; local Xcode derived data uses `mktemp`.
 - Lock the manager state that engine-queue callbacks read (`engine`, `handleQueue`, `bufferLimits`), so reconfiguring a manager from another thread no longer races with incoming packets, and release receive-backlog permits by what was reserved, so changing `bufferLimits` while packets are in flight cannot leak backlog quota.
+- Drop the explicit `Cookie` header (from `.cookies`) when a polling request is redirected to another origin. Verified on macOS: URLSession removes `Authorization` itself but copied the cookie to other ports and hosts. Other `extraHeaders` still follow redirects, as in curl and browsers.
 
 ## 17.2.0 — 2026-11-19
 

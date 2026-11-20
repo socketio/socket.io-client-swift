@@ -100,6 +100,16 @@ internal class SocketSessionDelegateProxy: NSObject, URLSessionDataDelegate {
         #endif
     }
 
+    /// Scheme, host and effective port; nil for a URL without a host.
+    static func origin(of url: URL?) -> String? {
+        guard let url = url, let scheme = url.scheme?.lowercased(), let host = url.host?.lowercased() else {
+            return nil
+        }
+        let port = url.port ?? (["https", "wss"].contains(scheme) ? 443 : 80)
+        let secure = ["https", "wss"].contains(scheme)
+        return "\(secure ? "https" : "http")://\(host):\(port)"
+    }
+
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
                     newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
         let once = SocketOnce<URLRequest?>(completionHandler)
@@ -108,10 +118,20 @@ internal class SocketSessionDelegateProxy: NSObject, URLSessionDataDelegate {
         let secureSchemes = ["https", "wss"]
         let secureOrigin = secureSchemes.contains(response.url?.scheme?.lowercased() ?? "") ||
             secureSchemes.contains(task.originalRequest?.url?.scheme?.lowercased() ?? "")
+        let currentOrigin = SocketSessionDelegateProxy.origin(of: response.url)
+        let firstOrigin = SocketSessionDelegateProxy.origin(of: task.originalRequest?.url)
         let finish: @Sendable (URLRequest?) -> Void = { candidate in
-            guard let candidate = candidate else { once.call(nil); return }
+            guard var candidate = candidate else { once.call(nil); return }
             let secureDestination = ["https", "wss"].contains(candidate.url?.scheme?.lowercased() ?? "")
-            once.call(secureOrigin && !secureDestination ? nil : candidate)
+            guard !(secureOrigin && !secureDestination) else { once.call(nil); return }
+            // URLSession drops Authorization on redirects but copies an explicit
+            // Cookie header (`.cookies`) to any destination. Like curl and
+            // browsers, never carry it to another origin.
+            let destination = SocketSessionDelegateProxy.origin(of: candidate.url)
+            if destination != currentOrigin || destination != firstOrigin {
+                candidate.setValue(nil, forHTTPHeaderField: "Cookie")
+            }
+            once.call(candidate)
         }
         #if canImport(ObjectiveC)
         if (forwardingDelegate as? URLSessionTaskDelegate)?.urlSession?(session, task: task,
