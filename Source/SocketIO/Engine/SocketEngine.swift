@@ -62,6 +62,16 @@ open class SocketEngine: NSObject,
     public private(set) var addTrailingSlash = true
     /// Kept across reconnects and polling-to-WebSocket upgrades, not across engines.
     internal let credentialCookieStorage = URLSessionConfiguration.ephemeral.httpCookieStorage
+    /// The delegate of the current polling session, kept to update its redirect cookies.
+    internal weak var pollingProxy: SocketSessionDelegateProxy?
+
+    /// An explicit `Cookie` from `.extraHeaders`, which replaces `.cookies`.
+    internal var explicitCookieHeader: String? {
+        extraHeaders?.first { name, value in
+            name.lowercased() == "cookie" &&
+                !(name + value).unicodeScalars.contains { $0 == "\r" || $0 == "\n" || $0 == "\0" }
+        }?.value
+    }
 
     /// The connect parameters sent during a connect.
     public var connectParams: [String: Any]? {
@@ -512,6 +522,7 @@ open class SocketEngine: NSObject,
             clientCertificate: clientCertificate,
             redirectCookies: cookies ?? [],
             redirectCookieStorage: withCredentials ? credentialCookieStorage : nil,
+            explicitCookieHeader: explicitCookieHeader,
             maximumMessageSize: options.maximumMessageSize,
             maximumPendingBytes: options.maximumPendingBytes,
             maximumPendingBatches: options.maximumPendingBatches,
@@ -525,10 +536,13 @@ open class SocketEngine: NSObject,
                       self.generation == attempt, !self.closed,
                       self.webSocketTransport === transport else { return }
                 switch event {
-                case .opened(_, let headers):
+                case .opened(_, let headers, let responseURL):
                     if self.withCredentials {
-                        let cookies = HTTPCookie.cookies(withResponseHeaderFields: headers, for: self.urlPolling)
-                        self.credentialCookieStorage?.setCookies(cookies, for: self.urlPolling, mainDocumentURL: nil)
+                        // A redirected handshake was answered by another URL; its
+                        // cookies belong to that host, never to the original one.
+                        let origin = responseURL.map(SocketCookieScope.httpURL(for:)) ?? self.urlPolling
+                        let cookies = HTTPCookie.cookies(withResponseHeaderFields: headers, for: origin)
+                        self.credentialCookieStorage?.setCookies(cookies, for: origin, mainDocumentURL: nil)
                     }
                     self.wsConnected = true
                     self.client?.engineDidWebsocketUpgrade(headers: headers)
@@ -979,7 +993,9 @@ open class SocketEngine: NSObject,
         pendingCloseReason = nil
         let proxy = SocketSessionDelegateProxy(tlsConfiguration: tlsConfiguration, forwardingDelegate: sessionDelegate,
                                                clientCertificate: clientCertificate, credentialOrigin: urlPolling,
-                                               redirectCookies: cookies ?? [])
+                                               redirectCookies: cookies ?? [],
+                                               explicitCookieHeader: explicitCookieHeader)
+        pollingProxy = proxy
         proxy.onInvalidation = { [weak self] invalidSession, error in
             guard let self = self, self.session === invalidSession, self.polling, !self.closed,
                   let error = error else { return }
@@ -1001,9 +1017,15 @@ open class SocketEngine: NSObject,
     }
 
 
-    /// Called when the engine should set/update its configs from a given configuration.
+    /// Called when the engine should set its configs from a given configuration.
     ///
-    /// parameter config: The `SocketIOClientConfiguration` that should be used to set/update configs.
+    /// The configuration replaces the previous one: credentials and trust
+    /// settings it omits (`.cookies`, `.extraHeaders`, `.connectParams`,
+    /// `.withCredentials`, `.sessionDelegate`, `.clientCertificate`,
+    /// `.security`, `.requestTimeout`) are reset to their defaults, so always
+    /// pass the complete configuration, as `SocketManager` does.
+    ///
+    /// parameter config: The `SocketIOClientConfiguration` that should be used to set the configs.
     open func setConfigs(_ config: SocketIOClientConfiguration) {
         configurationError = nil
         // The manager passes its complete configuration. Omitted credentials,
@@ -1074,6 +1096,15 @@ open class SocketEngine: NSObject,
                 continue
             }
         }
+        // Server-set cookies are credentials too: without `.withCredentials`
+        // the jar is unused, and a later session (possibly another user's)
+        // must not inherit what an earlier one stored.
+        if !withCredentials, let jar = credentialCookieStorage {
+            for cookie in jar.cookies ?? [] { jar.deleteCookie(cookie) }
+        }
+        // The live polling session follows redirects with the current cookies.
+        pollingProxy?.redirectCookies = SocketRedirectCookies(configured: cookies ?? [],
+                                                              explicitHeader: explicitCookieHeader)
         // Normalize after all options: configuration ordering must not matter.
         if socketPath.hasSuffix("/") { socketPath.removeLast() }
         if addTrailingSlash { socketPath += "/" }

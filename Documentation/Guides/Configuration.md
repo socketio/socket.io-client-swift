@@ -139,13 +139,24 @@ on the first request and again after every redirect:
 
 - A domain without a leading dot (`api.example.com`) is host-only: the cookie goes to that host only.
 - A domain with a leading dot (`.example.com`) also covers subdomains such as `node3.example.com`.
+  An IP address only matches itself, never as a domain suffix.
+- The path is compared with the percent-encoded request path, on a `/` boundary.
 - A `Secure` cookie is never sent over `http`/`ws`.
 - Cookies are not port-scoped, so another port on the same host still receives them.
 
 Before 18.0.0, every configured cookie went to the server whatever its domain, and
 URLSession copied it to any host a redirect pointed to. Give each cookie the domain
 of your Socket.IO server, or that server's parent domain with a leading dot.
-An explicit `Cookie` entry in `.extraHeaders` is sent as written and is not scoped.
+
+An explicit `Cookie` entry in `.extraHeaders` replaces `.cookies` (and, for the
+WebSocket handshake, the `.withCredentials` jar). It is sent as written, without
+scoping, to the configured server host on any scheme or port, including after an
+`http` → `https` or port redirect. A redirect to another host never receives it.
+
+`SocketEngine.setConfigs(_:)` replaces the whole configuration: options it omits,
+including credentials and the TLS policy, return to their defaults. Pass the complete
+configuration, as `SocketManager` does. Turning `.withCredentials` off also empties the
+engine's cookie jar, so cookies a server set for one session are not sent in a later one.
 
 ## Threading and Swift concurrency
 

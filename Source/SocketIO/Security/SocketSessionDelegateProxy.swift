@@ -23,19 +23,22 @@ internal class SocketSessionDelegateProxy: NSObject, URLSessionDataDelegate {
     private var boundedBodies = [Int: SocketBoundedBody]()
     private let boundedBodyLock = NSLock()
 
-    /// The explicitly configured `.cookies`; a redirect to another origin
-    /// carries only those that cookie rules allow for the new URL.
-    private let redirectCookies: [HTTPCookie]
-    /// The engine-owned jar when the request carried its cookies explicitly
-    /// (the WebSocket handshake); Foundation scopes its `cookies(for:)`.
-    private let redirectCookieStorage: HTTPCookieStorage?
+    /// What a redirected request may carry in its `Cookie` header. A polling
+    /// session lives across configuration changes, so the engine updates it.
+    internal var redirectCookies: SocketRedirectCookies {
+        get { redirectCookiesLock.lock(); defer { redirectCookiesLock.unlock() }; return _redirectCookies }
+        set { redirectCookiesLock.lock(); _redirectCookies = newValue; redirectCookiesLock.unlock() }
+    }
+    private var _redirectCookies: SocketRedirectCookies
+    private let redirectCookiesLock = NSLock()
 
     internal init(tlsConfiguration: SocketTLSConfiguration,
                   forwardingDelegate: URLSessionDelegate?,
                   clientCertificate: URLCredential? = nil, credentialOrigin: URL? = nil,
-                  redirectCookies: [HTTPCookie] = [], redirectCookieStorage: HTTPCookieStorage? = nil) {
-        self.redirectCookies = redirectCookies
-        self.redirectCookieStorage = redirectCookieStorage
+                  redirectCookies: [HTTPCookie] = [], redirectCookieStorage: HTTPCookieStorage? = nil,
+                  explicitCookieHeader: String? = nil) {
+        self._redirectCookies = SocketRedirectCookies(configured: redirectCookies, jar: redirectCookieStorage,
+                                                      explicitHeader: explicitCookieHeader)
         self.clientCertificate = clientCertificate
         self.credentialOrigin = credentialOrigin
         self.tlsConfiguration = tlsConfiguration
@@ -50,8 +53,8 @@ internal class SocketSessionDelegateProxy: NSObject, URLSessionDataDelegate {
             let space = challenge.protectionSpace
             // A redirect must not disclose the configured identity to another origin.
             guard let origin = credentialOrigin,
-                  ["https", "wss"].contains(origin.scheme?.lowercased() ?? ""),
-                  ["https", "wss"].contains(space.protocol?.lowercased() ?? ""),
+                  SocketCookieScope.isSecureScheme(origin.scheme),
+                  SocketCookieScope.isSecureScheme(space.protocol),
                   SocketCredentialHost.matches(origin.host, space.host),
                   (origin.port ?? 443) == space.port,
                   challenge.previousFailureCount == 0,
@@ -112,11 +115,12 @@ internal class SocketSessionDelegateProxy: NSObject, URLSessionDataDelegate {
 
     /// Scheme, host and effective port; nil for a URL without a host.
     static func origin(of url: URL?) -> String? {
-        guard let url = url, let scheme = url.scheme?.lowercased(), let host = url.host?.lowercased() else {
+        guard let url = url, let scheme = url.scheme?.lowercased(),
+              let host = SocketCookieScope.normalizedHost(url.host) else {
             return nil
         }
-        let port = url.port ?? (["https", "wss"].contains(scheme) ? 443 : 80)
-        let secure = ["https", "wss"].contains(scheme)
+        let secure = SocketCookieScope.isSecureScheme(scheme)
+        let port = url.port ?? (secure ? 443 : 80)
         return "\(secure ? "https" : "http")://\(host):\(port)"
     }
 
@@ -125,36 +129,26 @@ internal class SocketSessionDelegateProxy: NSObject, URLSessionDataDelegate {
         let once = SocketOnce<URLRequest?>(completionHandler)
         // The redirect response is the current hop. Looking only at the
         // original URL permits http -> https -> http downgrades.
-        let secureSchemes = ["https", "wss"]
-        let secureOrigin = secureSchemes.contains(response.url?.scheme?.lowercased() ?? "") ||
-            secureSchemes.contains(task.originalRequest?.url?.scheme?.lowercased() ?? "")
+        let secureOrigin = SocketCookieScope.isSecureScheme(response.url?.scheme) ||
+            SocketCookieScope.isSecureScheme(task.originalRequest?.url?.scheme)
         let currentOrigin = SocketSessionDelegateProxy.origin(of: response.url)
-        let firstOrigin = SocketSessionDelegateProxy.origin(of: task.originalRequest?.url)
-        let configuredCookies = SocketUncheckedSendableBox(redirectCookies)
-        let cookieJar = SocketUncheckedSendableBox(redirectCookieStorage)
+        let firstURL = task.originalRequest?.url
+        let firstOrigin = SocketSessionDelegateProxy.origin(of: firstURL)
+        let cookies = SocketUncheckedSendableBox(redirectCookies)
         let finish: @Sendable (URLRequest?) -> Void = { candidate in
             guard var candidate = candidate else { once.call(nil); return }
-            let secureDestination = ["https", "wss"].contains(candidate.url?.scheme?.lowercased() ?? "")
-            guard !(secureOrigin && !secureDestination) else { once.call(nil); return }
+            guard !(secureOrigin && !SocketCookieScope.isSecureScheme(candidate.url?.scheme)) else {
+                once.call(nil); return
+            }
             // URLSession drops Authorization on redirects but copies an explicit
             // Cookie header (`.cookies`) to any destination, which hands the
             // session to whatever origin the server redirects to. The same flaw
             // was fixed as CVE-2022-0155 (follow-redirects), CVE-2023-43804
             // (urllib3), CVE-2022-27776 (curl) and in undici (GHSA-q768-x9m6-m9qp).
-            // On another origin the header is rebuilt like a browser would: only
-            // cookies whose domain, path, Secure flag and expiry allow the new
-            // URL (http -> https on the same host, a parent-domain cookie on a
-            // sibling host, another port of the same host) are kept.
             let destination = SocketSessionDelegateProxy.origin(of: candidate.url)
-            if destination != currentOrigin || destination != firstOrigin {
-                candidate.setValue(nil, forHTTPHeaderField: "Cookie")
-                if let url = candidate.url {
-                    let allowed = SocketCookieScope.cookies(configuredCookies.value, allowedFor: url)
-                        + (cookieJar.value?.cookies(for: url) ?? [])
-                    if let header = HTTPCookie.requestHeaderFields(with: allowed)["Cookie"] {
-                        candidate.setValue(header, forHTTPHeaderField: "Cookie")
-                    }
-                }
+            let sameOrigin = destination != nil && destination == currentOrigin && destination == firstOrigin
+            if let header = cookies.value.header(for: candidate.url, firstURL: firstURL, sameOrigin: sameOrigin) {
+                candidate.setValue(header, forHTTPHeaderField: "Cookie")
             }
             once.call(candidate)
         }
@@ -312,32 +306,102 @@ internal final class SocketOnce<Value>: @unchecked Sendable {
 extension SocketSessionDelegateProxy: @unchecked Sendable {}
 #endif
 
+/// The `Cookie` header of a redirected request is rebuilt the way the first
+/// request was built for that URL, so a redirect never widens what is sent:
+/// - configured `.cookies` by RFC 6265 cookie rules (domain, path, Secure, expiry),
+///   plus the engine jar when the request carried it explicitly (WebSocket);
+/// - an explicit `Cookie` from `.extraHeaders` replaced those on the first
+///   request. It is sent as written to the configured host on any scheme or
+///   port, and never to another host.
+internal struct SocketRedirectCookies {
+    var configured: [HTTPCookie] = []
+    /// The engine-owned jar when the request carried its cookies explicitly
+    /// (the WebSocket handshake); Foundation scopes its `cookies(for:)`.
+    var jar: HTTPCookieStorage?
+    var explicitHeader: String?
+
+    /// The header value to set (`nil` inside removes the header), or `nil`
+    /// to keep URLSession's copy, which only happens when the request carries
+    /// nothing this client manages and the origin did not change.
+    func header(for url: URL?, firstURL: URL?, sameOrigin: Bool) -> String?? {
+        if let explicitHeader {
+            guard let host = SocketCookieScope.normalizedHost(url?.host),
+                  host == SocketCookieScope.normalizedHost(firstURL?.host) else { return .some(nil) }
+            return .some(explicitHeader)
+        }
+        guard !sameOrigin || !configured.isEmpty || jar != nil else { return nil }
+        guard let url = url else { return .some(nil) }
+        let allowed = SocketCookieScope.cookies(configured, allowedFor: url)
+            + (jar?.cookies(for: SocketCookieScope.httpURL(for: url)) ?? [])
+        return .some(HTTPCookie.requestHeaderFields(with: allowed)["Cookie"])
+    }
+}
+
 /// Which configured cookies a request may carry. Used for the first request
 /// and again for every redirect, so `.cookies` behave like a browser cookie jar.
 internal enum SocketCookieScope {
+    static func isSecureScheme(_ scheme: String?) -> Bool {
+        let scheme = scheme?.lowercased()
+        return scheme == "https" || scheme == "wss"
+    }
+
+    /// `HTTPCookieStorage` matches cookies against http(s) URLs; a WebSocket
+    /// URL is looked up as the http(s) URL of the same handshake.
+    static func httpURL(for url: URL) -> URL {
+        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return url }
+        switch components.scheme?.lowercased() {
+        case "ws": components.scheme = "http"
+        case "wss": components.scheme = "https"
+        default: return url
+        }
+        return components.url ?? url
+    }
+
+    /// Lowercased, without IPv6 brackets or a trailing root dot.
+    static func normalizedHost(_ host: String?) -> String? {
+        guard var host = host?.lowercased(), !host.isEmpty else { return nil }
+        if host.hasPrefix("[") && host.hasSuffix("]") { host = String(host.dropFirst().dropLast()) }
+        if host.count > 1 && host.hasSuffix(".") { host = String(host.dropLast()) }
+        return host.isEmpty ? nil : host
+    }
+
+    /// RFC 6265 §5.1.3: an IP address only matches itself, never a domain suffix.
+    static func isIPAddress(_ host: String) -> Bool {
+        if host.contains(":") { return true }
+        let parts = host.split(separator: ".", omittingEmptySubsequences: false)
+        return parts.count == 4 && parts.allSatisfy { !$0.isEmpty && $0.allSatisfy(\.isNumber) }
+    }
+
     /// RFC 6265 request matching: domain (Foundation marks domain cookies with
     /// a leading dot, others are host-only), path, Secure and expiry. Cookies
     /// are not port-scoped.
     static func cookies(_ cookies: [HTTPCookie], allowedFor url: URL, now: Date = Date()) -> [HTTPCookie] {
-        guard let host = url.host?.lowercased(), let scheme = url.scheme?.lowercased() else { return [] }
-        let secure = scheme == "https" || scheme == "wss"
-        // URLComponents keeps a trailing slash that `URL.path` drops.
-        let rawPath = URLComponents(url: url, resolvingAgainstBaseURL: false)?.path ?? url.path
+        guard let host = normalizedHost(url.host), url.scheme != nil else { return [] }
+        let secure = isSecureScheme(url.scheme)
+        // The request-uri path, still percent-encoded (RFC 6265 §5.1.4);
+        // URLComponents also keeps a trailing slash that `URL.path` drops.
+        let rawPath = URLComponents(url: url, resolvingAgainstBaseURL: false)?.percentEncodedPath ?? url.path
         let path = rawPath.isEmpty ? "/" : rawPath
         return cookies.filter { cookie in
             if let expires = cookie.expiresDate, expires < now { return false }
             if cookie.isSecure && !secure { return false }
-            let domain = cookie.domain.lowercased()
-            if domain.hasPrefix(".") {
-                let parent = String(domain.dropFirst())
-                guard host == parent || host.hasSuffix("." + parent) else { return false }
-            } else {
-                guard host == domain else { return false }
-            }
+            guard domainMatches(host: host, cookieDomain: cookie.domain) else { return false }
             let cookiePath = cookie.path.isEmpty ? "/" : cookie.path
             guard path == cookiePath || (path.hasPrefix(cookiePath) &&
                 (cookiePath.hasSuffix("/") || path.dropFirst(cookiePath.count).hasPrefix("/"))) else { return false }
             return true
         }
+    }
+
+    private static func domainMatches(host: String, cookieDomain: String) -> Bool {
+        var domain = cookieDomain.lowercased()
+        let domainCookie = domain.hasPrefix(".")
+        if domainCookie { domain.removeFirst() }
+        guard let domain = normalizedHost(domain) else { return false }
+        if host == domain { return true }
+        // Foundation may store a dotless host such as `localhost` as `localhost.local`.
+        if !host.contains(".") && !isIPAddress(host) && domain == host + ".local" { return true }
+        guard domainCookie, !isIPAddress(host) else { return false }
+        return host.hasSuffix("." + domain)
     }
 }

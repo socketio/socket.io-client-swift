@@ -414,7 +414,7 @@ extension SocketSecurityHardeningTest {
         let scoped = cookie("scoped", domain: "chat.example.com", path: "/socket.io")
         let all = [host, parent, secure, scoped]
 
-        // Same origin: URLSession's copy is left untouched.
+        // Same origin and path: rebuilt by the same rules, so the same cookies go.
         XCTAssertEqual(redirect(from: "https://chat.example.com/socket.io/", to: "https://chat.example.com/socket.io/?x",
                                 cookies: all), HTTPCookie.requestHeaderFields(with: all)["Cookie"])
         // http -> https on the same host: everything for that host and path goes.
@@ -476,5 +476,342 @@ extension SocketSecurityHardeningTest {
         var request = URLRequest(url: URL(string: "https://chat.example.com/socket.io/")!)
         engine.addHeaders(to: &request)
         XCTAssertEqual(request.value(forHTTPHeaderField: "Cookie"), "app=explicit")
+    }
+}
+
+// MARK: Super review of PR #31
+
+private final class ReviewTransport: EngineWebSocketTransport {
+    var onEvent: ((EngineWebSocketEvent) -> Void)?
+    var isWritable = true
+    func connect() {}
+    func sendBatch(_ messages: [EngineWebSocketMessage], completion: @escaping (Result<Void, Error>) -> Void) {
+        completion(.success(()))
+    }
+    func close(code: Int, reason: Data?) {}
+    func abort() {}
+}
+
+extension SocketSecurityHardeningTest {
+    private func connectedManager(_ label: String) -> (SocketManager, CaptureEngine, DispatchQueue) {
+        let queue = DispatchQueue(label: label)
+        let manager = SocketManager(socketURL: url, config: [.log(false), .handleQueue(queue), .autoConnect(false)])
+        let engine = CaptureEngine()
+        queue.sync {
+            manager.engine = engine
+            manager.setTestStatus(.connected)
+        }
+        return (manager, engine, queue)
+    }
+
+    private func connects(_ engine: CaptureEngine) -> [String] {
+        engine.sentPackets.filter { $0.hasPrefix("0") }
+    }
+
+    // D: replacing the provider while its callback is pending must not strand the attempt.
+    func testReplacingTheProviderWhileItsCallbackIsPendingResolvesAgain() {
+        let (manager, engine, queue) = connectedManager("test.review.replace")
+        let socket = manager.defaultSocket
+        var pending: SocketAuthCallback?
+        socket.setAuth { callback in pending = callback }
+        queue.sync { socket.connect(timeoutAfter: 0, withHandler: nil) }
+        queue.sync {}
+        XCTAssertNotNil(pending)
+
+        socket.setAuth { callback in callback(["token": "rotated"]) }
+        queue.sync {}
+        queue.sync {}
+        pending?(["token": "replaced"])
+        queue.sync {}
+        queue.sync {}
+
+        queue.sync {
+            XCTAssertEqual(connects(engine), ["0/,{\"token\":\"rotated\"}"])
+            XCTAssertEqual(socket.status, .connecting)
+        }
+    }
+
+    func testClearingTheProviderWhileItsCallbackIsPendingConnectsWithoutIt() {
+        let (manager, engine, queue) = connectedManager("test.review.clear")
+        let socket = manager.defaultSocket
+        var pending: SocketAuthCallback?
+        socket.setAuth { callback in pending = callback }
+        queue.sync { socket.connect(timeoutAfter: 0, withHandler: nil) }
+        queue.sync {}
+
+        socket.clearAuth()
+        queue.sync {}
+        queue.sync {}
+        pending?(["token": "replaced"])
+        queue.sync {}
+        queue.sync {}
+
+        queue.sync { XCTAssertEqual(connects(engine), ["0/,"]) }
+    }
+
+    func testSetAuthFromAStatusChangeListenerStillJoins() {
+        let (manager, engine, queue) = connectedManager("test.review.listener")
+        let socket = manager.defaultSocket
+        queue.sync {
+            socket.on(clientEvent: .statusChange) { _, _ in
+                guard socket.status == .connecting else { return }
+                socket.setAuth { callback in callback(["token": "listener"]) }
+            }
+            socket.connect(timeoutAfter: 0, withHandler: nil)
+        }
+        queue.sync {}
+        queue.sync {}
+
+        queue.sync { XCTAssertEqual(connects(engine), ["0/,{\"token\":\"listener\"}"]) }
+    }
+
+    // I: a namespace joined without connect() accepts the server's reply.
+    func testJoinWithoutConnectAcceptsTheServerConnect() throws {
+        let (manager, engine, queue) = connectedManager("test.review.join")
+        let socket = manager.socket(forNamespace: "/admin")
+        try queue.sync {
+            manager.connectSocket(socket, withPayload: nil)
+            XCTAssertEqual(connects(engine), ["0/admin,"])
+            socket.handlePacket(try manager.parseString("0/admin,{\"sid\":\"s1\"}"))
+            XCTAssertEqual(socket.status, .connected)
+        }
+    }
+
+    // H: a timed-out or failed attempt is not revived by a late server CONNECT.
+    func testTimedOutSocketIgnoresALateConnect() throws {
+        let manager = SocketManager(socketURL: url, config: [.log(false), .autoConnect(false), .reconnects(false)])
+        manager.engine = MockEngine()
+        let socket = manager.defaultSocket
+        var connected = 0
+        socket.on(clientEvent: .connect) { _, _ in connected += 1 }
+        let timedOut = expectation(description: "timed out")
+        socket.connect(timeoutAfter: 0.02) { timedOut.fulfill() }
+        wait(for: [timedOut], timeout: 1)
+        XCTAssertEqual(socket.status, .disconnected)
+
+        socket.handlePacket(try manager.parseString("2[\"late\",1]"))
+        socket.handlePacket(try manager.parseString("0{\"sid\":\"late\"}"))
+
+        XCTAssertEqual(socket.status, .disconnected)
+        XCTAssertEqual(connected, 0)
+        XCTAssertEqual(socket.testRetainedBuffers.replayPackets, 0)
+    }
+
+    func testFailedAuthSocketIgnoresALateConnect() throws {
+        let (manager, _, queue) = connectedManager("test.review.failed")
+        let socket = manager.defaultSocket
+        let failed = expectation(description: "auth failed")
+        socket.on(clientEvent: .error) { _, _ in failed.fulfill() }
+        socket.setAuth { () async throws -> [String: Any]? in throw URLError(.userAuthenticationRequired) }
+        queue.sync { socket.connect(timeoutAfter: 0, withHandler: nil) }
+        wait(for: [failed], timeout: 2)
+        queue.sync {}
+
+        try queue.sync {
+            XCTAssertEqual(socket.status, .notConnected)
+            XCTAssertTrue(socket.active)
+            socket.handlePacket(try manager.parseString("0{\"sid\":\"late\"}"))
+            XCTAssertEqual(socket.status, .notConnected)
+        }
+    }
+
+    // G: an `.error` handler that retries is not aborted by the failure it handles.
+    func testErrorHandlerRetryIsNotAbortedByTheFailureItHandles() {
+        let (manager, engine, queue) = connectedManager("test.review.retry")
+        let socket = manager.defaultSocket
+        var retried = false
+        queue.sync {
+            socket.on(clientEvent: .error) { _, _ in
+                guard !retried else { return }
+                retried = true
+                socket.connect(withPayload: ["token": "ok"], timeoutAfter: 0, withHandler: nil)
+            }
+            socket.connect(withPayload: ["bad": Double.nan], timeoutAfter: 0, withHandler: nil)
+        }
+        queue.sync {}
+
+        queue.sync {
+            XCTAssertTrue(retried)
+            XCTAssertEqual(connects(engine), ["0/,{\"token\":\"ok\"}"])
+            XCTAssertEqual(socket.status, .connecting)
+        }
+    }
+
+    // E/F: a transport drop retires the pending provider callback.
+    func testTransportDropRetiresThePendingProviderCallback() {
+        let (manager, engine, queue) = connectedManager("test.review.drop")
+        let socket = manager.defaultSocket
+        var pending: SocketAuthCallback?
+        socket.setAuth { callback in pending = callback }
+        queue.sync { socket.connect(timeoutAfter: 0, withHandler: nil) }
+        queue.sync {}
+
+        queue.sync { socket.connectAttemptLostTransport() }
+        pending?(["token": "dead-transport"])
+        queue.sync {}
+        queue.sync {}
+
+        queue.sync {
+            XCTAssertTrue(connects(engine).isEmpty, "\(engine.sentPackets)")
+            XCTAssertEqual(socket.status, .connecting, "the parked socket is rejoined on the next open")
+        }
+    }
+
+    // P: server-set cookies do not outlive `.withCredentials`.
+    func testDisablingCredentialsClearsServerSetCookies() throws {
+        let manager = SocketManager(socketURL: url, config: [.autoConnect(false)])
+        let engine = SocketEngine(client: manager, url: url, config: [.withCredentials(true)])
+        let jar = try XCTUnwrap(engine.credentialCookieStorage)
+        jar.setCookie(try XCTUnwrap(HTTPCookie(properties: [.name: "session", .value: "user-a",
+                                                            .domain: "localhost", .path: "/"])))
+        engine.setConfigs([.withCredentials(true)])
+        XCTAssertEqual(jar.cookies?.count, 1, "kept while credentials stay enabled")
+
+        engine.setConfigs([])
+        engine.setConfigs([.withCredentials(true)])
+        XCTAssertEqual(jar.cookies?.count ?? 0, 0)
+    }
+
+    // M: cookies of a redirected handshake belong to the host that answered.
+    func testWebSocketCookiesAreStoredForTheHostThatAnswered() throws {
+        let manager = SocketManager(socketURL: url, config: [.autoConnect(false)])
+        let engine = SocketEngine(client: manager, url: url, config: [.forceWebsockets(true), .withCredentials(true)])
+        let transport = ReviewTransport()
+        engine.webSocketTransportFactory = { _ in transport }
+        engine.connect()
+        engine.engineQueue.sync {}
+        transport.onEvent?(.opened(protocol: nil, headers: ["Set-Cookie": "planted=1; Path=/"],
+                                   url: URL(string: "ws://evil.test/socket.io/")!))
+        engine.engineQueue.sync {}
+        engine.engineQueue.sync {}
+        defer { engine.disconnect(reason: "test"); engine.engineQueue.sync {} }
+
+        let jar = try XCTUnwrap(engine.credentialCookieStorage)
+        XCTAssertFalse(jar.cookies(for: URL(string: "http://localhost:1/")!)?.contains { $0.name == "planted" } ?? false)
+        XCTAssertTrue(jar.cookies(for: URL(string: "http://evil.test/")!)?.contains { $0.name == "planted" } ?? false)
+    }
+
+    // N: a live polling session follows redirects with the current cookies.
+    func testLivePollingRedirectsFollowTheCurrentCookies() {
+        let manager = SocketManager(socketURL: url, config: [.autoConnect(false)])
+        let engine = SocketEngine(client: manager, url: url, config: [.cookies([cookie("old", domain: "localhost")])])
+        let proxy = SocketSessionDelegateProxy(tlsConfiguration: .systemDefault, forwardingDelegate: nil,
+                                               redirectCookies: [cookie("old", domain: "localhost")])
+        engine.pollingProxy = proxy
+
+        engine.setConfigs([.cookies([cookie("new", domain: "localhost")])])
+        XCTAssertEqual(proxy.redirectCookies.configured.map(\.name), ["new"])
+        XCTAssertNil(proxy.redirectCookies.explicitHeader)
+
+        engine.setConfigs([.extraHeaders(["cookie": "app=explicit"])])
+        XCTAssertEqual(proxy.redirectCookies.configured.map(\.name), [])
+        XCTAssertEqual(proxy.redirectCookies.explicitHeader, "app=explicit")
+    }
+
+    // X: a bare query item carries its secret in the name.
+    func testValuelessQueryItemsAreRedacted() {
+        let logged = SocketLogRedaction.url(URL(string: "https://chat.example.com/socket.io/?my-secret-token&EIO=4")!)
+        XCTAssertFalse(logged.contains("my-secret-token"), logged)
+        XCTAssertTrue(logged.contains("EIO=4"), logged)
+    }
+
+    // Z: assigning the current queue again keeps it marked as the handle queue.
+    func testReassigningTheHandleQueueKeepsItsMarker() {
+        let queue = DispatchQueue(label: "test.review.queue")
+        let other = DispatchQueue(label: "test.review.other")
+        let manager = SocketManager(socketURL: url, config: [.log(false), .handleQueue(queue), .autoConnect(false)])
+        queue.sync {
+            manager.handleQueue = queue
+            XCTAssertTrue(manager.isOnHandleQueue)
+        }
+        manager.handleQueue = other
+        queue.sync { XCTAssertFalse(manager.isOnHandleQueue) }
+        other.sync { XCTAssertTrue(manager.isOnHandleQueue) }
+    }
+
+    // A, C, K: redirect cookie decisions.
+    private func redirectHeader(from source: String, to target: String, configured: [HTTPCookie] = [],
+                                jar: HTTPCookieStorage? = nil, explicit: String? = nil) -> String? {
+        let proxy = SocketSessionDelegateProxy(tlsConfiguration: .systemDefault, forwardingDelegate: nil,
+                                               redirectCookies: configured, redirectCookieStorage: jar,
+                                               explicitCookieHeader: explicit)
+        let session = URLSession(configuration: .ephemeral)
+        defer { session.invalidateAndCancel() }
+        var original = URLRequest(url: URL(string: source)!)
+        original.setValue(explicit ?? HTTPCookie.requestHeaderFields(with: configured)["Cookie"],
+                          forHTTPHeaderField: "Cookie")
+        let task: URLSessionTask = source.hasPrefix("ws") ? session.webSocketTask(with: original)
+                                                          : session.dataTask(with: original)
+        var next = URLRequest(url: URL(string: target)!)
+        next.allHTTPHeaderFields = original.allHTTPHeaderFields
+        let response = HTTPURLResponse(url: URL(string: source)!, statusCode: 307, httpVersion: nil,
+                                       headerFields: ["Location": target])!
+        var decided: URLRequest??
+        proxy.urlSession(session, task: task, willPerformHTTPRedirection: response, newRequest: next) {
+            decided = .some($0)
+        }
+        return decided??.value(forHTTPHeaderField: "Cookie")
+    }
+
+    func testSameOriginRedirectIsRescopedByPath() {
+        let scoped = cookie("scoped", domain: "chat.example.com", path: "/socket.io")
+        let fresh = cookie("fresh", domain: "chat.example.com", path: "/new")
+        XCTAssertNil(redirectHeader(from: "https://chat.example.com/socket.io/", to: "https://chat.example.com/other/",
+                                    configured: [scoped]))
+        XCTAssertEqual(redirectHeader(from: "https://chat.example.com/socket.io/", to: "https://chat.example.com/new/",
+                                      configured: [scoped, fresh]), "fresh=v")
+    }
+
+    func testExplicitCookieHeaderFollowsOnlyTheConfiguredHost() {
+        let configured = [cookie("configured", domain: ".example.com")]
+        XCTAssertEqual(redirectHeader(from: "http://chat.example.com/socket.io/", to: "https://chat.example.com/socket.io/",
+                                      configured: configured, explicit: "app=explicit"), "app=explicit")
+        XCTAssertEqual(redirectHeader(from: "https://chat.example.com/socket.io/",
+                                      to: "https://chat.example.com:8443/socket.io/",
+                                      configured: configured, explicit: "app=explicit"), "app=explicit")
+        // Another host gets neither the explicit header nor the cookies it replaced.
+        XCTAssertNil(redirectHeader(from: "https://chat.example.com/socket.io/", to: "https://node3.example.com/socket.io/",
+                                    configured: configured, explicit: "app=explicit"))
+    }
+
+    func testWebSocketRedirectLooksUpSecureJarCookies() throws {
+        let jar = URLSessionConfiguration.ephemeral.httpCookieStorage!
+        jar.setCookie(try XCTUnwrap(HTTPCookie(properties: [.name: "lb", .value: "node1", .domain: ".example.com",
+                                                            .path: "/", .secure: "TRUE"])))
+        let header = redirectHeader(from: "wss://chat.example.com/socket.io/", to: "wss://node3.example.com/socket.io/",
+                                    jar: jar) ?? ""
+        XCTAssertTrue(header.contains("lb=node1"), header)
+    }
+
+    // B, Q, V, U: RFC 6265 matching details.
+    func testCookieMatchingUsesTheEncodedPathAndExactIPAddresses() {
+        func names(_ cookies: [HTTPCookie], _ url: String) -> [String] {
+            SocketCookieScope.cookies(cookies, allowedFor: URL(string: url)!).map(\.name)
+        }
+        XCTAssertEqual(names([cookie("a", domain: "h.test", path: "/a")], "https://h.test/a%2Fb/"), [])
+        XCTAssertEqual(names([cookie("sp", domain: "h.test", path: "/my%20app")], "https://h.test/my%20app/socket.io/"), ["sp"])
+        func optionalCookie(_ name: String, domain: String) -> HTTPCookie? {
+            HTTPCookie(properties: [.name: name, .value: "v", .domain: domain, .path: "/"])
+        }
+        // Foundation may refuse some of these domains; whatever it accepts must match as RFC 6265 says.
+        if let suffix = optionalCookie("ip", domain: ".0.0.1") {
+            XCTAssertEqual(names([suffix], "http://127.0.0.1/socket.io/"), [])
+        }
+        XCTAssertEqual(names([cookie("ip", domain: "127.0.0.1")], "http://127.0.0.1:3000/socket.io/"), ["ip"])
+        if let v6 = optionalCookie("v6", domain: "::1") {
+            XCTAssertEqual(names([v6], "http://[::1]:3000/socket.io/"), ["v6"])
+        }
+        if let dot = optionalCookie("dot", domain: ".") {
+            XCTAssertEqual(names([dot], "http://evil.test./"), [])
+        }
+        // However Foundation stores a dotless host, a cookie made for it still reaches it.
+        let local = cookie("lh", domain: "localhost")
+        XCTAssertEqual(names([local], "http://localhost:3000/socket.io/"), ["lh"], "stored domain: \(local.domain)")
+        let fromResponse = HTTPCookie.cookies(withResponseHeaderFields: ["Set-Cookie": "resp=1; Path=/"],
+                                              for: URL(string: "http://localhost:3000/")!)
+        if !fromResponse.isEmpty {
+            XCTAssertEqual(names(fromResponse, "http://localhost:3000/socket.io/"), ["resp"],
+                           "stored domain: \(fromResponse.map(\.domain))")
+        }
     }
 }
