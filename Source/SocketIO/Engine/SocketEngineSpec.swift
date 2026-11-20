@@ -247,6 +247,14 @@ extension SocketEngineSpec {
 
         if let extraHeaders = extraHeaders {
             for (headerName, value) in extraHeaders {
+                // CR, LF and NUL are never valid in a field; they could start
+                // a second header. Such a header is skipped, not rewritten.
+                guard !(headerName + value).unicodeScalars.contains(where: { $0 == "\r" || $0 == "\n" || $0 == "\0" })
+                else {
+                    DefaultSocketLogger.Logger.error("Skipping extra header with a control character",
+                                                     type: "SocketEngine")
+                    continue
+                }
                 req.setValue(value, forHTTPHeaderField: headerName)
             }
         }

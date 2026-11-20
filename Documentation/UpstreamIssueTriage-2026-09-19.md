@@ -14,7 +14,7 @@ Dazu kommen die Gemini-Läufe des Koordinators (ein OpenCode-Lauf pro Batch), di
 hier nicht abgerechnet sind. Alle Wahrscheinlichkeiten sind Modellschätzungen.
 
 Rohdaten, Skripte und die vollständigen Ereignisprotokolle liegen außerhalb des
-Repositories in `/home/monkey/code/socket.io-client-swift-upstream-triage/`.
+Repositories in einem separaten lokalen Verzeichnis (`socket.io-client-swift-upstream-triage/`).
 Die Jev-Urteile sind als [Stufe-1-CSV](ReviewEvidence/UpstreamTriage-Stage1-2026-09-19.csv)
 und [Stufe-2-CSV](ReviewEvidence/UpstreamTriage-Stage2-2026-09-19.csv) beigelegt.
 

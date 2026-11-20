@@ -1105,9 +1105,10 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
             case let .reconnectAttempts(attempts):
                 reconnectAttempts = attempts
             case let .reconnectWait(wait):
-                reconnectWait = abs(wait)
+                // `abs(Int.min)` traps; saturate instead.
+                reconnectWait = Int(clamping: wait.magnitude)
             case let .reconnectWaitMax(wait):
-                reconnectWaitMax = abs(wait)
+                reconnectWaitMax = Int(clamping: wait.magnitude)
             case let .randomizationFactor(factor):
                 randomizationFactor = factor
             case let .connectTimeout(value):

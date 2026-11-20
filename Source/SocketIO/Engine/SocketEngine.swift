@@ -201,6 +201,10 @@ open class SocketEngine: NSObject,
     private(set) var probeWait = ProbeWaitQueue()
     private var secure = false
 
+    private static func isSecureScheme(_ url: URL) -> Bool {
+        ["https", "wss"].contains(url.scheme?.lowercased() ?? "")
+    }
+
     // MARK: Initializers
 
     /// Creates a new engine.
@@ -211,7 +215,7 @@ open class SocketEngine: NSObject,
     public init(client: SocketEngineClient, url: URL, config: SocketIOClientConfiguration) {
         self.client = client
         self.url = url
-        self.secure = ["https", "wss"].contains(url.scheme?.lowercased() ?? "")
+        self.secure = SocketEngine.isSecureScheme(url)
 
         super.init()
 
@@ -306,7 +310,8 @@ open class SocketEngine: NSObject,
             // session's actual POST completions, even though their engine
             // callbacks are now stale. Never read the replacement session here.
             let sender = RetiringPollingSender(session: oldSession, queue: engineQueue,
-                                               requests: retiringRequests, timeout: pollingRetirementDeadline)
+                                               requests: retiringRequests, timeout: pollingRetirementDeadline,
+                                               bodyLimit: bufferLimits.maximumPollingResponseBytes)
             retiringSender = sender
             retiringPostGroup.socketNotify(queue: engineQueue) { sender.start() }
             engineQueue.socketAsyncAfter(deadline: .now() + pollingRetirementDeadline) {
@@ -396,7 +401,7 @@ open class SocketEngine: NSObject,
             closeAfterUpgradeSettled(overPolling: polling)
         }
 
-        DefaultSocketLogger.Logger.log("Starting engine. Server: \(url)", type: SocketEngine.logType)
+        DefaultSocketLogger.Logger.log("Starting engine. Server: \(SocketLogRedaction.url(url))", type: SocketEngine.logType)
         DefaultSocketLogger.Logger.log("Handshaking", type: SocketEngine.logType)
 
         openingTransports = []
@@ -997,10 +1002,22 @@ open class SocketEngine: NSObject,
     /// parameter config: The `SocketIOClientConfiguration` that should be used to set/update configs.
     open func setConfigs(_ config: SocketIOClientConfiguration) {
         configurationError = nil
-        // The manager passes its complete configuration. Omitted optional
-        // credentials and request deadlines must not survive engine reuse.
+        // The manager passes its complete configuration. Omitted credentials,
+        // trust settings and request deadlines must not survive engine reuse:
+        // a removed header, cookie, query token, delegate or TLS policy would
+        // otherwise be sent with, or decide, the next session.
         clientCertificate = nil
         requestTimeout = nil
+        connectParams = nil
+        cookies = nil
+        extraHeaders = nil
+        sessionDelegate = nil
+        tlsConfiguration = .systemDefault
+        withCredentials = false
+        // An https/wss URL is never downgraded by `.secure(false)`; the URL
+        // scheme decides, as in engine.io-client.
+        let schemeIsSecure = SocketEngine.isSecureScheme(url)
+        secure = schemeIsSecure
         for option in config {
             switch option {
             case let .requestTimeout(timeout):
@@ -1032,7 +1049,7 @@ open class SocketEngine: NSObject,
             case let .path(path):
                 socketPath = path
             case let .secure(secure):
-                self.secure = secure
+                self.secure = secure || schemeIsSecure
             case let .clientCertificate(credential):
                 clientCertificate = credential
             case let .security(policy):
@@ -1052,6 +1069,9 @@ open class SocketEngine: NSObject,
             }
         }
         // Normalize after all options: configuration ordering must not matter.
+        // A relative path cannot form a URL with a host and used to crash
+        // URL construction.
+        if !socketPath.hasPrefix("/") { socketPath = "/" + socketPath }
         if socketPath.hasSuffix("/") { socketPath.removeLast() }
         if addTrailingSlash { socketPath += "/" }
         (urlPolling, urlWebSocket) = createURLs()
@@ -1292,15 +1312,18 @@ private final class RetiringPollingSender {
     private let queue: DispatchQueue
     private let requests: [RetiringPollingRequest]
     private let timeout: TimeInterval
+    private let bodyLimit: Int
     private var index = 0
     private var started = false
     private var finished = false
 
-    init(session: URLSession, queue: DispatchQueue, requests: [RetiringPollingRequest], timeout: TimeInterval) {
+    init(session: URLSession, queue: DispatchQueue, requests: [RetiringPollingRequest], timeout: TimeInterval,
+         bodyLimit: Int) {
         self.session = session
         self.queue = queue
         self.requests = requests
         self.timeout = timeout
+        self.bodyLimit = bodyLimit
     }
 
     /// Called once the retiring session's own POST barrier has drained.
@@ -1334,8 +1357,17 @@ private final class RetiringPollingSender {
             self.sendNext()
         }
         let queue = self.queue
-        let task = session.dataTask(with: entry.request) { _, _, _ in
+        let complete: @Sendable (Data?, URLResponse?, Error?) -> Void = { _, _, _ in
             queue.socketAsync { delivery.run() }
+        }
+        let task: URLSessionDataTask
+        // The response to a retiring POST is discarded, but a configured
+        // polling response cap still applies to it, as to every live request.
+        if bodyLimit != .max, let proxy = session.delegate as? SocketSessionDelegateProxy {
+            task = session.dataTask(with: entry.request)
+            proxy.boundBody(of: task, to: bodyLimit, completion: complete)
+        } else {
+            task = session.dataTask(with: entry.request, completionHandler: complete)
         }
         task.resume()
         queue.socketAsyncAfter(deadline: .now() + timeout) { [weak task] in

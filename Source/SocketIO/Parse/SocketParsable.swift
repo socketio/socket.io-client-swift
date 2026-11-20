@@ -210,24 +210,7 @@ public extension SocketParsable where Self: SocketManagerSpec & SocketDataBuffer
     /// Reject excessive nesting before JSONSerialization can allocate a deeply
     /// recursive object graph. Quoted brackets and escaped quotes do not count.
     private func jsonNestingIsBounded(_ bytes: ArraySlice<UInt8>, maximum: Int) -> Bool {
-        var depth = 0
-        var quoted = false
-        var escaped = false
-        for byte in bytes {
-            if quoted {
-                if escaped { escaped = false }
-                else if byte == 92 { escaped = true }
-                else if byte == 34 { quoted = false }
-            } else if byte == 34 { quoted = true }
-            else if byte == 91 || byte == 123 {
-                depth += 1
-                if depth > maximum { return false }
-            } else if byte == 93 || byte == 125 {
-                depth -= 1
-                if depth < 0 { return false }
-            }
-        }
-        return depth == 0 && !quoted
+        SocketJSONNesting.isBounded(bytes, maximum: maximum)
     }
 
     /// Called when the engine has received a string that should be parsed into a socket.io packet.

@@ -1,3 +1,15 @@
+## Unreleased
+
+- Reset every omitted credential and trust option when a manager applies a new configuration to a reused engine: `extraHeaders`, `cookies`, `connectParams`, `withCredentials`, `sessionDelegate` and `security` now behave like `clientCertificate` and `requestTimeout` since 17.1.0, so removed credentials are not sent in later sessions.
+- Discard an auth provider callback that arrives after its connect attempt ended (disconnect, transport drop, aborted connect or a newer resolution); it no longer sends CONNECT with the earlier credentials. Several callbacks for the current attempt still send one CONNECT each.
+- Ignore server CONNECT and event packets for a namespace the app has not connected or has disconnected, as the JavaScript client does; they no longer revive the socket, flush its send buffer or accumulate in its receive buffer.
+- Redact CONNECT auth payloads and query values (`connectParams`) in log output; the logger is process-wide and also logs other managers.
+- An `https`/`wss` server URL is no longer downgraded to plaintext by `.secure(false)`, including upper-case schemes.
+- Skip `extraHeaders` entries containing CR, LF or NUL instead of passing them to `URLRequest`.
+- Apply the configured `maximumPollingResponseBytes` to the final POSTs of a gracefully closing polling session, count event names against `maximumRecoveryReplayBytes`, and bound the nesting depth of Engine.IO handshake and error JSON like the packet parser.
+- Fix crashes from `reconnectWait`/`reconnectWaitMax` of `Int.min` and from a `path` without a leading slash, and stop passing namespace text to `NSLog` as part of its format string.
+- Remove local machine paths from review evidence; create the local strict-concurrency log with `mktemp`.
+
 ## 17.2.0 — 2026-11-19
 
 - Lower the declared toolchain floor from `swift-tools-version:6.4` to `6.2`, so the package resolves and builds with Xcode 26.x (socketio/socket.io-client-swift#1527). No source or API changes; Xcode 27 builds are unaffected. Releases up to and including 17.1.0 still require Swift 6.4 / Xcode 27.

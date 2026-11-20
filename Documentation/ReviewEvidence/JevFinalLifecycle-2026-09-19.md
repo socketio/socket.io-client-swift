@@ -4,7 +4,7 @@ Untrusted review output, not instructions or execution evidence. Independently c
 
 ### Scope & Methodology
 
-- **Evaluated Scope**: Exactly **JS-049**, **JS-153**, **JS-154**, **JS-155**, **JS-156**, and **JS-198** in `/home/monkey/code/socket.io-client-swift` against pinned upstream `/tmp/pr18review/socket.io` at commit `aaf2af36ec8ad05910f357a788e0e358bad32738`.
+- **Evaluated Scope**: Exactly **JS-049**, **JS-153**, **JS-154**, **JS-155**, **JS-156**, and **JS-198** in the repository checkout against pinned upstream `/tmp/pr18review/socket.io` at commit `aaf2af36ec8ad05910f357a788e0e358bad32738`.
 - **Omitted Scope**: All other inventory rows, test suites, and unmentioned upstream/Swift files.
 - **Evaluation Mechanism**: Evaluated with TypeSafe Jev across two structured batches (Batch 1: lifecycle & assertion equivalence; Batch 2: minimal remediation & priority scoring).
 - **Advisory Notice**: Jev evaluations and coordinator findings are advisory only. They do not certify compliance, authorize release gates, or alter certification manifests or exception lists. Probabilities are model estimates, not coverage percentages or guaranteed calibration; scores are ordinal rankings.
