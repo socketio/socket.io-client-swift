@@ -21,7 +21,9 @@ final class RedirectCredentialsE2ETest: XCTestCase {
         ])
         var request = URLRequest(url: URL(string: "\(base)/\(path)?status=\(status)")!)
         engine.addHeaders(to: &request)
-        let proxy = SocketSessionDelegateProxy(tlsConfiguration: .systemDefault, forwardingDelegate: nil)
+        // Configured like the engine's polling session (SocketEngine.resetEngine).
+        let proxy = SocketSessionDelegateProxy(tlsConfiguration: .systemDefault, forwardingDelegate: nil,
+                                               redirectCookies: engine.cookies ?? [])
         let session = URLSession(configuration: .ephemeral, delegate: proxy, delegateQueue: nil)
         defer { session.invalidateAndCancel() }
         let observed = Observed()
