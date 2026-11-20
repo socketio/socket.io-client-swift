@@ -2,8 +2,8 @@ import Foundation
 import XCTest
 @testable import SocketIO
 
-/// Real URLSession redirects (Gemini scan F-05): an explicit `.cookies` header
-/// must not follow a redirect to another origin. URLSession itself copies it.
+/// Real URLSession redirects (Gemini scan F-05): URLSession copies an explicit
+/// `.cookies` header to any redirect target; only cookie-rule matches may follow.
 final class RedirectCredentialsE2ETest: XCTestCase {
     private final class Observed: @unchecked Sendable {
         var body: [String: Any]?
@@ -42,11 +42,14 @@ final class RedirectCredentialsE2ETest: XCTestCase {
         for status in [301, 302, 307, 308] {
             let same = try requestThroughRedirect("same", status: status, port: server.port)
             XCTAssertEqual(same["cookie"] as? String, "session=cookie-secret", "same origin, \(status)")
-            for path in ["port", "host"] {
-                let other = try requestThroughRedirect(path, status: status, port: server.port)
-                XCTAssertTrue(other["cookie"] is NSNull, "\(path), \(status): \(other)")
-                XCTAssertEqual(other["apiKey"] as? String, "key-value", "other extra headers still follow")
-            }
+            // Cookies are not port-scoped (RFC 6265): another port of the same
+            // host keeps a host cookie, as in a browser.
+            let port = try requestThroughRedirect("port", status: status, port: server.port)
+            XCTAssertEqual(port["cookie"] as? String, "session=cookie-secret", "other port, \(status)")
+            // A different host the cookie was never set for must not get it.
+            let host = try requestThroughRedirect("host", status: status, port: server.port)
+            XCTAssertTrue(host["cookie"] is NSNull, "other host, \(status): \(host)")
+            XCTAssertEqual(host["apiKey"] as? String, "key-value", "other extra headers still follow")
         }
     }
 }

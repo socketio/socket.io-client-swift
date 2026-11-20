@@ -976,7 +976,8 @@ open class SocketEngine: NSObject,
         pingTimeout = 0
         pendingCloseReason = nil
         let proxy = SocketSessionDelegateProxy(tlsConfiguration: tlsConfiguration, forwardingDelegate: sessionDelegate,
-                                               clientCertificate: clientCertificate, credentialOrigin: urlPolling)
+                                               clientCertificate: clientCertificate, credentialOrigin: urlPolling,
+                                               redirectCookies: cookies ?? [])
         proxy.onInvalidation = { [weak self] invalidSession, error in
             guard let self = self, self.session === invalidSession, self.polling, !self.closed,
                   let error = error else { return }

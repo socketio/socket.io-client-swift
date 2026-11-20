@@ -377,3 +377,63 @@ final class SocketSecurityHardeningTest: XCTestCase {
         wait(for: [done], timeout: 10)
     }
 }
+
+// MARK: Redirect cookies (Gemini F-05)
+
+extension SocketSecurityHardeningTest {
+    private func cookie(_ name: String, domain: String, path: String = "/", secure: Bool = false) -> HTTPCookie {
+        var properties: [HTTPCookiePropertyKey: Any] = [.name: name, .value: "v", .domain: domain, .path: path]
+        if secure { properties[.secure] = "TRUE" }
+        return HTTPCookie(properties: properties)!
+    }
+
+    /// Calls the proxy's redirect decision without a network.
+    private func redirect(from source: String, to target: String, cookies: [HTTPCookie]) -> String? {
+        let proxy = SocketSessionDelegateProxy(tlsConfiguration: .systemDefault, forwardingDelegate: nil,
+                                               redirectCookies: cookies)
+        let session = URLSession(configuration: .ephemeral)
+        defer { session.invalidateAndCancel() }
+        var original = URLRequest(url: URL(string: source)!)
+        original.setValue(HTTPCookie.requestHeaderFields(with: cookies)["Cookie"], forHTTPHeaderField: "Cookie")
+        let task = session.dataTask(with: original)
+        var next = URLRequest(url: URL(string: target)!)
+        next.allHTTPHeaderFields = original.allHTTPHeaderFields
+        let response = HTTPURLResponse(url: URL(string: source)!, statusCode: 307, httpVersion: nil,
+                                       headerFields: ["Location": target])!
+        var decided: URLRequest??
+        proxy.urlSession(session, task: task, willPerformHTTPRedirection: response, newRequest: next) {
+            decided = .some($0)
+        }
+        return decided??.value(forHTTPHeaderField: "Cookie")
+    }
+
+    func testRedirectKeepsOnlyCookiesThatCookieRulesAllow() {
+        let host = cookie("host", domain: "chat.example.com")
+        let parent = cookie("parent", domain: ".example.com")
+        let secure = cookie("secure", domain: "chat.example.com", secure: true)
+        let scoped = cookie("scoped", domain: "chat.example.com", path: "/socket.io")
+        let all = [host, parent, secure, scoped]
+
+        // Same origin: URLSession's copy is left untouched.
+        XCTAssertEqual(redirect(from: "https://chat.example.com/socket.io/", to: "https://chat.example.com/socket.io/?x",
+                                cookies: all), HTTPCookie.requestHeaderFields(with: all)["Cookie"])
+        // http -> https on the same host: everything for that host and path goes.
+        let upgraded = redirect(from: "http://chat.example.com/socket.io/", to: "https://chat.example.com/socket.io/",
+                                cookies: [host, parent, scoped]) ?? ""
+        for name in ["host=", "parent=", "scoped="] { XCTAssertTrue(upgraded.contains(name), upgraded) }
+        // A sibling host of the parent domain only gets the parent-domain cookie.
+        XCTAssertEqual(redirect(from: "https://chat.example.com/socket.io/", to: "https://node3.example.com/socket.io/",
+                                cookies: all), "parent=v")
+        // Another port of the same host keeps host cookies (cookies are not port-scoped).
+        let otherPort = redirect(from: "https://chat.example.com/socket.io/", to: "https://chat.example.com:8443/socket.io/",
+                                 cookies: [host]) ?? ""
+        XCTAssertEqual(otherPort, "host=v")
+        // A foreign domain gets nothing; a Secure cookie never goes over plain http.
+        XCTAssertNil(redirect(from: "https://chat.example.com/socket.io/", to: "https://evil.test/socket.io/", cookies: all))
+        XCTAssertNil(redirect(from: "http://chat.example.com/socket.io/", to: "http://chat.example.com:8080/socket.io/",
+                              cookies: [secure]))
+        // A path-scoped cookie stays out of other paths.
+        XCTAssertEqual(redirect(from: "https://chat.example.com/socket.io/", to: "https://node3.example.com/other/",
+                                cookies: [scoped, parent]), "parent=v")
+    }
+}
