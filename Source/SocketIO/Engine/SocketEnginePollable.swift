@@ -210,11 +210,16 @@ extension SocketEnginePollable {
                                        type: "SocketEnginePolling")
 
         guard let requestSession = session else { return }
-        // Capture the concrete attempt's barrier, not the engine's future one.
-        let postGroup = req.httpMethod == "POST" ? (self as? SocketEngine)?.pollingPostGroup : nil
-        postGroup?.enter()
-
         let engine = self as? SocketEngine
+        // Capture the concrete attempt's barrier, not the engine's future one.
+        let postGroup = req.httpMethod == "POST" ? engine?.pollingPostGroup : nil
+        postGroup?.enter()
+        // `SocketEngine` stores the server's cookies itself (Foundation's
+        // cookie handling is off for its requests): those of the response the
+        // request ends with, for the URL that answered, before anything else
+        // happens. The redirect handler stores those of every followed hop.
+        let jar = engine?.withCredentials == true ? engine?.credentialCookies : nil
+
         let queue = engineQueue
         let delivery = SocketUncheckedSendableBox({ [weak self, weak requestSession]
             (data: Data?, response: URLResponse?, error: Error?) in
@@ -224,6 +229,7 @@ extension SocketEnginePollable {
         })
         let deliver: @Sendable (Data?, URLResponse?, Error?) -> Void = { data, response, error in
             defer { postGroup?.leave() }
+            if let jar, let response = response as? HTTPURLResponse { jar.store(response) }
             queue.socketAsync { delivery.value(data, response, error) }
         }
 

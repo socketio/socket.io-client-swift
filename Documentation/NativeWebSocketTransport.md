@@ -71,11 +71,19 @@ identical for polling and WebSocket. External `.sessionDelegate` callbacks cover
 authentication not handled by the configured TLS/client identity policy, redirects,
 invalidation, completion, metrics and
 WebSocket open/close. Server-trust challenges belong exclusively to the TLS policy;
-an external delegate cannot weaken it. Redirects cannot downgrade HTTPS/WSS to
-HTTP/WS. The WebSocket handshake follows no redirect, and a polling POST follows only
-307/308 to the host of the first request; a redirect refused by these rules is not
-offered to the delegate, and a request the delegate returns is checked again. See
-[Configuration – Redirects](Guides/Configuration.md#redirects). Custom Apple TLS policies are explicitly unsupported on non-Apple builds.
+an external delegate cannot weaken it. Only 301, 302, 303, 307 and 308 redirects are
+followed, and never from HTTPS/WSS to HTTP/WS. The WebSocket handshake follows no
+redirect: the handshake fails with an error, so the engine falls back to the next
+transport or reconnects. A polling POST follows only 307/308 to the host of the first
+request. A redirect refused by these rules is not offered to the delegate, and a request
+the delegate returns is checked again. See
+[Configuration – Redirects](Guides/Configuration.md#redirects).
+
+The handshake request carries one `Cookie` header, built like a polling request's: an
+explicit `Cookie` from `.extraHeaders`, or the `.cookies` and `.withCredentials` cookies
+RFC 6265 allows for the URL. With `.withCredentials`, the cookies the handshake response
+sets are stored by the same rules as polling cookies. See
+[Configuration – Cookies](Guides/Configuration.md#cookies). Custom Apple TLS policies are explicitly unsupported on non-Apple builds.
 
 
 ### Client certificates (mutual TLS)

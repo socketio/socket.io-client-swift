@@ -16,10 +16,21 @@ What to check:
 
 - Set each cookie's domain to the Socket.IO server's host (`chat.example.com`, host-only),
   or to its parent domain with a leading dot (`.example.com`) when sibling hosts need it.
-- Remove the `Secure` flag from cookies for plain `http`/`ws` servers, or connect over `https`/`wss`.
+- Remove the `Secure` flag from cookies for plain `http`/`ws` servers, or connect over
+  `https`/`wss`. Plain `http`/`ws` to `localhost`, 127.0.0.0/8 or `::1` counts as secure,
+  as in browsers.
 - A cookie whose path does not cover the Socket.IO path (default `/socket.io/`) is no longer sent.
-- An explicit `Cookie` entry in `.extraHeaders` is still sent as written to the configured
-  host, on any scheme or port. A redirect to another host no longer receives it.
+- An explicit `Cookie` entry in `.extraHeaders` is still the whole `Cookie` header, sent as
+  written, on the configured host on any scheme or port. A redirect to another host no
+  longer receives it; that host gets the `.cookies` and server cookies scoped to it.
+- With `.withCredentials`, the engine now sends and stores server cookies itself on
+  polling too, so `.cookies` are no longer dropped next to them. A `Secure` cookie from a
+  context that is not secure, and a `__Secure-` or `__Host-` cookie that breaks its
+  prefix rules, are not stored. Cookies in the header are ordered by path length, then by
+  creation (RFC 6265).
+- Only 301, 302, 303, 307 and 308 redirects are followed; 300 is not. `Authorization`
+  and `Proxy-Authorization` follow a redirect only within the first origin, and a `Host`
+  header from `.extraHeaders` is removed when the host or port changes.
 - A polling POST follows only a 307/308 redirect to the host of the first request. A
   server or proxy that answers POSTs with 301, 302 or 303, or redirects them to another
   host, now fails the write instead; see [Configuration – Redirects](Configuration.md#redirects).

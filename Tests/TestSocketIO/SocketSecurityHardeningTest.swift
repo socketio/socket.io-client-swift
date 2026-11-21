@@ -390,7 +390,7 @@ extension SocketSecurityHardeningTest {
     /// Calls the proxy's redirect decision without a network.
     private func redirect(from source: String, to target: String, cookies: [HTTPCookie]) -> String? {
         let proxy = SocketSessionDelegateProxy(tlsConfiguration: .systemDefault, forwardingDelegate: nil,
-                                               redirectCookies: cookies)
+                                               requestCookies: SocketRequestCookies(configured: cookies))
         let session = URLSession(configuration: .ephemeral)
         defer { session.invalidateAndCancel() }
         var original = URLRequest(url: URL(string: source)!)
@@ -414,9 +414,10 @@ extension SocketSecurityHardeningTest {
         let scoped = cookie("scoped", domain: "chat.example.com", path: "/socket.io")
         let all = [host, parent, secure, scoped]
 
-        // Same origin and path: rebuilt by the same rules, so the same cookies go.
+        // Same origin and path: rebuilt by the same rules, so the same cookies
+        // go, the longer path first (RFC 6265 §5.4).
         XCTAssertEqual(redirect(from: "https://chat.example.com/socket.io/", to: "https://chat.example.com/socket.io/?x",
-                                cookies: all), HTTPCookie.requestHeaderFields(with: all)["Cookie"])
+                                cookies: all), "scoped=v; host=v; parent=v; secure=v")
         // http -> https on the same host: everything for that host and path goes.
         let upgraded = redirect(from: "http://chat.example.com/socket.io/", to: "https://chat.example.com/socket.io/",
                                 cookies: [host, parent, scoped]) ?? ""
@@ -696,16 +697,18 @@ extension SocketSecurityHardeningTest {
         let manager = SocketManager(socketURL: url, config: [.autoConnect(false)])
         let engine = SocketEngine(client: manager, url: url, config: [.cookies([cookie("old", domain: "localhost")])])
         let proxy = SocketSessionDelegateProxy(tlsConfiguration: .systemDefault, forwardingDelegate: nil,
-                                               redirectCookies: [cookie("old", domain: "localhost")])
+                                               requestCookies: SocketRequestCookies(configured: [cookie("old", domain: "localhost")]))
         engine.pollingProxy = proxy
 
         engine.setConfigs([.cookies([cookie("new", domain: "localhost")])])
-        XCTAssertEqual(proxy.redirectCookies.configured.map(\.name), ["new"])
-        XCTAssertNil(proxy.redirectCookies.explicitHeader)
+        XCTAssertEqual(proxy.requestCookies.configured.map(\.name), ["new"])
+        XCTAssertNil(proxy.requestCookies.explicitHeader)
+        XCTAssertNil(proxy.requestCookies.jar)
 
-        engine.setConfigs([.extraHeaders(["cookie": "app=explicit"])])
-        XCTAssertEqual(proxy.redirectCookies.configured.map(\.name), [])
-        XCTAssertEqual(proxy.redirectCookies.explicitHeader, "app=explicit")
+        engine.setConfigs([.extraHeaders(["cookie": "app=explicit"]), .withCredentials(true)])
+        XCTAssertEqual(proxy.requestCookies.configured.map(\.name), [])
+        XCTAssertEqual(proxy.requestCookies.explicitHeader, "app=explicit")
+        XCTAssertTrue(proxy.requestCookies.jar === engine.credentialCookies, "redirects store and send server cookies")
     }
 
     // X: a bare query item carries its secret in the name.
@@ -731,10 +734,10 @@ extension SocketSecurityHardeningTest {
 
     // A, C, K: redirect cookie decisions.
     private func redirectHeader(from source: String, to target: String, configured: [HTTPCookie] = [],
-                                jar: HTTPCookieStorage? = nil, explicit: String? = nil) -> String? {
+                                jar: SocketCookieJar? = nil, explicit: String? = nil) -> String? {
         let proxy = SocketSessionDelegateProxy(tlsConfiguration: .systemDefault, forwardingDelegate: nil,
-                                               redirectCookies: configured, redirectCookieStorage: jar,
-                                               explicitCookieHeader: explicit)
+                                               requestCookies: SocketRequestCookies(configured: configured, jar: jar,
+                                                                                    explicitHeader: explicit))
         let session = URLSession(configuration: .ephemeral)
         defer { session.invalidateAndCancel() }
         var original = URLRequest(url: URL(string: source)!)
@@ -769,18 +772,22 @@ extension SocketSecurityHardeningTest {
         XCTAssertEqual(redirectHeader(from: "https://chat.example.com/socket.io/",
                                       to: "https://chat.example.com:8443/socket.io/",
                                       configured: configured, explicit: "app=explicit"), "app=explicit")
-        // Another host gets neither the explicit header nor the cookies it replaced.
-        XCTAssertNil(redirectHeader(from: "https://chat.example.com/socket.io/", to: "https://node3.example.com/socket.io/",
+        // Another host never gets the explicit header; it gets the managed
+        // cookies RFC 6265 allows for it, as without an explicit header.
+        XCTAssertEqual(redirectHeader(from: "https://chat.example.com/socket.io/", to: "https://node3.example.com/socket.io/",
+                                      configured: configured, explicit: "app=explicit"), "configured=v")
+        XCTAssertNil(redirectHeader(from: "https://chat.example.com/socket.io/", to: "https://evil.test/socket.io/",
                                     configured: configured, explicit: "app=explicit"))
     }
 
-    func testWebSocketRedirectLooksUpSecureJarCookies() throws {
-        let jar = URLSessionConfiguration.ephemeral.httpCookieStorage!
-        jar.setCookie(try XCTUnwrap(HTTPCookie(properties: [.name: "lb", .value: "node1", .domain: ".example.com",
-                                                            .path: "/", .secure: "TRUE"])))
-        let header = redirectHeader(from: "wss://chat.example.com/socket.io/", to: "wss://node3.example.com/socket.io/",
-                                    jar: jar) ?? ""
-        XCTAssertTrue(header.contains("lb=node1"), header)
+    func testPollingRedirectSendsTheJarCookiesForTheNewURL() throws {
+        let jar = try XCTUnwrap(URLSessionConfiguration.ephemeral.httpCookieStorage.map(SocketCookieJar.init(storage:)))
+        jar.store(responseHeaders: ["Set-Cookie": "lb=node1; Domain=example.com; Path=/; Secure"],
+                  from: URL(string: "https://chat.example.com/socket.io/")!)
+        XCTAssertEqual(redirectHeader(from: "https://chat.example.com/socket.io/", to: "https://node3.example.com/socket.io/",
+                                      jar: jar), "lb=node1")
+        XCTAssertNil(redirectHeader(from: "https://chat.example.com/socket.io/", to: "https://evil.test/socket.io/",
+                                    jar: jar))
     }
 
     // B, Q, V, U: RFC 6265 matching details.
@@ -879,11 +886,22 @@ extension SocketSecurityHardeningTest {
     }
 
     func testAGetFollowsEveryRedirectStatus() {
-        for status in [300, 301, 302, 303, 307, 308] {
+        for status in [301, 302, 303, 307, 308] {
             let decided = bodyRedirect("GET", status: status, from: "http://chat.example.com/socket.io/",
                                        to: "http://node3.example.com/socket.io/")
             XCTAssertEqual(decided??.url?.host, "node3.example.com", "\(status)")
         }
+    }
+
+    func testOnlyRedirectStatusesAreFollowed() {
+        // 300 Multiple Choices is not followed, and a delegate is not asked about it.
+        let unused = RewritingRedirectDelegate { $0 }
+        for status in [300, 304, 305, 306, 399] {
+            XCTAssertEqual(bodyRedirect("GET", status: status, from: "http://chat.example.com/socket.io/",
+                                        to: "http://chat.example.com/socket.io/?x", delegate: unused), .some(nil),
+                           "\(status)")
+        }
+        XCTAssertEqual(unused.calls, 0)
     }
 
     func testASessionDelegateCannotWidenARedirectOfAPost() {
@@ -919,10 +937,13 @@ extension SocketSecurityHardeningTest {
                                                credentialOrigin: URL(string: first))
         let session = URLSession(configuration: .ephemeral)
         defer { session.invalidateAndCancel() }
-        let task = session.dataTask(with: URLRequest(url: URL(string: first)!))
-        var next = URLRequest(url: URL(string: target)!)
-        next.setValue("Bearer secret", forHTTPHeaderField: "Authorization")
-        next.setValue("Basic proxy-secret", forHTTPHeaderField: "Proxy-Authorization")
+        var original = URLRequest(url: URL(string: first)!)
+        original.setValue("Bearer secret", forHTTPHeaderField: "Authorization")
+        original.setValue("Basic proxy-secret", forHTTPHeaderField: "Proxy-Authorization")
+        let task = session.dataTask(with: original)
+        // URLSession proposes the next request without Authorization, even on
+        // the same origin (measured on macOS 27).
+        let next = URLRequest(url: URL(string: target)!)
         let response = HTTPURLResponse(url: URL(string: current)!, statusCode: 307, httpVersion: nil,
                                        headerFields: ["Location": target])!
         var decided: URLRequest??
@@ -934,26 +955,32 @@ extension SocketSecurityHardeningTest {
 
     func testCredentialsEndWithTheFirstChangeOfOrigin() throws {
         let a = "https://chat.example.com/socket.io/"
-        let same = try XCTUnwrap(credentialRedirect(first: a, current: a, to: a + "?x"))
-        XCTAssertEqual(same?.value(forHTTPHeaderField: "Authorization"), "Bearer secret")
-        XCTAssertEqual(same?.value(forHTTPHeaderField: "Proxy-Authorization"), "Basic proxy-secret")
-        for target in ["https://node3.example.com/socket.io/", "https://chat.example.com:8443/socket.io/"] {
-            let other = try XCTUnwrap(credentialRedirect(first: a, current: a, to: target))
-            XCTAssertNil(other?.value(forHTTPHeaderField: "Authorization"), target)
-            XCTAssertNil(other?.value(forHTTPHeaderField: "Proxy-Authorization"), target)
+        // `?? nil` flattens the decision: nil when the redirect was refused.
+        let same = try XCTUnwrap(credentialRedirect(first: a, current: a, to: a + "?x") ?? nil, "followed")
+        XCTAssertEqual(same.value(forHTTPHeaderField: "Authorization"), "Bearer secret")
+        XCTAssertEqual(same.value(forHTTPHeaderField: "Proxy-Authorization"), "Basic proxy-secret")
+        for target in ["https://node3.example.com/socket.io/", "https://chat.example.com:8443/socket.io/",
+                       "https://127.0.0.1/socket.io/"] {
+            let other = try XCTUnwrap(credentialRedirect(first: a, current: a, to: target) ?? nil, target)
+            XCTAssertNil(other.value(forHTTPHeaderField: "Authorization"), target)
+            XCTAssertNil(other.value(forHTTPHeaderField: "Proxy-Authorization"), target)
         }
         // A -> B -> A: the hop back to the first origin does not restore them.
-        let back = try XCTUnwrap(credentialRedirect(first: a, current: "https://node3.example.com/socket.io/", to: a))
-        XCTAssertNil(back?.value(forHTTPHeaderField: "Authorization"))
-        XCTAssertNil(back?.value(forHTTPHeaderField: "Proxy-Authorization"))
+        let back = try XCTUnwrap(credentialRedirect(first: a, current: "https://node3.example.com/socket.io/", to: a) ?? nil)
+        XCTAssertNil(back.value(forHTTPHeaderField: "Authorization"))
+        XCTAssertNil(back.value(forHTTPHeaderField: "Proxy-Authorization"))
+        // The same origin written differently is still the same origin.
+        let spelled = try XCTUnwrap(credentialRedirect(first: "https://127.0.0.1/socket.io/", current: "https://127.0.0.1/",
+                                                       to: "https://127.1:443/socket.io/?x") ?? nil)
+        XCTAssertEqual(spelled.value(forHTTPHeaderField: "Authorization"), "Bearer secret")
     }
 
     func testAClientCertificateBlocksRedirectsToAnotherOrigin() throws {
         // The proxy only checks that a certificate is configured.
         let certificate = URLCredential(user: "stand-in", password: "identity", persistence: .none)
         let a = "https://chat.example.com/socket.io/"
-        let same = try XCTUnwrap(credentialRedirect(first: a, current: a, to: a + "?x", clientCertificate: certificate))
-        XCTAssertEqual(same?.url?.absoluteString, a + "?x")
+        let same = try XCTUnwrap(credentialRedirect(first: a, current: a, to: a + "?x", clientCertificate: certificate) ?? nil)
+        XCTAssertEqual(same.url?.absoluteString, a + "?x")
         for target in ["https://node3.example.com/socket.io/", "https://chat.example.com:8443/socket.io/",
                        "http://chat.example.com/socket.io/"] {
             XCTAssertEqual(credentialRedirect(first: a, current: a, to: target, clientCertificate: certificate),
@@ -998,5 +1025,276 @@ extension SocketSecurityHardeningTest {
             }
         }
         XCTAssertEqual(unused.calls, 0)
+    }
+}
+
+// MARK: Redirect and cookie rules shared with the Kotlin client
+
+/// Drives the proxy through the hops of one task, as URLSession would.
+private final class RedirectChain {
+    let proxy: SocketSessionDelegateProxy
+    private let session = URLSession(configuration: .ephemeral)
+    private let task: URLSessionTask
+    private(set) var current: URL
+
+    init(first: URLRequest, proxy: SocketSessionDelegateProxy) {
+        self.proxy = proxy
+        task = session.dataTask(with: first)
+        current = first.url!
+    }
+
+    deinit { session.invalidateAndCancel() }
+
+    /// The request the proxy lets URLSession send next, or nil when refused.
+    /// URLSession proposes `target` with `headers` (it drops Authorization).
+    func hop(to target: String, status: Int = 307, setCookie: String? = nil,
+             headers: [String: String] = [:]) -> URLRequest? {
+        var next = URLRequest(url: URL(string: target)!)
+        for (name, value) in headers { next.setValue(value, forHTTPHeaderField: name) }
+        var fields = ["Location": target]
+        if let setCookie { fields["Set-Cookie"] = setCookie }
+        let response = HTTPURLResponse(url: current, statusCode: status, httpVersion: nil, headerFields: fields)!
+        var decided: URLRequest??
+        proxy.urlSession(session, task: task, willPerformHTTPRedirection: response, newRequest: next) {
+            decided = .some($0)
+        }
+        let followed = decided ?? nil
+        if let url = followed?.url { current = url }
+        return followed
+    }
+
+    func complete() { proxy.urlSession(session, task: task, didCompleteWithError: nil) }
+}
+
+extension SocketSecurityHardeningTest {
+    private func chain(from first: String, cookies: SocketRequestCookies = SocketRequestCookies(),
+                       method: String = "GET") -> RedirectChain {
+        var request = URLRequest(url: URL(string: first)!)
+        request.httpMethod = method
+        request.setValue("Bearer secret", forHTTPHeaderField: "Authorization")
+        request.setValue("Basic proxy-secret", forHTTPHeaderField: "Proxy-Authorization")
+        let proxy = SocketSessionDelegateProxy(tlsConfiguration: .systemDefault, forwardingDelegate: nil,
+                                               requestCookies: cookies)
+        return RedirectChain(first: request, proxy: proxy)
+    }
+
+    private func newJar() -> SocketCookieJar {
+        SocketCookieJar(storage: URLSessionConfiguration.ephemeral.httpCookieStorage!)
+    }
+
+    private func allowedNames(_ cookies: [HTTPCookie], _ url: String) -> [String] {
+        SocketCookieScope.cookies(cookies, allowedFor: URL(string: url)!).map(\.name)
+    }
+
+    func testAuthorizationIsNotRestoredOnceTheChainLeftTheFirstOrigin() throws {
+        let a = "https://chat.example.com/socket.io/"
+        let chain = chain(from: a)
+        let stay = try XCTUnwrap(chain.hop(to: a + "?1"))
+        XCTAssertEqual(stay.value(forHTTPHeaderField: "Authorization"), "Bearer secret")
+        XCTAssertEqual(stay.value(forHTTPHeaderField: "Proxy-Authorization"), "Basic proxy-secret")
+        let away = try XCTUnwrap(chain.hop(to: "https://node3.example.com/socket.io/"))
+        XCTAssertNil(away.value(forHTTPHeaderField: "Authorization"))
+        let back = try XCTUnwrap(chain.hop(to: a + "?2"))
+        XCTAssertNil(back.value(forHTTPHeaderField: "Authorization"))
+        // Nor on a later hop within the first origin: the chain has left it.
+        let again = try XCTUnwrap(chain.hop(to: a + "?3"))
+        XCTAssertNil(again.value(forHTTPHeaderField: "Authorization"))
+        XCTAssertNil(again.value(forHTTPHeaderField: "Proxy-Authorization"))
+        // The record ends with the task.
+        chain.complete()
+        let afterCompletion = try XCTUnwrap(chain.hop(to: a + "?4"))
+        XCTAssertEqual(afterCompletion.value(forHTTPHeaderField: "Authorization"), "Bearer secret")
+    }
+
+    func testACustomHostHeaderIsRemovedWhenTheHostOrPortChanges() throws {
+        let a = "https://chat.example.com/socket.io/"
+        func host(after target: String) throws -> String? {
+            let next = try XCTUnwrap(chain(from: a).hop(to: target, headers: ["Host": "chat.example.com"]), target)
+            return next.value(forHTTPHeaderField: "Host")
+        }
+        XCTAssertEqual(try host(after: a + "?x"), "chat.example.com")
+        XCTAssertEqual(try host(after: "https://CHAT.example.com.:443/other/"), "chat.example.com")
+        XCTAssertNil(try host(after: "https://chat.example.com:8443/socket.io/"))
+        XCTAssertNil(try host(after: "https://node3.example.com/socket.io/"))
+        XCTAssertNil(try host(after: "https://127.0.0.1/socket.io/"))
+    }
+
+    func testADowngradeIsRefusedBeforeTheDelegateIsAsked() {
+        let https = "https://chat.example.com/socket.io/"
+        let unused = RewritingRedirectDelegate { $0 }
+        for (first, current, target) in [(https, https, "http://chat.example.com/socket.io/"),
+                                         ("http://chat.example.com/", https, "http://chat.example.com/socket.io/"),
+                                         (https, https, "ws://chat.example.com/socket.io/")] {
+            XCTAssertEqual(credentialRedirect(first: first, current: current, to: target, delegate: unused), .some(nil),
+                           "\(first) -> \(current) -> \(target)")
+        }
+        XCTAssertEqual(unused.calls, 0)
+        // Checked again on the request the delegate returns.
+        let downgrading = RewritingRedirectDelegate { request in
+            var changed = request
+            changed.url = URL(string: "http://chat.example.com/socket.io/")
+            return changed
+        }
+        XCTAssertEqual(credentialRedirect(first: https, current: https, to: https + "?x", delegate: downgrading),
+                       .some(nil))
+        XCTAssertEqual(downgrading.calls, 1)
+        // Plain http may still move to https, or stay on http.
+        XCTAssertNotNil(credentialRedirect(first: "http://chat.example.com/", current: "http://chat.example.com/",
+                                           to: https) ?? nil)
+        XCTAssertNotNil(credentialRedirect(first: "http://chat.example.com/", current: "http://chat.example.com/",
+                                           to: "http://node3.example.com/") ?? nil)
+    }
+
+    func testCookiesSetOnAFollowedHopAreStoredForTheHostThatAnswered() throws {
+        let jar = newJar()
+        let first = "https://chat.example.com/socket.io/"
+        let chain = chain(from: first, cookies: SocketRequestCookies(jar: jar))
+        let next = try XCTUnwrap(chain.hop(to: "https://chat.example.com:8443/socket.io/", setCookie: "lb=node1; Path=/"))
+        XCTAssertEqual(next.value(forHTTPHeaderField: "Cookie"), "lb=node1")
+        XCTAssertFalse(next.httpShouldHandleCookies)
+        // Set by chat.example.com, so not sent to node3.
+        let away = try XCTUnwrap(chain.hop(to: "https://node3.example.com/socket.io/", setCookie: "second=1; Path=/"))
+        XCTAssertNil(away.value(forHTTPHeaderField: "Cookie"))
+        XCTAssertEqual(jar.cookies(for: URL(string: first)!).map(\.name), ["lb", "second"])
+        // A refused hop is the response the task ends with; the engine stores that one.
+        let refusing = self.chain(from: first, cookies: SocketRequestCookies(jar: jar))
+        XCTAssertNil(refusing.hop(to: first + "?x", status: 300, setCookie: "refused=1; Path=/"))
+        XCTAssertEqual(jar.cookies(for: URL(string: first)!).map(\.name), ["lb", "second"])
+    }
+
+    func testCookieHeaderOrderFollowsRFC6265() throws {
+        let jar = newJar()
+        let url = URL(string: "https://chat.example.com/socket.io/")!
+        jar.store(responseHeaders: ["Set-Cookie": "z=1; Path=/"], from: url)
+        jar.store(responseHeaders: ["Set-Cookie": "a=1; Path=/"], from: url)
+        jar.store(responseHeaders: ["Set-Cookie": "deep=1; Path=/socket.io"], from: url)
+        // A replaced cookie keeps its creation time (RFC 6265 §5.3 step 11.3).
+        jar.store(responseHeaders: ["Set-Cookie": "z=2; Path=/"], from: url)
+        XCTAssertEqual(jar.cookies(for: url).map { "\($0.name)=\($0.value)" }, ["z=2", "a=1", "deep=1"])
+        let cookies = SocketRequestCookies(configured: [cookie("c1", domain: "chat.example.com"),
+                                                        cookie("c2", domain: "chat.example.com", path: "/socket.io/")],
+                                           jar: jar)
+        XCTAssertEqual(cookies.header(for: url, configuredHost: "chat.example.com"), "c2=v; deep=1; c1=v; z=2; a=1")
+        // A deleted cookie that is set again is a new cookie.
+        jar.store(responseHeaders: ["Set-Cookie": "z=gone; Path=/; Max-Age=0"], from: url)
+        jar.store(responseHeaders: ["Set-Cookie": "z=3; Path=/"], from: url)
+        XCTAssertEqual(jar.cookies(for: url).map { "\($0.name)=\($0.value)" }, ["a=1", "deep=1", "z=3"])
+    }
+
+    func testEngineRequestsCarryOneExplicitCookieHeader() throws {
+        let manager = SocketManager(socketURL: URL(string: "https://chat.example.com/")!, config: [.autoConnect(false)])
+        let engine = SocketEngine(client: manager, url: URL(string: "https://chat.example.com/")!,
+                                  config: [.withCredentials(true), .cookies([cookie("configured", domain: "chat.example.com")])])
+        engine.credentialCookies?.store(responseHeaders: ["Set-Cookie": "server=1; Path=/"],
+                                        from: URL(string: "https://chat.example.com/socket.io/")!)
+        for url in [engine.urlPollingWithSid, engine.urlWebSocketWithSid] {
+            var request = URLRequest(url: url)
+            engine.addHeaders(to: &request)
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Cookie"), "configured=v; server=1", url.absoluteString)
+            XCTAssertFalse(request.httpShouldHandleCookies, "Foundation adds no cookies of its own")
+        }
+        engine.setConfigs([.withCredentials(true), .cookies([cookie("configured", domain: "chat.example.com")]),
+                           .extraHeaders(["Cookie": "app=explicit"])])
+        var request = URLRequest(url: engine.urlPollingWithSid)
+        engine.addHeaders(to: &request)
+        XCTAssertEqual(request.value(forHTTPHeaderField: "Cookie"), "app=explicit")
+        withExtendedLifetime(manager) {}
+    }
+
+    func testHostsAreComparedInCanonicalForm() {
+        let cases: [(String, String)] = [
+            ("127.1", "127.0.0.1"), ("0x7f.0.0.1", "127.0.0.1"), ("2130706433", "127.0.0.1"),
+            ("0177.0.0.1", "127.0.0.1"), ("0X7F000001", "127.0.0.1"), ("1.2.3", "1.2.0.3"), ("127.0.0.1.", "127.0.0.1"),
+            ("0x", "0.0.0.0"), ("[0:0:0:0:0:0:0:1]", "::1"), ("[::1]", "::1"), ("0:0:0:0:0:0:0:1", "::1"),
+            ("[2001:DB8:0:0:0:0:0:1]", "2001:db8::1"), ("Example.COM.", "example.com"),
+            // Not IPv4 addresses for the WHATWG parser, so domain names.
+            ("foo.123", "foo.123"), ("app.0x1", "app.0x1"), ("127.evil.0", "127.evil.0"), ("256.0.0.1", "256.0.0.1"),
+            ("08.0.0.1", "08.0.0.1"), ("1.2.3.4.5", "1.2.3.4.5"), ("4294967296", "4294967296"),
+        ]
+        for (host, canonical) in cases { XCTAssertEqual(SocketHost.canonical(host), canonical, host) }
+        for host in ["127.1", "0x7f.0.0.1", "2130706433", "[::1]", "::1", "10.0.0.1"] {
+            XCTAssertTrue(SocketCookieScope.isIPAddress(host), host)
+        }
+        for host in ["foo.123", "app.0x1", "127.evil.0", "example.com", "256.0.0.1", "localhost"] {
+            XCTAssertFalse(SocketCookieScope.isIPAddress(host), host)
+        }
+        for (first, second) in [("http://127.1/", "http://127.0.0.1:80/"), ("http://2130706433/", "http://0x7f.0.0.1/"),
+                                ("http://[0:0:0:0:0:0:0:1]:3000/", "http://[::1]:3000/"),
+                                ("https://Chat.Example.com./", "https://chat.example.com:443/")] {
+            XCTAssertEqual(SocketSessionDelegateProxy.origin(of: URL(string: first)),
+                           SocketSessionDelegateProxy.origin(of: URL(string: second)), first)
+        }
+        XCTAssertNotEqual(SocketSessionDelegateProxy.origin(of: URL(string: "http://127.evil.0/")),
+                          SocketSessionDelegateProxy.origin(of: URL(string: "http://127.0.0.1/")))
+        // Cookies of an IP address reach every notation of it, and nothing else.
+        XCTAssertEqual(allowedNames([cookie("ip", domain: "127.0.0.1")], "http://127.1/socket.io/"), ["ip"])
+        XCTAssertEqual(allowedNames([cookie("ip", domain: "127.0.0.1")], "http://2130706433/socket.io/"), ["ip"])
+        XCTAssertEqual(allowedNames([cookie("ip", domain: "127.0.0.1")], "http://127.0.0.2/socket.io/"), [])
+    }
+
+    func testLoopbackHostsAreSecureContextsForCookies() {
+        for url in ["https://chat.example.com/", "wss://chat.example.com/", "http://localhost:3000/", "ws://localhost/",
+                    "http://LOCALHOST./", "http://127.0.0.1/", "http://127.1/", "http://127.42.0.1/",
+                    "http://[::1]:3000/", "http://[0:0:0:0:0:0:0:1]/"] {
+            XCTAssertTrue(SocketCookieScope.isSecureContext(URL(string: url)), url)
+        }
+        for url in ["http://chat.example.com/", "ws://chat.example.com/", "http://foo.localhost/",
+                    "http://localhost.example/", "http://128.0.0.1/", "http://10.0.0.1/", "http://127.evil.0/",
+                    "http://[::2]/"] {
+            XCTAssertFalse(SocketCookieScope.isSecureContext(URL(string: url)), url)
+        }
+        XCTAssertEqual(allowedNames([cookie("s", domain: "localhost", secure: true)], "http://localhost:3000/socket.io/"), ["s"])
+        XCTAssertEqual(allowedNames([cookie("s", domain: "127.0.0.1", secure: true)], "ws://127.1:3000/socket.io/"), ["s"])
+        XCTAssertEqual(allowedNames([cookie("s", domain: "foo.localhost", secure: true)], "http://foo.localhost/"), [])
+    }
+
+    func testServerCookiesFollowTheStorageRules() throws {
+        func stored(_ setCookie: String, from url: String) -> [String] {
+            let jar = newJar()
+            jar.store(responseHeaders: ["Set-Cookie": setCookie], from: URL(string: url)!)
+            return (jar.storage.cookies ?? []).map(\.name)
+        }
+        let https = "https://chat.example.com/socket.io/"
+        XCTAssertEqual(stored("__Host-ok=1; Secure; Path=/", from: https), ["__Host-ok"])
+        XCTAssertEqual(stored("__Host-a=1; Path=/", from: https), [])
+        XCTAssertEqual(stored("__host-a=1; Path=/", from: https), [], "prefixes are compared case-insensitively")
+        XCTAssertEqual(stored("__HOST-a=1; Secure; Path=/; Domain=chat.example.com", from: https), [])
+        XCTAssertEqual(stored("__Host-a=1; Secure; Path=/socket.io", from: https), [])
+        XCTAssertEqual(stored("__Secure-ok=1; Secure; Path=/", from: https), ["__Secure-ok"])
+        XCTAssertEqual(stored("__secure-a=1; Path=/", from: https), [])
+        XCTAssertEqual(stored("s=1; Secure; Path=/", from: "http://chat.example.com/"), [])
+        XCTAssertEqual(stored("s=1; Secure; Path=/", from: "http://foo.localhost/"), [])
+        XCTAssertEqual(stored("s=1; Secure; Path=/", from: "http://localhost:3000/"), ["s"])
+        XCTAssertEqual(stored("s=1; Secure; Path=/", from: "ws://127.0.0.1:3000/"), ["s"])
+        XCTAssertEqual(stored("d=1; Domain=evil.test; Path=/", from: https), [])
+        XCTAssertEqual(stored("d=1; Domain=example.com; Path=/", from: https), ["d"])
+        #if canImport(Darwin)
+        // Apple's cookie storage rejects a public suffix as Domain; this client ships no list of its own.
+        XCTAssertEqual(stored("p=1; Domain=co.uk; Path=/", from: "https://shop.co.uk/"), [])
+        #endif
+        let secure = cookie("s", domain: "chat.example.com", secure: true)
+        XCTAssertFalse(SocketCookieScope.acceptsServerCookie(secure, from: URL(string: "http://chat.example.com/")!))
+        XCTAssertTrue(SocketCookieScope.acceptsServerCookie(secure, from: URL(string: "https://chat.example.com/")!))
+        XCTAssertTrue(SocketCookieScope.acceptsServerCookie(cookie("ip", domain: "127.0.0.1"),
+                                                            from: URL(string: "http://127.1/")!))
+        if let suffix = HTTPCookie(properties: [.name: "ip", .value: "v", .domain: ".0.0.1", .path: "/"]) {
+            XCTAssertFalse(SocketCookieScope.acceptsServerCookie(suffix, from: URL(string: "http://127.0.0.1/")!))
+        }
+    }
+}
+
+extension SocketSecurityHardeningTest {
+    func testAHandshakeThatEndsBeforeOpeningIsAnError() {
+        let redirect = HTTPURLResponse(url: URL(string: "wss://chat.example.com/socket.io/")!, statusCode: 307,
+                                       httpVersion: nil, headerFields: ["Location": "wss://node3.example.com/"])
+        let failure = URLSessionWebSocketConnection.completionError(nil, opened: false, response: redirect)
+        guard case EngineWebSocketError.handshakeFailed(statusCode: 307)? = failure as? EngineWebSocketError else {
+            return XCTFail("\(String(describing: failure))")
+        }
+        XCTAssertTrue(failure?.localizedDescription.contains("307") ?? false)
+        XCTAssertNil(URLSessionWebSocketConnection.completionError(nil, opened: true, response: redirect))
+        let native = URLError(.badServerResponse)
+        XCTAssertEqual((URLSessionWebSocketConnection.completionError(native, opened: false, response: redirect)
+            as? URLError)?.code, .badServerResponse)
     }
 }

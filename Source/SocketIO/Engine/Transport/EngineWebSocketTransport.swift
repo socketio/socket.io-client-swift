@@ -25,8 +25,8 @@ internal enum EngineWebSocketMessage: Equatable {
 }
 
 internal enum EngineWebSocketEvent {
-    /// `url` is the URL of the handshake response, which differs from the
-    /// request after a redirect.
+    /// `url` is the URL of the handshake response; server cookies are stored
+    /// for it. The handshake follows no redirect, so it is the request's URL.
     case opened(protocol: String?, headers: [String: String] = [:], url: URL? = nil)
     case message(EngineWebSocketMessage)
     case closed(code: Int?, reason: Data?, error: Error?)
@@ -39,6 +39,9 @@ internal enum EngineWebSocketError: Error, LocalizedError {
     case queueLimitExceeded
     case invalidCloseFrame
     case unsupportedMessage
+    /// The handshake ended without switching protocols, for example with a
+    /// redirect, which is not followed.
+    case handshakeFailed(statusCode: Int?)
 
     var errorDescription: String? {
         switch self {
@@ -48,6 +51,9 @@ internal enum EngineWebSocketError: Error, LocalizedError {
         case .queueLimitExceeded: return "The WebSocket send queue limit was exceeded."
         case .invalidCloseFrame: return "The WebSocket close code or reason is invalid."
         case .unsupportedMessage: return "The WebSocket received an unsupported message type."
+        case .handshakeFailed(let statusCode?):
+            return "The WebSocket handshake was answered with HTTP status \(statusCode)."
+        case .handshakeFailed(nil): return "The WebSocket handshake failed."
         }
     }
 }

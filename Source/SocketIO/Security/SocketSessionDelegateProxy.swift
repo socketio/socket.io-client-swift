@@ -23,22 +23,25 @@ internal class SocketSessionDelegateProxy: NSObject, URLSessionDataDelegate {
     private var boundedBodies = [Int: SocketBoundedBody]()
     private let boundedBodyLock = NSLock()
 
-    /// What a redirected request may carry in its `Cookie` header. A polling
-    /// session lives across configuration changes, so the engine updates it.
-    internal var redirectCookies: SocketRedirectCookies {
-        get { redirectCookiesLock.lock(); defer { redirectCookiesLock.unlock() }; return _redirectCookies }
-        set { redirectCookiesLock.lock(); _redirectCookies = newValue; redirectCookiesLock.unlock() }
+    /// What a redirected request may carry in its `Cookie` header, and the jar
+    /// that stores the cookies each followed hop sets. A polling session lives
+    /// across configuration changes, so the engine updates it.
+    internal var requestCookies: SocketRequestCookies {
+        get { requestCookiesLock.lock(); defer { requestCookiesLock.unlock() }; return _requestCookies }
+        set { requestCookiesLock.lock(); _requestCookies = newValue; requestCookiesLock.unlock() }
     }
-    private var _redirectCookies: SocketRedirectCookies
-    private let redirectCookiesLock = NSLock()
+    private var _requestCookies: SocketRequestCookies
+    private let requestCookiesLock = NSLock()
+
+    /// Tasks whose redirect chain has left the origin of their first request.
+    private var leftFirstOrigin = Set<Int>()
+    private let leftFirstOriginLock = NSLock()
 
     internal init(tlsConfiguration: SocketTLSConfiguration,
                   forwardingDelegate: URLSessionDelegate?,
                   clientCertificate: URLCredential? = nil, credentialOrigin: URL? = nil,
-                  redirectCookies: [HTTPCookie] = [], redirectCookieStorage: HTTPCookieStorage? = nil,
-                  explicitCookieHeader: String? = nil) {
-        self._redirectCookies = SocketRedirectCookies(configured: redirectCookies, jar: redirectCookieStorage,
-                                                      explicitHeader: explicitCookieHeader)
+                  requestCookies: SocketRequestCookies = SocketRequestCookies()) {
+        self._requestCookies = requestCookies
         self.clientCertificate = clientCertificate
         self.credentialOrigin = credentialOrigin
         self.tlsConfiguration = tlsConfiguration
@@ -124,6 +127,19 @@ internal class SocketSessionDelegateProxy: NSObject, URLSessionDataDelegate {
         return "\(secure ? "https" : "http")://\(host):\(port)"
     }
 
+    /// The redirect statuses that are followed, as in Fetch and URLSession.
+    /// 300 Multiple Choices is not a redirect to follow.
+    static let followedStatuses: Set<Int> = [301, 302, 303, 307, 308]
+
+    /// Whether a redirect would leave https/wss for plain http/ws. Checked
+    /// against the current hop and the first request, because looking only at
+    /// the first URL permits http -> https -> http downgrades.
+    static func refusesDowngrade(firstURL: URL?, currentURL: URL?, candidate: URLRequest) -> Bool {
+        let secure = SocketCookieScope.isSecureScheme(firstURL?.scheme) ||
+            SocketCookieScope.isSecureScheme(currentURL?.scheme)
+        return secure && !SocketCookieScope.isSecureScheme(candidate.url?.scheme)
+    }
+
     /// Whether a redirect of a request with a body must not be followed.
     ///
     /// The polling POST carries Engine.IO packets and the CONNECT `auth`
@@ -131,7 +147,8 @@ internal class SocketSessionDelegateProxy: NSObject, URLSessionDataDelegate {
     /// so the packets would be lost while the write looks successful, and it
     /// resends the body to any host on 307 and 308. Such a request therefore
     /// follows only 307/308, keeps its method and stays on the host of the
-    /// first request (any scheme or port). GET and HEAD follow every redirect.
+    /// first request (any scheme or port). GET and HEAD follow every
+    /// followed status.
     static func refusesBodyRedirect(status: Int, firstRequest: URLRequest?, candidate: URLRequest) -> Bool {
         let method = (firstRequest?.httpMethod ?? "GET").uppercased()
         guard method != "GET" && method != "HEAD" else { return false }
@@ -153,53 +170,76 @@ internal class SocketSessionDelegateProxy: NSObject, URLSessionDataDelegate {
         return destination == nil || destination != firstOrigin
     }
 
+    /// Whether `candidate` goes to another host or port than the first
+    /// request, so a `Host` header written for that request no longer fits.
+    static func changesHostOrPort(from first: URL?, to candidate: URL?) -> Bool {
+        func port(_ url: URL?) -> Int? {
+            url.map { $0.port ?? (SocketCookieScope.isSecureScheme($0.scheme) ? 443 : 80) }
+        }
+        return SocketCookieScope.normalizedHost(first?.host) != SocketCookieScope.normalizedHost(candidate?.host) ||
+            port(first) != port(candidate)
+    }
+
+    /// Records the hops of a redirect and returns whether the chain of `task`
+    /// has left the origin of its first request at any point.
+    private func chainHasLeftFirstOrigin(_ task: Int, firstOrigin: String?, hops: [URL?]) -> Bool {
+        let leaves = firstOrigin == nil || hops.contains { Self.origin(of: $0) != firstOrigin }
+        leftFirstOriginLock.lock()
+        defer { leftFirstOriginLock.unlock() }
+        if leaves { leftFirstOrigin.insert(task) }
+        return leftFirstOrigin.contains(task)
+    }
+
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
                     newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
         let once = SocketOnce<URLRequest?>(completionHandler)
         // Without a followed redirect URLSession completes the task with the
-        // 3xx response, which the polling transport reports as a write error.
+        // 3xx response, which the polling transport reports as an error.
         let status = response.statusCode
         let firstRequest = task.originalRequest
         let firstURL = firstRequest?.url
-        let firstOrigin = SocketSessionDelegateProxy.origin(of: firstURL)
+        let firstOrigin = Self.origin(of: firstURL)
+        let currentURL = response.url
         let presentsCertificate = clientCertificate != nil
-        if Self.refusesBodyRedirect(status: status, firstRequest: firstRequest, candidate: request) ||
-            Self.refusesCertificateRedirect(presentsCertificate, firstOrigin: firstOrigin, candidate: request) {
-            once.call(nil); return
+        let refuses: @Sendable (URLRequest) -> Bool = { candidate in
+            Self.refusesDowngrade(firstURL: firstURL, currentURL: currentURL, candidate: candidate) ||
+                Self.refusesBodyRedirect(status: status, firstRequest: firstRequest, candidate: candidate) ||
+                Self.refusesCertificateRedirect(presentsCertificate, firstOrigin: firstOrigin, candidate: candidate)
         }
-        // The redirect response is the current hop. Looking only at the
-        // original URL permits http -> https -> http downgrades.
-        let secureOrigin = SocketCookieScope.isSecureScheme(response.url?.scheme) ||
-            SocketCookieScope.isSecureScheme(task.originalRequest?.url?.scheme)
-        let currentOrigin = SocketSessionDelegateProxy.origin(of: response.url)
-        let cookies = SocketUncheckedSendableBox(redirectCookies)
-        let finish: @Sendable (URLRequest?) -> Void = { candidate in
-            guard var candidate = candidate else { once.call(nil); return }
-            guard !(secureOrigin && !SocketCookieScope.isSecureScheme(candidate.url?.scheme)) else {
-                once.call(nil); return
-            }
+        // A refused redirect is not offered to an external delegate.
+        guard Self.followedStatuses.contains(status), !refuses(request) else { once.call(nil); return }
+        let cookies = SocketUncheckedSendableBox(requestCookies)
+        let taskIdentifier = task.taskIdentifier
+        let finish: @Sendable (URLRequest?) -> Void = { [self] candidate in
             // Checked again: an external delegate may return another request.
-            guard !Self.refusesBodyRedirect(status: status, firstRequest: firstRequest, candidate: candidate),
-                  !Self.refusesCertificateRedirect(presentsCertificate, firstOrigin: firstOrigin,
-                                                   candidate: candidate) else {
-                once.call(nil); return
+            guard var candidate = candidate, !refuses(candidate) else { once.call(nil); return }
+            // Credentials of the first origin go only to that origin, and end
+            // with the first change of origin: a later hop back (A -> B -> A)
+            // does not restore them. URLSession drops Authorization even on a
+            // redirect to the same origin, so it is put back from the first request.
+            let leftFirstOrigin = chainHasLeftFirstOrigin(taskIdentifier, firstOrigin: firstOrigin,
+                                                          hops: [currentURL, candidate.url])
+            for field in ["Authorization", "Proxy-Authorization"] {
+                if leftFirstOrigin {
+                    candidate.setValue(nil, forHTTPHeaderField: field)
+                } else if let value = firstRequest?.value(forHTTPHeaderField: field) {
+                    candidate.setValue(value, forHTTPHeaderField: field)
+                }
             }
-            // URLSession drops Authorization on redirects but copies an explicit
-            // Cookie header (`.cookies`) to any destination, which hands the
-            // session to whatever origin the server redirects to. The same flaw
-            // was fixed as CVE-2022-0155 (follow-redirects), CVE-2023-43804
-            // (urllib3), CVE-2022-27776 (curl) and in undici (GHSA-q768-x9m6-m9qp).
-            let destination = SocketSessionDelegateProxy.origin(of: candidate.url)
-            let sameOrigin = destination != nil && destination == currentOrigin && destination == firstOrigin
-            // Credentials of the first origin end with the first change of
-            // origin and do not come back on a later hop to it (A -> B -> A).
-            if !sameOrigin {
-                candidate.setValue(nil, forHTTPHeaderField: "Authorization")
-                candidate.setValue(nil, forHTTPHeaderField: "Proxy-Authorization")
+            // A `Host` from `.extraHeaders` named the first host and port.
+            if Self.changesHostOrPort(from: firstURL, to: candidate.url) {
+                candidate.setValue(nil, forHTTPHeaderField: "Host")
             }
-            if let header = cookies.value.header(for: candidate.url, firstURL: firstURL, sameOrigin: sameOrigin) {
-                candidate.setValue(header, forHTTPHeaderField: "Cookie")
-            }
+            // URLSession copies an explicit Cookie header (`.cookies`) to any
+            // destination, which hands the session to whatever origin the
+            // server redirects to. The same flaw was fixed as CVE-2022-0155
+            // (follow-redirects), CVE-2023-43804 (urllib3), CVE-2022-27776 (curl)
+            // and in undici (GHSA-q768-x9m6-m9qp). The header is rebuilt for the
+            // new URL instead, after storing the cookies this hop set.
+            cookies.value.jar?.store(response)
+            candidate.httpShouldHandleCookies = false
+            candidate.setValue(cookies.value.header(for: candidate.url, configuredHost: firstURL?.host),
+                               forHTTPHeaderField: "Cookie")
             once.call(candidate)
         }
         #if canImport(ObjectiveC)
@@ -225,6 +265,9 @@ internal class SocketSessionDelegateProxy: NSObject, URLSessionDataDelegate {
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        leftFirstOriginLock.lock()
+        leftFirstOrigin.remove(task.taskIdentifier)
+        leftFirstOriginLock.unlock()
         finishBoundedBody(for: task.taskIdentifier, error: error)
         #if canImport(ObjectiveC)
         (forwardingDelegate as? URLSessionTaskDelegate)?.urlSession?(session, task: task, didCompleteWithError: error)
@@ -355,103 +398,3 @@ internal final class SocketOnce<Value>: @unchecked Sendable {
 #if compiler(>=5.5)
 extension SocketSessionDelegateProxy: @unchecked Sendable {}
 #endif
-
-/// The `Cookie` header of a redirected request is rebuilt the way the first
-/// request was built for that URL, so a redirect never widens what is sent:
-/// - configured `.cookies` by RFC 6265 cookie rules (domain, path, Secure, expiry),
-///   plus the engine jar when the request carried it explicitly (WebSocket);
-/// - an explicit `Cookie` from `.extraHeaders` replaced those on the first
-///   request. It is sent as written to the configured host on any scheme or
-///   port, and never to another host.
-internal struct SocketRedirectCookies {
-    var configured: [HTTPCookie] = []
-    /// The engine-owned jar when the request carried its cookies explicitly
-    /// (the WebSocket handshake); Foundation scopes its `cookies(for:)`.
-    var jar: HTTPCookieStorage?
-    var explicitHeader: String?
-
-    /// The header value to set (`nil` inside removes the header), or `nil`
-    /// to keep URLSession's copy, which only happens when the request carries
-    /// nothing this client manages and the origin did not change.
-    func header(for url: URL?, firstURL: URL?, sameOrigin: Bool) -> String?? {
-        if let explicitHeader {
-            guard let host = SocketCookieScope.normalizedHost(url?.host),
-                  host == SocketCookieScope.normalizedHost(firstURL?.host) else { return .some(nil) }
-            return .some(explicitHeader)
-        }
-        guard !sameOrigin || !configured.isEmpty || jar != nil else { return nil }
-        guard let url = url else { return .some(nil) }
-        let allowed = SocketCookieScope.cookies(configured, allowedFor: url)
-            + (jar?.cookies(for: SocketCookieScope.httpURL(for: url)) ?? [])
-        return .some(HTTPCookie.requestHeaderFields(with: allowed)["Cookie"])
-    }
-}
-
-/// Which configured cookies a request may carry. Used for the first request
-/// and again for every redirect, so `.cookies` behave like a browser cookie jar.
-internal enum SocketCookieScope {
-    static func isSecureScheme(_ scheme: String?) -> Bool {
-        let scheme = scheme?.lowercased()
-        return scheme == "https" || scheme == "wss"
-    }
-
-    /// `HTTPCookieStorage` matches cookies against http(s) URLs; a WebSocket
-    /// URL is looked up as the http(s) URL of the same handshake.
-    static func httpURL(for url: URL) -> URL {
-        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return url }
-        switch components.scheme?.lowercased() {
-        case "ws": components.scheme = "http"
-        case "wss": components.scheme = "https"
-        default: return url
-        }
-        return components.url ?? url
-    }
-
-    /// Lowercased, without IPv6 brackets or a trailing root dot.
-    static func normalizedHost(_ host: String?) -> String? {
-        guard var host = host?.lowercased(), !host.isEmpty else { return nil }
-        if host.hasPrefix("[") && host.hasSuffix("]") { host = String(host.dropFirst().dropLast()) }
-        if host.count > 1 && host.hasSuffix(".") { host = String(host.dropLast()) }
-        return host.isEmpty ? nil : host
-    }
-
-    /// RFC 6265 §5.1.3: an IP address only matches itself, never a domain suffix.
-    static func isIPAddress(_ host: String) -> Bool {
-        if host.contains(":") { return true }
-        let parts = host.split(separator: ".", omittingEmptySubsequences: false)
-        return parts.count == 4 && parts.allSatisfy { !$0.isEmpty && $0.allSatisfy(\.isNumber) }
-    }
-
-    /// RFC 6265 request matching: domain (Foundation marks domain cookies with
-    /// a leading dot, others are host-only), path, Secure and expiry. Cookies
-    /// are not port-scoped.
-    static func cookies(_ cookies: [HTTPCookie], allowedFor url: URL, now: Date = Date()) -> [HTTPCookie] {
-        guard let host = normalizedHost(url.host), url.scheme != nil else { return [] }
-        let secure = isSecureScheme(url.scheme)
-        // The request-uri path, still percent-encoded (RFC 6265 §5.1.4);
-        // URLComponents also keeps a trailing slash that `URL.path` drops.
-        let rawPath = URLComponents(url: url, resolvingAgainstBaseURL: false)?.percentEncodedPath ?? url.path
-        let path = rawPath.isEmpty ? "/" : rawPath
-        return cookies.filter { cookie in
-            if let expires = cookie.expiresDate, expires < now { return false }
-            if cookie.isSecure && !secure { return false }
-            guard domainMatches(host: host, cookieDomain: cookie.domain) else { return false }
-            let cookiePath = cookie.path.isEmpty ? "/" : cookie.path
-            guard path == cookiePath || (path.hasPrefix(cookiePath) &&
-                (cookiePath.hasSuffix("/") || path.dropFirst(cookiePath.count).hasPrefix("/"))) else { return false }
-            return true
-        }
-    }
-
-    private static func domainMatches(host: String, cookieDomain: String) -> Bool {
-        var domain = cookieDomain.lowercased()
-        let domainCookie = domain.hasPrefix(".")
-        if domainCookie { domain.removeFirst() }
-        guard let domain = normalizedHost(domain) else { return false }
-        if host == domain { return true }
-        // Foundation may store a dotless host such as `localhost` as `localhost.local`.
-        if !host.contains(".") && !isIPAddress(host) && domain == host + ".local" { return true }
-        guard domainCookie, !isIPAddress(host) else { return false }
-        return host.hasSuffix("." + domain)
-    }
-}

@@ -237,30 +237,41 @@ extension SocketEngineSpec {
         return urlByAppendingCacheBuster(to: com.url!)
     }
 
-    func addHeaders(to req: inout URLRequest, includingCookies additionalCookies: [HTTPCookie]? = nil) {
-        // Configured cookies follow RFC 6265 like a browser jar: only those whose
-        // domain, path, Secure flag and expiry allow this URL are sent. The
-        // engine-owned jar (`additionalCookies`) is already scoped by Foundation.
-        var cookiesToAdd: [HTTPCookie] = []
-        if let cookies = cookies, let url = req.url {
-            cookiesToAdd = SocketCookieScope.cookies(cookies, allowedFor: url)
-        }
-        cookiesToAdd += additionalCookies ?? []
+    /// An explicit `Cookie` from `.extraHeaders`, which replaces the managed
+    /// cookies on the configured host.
+    var explicitCookieHeader: String? {
+        extraHeaders?.filter { name, value in
+            name.lowercased() == "cookie" && !Self.containsHeaderBreak(name + value)
+        }.min { $0.key < $1.key }?.value
+    }
 
-        if !cookiesToAdd.isEmpty {
-            req.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookiesToAdd)
+    /// CR, LF and NUL are never valid in a field; they could start a second header.
+    private static func containsHeaderBreak(_ text: String) -> Bool {
+        text.unicodeScalars.contains { $0 == "\r" || $0 == "\n" || $0 == "\0" }
+    }
+
+    func addHeaders(to req: inout URLRequest) {
+        // Exactly one Cookie header: an explicit one from `.extraHeaders`, or
+        // the configured `.cookies` (and, for `SocketEngine`, the cookies the
+        // server set with `.withCredentials`) that RFC 6265 allows for the URL.
+        let engine = self as? SocketEngine
+        let cookies = engine?.requestCookies ??
+            SocketRequestCookies(configured: self.cookies ?? [], explicitHeader: explicitCookieHeader)
+        if let header = cookies.header(for: req.url, configuredHost: req.url?.host) {
+            req.setValue(header, forHTTPHeaderField: "Cookie")
         }
+        // The engine handles cookies itself; Foundation would add its own.
+        if engine != nil { req.httpShouldHandleCookies = false }
 
         if let extraHeaders = extraHeaders {
             for (headerName, value) in extraHeaders {
-                // CR, LF and NUL are never valid in a field; they could start
-                // a second header. Such a header is skipped, not rewritten.
-                guard !(headerName + value).unicodeScalars.contains(where: { $0 == "\r" || $0 == "\n" || $0 == "\0" })
-                else {
+                // Such a header is skipped, not rewritten.
+                guard !Self.containsHeaderBreak(headerName + value) else {
                     DefaultSocketLogger.Logger.error("Skipping extra header with a control character",
                                                      type: "SocketEngine")
                     continue
                 }
+                guard headerName.lowercased() != "cookie" else { continue }
                 req.setValue(value, forHTTPHeaderField: headerName)
             }
         }
