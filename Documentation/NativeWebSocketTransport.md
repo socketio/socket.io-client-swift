@@ -72,9 +72,10 @@ authentication not handled by the configured TLS/client identity policy, redirec
 invalidation, completion, metrics and
 WebSocket open/close. Server-trust challenges belong exclusively to the TLS policy;
 an external delegate cannot weaken it. Redirects cannot downgrade HTTPS/WSS to
-HTTP/WS. A polling POST follows only 307/308 to the host of the first request; a
-redirect refused by this rule is not offered to the delegate, and a request the
-delegate returns is checked again. Custom Apple TLS policies are explicitly unsupported on non-Apple builds.
+HTTP/WS. The WebSocket handshake follows no redirect, and a polling POST follows only
+307/308 to the host of the first request; a redirect refused by these rules is not
+offered to the delegate, and a request the delegate returns is checked again. See
+[Configuration – Redirects](Guides/Configuration.md#redirects). Custom Apple TLS policies are explicitly unsupported on non-Apple builds.
 
 
 ### Client certificates (mutual TLS)
@@ -97,7 +98,8 @@ optional array of `SecCertificate` values. See Apple's
 and [identity import guide](https://developer.apple.com/documentation/security/importing-an-identity).
 The library does not import or persist private keys. The credential must contain
 an identity and the connection must use HTTPS/WSS. It is supplied only to the
-configured host and port, never a different redirect origin. Rejected identities
+configured host and port. A redirect to another origin is refused while a client
+certificate is configured. Rejected identities
 are not repeatedly offered within the same authentication challenge sequence.
 Server trust, hostname validation and optional `.security(...)` pins remain active.
 The client-identity host comparison uses Foundation's IDNA representation, ignores

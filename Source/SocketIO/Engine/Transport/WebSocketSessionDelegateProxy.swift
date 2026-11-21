@@ -222,6 +222,18 @@ internal final class WebSocketSessionDelegateProxy: SocketSessionDelegateProxy, 
                    explicitCookieHeader: explicitCookieHeader)
     }
 
+    /// The handshake follows no redirect, like browsers, Node's `ws` and the
+    /// Kotlin client. URLSessionWebSocketTask would follow 301-308 and resend
+    /// the handshake headers to the new location. The task fails instead, and
+    /// the transport reports it like any failed handshake. A `.sessionDelegate`
+    /// is not asked.
+    override func urlSession(_ session: URLSession, task: URLSessionTask,
+                             willPerformHTTPRedirection response: HTTPURLResponse,
+                             newRequest request: URLRequest,
+                             completionHandler: @escaping (URLRequest?) -> Void) {
+        completionHandler(nil)
+    }
+
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask,
                     didOpenWithProtocol protocolName: String?) {
         queue.socketAsync { [weak owner] in owner?.opened(session, webSocketTask, protocolName) }

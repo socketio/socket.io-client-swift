@@ -153,21 +153,48 @@ WebSocket handshake, the `.withCredentials` jar). It is sent as written, without
 scoping, to the configured server host on any scheme or port, including after an
 `http` → `https` or port redirect. A redirect to another host never receives it.
 
-### Redirects of polling POSTs
+### Redirects
 
-Polling GETs and the WebSocket handshake follow redirects like URLSession does. A
-polling POST carries Engine.IO packets, including the CONNECT `auth` payload, so since
+The client follows redirects like the Kotlin client:
+
+| Request | Redirect |
+| --- | --- |
+| Polling GET | Followed for every 3xx status, also to another origin. |
+| Polling POST | Only 307/308 to the host of the first request, see below. |
+| WebSocket handshake | Never followed. The handshake fails, as in browsers and Node's `ws`. |
+
+On every redirect:
+
+- `https`/`wss` is never downgraded to `http`/`ws`, checked against the current hop and the first request.
+- When the origin (scheme, host or port) changes, `Authorization` and `Proxy-Authorization`
+  are removed, also when they come from `.extraHeaders`. They do not come back on a later
+  hop to the first origin.
+- `Cookie` is rebuilt for the new URL from `.cookies` and the `.withCredentials` jar by the
+  rules above; an explicit `Cookie` from `.extraHeaders` only goes to the configured host.
+  Other `.extraHeaders` follow the redirect, as in browsers and curl.
+- With a `.clientCertificate`, a redirect to another origin is refused before a connection
+  to the target is made, so the certificate is never presented there and the request does
+  not silently continue without it. The request fails with the 3xx response.
+- A `.sessionDelegate` cannot widen these rules: a refused redirect is not offered to it,
+  and the request it returns is checked again.
+
+A refused redirect fails the request like a transport error, which starts the usual
+reconnection; for a WebSocket upgrade from polling, the connection stays on polling. To
+move the connection to another host, configure the client with that host's URL.
+
+#### Polling POSTs
+
+A polling POST carries Engine.IO packets, including the CONNECT `auth` payload, so since
 18.0.0 it follows a redirect only when all of these hold:
 
 - the status is 307 or 308, so the method and body stay unchanged;
 - the target is on the host of the first request (another scheme or port is fine);
 - a `.sessionDelegate` that handles the redirect still returns a POST to that host.
 
-Otherwise the request is not followed and the write fails with the 3xx response, which
-starts the usual reconnection. URLSession would turn the POST into a GET without body on
-301, 302 and 303, losing the packets while the write looked successful, and would resend
-the body to any host on 307 and 308. To move polling to another host, configure the
-client with that host's URL.
+Otherwise the request is not followed and the write fails with the 3xx response.
+URLSession would turn the POST into a GET without body on 301, 302 and 303, losing the
+packets while the write looked successful, and would resend the body to any host on 307
+and 308.
 
 `SocketEngine.setConfigs(_:)` replaces the whole configuration: options it omits,
 including credentials and the TLS policy, return to their defaults. Pass the complete

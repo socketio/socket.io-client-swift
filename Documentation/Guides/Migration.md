@@ -22,8 +22,11 @@ What to check:
   host, on any scheme or port. A redirect to another host no longer receives it.
 - A polling POST follows only a 307/308 redirect to the host of the first request. A
   server or proxy that answers POSTs with 301, 302 or 303, or redirects them to another
-  host, now fails the write instead; see
-  [Configuration – Redirects of polling POSTs](Configuration.md#redirects-of-polling-posts).
+  host, now fails the write instead; see [Configuration – Redirects](Configuration.md#redirects).
+- The WebSocket handshake follows no redirect. Point the client at the final WebSocket URL;
+  an upgrade from polling that is redirected stays on polling.
+- With `.clientCertificate`, a redirect to another scheme, host or port fails instead of
+  continuing without the certificate.
 - `SocketEngine.setConfigs(_:)` replaces the whole configuration, and disabling
   `.withCredentials` empties the engine's cookie jar. Code that calls `setConfigs` on an
   engine directly with a partial list must pass the complete configuration.

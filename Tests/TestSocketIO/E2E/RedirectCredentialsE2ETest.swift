@@ -101,21 +101,19 @@ final class RedirectCredentialsE2ETest: XCTestCase {
         }
     }
 
-    /// URLSessionWebSocketTask follows handshake redirects too (verified on
-    /// macOS 27) and copied the Cookie header to any host.
-    private func webSocketThroughRedirect(_ path: String, port: Int) throws -> [String: Any] {
-        let cookie = try XCTUnwrap(HTTPCookie(properties: [
-            .name: "session", .value: "cookie-secret", .domain: "127.0.0.1", .path: "/"
-        ]))
+    /// URLSessionWebSocketTask follows handshake redirects (verified on macOS
+    /// 27) and copied the Cookie header to any host. The transport's delegate
+    /// refuses them, so the handshake fails like in browsers and Node `ws`.
+    private func webSocketThroughRedirect(_ path: String, port: Int) throws -> (body: [String: Any]?, error: Error?) {
         var request = URLRequest(url: URL(string: "ws://127.0.0.1:\(port)/\(path)")!)
-        request.setValue(HTTPCookie.requestHeaderFields(with: [cookie])["Cookie"], forHTTPHeaderField: "Cookie")
+        request.setValue("session=cookie-secret", forHTTPHeaderField: "Cookie")
         request.httpShouldHandleCookies = false
         let queue = DispatchQueue(label: "redirect.websocket.e2e")
         let connection = URLSessionWebSocketConnection(request: request, queue: queue, configuration: .ephemeral,
-                                                       maximumMessageSize: 4096, redirectCookies: [cookie])
+                                                       maximumMessageSize: 4096)
         defer { queue.sync { connection.cancel() } }
         let observed = Observed()
-        let received = expectation(description: "echo over \(path)")
+        let received = expectation(description: "handshake over \(path)")
         queue.sync {
             connection.start()
             connection.receive { result in
@@ -129,18 +127,19 @@ final class RedirectCredentialsE2ETest: XCTestCase {
             }
         }
         wait(for: [received], timeout: 10)
-        XCTAssertNil(observed.error, path)
-        return try XCTUnwrap(observed.body, path)
+        return (observed.body, observed.error)
     }
 
-    func testWebSocketHandshakeRedirectKeepsCookiesWithinTheirScope() throws {
+    func testWebSocketHandshakeFollowsNoRedirect() throws {
         let server = try TestServerProcess.start(serverScript: "redirect-headers.mjs")
         defer { server.stop() }
-        let same = try webSocketThroughRedirect("ws-same", port: server.port)
-        XCTAssertEqual(same["cookie"] as? String, "session=cookie-secret")
-        let otherPort = try webSocketThroughRedirect("ws-port", port: server.port)
-        XCTAssertEqual(otherPort["cookie"] as? String, "session=cookie-secret", "cookies are not port-scoped")
-        let otherHost = try webSocketThroughRedirect("ws-host", port: server.port)
-        XCTAssertTrue(otherHost["cookie"] is NSNull, "\(otherHost)")
+        // The echo endpoint itself still answers, so a failure below is the refused redirect.
+        let direct = try webSocketThroughRedirect("ws-echo", port: server.port)
+        XCTAssertEqual(direct.body?["cookie"] as? String, "session=cookie-secret")
+        for path in ["ws-same", "ws-port", "ws-host"] {
+            let redirected = try webSocketThroughRedirect(path, port: server.port)
+            XCTAssertNil(redirected.body, "\(path): \(String(describing: redirected.body))")
+            XCTAssertNotNil(redirected.error, path)
+        }
     }
 }
