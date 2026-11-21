@@ -192,6 +192,32 @@ internal enum SocketCookieScope {
         return true
     }
 
+    /// RFC 6265bis §5.7: a cookie from a context that is not secure is ignored
+    /// when an unexpired `Secure` cookie of the same name is stored whose domain
+    /// domain-matches the new cookie's domain or the other way round, and whose
+    /// path the new cookie's path path-matches. Plain http cannot replace or
+    /// shadow a `Secure` cookie that way.
+    static func shadowsSecureCookie(_ cookie: HTTPCookie, in stored: [HTTPCookie], now: Date = Date()) -> Bool {
+        guard let domain = bareDomain(cookie.domain) else { return false }
+        let path = cookie.path.isEmpty ? "/" : cookie.path
+        return stored.contains { existing in
+            guard existing.isSecure, existing.name == cookie.name,
+                  let existingDomain = bareDomain(existing.domain) else { return false }
+            if let expires = existing.expiresDate, expires < now { return false }
+            guard domain == existingDomain || domain.hasSuffix("." + existingDomain) ||
+                existingDomain.hasSuffix("." + domain) else { return false }
+            let existingPath = existing.path.isEmpty ? "/" : existing.path
+            return path == existingPath || (path.hasPrefix(existingPath) &&
+                (existingPath.hasSuffix("/") || path.dropFirst(existingPath.count).hasPrefix("/")))
+        }
+    }
+
+    private static func bareDomain(_ domain: String) -> String? {
+        var domain = domain.lowercased()
+        if domain.hasPrefix(".") { domain.removeFirst() }
+        return normalizedHost(domain)
+    }
+
     private static func domainMatches(host: String, cookieDomain: String) -> Bool {
         var domain = cookieDomain.lowercased()
         let domainCookie = domain.hasPrefix(".")
@@ -245,10 +271,18 @@ internal final class SocketCookieJar: @unchecked Sendable {
         guard !accepted.isEmpty else { return }
         lock.lock()
         defer { lock.unlock() }
-        storage.setCookies(accepted, for: storageURL, mainDocumentURL: nil)
+        let kept: [HTTPCookie]
+        if SocketCookieScope.isSecureContext(url) {
+            kept = accepted
+        } else {
+            let stored = storage.cookies ?? []
+            kept = accepted.filter { !SocketCookieScope.shadowsSecureCookie($0, in: stored) }
+        }
+        guard !kept.isEmpty else { return }
+        storage.setCookies(kept, for: storageURL, mainDocumentURL: nil)
         let present = Set((storage.cookies ?? []).map(Self.identity(of:)))
         creation = creation.filter { present.contains($0.key) }
-        for cookie in accepted {
+        for cookie in kept {
             let key = Self.identity(of: cookie)
             // A replaced cookie keeps its creation time.
             guard present.contains(key), creation[key] == nil else { continue }

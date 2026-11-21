@@ -1281,6 +1281,33 @@ extension SocketSecurityHardeningTest {
             XCTAssertFalse(SocketCookieScope.acceptsServerCookie(suffix, from: URL(string: "http://127.0.0.1/")!))
         }
     }
+
+    // RFC 6265bis §5.7, as in the Kotlin client: plain http cannot replace or shadow a Secure cookie.
+    func testPlainHTTPCannotReplaceASecureCookie() throws {
+        let jar = newJar()
+        let https = URL(string: "https://chat.example.com/socket.io/")!
+        jar.store(responseHeaders: ["Set-Cookie": "sid=real; Secure; Path=/"], from: https)
+        let http = URL(string: "http://chat.example.com/socket.io/")!
+        jar.store(responseHeaders: ["Set-Cookie": "sid=forged; Path=/"], from: http)
+        jar.store(responseHeaders: ["Set-Cookie": "sid=forged; Path=/socket.io"], from: http)
+        jar.store(responseHeaders: ["Set-Cookie": "sid=forged; Domain=example.com; Path=/"], from: http)
+        // Another name, or a path the Secure cookie's path does not cover, is stored.
+        jar.store(responseHeaders: ["Set-Cookie": "other=1; Path=/"], from: http)
+        XCTAssertEqual(jar.cookies(for: https).map { "\($0.name)=\($0.value)" }.sorted(), ["other=1", "sid=real"])
+
+        let narrow = newJar()
+        narrow.store(responseHeaders: ["Set-Cookie": "sid=real; Secure; Path=/admin"], from: https)
+        narrow.store(responseHeaders: ["Set-Cookie": "sid=plain; Path=/"], from: http)
+        XCTAssertEqual((narrow.storage.cookies ?? []).map(\.value).sorted(), ["plain", "real"])
+
+        // An expired Secure cookie does not protect its name.
+        let stored = [try XCTUnwrap(HTTPCookie(properties: [.name: "sid", .value: "old", .domain: "chat.example.com",
+                                                            .path: "/", .secure: "TRUE",
+                                                            .expires: Date(timeIntervalSinceNow: -60)]))]
+        let replacement = try XCTUnwrap(HTTPCookie(properties: [.name: "sid", .value: "new",
+                                                                 .domain: "chat.example.com", .path: "/"]))
+        XCTAssertFalse(SocketCookieScope.shadowsSecureCookie(replacement, in: stored))
+    }
 }
 
 extension SocketSecurityHardeningTest {

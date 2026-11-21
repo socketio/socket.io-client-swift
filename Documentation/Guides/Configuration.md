@@ -174,6 +174,9 @@ and the WebSocket handshake. A replaced cookie keeps its creation time. A cookie
 ignored when:
 
 - it is `Secure` but did not come from a secure context (see above);
+- it did not come from a secure context, and an unexpired `Secure` cookie of the same name
+  is stored whose domain covers it or is covered by it and whose path covers its path, so
+  plain http cannot replace or shadow a `Secure` cookie (RFC 6265bis);
 - its `Domain` does not cover the host that answered; an IP address only sets cookies for itself;
 - its name starts with `__Secure-` and it is not `Secure`;
 - its name starts with `__Host-` and it is not `Secure`, has a `Domain` attribute or a
