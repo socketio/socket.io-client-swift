@@ -34,6 +34,7 @@ Examples using `socket` assume an existing socket used on its manager's serial
 | Start a 16.x → 17 migration | [Migration overview](Guides/Migration.md) |
 | Removed APIs, protocol and Swift concurrency changes | [Socket.IO 4 / Swift 6 migration](SocketIO4Swift6Migration.md) |
 | URLSession transport, TLS and backend differences | [Native transport migration](NativeWebSocketTransport.md) |
+| 18.0.0 redirect and cookie rules (RFC 6265), migration and validation | [Release 18.0.0](Release18.0.0.md) |
 | 17.2.0 toolchain floor (Swift 6.2 / Xcode 26) and validation | [Release 17.2.0](Release17.2.0.md) |
 | 17.1.0 fixes, options and compatibility notes | [Release 17.1.0](Release17.1.0.md) |
 | 17.0.1 fixes, options and compatibility notes | [Release 17.0.1](Release17.0.1.md) |

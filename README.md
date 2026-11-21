@@ -61,7 +61,7 @@ These are dated observations, not a statement about the maintainers' future plan
 [socketio/socket.io-client-swift](https://github.com/socketio/socket.io-client-swift)
 already supports Socket.IO 4 and SPM; those are not the reasons for this fork. See **[the production rationale, concrete behavior differences and
 source-linked comparison](Documentation/Guides/WhyThisFork.md)**. Existing applications
-should read the [17.x migration guide](Documentation/Guides/Migration.md).
+should read the [migration guide](Documentation/Guides/Migration.md).
 
 ## Requirements
 
@@ -80,7 +80,7 @@ and [the package manifest](Package.swift) for deployment targets.
 **Swift Package Manager is the only supported installation method.**
 
 In Xcode, choose **File → Add Package Dependencies**, enter the URL below and select
-**Up to Next Major Version** from **17.2.0**. Add the **SocketIO** product to your app target.
+**Up to Next Major Version** from **18.0.0**. Add the **SocketIO** product to your app target.
 
 ```text
 https://github.com/kaeferfreund/socket.io-client-swift.git
@@ -95,7 +95,7 @@ Add the dependency and the product to the appropriate arrays:
 // In Package.dependencies:
 .package(
     url: "https://github.com/kaeferfreund/socket.io-client-swift.git",
-    from: "17.2.0"
+    from: "18.0.0"
 )
 
 // In your target's dependencies:
@@ -106,7 +106,7 @@ Add the dependency and the product to the appropriate arrays:
 
 A version requirement installs a **published release**, not the development branch
 you are viewing. To evaluate unreleased changes, explicitly select the reviewed
-branch or commit in Xcode/SPM. The [17.2.0 release notes](Documentation/Release17.2.0.md)
+branch or commit in Xcode/SPM. The [18.0.0 release notes](Documentation/Release18.0.0.md)
 describe the published release.
 
 ## Quick start

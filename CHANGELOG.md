@@ -1,4 +1,6 @@
-## Unreleased (next release: 18.0.0)
+## 18.0.0 — 2026-11-21
+
+See the [18.0.0 release notes](Documentation/Release18.0.0.md) for an overview, the migration steps and the validation scope.
 
 ### Breaking changes
 
