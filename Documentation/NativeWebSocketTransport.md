@@ -72,7 +72,9 @@ authentication not handled by the configured TLS/client identity policy, redirec
 invalidation, completion, metrics and
 WebSocket open/close. Server-trust challenges belong exclusively to the TLS policy;
 an external delegate cannot weaken it. Redirects cannot downgrade HTTPS/WSS to
-HTTP/WS. Custom Apple TLS policies are explicitly unsupported on non-Apple builds.
+HTTP/WS. A polling POST follows only 307/308 to the host of the first request; a
+redirect refused by this rule is not offered to the delegate, and a request the
+delegate returns is checked again. Custom Apple TLS policies are explicitly unsupported on non-Apple builds.
 
 
 ### Client certificates (mutual TLS)

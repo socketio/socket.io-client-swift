@@ -8,6 +8,7 @@ final class RedirectCredentialsE2ETest: XCTestCase {
     private final class Observed: @unchecked Sendable {
         var body: [String: Any]?
         var error: Error?
+        var status = 0
     }
 
     private func requestThroughRedirect(_ path: String, status: Int, port: Int) throws -> [String: Any] {
@@ -52,6 +53,51 @@ final class RedirectCredentialsE2ETest: XCTestCase {
             let host = try requestThroughRedirect("host", status: status, port: server.port)
             XCTAssertTrue(host["cookie"] is NSNull, "other host, \(status): \(host)")
             XCTAssertEqual(host["apiKey"] as? String, "key-value", "other extra headers still follow")
+        }
+    }
+
+    /// A polling POST through a real URLSession redirect: the status code of
+    /// the response the task completes with, and the echo if it was followed.
+    private func postThroughRedirect(_ path: String, status: Int, port: Int) throws -> (Int, [String: Any]?) {
+        let proxy = SocketSessionDelegateProxy(tlsConfiguration: .systemDefault, forwardingDelegate: nil)
+        let session = URLSession(configuration: .ephemeral, delegate: proxy, delegateQueue: nil)
+        defer { session.invalidateAndCancel() }
+        var request = URLRequest(url: URL(string: "http://127.0.0.1:\(port)/\(path)?status=\(status)")!)
+        request.httpMethod = "POST"
+        request.httpBody = Data("40{\"token\":\"secret\"}".utf8)
+        let observed = Observed()
+        let done = expectation(description: "POST \(path) \(status)")
+        session.dataTask(with: request) { data, response, error in
+            observed.error = error
+            observed.status = (response as? HTTPURLResponse)?.statusCode ?? 0
+            observed.body = data.flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] }
+            done.fulfill()
+        }.resume()
+        wait(for: [done], timeout: 10)
+        XCTAssertNil(observed.error)
+        return (observed.status, observed.body)
+    }
+
+    func testAPostIsRepeatedOnlyBy307Or308OnTheFirstHost() throws {
+        let server = try TestServerProcess.start(serverScript: "redirect-headers.mjs")
+        defer { server.stop() }
+        for status in [307, 308] {
+            for path in ["same", "port"] {
+                let (code, echo) = try postThroughRedirect(path, status: status, port: server.port)
+                XCTAssertEqual(code, 200, "\(path), \(status)")
+                XCTAssertEqual(echo?["method"] as? String, "POST", "\(path), \(status)")
+                XCTAssertEqual(echo?["body"] as? String, "40{\"token\":\"secret\"}", "\(path), \(status)")
+            }
+            // URLSession would resend the body to the other host; the task ends with the redirect instead.
+            let (code, echo) = try postThroughRedirect("host", status: status, port: server.port)
+            XCTAssertEqual(code, status)
+            XCTAssertNil(echo)
+        }
+        // URLSession would turn these into a GET without body and the packets would be lost.
+        for status in [301, 302, 303] {
+            let (code, echo) = try postThroughRedirect("same", status: status, port: server.port)
+            XCTAssertEqual(code, status)
+            XCTAssertNil(echo)
         }
     }
 

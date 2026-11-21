@@ -3,15 +3,21 @@ import crypto from 'node:crypto';
 
 // Redirect fixture: an origin server that redirects polling requests to
 // itself (same origin) or to a second server (other port / other host name),
-// and a target that echoes the credential headers it received.
+// and a target that echoes the credential headers, method and body it received.
 const target = http.createServer((req, res) => {
-  res.setHeader('Content-Type', 'application/json');
-  res.end(JSON.stringify({
-    authorization: req.headers['authorization'] ?? null,
-    apiKey: req.headers['x-api-key'] ?? null,
-    cookie: req.headers['cookie'] ?? null,
-    host: req.headers['host'] ?? null,
-  }));
+  const chunks = [];
+  req.on('data', (chunk) => chunks.push(chunk));
+  req.on('end', () => {
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({
+      authorization: req.headers['authorization'] ?? null,
+      apiKey: req.headers['x-api-key'] ?? null,
+      cookie: req.headers['cookie'] ?? null,
+      host: req.headers['host'] ?? null,
+      method: req.method,
+      body: Buffer.concat(chunks).toString(),
+    }));
+  });
 });
 
 const origin = http.createServer((req, res) => {

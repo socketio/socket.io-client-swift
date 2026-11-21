@@ -124,9 +124,34 @@ internal class SocketSessionDelegateProxy: NSObject, URLSessionDataDelegate {
         return "\(secure ? "https" : "http")://\(host):\(port)"
     }
 
+    /// Whether a redirect of a request with a body must not be followed.
+    ///
+    /// The polling POST carries Engine.IO packets and the CONNECT `auth`
+    /// payload. URLSession turns it into a GET without body on 301, 302 and 303,
+    /// so the packets would be lost while the write looks successful, and it
+    /// resends the body to any host on 307 and 308. Such a request therefore
+    /// follows only 307/308, keeps its method and stays on the host of the
+    /// first request (any scheme or port). GET and HEAD follow every redirect.
+    static func refusesBodyRedirect(status: Int, firstRequest: URLRequest?, candidate: URLRequest) -> Bool {
+        let method = (firstRequest?.httpMethod ?? "GET").uppercased()
+        guard method != "GET" && method != "HEAD" else { return false }
+        guard status == 307 || status == 308,
+              (candidate.httpMethod ?? "GET").uppercased() == method,
+              let host = SocketCookieScope.normalizedHost(candidate.url?.host),
+              host == SocketCookieScope.normalizedHost(firstRequest?.url?.host) else { return true }
+        return false
+    }
+
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
                     newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
         let once = SocketOnce<URLRequest?>(completionHandler)
+        // Without a followed redirect URLSession completes the task with the
+        // 3xx response, which the polling transport reports as a write error.
+        let status = response.statusCode
+        let firstRequest = task.originalRequest
+        if Self.refusesBodyRedirect(status: status, firstRequest: firstRequest, candidate: request) {
+            once.call(nil); return
+        }
         // The redirect response is the current hop. Looking only at the
         // original URL permits http -> https -> http downgrades.
         let secureOrigin = SocketCookieScope.isSecureScheme(response.url?.scheme) ||
@@ -138,6 +163,10 @@ internal class SocketSessionDelegateProxy: NSObject, URLSessionDataDelegate {
         let finish: @Sendable (URLRequest?) -> Void = { candidate in
             guard var candidate = candidate else { once.call(nil); return }
             guard !(secureOrigin && !SocketCookieScope.isSecureScheme(candidate.url?.scheme)) else {
+                once.call(nil); return
+            }
+            // Checked again: an external delegate may return another request.
+            guard !Self.refusesBodyRedirect(status: status, firstRequest: firstRequest, candidate: candidate) else {
                 once.call(nil); return
             }
             // URLSession drops Authorization on redirects but copies an explicit

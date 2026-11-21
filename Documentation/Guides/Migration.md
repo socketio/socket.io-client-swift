@@ -20,6 +20,10 @@ What to check:
 - A cookie whose path does not cover the Socket.IO path (default `/socket.io/`) is no longer sent.
 - An explicit `Cookie` entry in `.extraHeaders` is still sent as written to the configured
   host, on any scheme or port. A redirect to another host no longer receives it.
+- A polling POST follows only a 307/308 redirect to the host of the first request. A
+  server or proxy that answers POSTs with 301, 302 or 303, or redirects them to another
+  host, now fails the write instead; see
+  [Configuration – Redirects of polling POSTs](Configuration.md#redirects-of-polling-posts).
 - `SocketEngine.setConfigs(_:)` replaces the whole configuration, and disabling
   `.withCredentials` empties the engine's cookie jar. Code that calls `setConfigs` on an
   engine directly with a partial list must pass the complete configuration.
