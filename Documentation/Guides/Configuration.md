@@ -127,31 +127,121 @@ let manager = SocketManager(
 )
 ```
 
-When enabled, the engine maintains its own isolated cookie jar.
+When enabled, the engine maintains its own isolated cookie jar. It is kept across
+reconnects and the upgrade to WebSocket, but not shared with other engines.
 
 The application's shared cookie store is not used automatically.
 
 Explicit .cookies(...) and explicit Cookie headers remain available when your application wants to control cookies directly.
 
-Since 18.0.0, `.cookies(...)` are scoped like a browser cookie jar (RFC 6265). Each
-cookie is sent only to URLs that its domain, path, `Secure` flag and expiry allow,
-on the first request and again after every redirect:
+Since 18.0.0, the engine sends and stores all cookies itself, for polling and the
+WebSocket handshake alike, like a browser cookie jar (RFC 6265 and the cookie prefixes
+of RFC 6265bis). Foundation's own cookie handling is turned off for its requests.
 
-- A domain without a leading dot (`api.example.com`) is host-only: the cookie goes to that host only.
-- A domain with a leading dot (`.example.com`) also covers subdomains such as `node3.example.com`.
-  An IP address only matches itself, never as a domain suffix.
-- The path is compared with the percent-encoded request path, on a `/` boundary.
-- A `Secure` cookie is never sent over `http`/`ws`.
-- Cookies are not port-scoped, so another port on the same host still receives them.
+### Which cookies are sent
 
-Before 18.0.0, every configured cookie went to the server whatever its domain, and
-URLSession copied it to any host a redirect pointed to. Give each cookie the domain
-of your Socket.IO server, or that server's parent domain with a leading dot.
+Every request carries at most one `Cookie` header:
 
-An explicit `Cookie` entry in `.extraHeaders` replaces `.cookies` (and, for the
-WebSocket handshake, the `.withCredentials` jar). It is sent as written, without
-scoping, to the configured server host on any scheme or port, including after an
-`http` → `https` or port redirect. A redirect to another host never receives it.
+- An explicit `Cookie` entry in `.extraHeaders` is the whole header on the configured
+  server host, on any scheme or port, including after an `http` → `https` or port
+  redirect. There it replaces `.cookies` and the `.withCredentials` jar and is sent as
+  written, without scoping. It is never sent to another host.
+- Otherwise, and on every other host a redirect leads to, the header holds the
+  `.cookies` and the cookies the server set (`.withCredentials`) that the request URL allows:
+  - A domain without a leading dot (`api.example.com`) is host-only: the cookie goes to that host only.
+  - A domain with a leading dot (`.example.com`) also covers subdomains such as `node3.example.com`.
+    An IP address only matches itself, never as a domain suffix.
+  - The path is compared with the percent-encoded request path, on a `/` boundary.
+  - A `Secure` cookie is sent only to a secure context: `https`/`wss`, or plain
+    `http`/`ws` to `localhost`, 127.0.0.0/8 or `::1`, as in browsers. `*.localhost` is
+    not a secure context.
+  - An expired cookie is not sent. Cookies are not port-scoped, so another port on the
+    same host still receives them.
+- Cookies with longer paths come first. Cookies with paths of the same length keep the
+  order they were created in (RFC 6265 §5.4); configured `.cookies` count in their
+  configured order, before the cookies the server set.
+
+The same rules apply on the first request and again after every redirect. Before
+18.0.0, every configured cookie went to the server whatever its domain, and URLSession
+copied it to any host a redirect pointed to. Give each cookie the domain of your
+Socket.IO server, or that server's parent domain with a leading dot.
+
+### Cookies the server sets
+
+With `.withCredentials(true)`, the `Set-Cookie` headers of every response are stored at
+once, for the URL that answered: polling responses, every redirect the client follows
+and the WebSocket handshake. A replaced cookie keeps its creation time. A cookie is
+ignored when:
+
+- it is `Secure` but did not come from a secure context (see above);
+- it did not come from a secure context, and an unexpired `Secure` cookie of the same name
+  is stored whose domain covers it or is covered by it and whose path covers its path, so
+  plain http cannot replace or shadow a `Secure` cookie (RFC 6265bis);
+- its `Domain` does not cover the host that answered; an IP address only sets cookies for itself;
+- its name starts with `__Secure-` and it is not `Secure`;
+- its name starts with `__Host-` and it is not `Secure`, has a `Domain` attribute or a
+  path other than `/`. Both prefixes are compared case-insensitively.
+
+Apple's cookie storage also rejects a public suffix such as `co.uk` as `Domain`
+(verified on macOS 27). The client ships no public suffix list of its own.
+
+### Hosts
+
+Hosts are compared in a canonical form: lowercase, without a trailing dot, IPv6 addresses
+without brackets in their canonical form (`[0:0:0:0:0:0:0:1]` is `::1`), and IPv4
+addresses in every notation the WHATWG URL parser accepts written as a dotted quad
+(`127.1`, `0x7f.0.0.1` and `2130706433` are all `127.0.0.1`). A host the IPv4 parser
+rejects, such as `foo.123` or `app.0x1`, is a domain name. The canonical form is used for
+cookie domains, loopback hosts and the same-host and same-origin decisions on redirects.
+
+### Redirects
+
+The client follows redirects like the Kotlin client. Only 301, 302, 303, 307 and 308
+are followed, as in browsers and URLSession; 300 Multiple Choices is not.
+
+| Request | Redirect |
+| --- | --- |
+| Polling GET | Followed, also to another origin. |
+| Polling POST | Only 307/308 to the host of the first request, see below. |
+| WebSocket handshake | Never followed. The handshake fails, as in browsers and Node's `ws`. |
+
+On every redirect:
+
+- `https`/`wss` is never downgraded to `http`/`ws`, checked against the current hop and the first request.
+- `Authorization` and `Proxy-Authorization`, also from `.extraHeaders`, go only to the
+  origin (scheme, host and port) of the first request, and only while the redirect chain
+  has not left it. They are removed at the first change of origin and do not come back on
+  a later hop to the first origin (A → B → A). URLSession drops them even on a redirect
+  within the same origin; the client puts them back there.
+- A `Host` header from `.extraHeaders` is removed when the host or port changes.
+- `Cookie` is rebuilt for the new URL by the rules above, after the cookies the redirect
+  response set are stored. Other `.extraHeaders` follow the redirect, as in browsers and curl.
+- With a `.clientCertificate`, a redirect to another origin is refused before a connection
+  to the target is made, so the certificate is never presented there and the request does
+  not silently continue without it. The request fails with the 3xx response.
+- A `.sessionDelegate` is asked only about a redirect these rules allow. A status that is
+  not followed, a downgrade, and a POST or client-certificate redirect that is refused are
+  refused before it is asked. The request it returns is checked again, and the header
+  rules above apply to it.
+
+A refused redirect fails the request like a transport error, which starts the usual
+reconnection. For a WebSocket upgrade from polling, the connection stays on polling; a
+connection that tries WebSocket first with `.tryAllTransports(true)` goes on to polling.
+To move the connection to another host, configure the client with that host's URL.
+
+#### Polling POSTs
+
+A polling POST carries Engine.IO packets, including the CONNECT `auth` payload, so since
+18.0.0 it follows a redirect only when all of these hold:
+
+- the status is 307 or 308, so the method and body stay unchanged;
+- the target is on the host of the first request (another scheme or port is fine);
+- a `.sessionDelegate` that handles the redirect still returns a POST to that host.
+
+Otherwise the request is not followed and the write fails with the 3xx response.
+URLSession would turn the POST into a GET without body on 301, 302 and 303, losing the
+packets while the write looked successful, and would resend the body to any host on 307
+and 308.
 
 `SocketEngine.setConfigs(_:)` replaces the whole configuration: options it omits,
 including credentials and the TLS policy, return to their defaults. Pass the complete

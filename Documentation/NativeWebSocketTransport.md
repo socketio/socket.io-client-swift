@@ -71,8 +71,19 @@ identical for polling and WebSocket. External `.sessionDelegate` callbacks cover
 authentication not handled by the configured TLS/client identity policy, redirects,
 invalidation, completion, metrics and
 WebSocket open/close. Server-trust challenges belong exclusively to the TLS policy;
-an external delegate cannot weaken it. Redirects cannot downgrade HTTPS/WSS to
-HTTP/WS. Custom Apple TLS policies are explicitly unsupported on non-Apple builds.
+an external delegate cannot weaken it. Only 301, 302, 303, 307 and 308 redirects are
+followed, and never from HTTPS/WSS to HTTP/WS. The WebSocket handshake follows no
+redirect: the handshake fails with an error, so the engine falls back to the next
+transport or reconnects. A polling POST follows only 307/308 to the host of the first
+request. A redirect refused by these rules is not offered to the delegate, and a request
+the delegate returns is checked again. See
+[Configuration – Redirects](Guides/Configuration.md#redirects).
+
+The handshake request carries one `Cookie` header, built like a polling request's: an
+explicit `Cookie` from `.extraHeaders`, or the `.cookies` and `.withCredentials` cookies
+RFC 6265 allows for the URL. With `.withCredentials`, the cookies the handshake response
+sets are stored by the same rules as polling cookies. See
+[Configuration – Cookies](Guides/Configuration.md#cookies). Custom Apple TLS policies are explicitly unsupported on non-Apple builds.
 
 
 ### Client certificates (mutual TLS)
@@ -95,7 +106,8 @@ optional array of `SecCertificate` values. See Apple's
 and [identity import guide](https://developer.apple.com/documentation/security/importing-an-identity).
 The library does not import or persist private keys. The credential must contain
 an identity and the connection must use HTTPS/WSS. It is supplied only to the
-configured host and port, never a different redirect origin. Rejected identities
+configured host and port. A redirect to another origin is refused while a client
+certificate is configured. Rejected identities
 are not repeatedly offered within the same authentication challenge sequence.
 Server trust, hostname validation and optional `.security(...)` pins remain active.
 The client-identity host comparison uses Foundation's IDNA representation, ignores

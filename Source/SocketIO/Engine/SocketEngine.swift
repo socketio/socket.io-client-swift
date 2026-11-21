@@ -61,16 +61,19 @@ open class SocketEngine: NSObject,
     public private(set) var forceBase64 = false
     public private(set) var addTrailingSlash = true
     /// Kept across reconnects and polling-to-WebSocket upgrades, not across engines.
-    internal let credentialCookieStorage = URLSessionConfiguration.ephemeral.httpCookieStorage
+    /// The engine stores and sends these cookies itself on every transport;
+    /// Foundation's cookie handling is off for its requests.
+    internal let credentialCookies = URLSessionConfiguration.ephemeral.httpCookieStorage
+        .map(SocketCookieJar.init(storage:))
+    internal var credentialCookieStorage: HTTPCookieStorage? { credentialCookies?.storage }
     /// The delegate of the current polling session, kept to update its redirect cookies.
     internal weak var pollingProxy: SocketSessionDelegateProxy?
 
-    /// An explicit `Cookie` from `.extraHeaders`, which replaces `.cookies`.
-    internal var explicitCookieHeader: String? {
-        extraHeaders?.first { name, value in
-            name.lowercased() == "cookie" &&
-                !(name + value).unicodeScalars.contains { $0 == "\r" || $0 == "\n" || $0 == "\0" }
-        }?.value
+    /// What the requests of this engine, and their redirects, may carry in
+    /// their `Cookie` header.
+    internal var requestCookies: SocketRequestCookies {
+        SocketRequestCookies(configured: cookies ?? [], jar: withCredentials ? credentialCookies : nil,
+                             explicitHeader: explicitCookieHeader)
     }
 
     /// The connect parameters sent during a connect.
@@ -510,19 +513,17 @@ open class SocketEngine: NSObject,
 
     private func createWebSocketAndConnect() {
         var request = URLRequest(url: urlWebSocketWithSid)
-        addHeaders(to: &request, includingCookies:
-            withCredentials ? credentialCookieStorage?.cookies(for: urlPollingWithSid) : nil)
-        // addHeaders already applies explicit Cookie/extraHeaders precedence.
+        // One Cookie header: the explicit one, or the configured and server
+        // cookies for this URL; Foundation adds none of its own.
+        addHeaders(to: &request)
         request.httpShouldHandleCookies = false
+        let handshakeURL = request.url ?? urlWebSocketWithSid
         let options = webSocketOptions
         let transport = webSocketTransportFactory?(request) ?? URLSessionWebSocketTransport(
             request: request, queue: engineQueue,
             configuration: .ephemeral,
             tlsConfiguration: tlsConfiguration, sessionDelegate: sessionDelegate,
             clientCertificate: clientCertificate,
-            redirectCookies: cookies ?? [],
-            redirectCookieStorage: withCredentials ? credentialCookieStorage : nil,
-            explicitCookieHeader: explicitCookieHeader,
             maximumMessageSize: options.maximumMessageSize,
             maximumPendingBytes: options.maximumPendingBytes,
             maximumPendingBatches: options.maximumPendingBatches,
@@ -538,11 +539,8 @@ open class SocketEngine: NSObject,
                 switch event {
                 case .opened(_, let headers, let responseURL):
                     if self.withCredentials {
-                        // A redirected handshake was answered by another URL; its
-                        // cookies belong to that host, never to the original one.
-                        let origin = responseURL.map(SocketCookieScope.httpURL(for:)) ?? self.urlPolling
-                        let cookies = HTTPCookie.cookies(withResponseHeaderFields: headers, for: origin)
-                        self.credentialCookieStorage?.setCookies(cookies, for: origin, mainDocumentURL: nil)
+                        // The cookies belong to the URL that answered the handshake.
+                        self.credentialCookies?.store(responseHeaders: headers, from: responseURL ?? handshakeURL)
                     }
                     self.wsConnected = true
                     self.client?.engineDidWebsocketUpgrade(headers: headers)
@@ -993,8 +991,7 @@ open class SocketEngine: NSObject,
         pendingCloseReason = nil
         let proxy = SocketSessionDelegateProxy(tlsConfiguration: tlsConfiguration, forwardingDelegate: sessionDelegate,
                                                clientCertificate: clientCertificate, credentialOrigin: urlPolling,
-                                               redirectCookies: cookies ?? [],
-                                               explicitCookieHeader: explicitCookieHeader)
+                                               requestCookies: requestCookies)
         pollingProxy = proxy
         proxy.onInvalidation = { [weak self] invalidSession, error in
             guard let self = self, self.session === invalidSession, self.polling, !self.closed,
@@ -1007,9 +1004,13 @@ open class SocketEngine: NSObject,
             configuration.timeoutIntervalForRequest = requestTimeout
             configuration.timeoutIntervalForResource = requestTimeout
         }
-        configuration.httpCookieStorage = withCredentials ? credentialCookieStorage : nil
-        configuration.httpShouldSetCookies = withCredentials
-        configuration.httpCookieAcceptPolicy = withCredentials ? .always : .never
+        // The engine sends and stores polling cookies itself, like the
+        // WebSocket's (`addHeaders`, `doRequest` and the redirect handler).
+        // Foundation would otherwise replace an explicit Cookie header with
+        // the jar's cookies and store Secure or prefixed cookies it should not.
+        configuration.httpCookieStorage = nil
+        configuration.httpShouldSetCookies = false
+        configuration.httpCookieAcceptPolicy = .never
         session = Foundation.URLSession(configuration: configuration,
                                         delegate: proxy, delegateQueue: queue)
         for pending in pendingPosts { pending.completion?() }
@@ -1099,12 +1100,9 @@ open class SocketEngine: NSObject,
         // Server-set cookies are credentials too: without `.withCredentials`
         // the jar is unused, and a later session (possibly another user's)
         // must not inherit what an earlier one stored.
-        if !withCredentials, let jar = credentialCookieStorage {
-            for cookie in jar.cookies ?? [] { jar.deleteCookie(cookie) }
-        }
+        if !withCredentials { credentialCookies?.removeAll() }
         // The live polling session follows redirects with the current cookies.
-        pollingProxy?.redirectCookies = SocketRedirectCookies(configured: cookies ?? [],
-                                                              explicitHeader: explicitCookieHeader)
+        pollingProxy?.requestCookies = requestCookies
         // Normalize after all options: configuration ordering must not matter.
         if socketPath.hasSuffix("/") { socketPath.removeLast() }
         if addTrailingSlash { socketPath += "/" }
