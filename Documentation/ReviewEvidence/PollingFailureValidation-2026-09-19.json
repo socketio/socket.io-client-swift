@@ -1,0 +1,49 @@
+{
+  "source_sha": "69adced68f0b3ed6910566386e64c8254fe25520",
+  "ci_run": "https://github.com/kaeferfreund/socket.io-client-swift/actions/runs/35443462303",
+  "ci_jobs_passed": 7,
+  "swift_tests": 844,
+  "swift_test_failures": 0,
+  "checker_self_tests": 9,
+  "strict_contract_check": "passed against downloaded native-swift-tests.log",
+  "coverage": {
+    "scope": "Source/SocketIO only; this is execution coverage, NOT JS scenario parity",
+    "sourceFiles": 33,
+    "lines": {
+      "count": 6701,
+      "covered": 6605,
+      "percent": 98.5673780032831
+    },
+    "functions": {
+      "count": 1084,
+      "covered": 1030,
+      "percent": 95.01845018450184
+    },
+    "regions": {
+      "count": 2745,
+      "covered": 2586,
+      "percent": 94.20765027322405
+    },
+    "branches": {
+      "count": 0,
+      "covered": 0,
+      "percent": null
+    }
+  },
+  "uncovered_lines": 96,
+  "baseline_source_sha": "fdf92809b9bea534ec56f134d1d63bcc96284efe",
+  "line_coverage_delta": {
+    "Engine/SocketEnginePollable.swift": 2,
+    "Engine/SocketEngine.swift": -2
+  },
+  "notes": [
+    "Added network and HTTP POST failure contracts; strengthened stale and duplicate acknowledgement assertions.",
+    "Line coverage is per-run; defensive timer/callback and logging paths vary. No production Swift changes or coverage exclusions.",
+    "Pinned original JS test runtime restored to Node 24 after Node 26 dependency-loader failure."
+  ],
+  "artifacts_sha256": {
+    "swift-coverage-summary.json": "91d4627d8caaeccecc9edc94b4ea599384a17228da2dc49fc71dffb5ca79cb45",
+    "swift-coverage.json": "ca0ca29a152aa0daf35b82551c9e54fe98f6df8ea6fbec6d6e441743c45af0bc",
+    "native-swift-tests.log": "af23b98cc5da09afc09a6b5277fd0e22768bd6b8760cad8070c399b7a636326a"
+  }
+}

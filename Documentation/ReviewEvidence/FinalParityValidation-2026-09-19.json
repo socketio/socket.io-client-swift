@@ -1,0 +1,37 @@
+{
+  "source_sha": "43bbe473c3002871376ce015716d64c6379ba7b3",
+  "ci_run": "https://github.com/kaeferfreund/socket.io-client-swift/actions/runs/35440824938",
+  "ci_jobs_passed": 7,
+  "swift_tests": 801,
+  "swift_test_failures": 0,
+  "strict_contract_check": "passed against downloaded native-swift-tests.log",
+  "applicable_runtime_declarations": 195,
+  "complete_native_assertion_mappings": 195,
+  "reviewed_runtime_boundaries": 102,
+  "typescript_only_declarations": 14,
+  "offline_checker_regressions_passed": 8,
+  "coverage": {
+    "scope": "Source/SocketIO only; this is execution coverage, NOT JS scenario parity",
+    "sourceFiles": 33,
+    "lines": {
+      "count": 6732,
+      "covered": 6326,
+      "percent": 93.9691027926322
+    },
+    "functions": {
+      "count": 1092,
+      "covered": 980,
+      "percent": 89.74358974358974
+    },
+    "regions": {
+      "count": 2754,
+      "covered": 2410,
+      "percent": 87.50907770515613
+    },
+    "branches": {
+      "count": 0,
+      "covered": 0,
+      "percent": null
+    }
+  }
+}

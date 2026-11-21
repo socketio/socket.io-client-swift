@@ -1,0 +1,3147 @@
+{
+  "upstream_sha": "aaf2af36ec8ad05910f357a788e0e358bad32738",
+  "scope": "Complete assertion mappings for applicable native client runtime declarations at the pinned reference, with explicit reviewed boundaries; not exhaustive behavioral equivalence.",
+  "remaining_unmapped_ids": [],
+  "contracts": [
+    {
+      "id": "JS-082",
+      "upstream_ids": [
+        "JS-082"
+      ],
+      "kind": "assertion-port",
+      "assertions": "A pre-connect buffered emit is acknowledged before an emit from the connect callback; real server, explicit polling and WebSocket cases plus upgrade enabled.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityFollowupE2ETest.swift",
+          "symbol": "JSParityFollowupE2ETest.testBufferedEmitPrecedesConnectHandlerEmitPolling"
+        },
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityFollowupE2ETest.swift",
+          "symbol": "JSParityFollowupE2ETest.testBufferedEmitPrecedesConnectHandlerEmitWebSocket"
+        },
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityFollowupE2ETest.swift",
+          "symbol": "JSParityFollowupE2ETest.testBufferedEmitPrecedesConnectHandlerEmitWithUpgradeEnabled"
+        }
+      ]
+    },
+    {
+      "id": "JS-091",
+      "upstream_ids": [
+        "JS-091"
+      ],
+      "kind": "assertion-port",
+      "assertions": "Inside connect, install an outgoing listener and immediately emit binary without an intervening queue turn; assert event name, original bytes, one call and server echo.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityFollowupE2ETest.swift",
+          "symbol": "JSParityFollowupE2ETest.testImmediateOutgoingListenerReceivesBinaryPolling"
+        },
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityFollowupE2ETest.swift",
+          "symbol": "JSParityFollowupE2ETest.testImmediateOutgoingListenerReceivesBinaryWebSocket"
+        }
+      ]
+    },
+    {
+      "id": "JS-093",
+      "upstream_ids": [
+        "JS-093"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Removing a UUID listener is effective before the immediately following emit on the owning queue; removed callback must not fire and listener count is zero.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketQueueTurnParityTest.swift",
+          "symbol": "SocketQueueTurnParityTest.testOutgoingRemovalPreventsImmediatelyFollowingEmit"
+        }
+      ]
+    },
+    {
+      "id": "JS-132",
+      "upstream_ids": [
+        "JS-132"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Polling-only raw Engine.IO sends bytes 0...4 then cash money €€€. Assert exactly two echoes, binary Data type and bytes first, exact multibyte text second. Data replaces ArrayBuffer.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testBinaryThenMultibyteTextPolling"
+        }
+      ]
+    },
+    {
+      "id": "JS-136",
+      "upstream_ids": [
+        "JS-136"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "After real polling-to-WebSocket upgrade, send bytes 0...4 then cash money €€€. Assert exactly two echoes in original order and with original binary/text types and values; native Data replaces ArrayBuffer.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testBinaryThenMultibyteTextAfterActualUpgrade"
+        }
+      ]
+    },
+    {
+      "id": "JS-159",
+      "upstream_ids": [
+        "JS-159",
+        "JS-203",
+        "JS-204"
+      ],
+      "kind": "native-URI-equivalent",
+      "assertions": "Assert both generated transport schemes, host, explicit/absent port, path and protocol query for the named absolute URL. Swift URL/SocketEngine API replaces public JS transport constructors.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketEngineURLParityTest.swift",
+          "symbol": "SocketEngineURLParityTest.testHTTPWithoutPort"
+        }
+      ]
+    },
+    {
+      "id": "JS-205",
+      "upstream_ids": [
+        "JS-205"
+      ],
+      "kind": "native-URI-equivalent",
+      "assertions": "Assert both generated transport schemes, host, explicit/absent port, path and protocol query for the named absolute URL. Swift URL/SocketEngine API replaces public JS transport constructors.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketEngineURLParityTest.swift",
+          "symbol": "SocketEngineURLParityTest.testHTTPWithPort"
+        }
+      ]
+    },
+    {
+      "id": "JS-160",
+      "upstream_ids": [
+        "JS-160",
+        "JS-206",
+        "JS-207"
+      ],
+      "kind": "native-URI-equivalent",
+      "assertions": "Assert both generated transport schemes, host, explicit/absent port, path and protocol query for the named absolute URL. Swift URL/SocketEngine API replaces public JS transport constructors.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketEngineURLParityTest.swift",
+          "symbol": "SocketEngineURLParityTest.testHTTPSWithoutPort"
+        }
+      ]
+    },
+    {
+      "id": "JS-208",
+      "upstream_ids": [
+        "JS-208"
+      ],
+      "kind": "native-URI-equivalent",
+      "assertions": "Assert both generated transport schemes, host, explicit/absent port, path and protocol query for the named absolute URL. Swift URL/SocketEngine API replaces public JS transport constructors.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketEngineURLParityTest.swift",
+          "symbol": "SocketEngineURLParityTest.testHTTPSWithPort"
+        }
+      ]
+    },
+    {
+      "id": "JS-212",
+      "upstream_ids": [
+        "JS-212"
+      ],
+      "kind": "native-URI-equivalent",
+      "assertions": "Assert both generated transport schemes, host, explicit/absent port, path and protocol query for the named absolute URL. Swift URL/SocketEngine API replaces public JS transport constructors.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketEngineURLParityTest.swift",
+          "symbol": "SocketEngineURLParityTest.testWSWithoutPort"
+        }
+      ]
+    },
+    {
+      "id": "JS-161",
+      "upstream_ids": [
+        "JS-161",
+        "JS-213"
+      ],
+      "kind": "native-URI-equivalent",
+      "assertions": "Assert both generated transport schemes, host, explicit/absent port, path and protocol query for the named absolute URL. Swift URL/SocketEngine API replaces public JS transport constructors.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketEngineURLParityTest.swift",
+          "symbol": "SocketEngineURLParityTest.testWSSWithoutPort"
+        }
+      ]
+    },
+    {
+      "id": "JS-162",
+      "upstream_ids": [
+        "JS-162"
+      ],
+      "kind": "native-URI-equivalent",
+      "assertions": "Assert both generated transport schemes, host, explicit/absent port, path and protocol query for the named absolute URL. Swift URL/SocketEngine API replaces public JS transport constructors.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketEngineURLParityTest.swift",
+          "symbol": "SocketEngineURLParityTest.testWSSWithPort"
+        }
+      ]
+    },
+    {
+      "id": "JS-166",
+      "upstream_ids": [
+        "JS-166",
+        "JS-210"
+      ],
+      "kind": "native-URI-equivalent",
+      "assertions": "Assert both generated transport schemes, host, explicit/absent port, path and protocol query for the named absolute URL. Swift URL/SocketEngine API replaces public JS transport constructors.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketEngineURLParityTest.swift",
+          "symbol": "SocketEngineURLParityTest.testIPv6WithoutPort"
+        }
+      ]
+    },
+    {
+      "id": "JS-167",
+      "upstream_ids": [
+        "JS-167",
+        "JS-211"
+      ],
+      "kind": "native-URI-equivalent",
+      "assertions": "Assert both generated transport schemes, host, explicit/absent port, path and protocol query for the named absolute URL. Swift URL/SocketEngine API replaces public JS transport constructors.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketEngineURLParityTest.swift",
+          "symbol": "SocketEngineURLParityTest.testIPv6WithPort"
+        }
+      ]
+    },
+    {
+      "id": "JS-215",
+      "upstream_ids": [
+        "JS-215"
+      ],
+      "kind": "native-URI-equivalent",
+      "assertions": "Assert both generated transport schemes, host, explicit/absent port, path and protocol query for the named absolute URL. Swift URL/SocketEngine API replaces public JS transport constructors.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketEngineURLParityTest.swift",
+          "symbol": "SocketEngineURLParityTest.testWebSocketIPv6WithoutPort"
+        }
+      ]
+    },
+    {
+      "id": "JS-216",
+      "upstream_ids": [
+        "JS-216"
+      ],
+      "kind": "native-URI-equivalent",
+      "assertions": "Assert both generated transport schemes, host, explicit/absent port, path and protocol query for the named absolute URL. Swift URL/SocketEngine API replaces public JS transport constructors.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketEngineURLParityTest.swift",
+          "symbol": "SocketEngineURLParityTest.testWebSocketIPv6WithPort"
+        }
+      ]
+    },
+    {
+      "id": "native-17",
+      "upstream_ids": [],
+      "kind": "automatic-reconnect-regression",
+      "assertions": "Drive manager.engineDidClose, retain retry order/fresh IDs and buffered acks, clear sent modern acks before retry; ignore late replies.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketReconnectEventsTest.swift",
+          "symbol": "SocketReconnectEventsTest.testAutomaticReconnectFailsSentTimedAckBeforeReconnectAttempt"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketReconnectEventsTest.swift",
+          "symbol": "SocketReconnectEventsTest.testAutomaticReconnectFailsAckTimeoutAckAndIgnoresLateReply"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketReconnectEventsTest.swift",
+          "symbol": "SocketReconnectEventsTest.testAutomaticReconnectSilentlyRemovesSentNoTimeoutCallbackAck"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketReconnectEventsTest.swift",
+          "symbol": "SocketReconnectEventsTest.testAutomaticReconnectKeepsAckBufferedByDisconnectListener"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketReconnectEventsTest.swift",
+          "symbol": "SocketReconnectEventsTest.testAutomaticReconnectRetriesHeadWithFreshAckWithoutReordering"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketReconnectEventsTest.swift",
+          "symbol": "SocketReconnectEventsTest.testAutomaticReconnectExhaustsRetryBudgetWithoutStrandingNextPacket"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketReconnectEventsTest.swift",
+          "symbol": "SocketReconnectEventsTest.testAutomaticReconnectFailsAsyncAckWithoutTimeout"
+        }
+      ]
+    },
+    {
+      "id": "native-18",
+      "upstream_ids": [],
+      "kind": "same-turn-regression",
+      "assertions": "Synchronous-on-owner-queue listener mutation; snapshot iteration; legacy/internal-event distinction; no successor ack swept by reentrant disconnect.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketQueueTurnParityTest.swift",
+          "symbol": "SocketQueueTurnParityTest.testOutgoingRegistrationAndBinaryEmitInConnectCallbackSameTurn"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketQueueTurnParityTest.swift",
+          "symbol": "SocketQueueTurnParityTest.testOutgoingRemoveAllPreventsImmediatelyFollowingEmit"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketQueueTurnParityTest.swift",
+          "symbol": "SocketQueueTurnParityTest.testOutgoingMultiplePrependsPreserveOrderInSameTurn"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketQueueTurnParityTest.swift",
+          "symbol": "SocketQueueTurnParityTest.testIncomingRegistrationAndRemovalInSameTurn"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketQueueTurnParityTest.swift",
+          "symbol": "SocketQueueTurnParityTest.testIncomingMultiplePrependsAndRemoveAllInSameTurn"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketQueueTurnParityTest.swift",
+          "symbol": "SocketQueueTurnParityTest.testIncomingSelfRemovalDoesNotDisturbCurrentSnapshot"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketQueueTurnParityTest.swift",
+          "symbol": "SocketQueueTurnParityTest.testOutgoingMutationUsesSnapshotButNextEmitSeesNewListener"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketQueueTurnParityTest.swift",
+          "symbol": "SocketQueueTurnParityTest.testModernIncomingListenersExcludeLifecycleEventsButLegacyStillSeesThem"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketQueueTurnParityTest.swift",
+          "symbol": "SocketQueueTurnParityTest.testOffQueueRegistrationStillSerializesOnTheOwnerQueue"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketQueueTurnParityTest.swift",
+          "symbol": "SocketQueueTurnParityTest.testTerminalDisconnectClearsModernAcksBeforeReturningOnOwnerQueue"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketQueueTurnParityTest.swift",
+          "symbol": "SocketQueueTurnParityTest.testReentrantDisconnectListenerCannotSweepSuccessorAck"
+        }
+      ]
+    },
+    {
+      "id": "remaining-js-133",
+      "upstream_ids": [
+        "JS-133"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Default polling/WebSocket transport list with forceBase64=true. Send bytes 0...4 on open and assert exactly one binary Data echo with identical bytes. Unlike the earlier mapping, no forced-polling-only configuration or attachment header changes the original scenario.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testForcedBase64SentOnOpenWithDefaultTransports"
+        }
+      ]
+    },
+    {
+      "id": "remaining-js-137",
+      "kind": "transferable-wire-regression",
+      "upstream_ids": [
+        "JS-137",
+        "JS-144"
+      ],
+      "assertions": [
+        "Direct WebSocket and completed polling-to-WebSocket upgrade return bytes 0...4 and empty Data. Actual client frames are base64 text, not binary frames; handshake requests b64=1. Native Data replaces ArrayBuffer/Blob."
+      ],
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testForcedBase64WebSocket"
+        },
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testForcedBase64AfterActualTransportUpgrade"
+        }
+      ]
+    },
+    {
+      "id": "remaining-js-139",
+      "kind": "transferable-wire-regression",
+      "upstream_ids": [
+        "JS-139",
+        "JS-140"
+      ],
+      "assertions": [
+        "Native Data replaces Blob input/output. Bytes 0...4 and zero-length bytes survive the raw polling round trip in order; the engine API uses a separate text header."
+      ],
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testBinaryDataPolling"
+        }
+      ]
+    },
+    {
+      "id": "remaining-js-141",
+      "upstream_ids": [
+        "JS-141"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Polling only, advertised maxPayload=100, five raw packets in original order: 72 binary bytes, 20 binary bytes, twenty a characters, 20 binary bytes, 72 binary bytes. Assert exactly five echoes with matching types/bytes/order and every observed POST <=100 bytes. Data replaces typed-array/ArrayBuffer/Blob/Node Buffer; initialized zero bytes also make the original allocUnsafe case deterministic.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testBinaryMaxPayloadBatching"
+        }
+      ]
+    },
+    {
+      "id": "remaining-js-142",
+      "kind": "transferable-wire-regression",
+      "upstream_ids": [
+        "JS-142",
+        "JS-143"
+      ],
+      "assertions": [
+        "Native Data replaces Blob input/output. WebSocket echoes bytes 0...4 and empty bytes; observer confirms binary frames, independently of the Socket.IO parser."
+      ],
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testBinaryDataWebSocket"
+        }
+      ]
+    },
+    {
+      "id": "remaining-js-145",
+      "kind": "native-assertion-equivalent",
+      "upstream_ids": [
+        "JS-145"
+      ],
+      "assertions": [
+        "Raw localhost polling opens, then receives the unsolicited server greeting hi. Open precedes message delivery and the engine has a nonempty SID."
+      ],
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testConnectLocalhostPolling"
+        }
+      ]
+    },
+    {
+      "id": "remaining-js-146",
+      "kind": "native-assertion-equivalent",
+      "upstream_ids": [
+        "JS-146"
+      ],
+      "assertions": [
+        "Raw localhost WebSocket opens, then receives the unsolicited server greeting hi. Open precedes message delivery and the engine has a nonempty SID."
+      ],
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testConnectLocalhostWebSocket"
+        }
+      ]
+    },
+    {
+      "id": "remaining-js-147",
+      "kind": "native-assertion-equivalent",
+      "upstream_ids": [
+        "JS-147"
+      ],
+      "assertions": [
+        "The exact upstream string cash money followed by three euro symbols is echoed unchanged through raw polling."
+      ],
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testMultibyteUTF8Polling"
+        }
+      ]
+    },
+    {
+      "id": "remaining-js-148",
+      "kind": "native-assertion-equivalent",
+      "upstream_ids": [
+        "JS-148"
+      ],
+      "assertions": [
+        "The exact upstream Unicode scalar sequence U+10000 through U+10FFFF and private-use endpoints U+E000/U+F8FF is echoed unchanged, not merely a common emoji."
+      ],
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testUnicodeScalarBoundaries"
+        }
+      ]
+    },
+    {
+      "id": "remaining-js-165",
+      "kind": "native-URI-equivalent",
+      "upstream_ids": [
+        "JS-165"
+      ],
+      "assertions": [
+        "addTrailingSlash(false) emits /engine.io? on the wire, with no slash before the query. Custom paths are normalized independently of option order; the default retains the slash."
+      ],
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testNoTrailingSlashOnWire"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketRemainingParityTest.swift",
+          "symbol": "SocketRemainingParityTest.testTrailingSlashIndependentOfConfigurationOrder"
+        }
+      ]
+    },
+    {
+      "id": "remaining-js-178",
+      "upstream_ids": [
+        "JS-178"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real polling-only connection with withCredentials=true. Fixture sets original cookies 1=1 and 2=2; after open, a raw message is echoed and the server-observed POST Cookie contains exactly both name/value pairs. Cookie pair order is normalized because Foundation owns serialization order; no missing or additional cookie is accepted. Original ten-millisecond sleep is replaced by the completed-open/cookie-processing barrier.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testServerCookiesSentWhenEnabled"
+        }
+      ]
+    },
+    {
+      "id": "remaining-js-179",
+      "upstream_ids": [
+        "JS-179"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real polling-only connection with withCredentials=false. Fixture sets original cookies 1=1 and 2=2; send on open, await echo and assert the subsequent server-observed POST has no Cookie header. Native nil corresponds to JS undefined.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testServerCookiesNotSentWhenDisabled"
+        }
+      ]
+    },
+    {
+      "id": "remaining-js-180",
+      "upstream_ids": [
+        "JS-180"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Parse original foo=bar Set-Cookie input with Foundation; assert name foo and value bar. Native HTTPCookie replaces the Node object while preserving every field asserted by this simple original scenario.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketRemainingParityTest.swift",
+          "symbol": "SocketRemainingParityTest.testSimpleNativeCookieParsing"
+        }
+      ]
+    },
+    {
+      "id": "remaining-js-182",
+      "upstream_ids": [
+        "JS-182"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Parse original foo=bar=bar&foo=foo&John=Doe&Doe=John; Domain=.example.com; Path=/; HttpOnly; Secure. Assert name foo and the complete original value including embedded equals and ampersands. HTTPCookie is the native object representation.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketRemainingParityTest.swift",
+          "symbol": "SocketRemainingParityTest.testCookieValueContainingEqualsAndAmpersands"
+        }
+      ]
+    },
+    {
+      "id": "remaining-js-194",
+      "upstream_ids": [
+        "JS-194"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real a*101 exceeds 100-byte polling server limit. Error callback must carry SocketTransportError with HTTP 413, operation write, polling write (HTTP 413) description and empty body; close must follow the error with transport error and identical detail object. Native URLSession completed response/type replaces XHR readyState/TransportError fields; queued b additionally covers JS-151.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testOversizePollingReports413AndCloseDetail"
+        }
+      ]
+    },
+    {
+      "id": "remaining-js-195",
+      "upstream_ids": [
+        "JS-195"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real WebSocket a*101 over 100-byte server limit closes with transport close, typed detail operation close, code 1009, empty close reason and websocket close (WebSocket 1009) description. Require no preceding error callback. Native SocketTransportError fields replace CloseEvent fields; IE11 branch is platform-specific.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testOversizeWebSocketReports1009AndCloseDetail"
+        }
+      ]
+    },
+    {
+      "id": "remaining-js-196",
+      "upstream_ids": [
+        "JS-196"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real polling request with nonexistent SID returns 400: error callback asserts typed polling read error, exact status and exact Session ID unknown JSON body; close follows with transport error and same detail. Stale request injected at transport layer because user query may not override engine-owned SID. Native completed URLSession response replaces XHR readyState.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testUnknownSIDPollingReports400BodyAndCloseDetail"
+        }
+      ]
+    },
+    {
+      "id": "remaining-js-197",
+      "upstream_ids": [
+        "JS-197"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real WebSocket handshake carrying nonexistent SID must report typed websocket close-operation error with native underlying error; close follows with transport error and the same detail object. Native URLSession error replaces JS generic error Event; no unsupported HTTP response-body/status claim is made.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testUnknownSIDWebSocketReportsErrorAndCloseDetail"
+        }
+      ]
+    },
+    {
+      "id": "remaining-js-220",
+      "kind": "transferable-wire-regression",
+      "upstream_ids": [
+        "JS-220",
+        "JS-223"
+      ],
+      "assertions": [
+        "A custom extraHeaders value reaches both actual polling GET and POST requests. URLSession replaces browser/Node XMLHttpRequest; browser CORS/preflight is not implemented by this native test."
+      ],
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testExtraHeadersReachPollingGETAndPOST"
+        }
+      ]
+    },
+    {
+      "id": "JS-240",
+      "upstream_ids": [
+        "JS-240"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "EVENT [a,two zero bytes], root namespace, id 0; encode then decode all attachments, assert type, namespace, id, full deep data equality and reconstruction only completing on the final attachment. JS ArrayBuffer/TypedArray/Blob maps to native Data; native binaryEvent/binaryAck retains its wire type after reconstruction.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketRemainingBinaryParserTest.swift",
+          "symbol": "SocketRemainingBinaryParserTest.testArrayBufferEquivalentHasExactWireAndAttachment"
+        }
+      ]
+    },
+    {
+      "id": "JS-242",
+      "upstream_ids": [
+        "JS-242"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "EVENT [a,bytes 0 through 4], root namespace, id 0; encode then decode all attachments, assert type, namespace, id, full deep data equality and reconstruction only completing on the final attachment. JS ArrayBuffer/TypedArray/Blob maps to native Data; native binaryEvent/binaryAck retains its wire type after reconstruction.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketRemainingBinaryParserTest.swift",
+          "symbol": "SocketRemainingBinaryParserTest.testTypedArrayEquivalentEncodesOnlySelectedBytes"
+        }
+      ]
+    },
+    {
+      "id": "JS-246",
+      "upstream_ids": [
+        "JS-246"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "EVENT [a,two zero bytes], root namespace, id 0; encode then decode all attachments, assert type, namespace, id, full deep data equality and reconstruction only completing on the final attachment. JS ArrayBuffer/TypedArray/Blob maps to native Data; native binaryEvent/binaryAck retains its wire type after reconstruction.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketRemainingBinaryParserTest.swift",
+          "symbol": "SocketRemainingBinaryParserTest.testBlobEquivalentPreservesEmptyAndNonemptyData"
+        }
+      ]
+    },
+    {
+      "id": "JS-247",
+      "upstream_ids": [
+        "JS-247"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "EVENT [a,{a:hi,b:{why:two zero bytes},c:bye}], /deep, id 999; encode then decode all attachments, assert type, namespace, id, full deep data equality and reconstruction only completing on the final attachment. JS ArrayBuffer/TypedArray/Blob maps to native Data; native binaryEvent/binaryAck retains its wire type after reconstruction.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketRemainingBinaryParserTest.swift",
+          "symbol": "SocketRemainingBinaryParserTest.testBlobEquivalentDeepInJSON"
+        }
+      ]
+    },
+    {
+      "id": "JS-248",
+      "upstream_ids": [
+        "JS-248"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "ACK [{a:hi ack,b:{why:two zero bytes},c:bye ack}], /deep, id 999; encode then decode all attachments, assert type, namespace, id, full deep data equality and reconstruction only completing on the final attachment. JS ArrayBuffer/TypedArray/Blob maps to native Data; native binaryEvent/binaryAck retains its wire type after reconstruction.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketRemainingBinaryParserTest.swift",
+          "symbol": "SocketRemainingBinaryParserTest.testBinaryAckBlobEquivalent"
+        }
+      ]
+    },
+    {
+      "id": "remaining-js-257",
+      "kind": "native-assertion-equivalent",
+      "upstream_ids": [
+        "JS-257"
+      ],
+      "assertions": [
+        "All seven public native SocketPacket.PacketType values correspond to protocol type numbers 0 through 6."
+      ],
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketRemainingBinaryParserTest.swift",
+          "symbol": "SocketRemainingBinaryParserTest.testPublicPacketTypesMatchWireNumbers"
+        }
+      ]
+    },
+    {
+      "id": "JS-102/JS-103/JS-104-clear-acks-on-retried-close",
+      "upstream_ids": [
+        "JS-102",
+        "JS-103",
+        "JS-104"
+      ],
+      "kind": "assertion-port",
+      "assertions": "JS `Socket.onclose` runs `_clearAcks()` on every close, so a transport drop that the manager retries settles a pending acknowledgement exactly as `disconnect()` does: `socket.timeout(N).emit` and a configured-`ackTimeout` callback receive the disconnect error and the registry is left empty (JS asserts `Object.keys(socket.acks).length === 0`), the `emitWithAck` continuation is resumed with `.disconnected` as JS rejects the promise, and a callback registered without `withError` is removed silently without being invoked. The real server-side transport kill covers the same contract end to end with an emit the server never acknowledges. The promise variant (JS-104) is certified by its own async tests: `emitWithAck` throws `.disconnected` both on an explicit disconnect and on a retried transport drop.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketClearAcksOnCloseTest.swift",
+          "symbol": "SocketClearAcksOnCloseTest.testTimedAckFailsOnATransportDropThatReconnects"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketClearAcksOnCloseTest.swift",
+          "symbol": "SocketClearAcksOnCloseTest.testAckTimeoutCallbackFailsOnATransportDropThatReconnects"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketClearAcksOnCloseTest.swift",
+          "symbol": "SocketClearAcksOnCloseTest.testPlainAckIsRemovedSilentlyOnATransportDropThatReconnects"
+        },
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testPendingAckFailsWhenTheTransportIsKilledAndTheSocketReconnects"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketClearAcksOnCloseTest.swift",
+          "symbol": "SocketClearAcksOnCloseTest.testAsyncEmitWithAckThrowsDisconnectedOnATransportDropThatReconnects"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketTimedEmitterTest.swift",
+          "symbol": "SocketTimedEmitterAsyncTest.testAsyncEmitThrowsDisconnectedOnDisconnect"
+        }
+      ]
+    },
+    {
+      "id": "JS-106/JS-107-unsent-ack-survives-the-close",
+      "upstream_ids": [
+        "JS-106",
+        "JS-107"
+      ],
+      "kind": "assertion-port",
+      "assertions": "`_clearAcks` skips an acknowledgement whose packet is still in `sendBuffer`: the packet has not reached the server, so it goes out on the next CONNECT and the acknowledgement is still owed. The throttled-timer scenario is what buffers a packet while the socket still believes it is connected (JS sets `_pingTimeoutTime` into the past; here `hasPingExpired`), and the buffered emit is answered after the reconnect.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketClearAcksOnCloseTest.swift",
+          "symbol": "SocketClearAcksOnCloseTest.testUnsentAckSurvivesATransportDropAndIsAcknowledgedAfterReconnect"
+        }
+      ]
+    },
+    {
+      "id": "JS-056/JS-057/JS-058-retried-head-across-a-close",
+      "upstream_ids": [
+        "JS-056",
+        "JS-057",
+        "JS-058"
+      ],
+      "kind": "assertion-port",
+      "assertions": "`_clearAcks` retires the per-attempt acknowledgement `_drainQueue` registered, and the callback `_addToQueue` appended decides what the close means for the entry: with retries left it keeps its place in `_queue` with `pending = false` and `onconnect`'s `_drainQueue(true)` re-sends it under a fresh id; once `tryCount > retries` the entry is discarded and the user's acknowledgement settles with the error. The queue never drains while the socket is disconnected.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketClearAcksOnCloseTest.swift",
+          "symbol": "SocketClearAcksOnCloseTest.testRetryHeadStaysQueuedAndIsResentWithAFreshIdAfterADrop"
+        },
+        {
+          "path": "Tests/TestSocketIO/SocketClearAcksOnCloseTest.swift",
+          "symbol": "SocketClearAcksOnCloseTest.testRetryHeadWhoseBudgetIsSpentIsDiscardedByTheDrop"
+        }
+      ]
+    },
+    {
+      "id": "JS-184",
+      "upstream_ids": [
+        "JS-184"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Configure only polling and pass original advertised list [polling,websocket] to the same filter used by the production handshake. Assert exactly [polling], preserving the original array result rather than inferring filtering from absence of a WebSocket connection.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketRemainingParityTest.swift",
+          "symbol": "SocketRemainingParityTest.testFilterUpgradesReturnsOnlyAvailableTransports"
+        }
+      ]
+    },
+    {
+      "id": "JS-185",
+      "upstream_ids": [
+        "JS-185"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Construct engines with original [websocket,polling] and [polling] lists. Assert both caller and engine lists remain equal to each original; additionally mutate the caller list and prove independent engine storage. Native explicit URL initializer replaces JS URI/no-URI overloads; Swift value semantics replace object aliasing.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketRemainingParityTest.swift",
+          "symbol": "SocketRemainingParityTest.testBothOriginalTransportListsRemainUnchanged"
+        }
+      ]
+    },
+    {
+      "id": "JS-187",
+      "upstream_ids": [
+        "JS-187"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Configure ordered [websocket,polling], tryAllTransports=true. Real server rejects the initial WebSocket request; assert fallback opens polling, application round trip succeeds, original request order is observed and no intermediate error/close reaches the client. Server-side transport denial replaces the original transport-local deny query.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testRealRejectedWebSocketFallsBackToPolling"
+        }
+      ]
+    },
+    {
+      "id": "JS-188",
+      "upstream_ids": [
+        "JS-188"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Configure ordered [polling,websocket], tryAllTransports=true. Real server rejects initial polling; assert fallback opens WebSocket, application round trip succeeds, request order is observed and no intermediate error/close reaches the client. Server-side transport denial replaces the original transport-local deny query.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testRealRejectedPollingFallsBackToWebSocket"
+        }
+      ]
+    },
+    {
+      "id": "JS-189",
+      "upstream_ids": [
+        "JS-189"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Ordered [polling,websocket] with default tryAllTransports=false and real polling rejection. Assert exact native polling read (HTTP 403) error and typed status/transport, transport-error close, no open and no WebSocket request. Native URLSession error replaces the original xhr poll error/fetch read error while preserving the same failure contract.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testRealRejectedPollingDoesNotFallbackByDefault"
+        }
+      ]
+    },
+    {
+      "id": "JS-199",
+      "upstream_ids": [
+        "JS-199"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "First engine starts polling, completes actual WebSocket upgrade and closes. Second engine with rememberUpgrade=true starts directly with WebSocket; assert first request is UPGRADE/transport=websocket and real open succeeds. The test requires upgrade instead of accepting the original 300ms timeout escape.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testRememberUpgradeStartsWebSocketAfterARealUpgrade"
+        }
+      ]
+    },
+    {
+      "id": "JS-200",
+      "upstream_ids": [
+        "JS-200"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "First real connection begins polling and demonstrably upgrades (server upgrade marker and native WS status), then closes. Create another engine with explicit rememberUpgrade false, require successful open and its first observed request to use polling GET, not WebSocket. Native request observation replaces JS transport.name; require real upgrade instead of the original timeout fallback.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testExplicitRememberUpgradeFalseStartsPollingAfterARealUpgrade"
+        }
+      ]
+    },
+    {
+      "id": "JS-243",
+      "upstream_ids": [
+        "JS-243"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original nested 3-byte and 6-byte zero buffers, /deep, id 999; assert exact encoded header then decode and assert full data equality, type, namespace and id, including ordered complete binary reconstruction. Missing id is native -1; single-value payloads use a one-element native data array; native binary types retain their wire discriminator.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketPacketEncoderTest.swift",
+          "symbol": "SocketPacketEncoderTest.testEncodesArrayBuffersDeepInJSON"
+        }
+      ]
+    },
+    {
+      "id": "JS-244",
+      "upstream_ids": [
+        "JS-244"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original null nested under e.g plus nine zero bytes, root, id 600; assert exact encoded header then decode and assert full data equality, type, namespace and id, including ordered complete binary reconstruction. Missing id is native -1; single-value payloads use a one-element native data array; native binary types retain their wire discriminator.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketPacketEncoderTest.swift",
+          "symbol": "SocketPacketEncoderTest.testEncodesDeepBinaryJSONWithNullValues"
+        }
+      ]
+    },
+    {
+      "id": "JS-249",
+      "upstream_ids": [
+        "JS-249"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original [a,UTF8 abc], /cool, id 23; assert exact encoded header then decode and assert full data equality, type, namespace and id, including ordered complete binary reconstruction. Missing id is native -1; single-value payloads use a one-element native data array; native binary types retain their wire discriminator.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketPacketEncoderTest.swift",
+          "symbol": "SocketPacketEncoderTest.testEncodesABuffer"
+        }
+      ]
+    },
+    {
+      "id": "JS-250",
+      "upstream_ids": [
+        "JS-250"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original [a,{b:[c,UTF8 abc]}], /cool, id 23; assert exact encoded header then decode and assert full data equality, type, namespace and id, including ordered complete binary reconstruction. Missing id is native -1; single-value payloads use a one-element native data array; native binary types retain their wire discriminator.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketPacketEncoderTest.swift",
+          "symbol": "SocketPacketEncoderTest.testEncodesANestedBuffer"
+        }
+      ]
+    },
+    {
+      "id": "JS-251",
+      "upstream_ids": [
+        "JS-251"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original ACK [a,UTF8 xxx,{}], /back, id 127; assert exact encoded header then decode and assert full data equality, type, namespace and id, including ordered complete binary reconstruction. Missing id is native -1; single-value payloads use a one-element native data array; native binary types retain their wire discriminator.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketPacketEncoderTest.swift",
+          "symbol": "SocketPacketEncoderTest.testEncodesABinaryAckWithBuffer"
+        }
+      ]
+    },
+    {
+      "id": "JS-258",
+      "upstream_ids": [
+        "JS-258"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original CONNECT {token:123}, /woot; assert exact encoded header then decode and assert full data equality, type, namespace and id, including ordered complete binary reconstruction. Missing id is native -1; single-value payloads use a one-element native data array; native binary types retain their wire discriminator.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketPacketEncoderTest.swift",
+          "symbol": "SocketPacketEncoderTest.testEncodesConnection"
+        }
+      ]
+    },
+    {
+      "id": "JS-259",
+      "upstream_ids": [
+        "JS-259"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original DISCONNECT without data, /woot; assert exact encoded header then decode and assert full data equality, type, namespace and id, including ordered complete binary reconstruction. Missing id is native -1; single-value payloads use a one-element native data array; native binary types retain their wire discriminator.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketPacketEncoderTest.swift",
+          "symbol": "SocketPacketEncoderTest.testEncodesDisconnection"
+        }
+      ]
+    },
+    {
+      "id": "JS-260",
+      "upstream_ids": [
+        "JS-260"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original EVENT [a,1,{}], root, no id; assert exact encoded header then decode and assert full data equality, type, namespace and id, including ordered complete binary reconstruction. Missing id is native -1; single-value payloads use a one-element native data array; native binary types retain their wire discriminator.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketPacketEncoderTest.swift",
+          "symbol": "SocketPacketEncoderTest.testEncodesAnEvent"
+        }
+      ]
+    },
+    {
+      "id": "JS-261",
+      "upstream_ids": [
+        "JS-261"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original EVENT [1,a,{}], root, no id; assert exact encoded header then decode and assert full data equality, type, namespace and id, including ordered complete binary reconstruction. Missing id is native -1; single-value payloads use a one-element native data array; native binary types retain their wire discriminator.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketPacketEncoderTest.swift",
+          "symbol": "SocketPacketEncoderTest.testEncodesAnEventWithAnIntegerAsEventName"
+        }
+      ]
+    },
+    {
+      "id": "JS-262",
+      "upstream_ids": [
+        "JS-262"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original EVENT [a,1,{}], /test, id 1; assert exact encoded header then decode and assert full data equality, type, namespace and id, including ordered complete binary reconstruction. Missing id is native -1; single-value payloads use a one-element native data array; native binary types retain their wire discriminator.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketPacketEncoderTest.swift",
+          "symbol": "SocketPacketEncoderTest.testEncodesAnEventWithAck"
+        }
+      ]
+    },
+    {
+      "id": "JS-263",
+      "upstream_ids": [
+        "JS-263"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original ACK [a,1,{}], root, id 123; assert exact encoded header then decode and assert full data equality, type, namespace and id, including ordered complete binary reconstruction. Missing id is native -1; single-value payloads use a one-element native data array; native binary types retain their wire discriminator.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketPacketEncoderTest.swift",
+          "symbol": "SocketPacketEncoderTest.testEncodesAnAck"
+        }
+      ]
+    },
+    {
+      "id": "JS-264",
+      "upstream_ids": [
+        "JS-264"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original CONNECT_ERROR string Unauthorized, root; assert exact encoded header then decode and assert full data equality, type, namespace and id, including ordered complete binary reconstruction. Missing id is native -1; single-value payloads use a one-element native data array; native binary types retain their wire discriminator.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketPacketEncoderTest.swift",
+          "symbol": "SocketPacketEncoderTest.testEncodesAConnectError"
+        }
+      ]
+    },
+    {
+      "id": "JS-265",
+      "upstream_ids": [
+        "JS-265"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original CONNECT_ERROR {message:Unauthorized}, root; assert exact encoded header then decode and assert full data equality, type, namespace and id, including ordered complete binary reconstruction. Missing id is native -1; single-value payloads use a one-element native data array; native binary types retain their wire discriminator.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketPacketEncoderTest.swift",
+          "symbol": "SocketPacketEncoderTest.testEncodesAConnectErrorWithObject"
+        }
+      ]
+    },
+    {
+      "id": "JS-245",
+      "upstream_ids": [
+        "JS-245"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Encode the original a plus Data(1,2,3) and Data(4,5,6); caller data remains deeply equal, namespace root and absent-id sentinel stay unchanged. Swift packet construction chooses binaryEvent rather than mutating a caller-owned EVENT object.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketPacketEncoderTest.swift",
+          "symbol": "SocketPacketEncoderTest.testShouldNotModifyTheInputPacket"
+        }
+      ]
+    },
+    {
+      "id": "JS-266",
+      "upstream_ids": [
+        "JS-266"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Self-referential dictionary encoding throws cyclicPayload before JSON serialization; additionally arrays and mixed cycles fail. Foundation reference containers represent the JS object cycle, with explicit test cleanup.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketPacketEncoderTest.swift",
+          "symbol": "SocketPacketEncoderTest.testRejectsCyclicFoundationContainers"
+        }
+      ]
+    },
+    {
+      "id": "JS-253",
+      "upstream_ids": [
+        "JS-253"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original string placeholder num splice followed by binary UTF8 world causes exactly one terminal parse error, zero application events and no retained reconstruction. Swift rejects invalid indices earlier at the header and reports through the manager rather than a JS thrown Error; error strings are native.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketProtocolSafetyTest.swift",
+          "symbol": "SocketProtocolSafetyTest.testOriginalMalformedBinarySequencesCloseOnceWithoutDeliveringAnEvent"
+        }
+      ]
+    },
+    {
+      "id": "JS-254",
+      "upstream_ids": [
+        "JS-254"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original out-of-range placeholder num 1 for one attachment followed by binary UTF8 world causes exactly one terminal parse error, zero application events and no retained reconstruction. Swift rejects invalid indices earlier at the header and reports through the manager rather than a JS thrown Error; error strings are native.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketProtocolSafetyTest.swift",
+          "symbol": "SocketProtocolSafetyTest.testOriginalMalformedBinarySequencesCloseOnceWithoutDeliveringAnEvent"
+        }
+      ]
+    },
+    {
+      "id": "JS-255",
+      "upstream_ids": [
+        "JS-255"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original binary UTF8 world without header causes exactly one terminal parse error, zero application events and no retained reconstruction. Swift rejects invalid indices earlier at the header and reports through the manager rather than a JS thrown Error; error strings are native.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketProtocolSafetyTest.swift",
+          "symbol": "SocketProtocolSafetyTest.testOriginalMalformedBinarySequencesCloseOnceWithoutDeliveringAnEvent"
+        }
+      ]
+    },
+    {
+      "id": "JS-256",
+      "upstream_ids": [
+        "JS-256"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original one-attachment hello header followed by text hello causes exactly one terminal parse error, zero application events and no retained reconstruction. Swift rejects invalid indices earlier at the header and reports through the manager rather than a JS thrown Error; error strings are native.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketProtocolSafetyTest.swift",
+          "symbol": "SocketProtocolSafetyTest.testOriginalMalformedBinarySequencesCloseOnceWithoutDeliveringAnEvent"
+        }
+      ]
+    },
+    {
+      "id": "JS-267",
+      "upstream_ids": [
+        "JS-267"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original truncated binary header 5 causes exactly one terminal parse error, zero application events and no retained reconstruction. Swift rejects invalid indices earlier at the header and reports through the manager rather than a JS thrown Error; error strings are native.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketProtocolSafetyTest.swift",
+          "symbol": "SocketProtocolSafetyTest.testOriginalMalformedBinarySequencesCloseOnceWithoutDeliveringAnEvent"
+        }
+      ]
+    },
+    {
+      "id": "JS-268",
+      "upstream_ids": [
+        "JS-268"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Exact original three-placeholder hello header with maximumAttachments 2 throws before retaining reconstruction; native typed failure replaces the JS exception string.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketProtocolSafetyTest.swift",
+          "symbol": "SocketProtocolSafetyTest.testOriginalAttachmentLimitRejectsThreeWhenOnlyTwoAreAllowed"
+        }
+      ]
+    },
+    {
+      "id": "JS-272",
+      "upstream_ids": [
+        "JS-272"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Exact unfinished 51-[hello] then decoder reset, then 2[hello]. One hello with empty arguments is delivered, reconstruction is cleared, no parse-error close occurs. Native decoder lifetime/reset belongs to manager reconnect rather than standalone Decoder.destroy().",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketProtocolSafetyTest.swift",
+          "symbol": "SocketProtocolSafetyTest.testReconnectDiscardsAnUnfinishedBinaryPacketAndDecodesTheNextTextEvent"
+        }
+      ]
+    },
+    {
+      "id": "JS-008",
+      "upstream_ids": [
+        "JS-008"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Emit the request before connection; server sends an event with an acknowledgement callback; client sends both original arguments 5 and {test:true}; server validates both and confirms via an event. Only fixture event names are renamed.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testOriginalServerRequestedAcknowledgementReceivesBothArguments"
+        }
+      ]
+    },
+    {
+      "id": "JS-011",
+      "upstream_ids": [
+        "JS-011"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Request before connection, receive the five exact upstream UTF8 strings as server events including the repeated final string, assert count and full ordered equality. Only fixture event names are renamed.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testOriginalUTF8ServerEventsPreserveAllFiveValuesAndOrder"
+        }
+      ]
+    },
+    {
+      "id": "JS-075",
+      "upstream_ids": [
+        "JS-075"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Fresh manager and /abc namespace with original auth object {a:b,c:d}; server handshake echoes exact auth and both keys are absent from query. Explicit native connect replaces JS auto-connect.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testAuthObjectAndCallbackReachAuthWithoutLeakingIntoQuery"
+        }
+      ]
+    },
+    {
+      "id": "JS-076",
+      "upstream_ids": [
+        "JS-076"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Fresh manager and /abc namespace with callback auth provider returning original {e:f}; server handshake echoes exact auth and e is absent from query. Explicit native connect replaces JS auto-connect.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testAuthObjectAndCallbackReachAuthWithoutLeakingIntoQuery"
+        }
+      ]
+    },
+    {
+      "id": "JS-002",
+      "upstream_ids": [
+        "JS-002"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original pre-connect hi request is buffered, a real localhost server emits hi, the handler runs and the socket disconnects.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testOriginalLocalhostConnectionDeliversAPreconnectEmit"
+        }
+      ]
+    },
+    {
+      "id": "JS-003",
+      "upstream_ids": [
+        "JS-003"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Explicit autoConnect false leaves the engine absent before disconnect; native active flag also remains false.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testExplicitAutoConnectFalseDoesNotCreateAnEngine"
+        }
+      ]
+    },
+    {
+      "id": "JS-007",
+      "upstream_ids": [
+        "JS-007"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "/foo and /bar reference the identical manager, then both disconnect. Native explicit manager construction replaces JS io() lookup; global lookup behavior remains an API boundary.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testDifferentNamespacesShareTheExplicitManager"
+        }
+      ]
+    },
+    {
+      "id": "JS-009",
+      "upstream_ids": [
+        "JS-009"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original pre-connect getAckDate with {test:true} receives a string acknowledgement from the real server; the native legacy NO ACK timeout sentinel is explicitly rejected.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testReceiveDateWithAck"
+        }
+      ]
+    },
+    {
+      "id": "JS-010",
+      "upstream_ids": [
+        "JS-010"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original pre-connect false request receives a server event containing Bool false, neither nil nor a truthy replacement.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testFalseSurvivesTheRoundTrip"
+        }
+      ]
+    },
+    {
+      "id": "JS-012",
+      "upstream_ids": [
+        "JS-012"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Root connects first; /foo is created and joined inside its connect callback; /foo connects while root stays connected, then both close.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testNamespaceCanJoinFromAnotherNamespacesConnectCallback"
+        }
+      ]
+    },
+    {
+      "id": "JS-013",
+      "upstream_ids": [
+        "JS-013"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Root disconnects in its first connect callback; /foo is created and joined inside root disconnect; /foo successfully connects and disconnects.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testNamespaceCanJoinFromAnotherNamespacesDisconnectCallback"
+        }
+      ]
+    },
+    {
+      "id": "JS-015",
+      "upstream_ids": [
+        "JS-015"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Initial connect disconnects; the one-shot disconnect callback reconnects synchronously; the second connect succeeds and disconnects. Exactly two connects.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testManualReconnectInsideTheDisconnectCallback"
+        }
+      ]
+    },
+    {
+      "id": "JS-029",
+      "upstream_ids": [
+        "JS-029"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real /foo and /asd namespaces share a manager. Closing /foo does not disconnect /asd; closing the last namespace then disconnects the manager and closes its engine. A native engine-close observer and closed-state assertion replace the JS manager close event bus.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testDisconnectingOneNamespaceKeepsTheOtherConnected"
+        }
+      ]
+    },
+    {
+      "id": "JS-036",
+      "upstream_ids": [
+        "JS-036"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original getDate request is emitted before connect; takeDate server event carries a String.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testEmitDateAsString"
+        }
+      ]
+    },
+    {
+      "id": "JS-037",
+      "upstream_ids": [
+        "JS-037"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original getDateObj request is emitted before connect; takeDateObj server event is a dictionary whose date field is a String.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testEmitDateInObject"
+        }
+      ]
+    },
+    {
+      "id": "JS-059",
+      "upstream_ids": [
+        "JS-059"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Default namespace SID is nonempty, equals the independently queried server SID and differs from the Engine.IO SID. The connected socket then disconnects.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testSocketIdIsClearedOnDisconnect"
+        }
+      ]
+    },
+    {
+      "id": "JS-060",
+      "upstream_ids": [
+        "JS-060"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Custom /foo namespace SID is nonempty, equals the independently queried server SID and differs from Engine.IO SID; root and /foo SIDs are distinct.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testSocketIdOnACustomNamespace"
+        }
+      ]
+    },
+    {
+      "id": "JS-061",
+      "upstream_ids": [
+        "JS-061"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "SID is already empty inside the disconnect callback after explicitly disconnecting a connected socket, not merely after waiting for the callback.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testSocketIdIsClearedOnDisconnect"
+        }
+      ]
+    },
+    {
+      "id": "JS-077",
+      "upstream_ids": [
+        "JS-077"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real /no namespace middleware refuses connection; connect_error contains the exact original Auth failed (custom namespace) message. Native payload representation replaces the JS Error instance.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testMiddlewareFailureOnCustomNamespaceIsReported"
+        }
+      ]
+    },
+    {
+      "id": "JS-078",
+      "upstream_ids": [
+        "JS-078"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real /with-data rejection includes the exact original message and data object with exactly code=401 and details=Invalid token. Native dictionary replaces JS Error.data representation.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testMiddlewareFailureCarriesItsErrorData"
+        }
+      ]
+    },
+    {
+      "id": "JS-079",
+      "upstream_ids": [
+        "JS-079"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "After /no middleware rejection force an Engine.IO reconnect; a sibling root reconnect and server processing barrier prove the new connection is active. Refused namespace reports exactly one connect_error and sends no additional CONNECT; explicit frame count is three.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testNoRejoinAfterAMiddlewareFailure"
+        }
+      ]
+    },
+    {
+      "id": "JS-080",
+      "upstream_ids": [
+        "JS-080"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "WebSocket-only first connect calls disconnect then connect in the same handler; reconnection succeeds and exactly one disconnect occurs before final cleanup.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testDisconnectThenReconnect"
+        }
+      ]
+    },
+    {
+      "id": "JS-083",
+      "upstream_ids": [
+        "JS-083"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Start connection then immediately await echo(123); real server acknowledgement resolves the async result with 123. Explicit connect replaces JS auto-connect, with no wait-for-connect barrier.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testEmitWithAckAwaitsTheAcknowledgement"
+        }
+      ]
+    },
+    {
+      "id": "JS-099",
+      "upstream_ids": [
+        "JS-099"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Start connection then await timed echo(42); real server acknowledgement returns 42 without throwing. Timeout uses native seconds and a CI-safe five-second success budget instead of JS 50ms; no wait-for-connect barrier.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testTimedEmitWithAckDoesNotTimeOutWhenTheServerAcknowledges"
+        }
+      ]
+    },
+    {
+      "id": "JS-001",
+      "upstream_ids": [
+        "JS-001"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Initially recovered is false; receive ordinary events to establish offset; forcibly close the real transport; reconnect preserves namespace SID and sets recovered true (both property and connect payload). Native server-side transport kill replaces direct JS engine.close, and missed-event replay is additionally verified.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/StateRecoveryE2ETest.swift",
+          "symbol": "StateRecoveryE2ETest.testA1_happyRecoveryDeliversMissedEvents"
+        }
+      ]
+    },
+    {
+      "id": "JS-028",
+      "upstream_ids": [
+        "JS-028"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Inject original root CONNECT with no sid/payload into the socket; exactly the incompatible-server connect_error is observed, connect does not fire and status does not become connected. Old protocol rejection remains supported; no old protocol implementation is required.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/JSParityUnitTest.swift",
+          "symbol": "JSParityUnitTest.testConnectPacketWithoutPayloadFiresConnectError"
+        }
+      ]
+    },
+    {
+      "id": "JS-084",
+      "upstream_ids": [
+        "JS-084"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original volatile getId request before connection never receives its callback; the following reliable request is buffered and acknowledged by a real server after connect. Native fixture event is server-socket-id; dropped untimed acknowledgement is additionally not retained.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testPreconnectVolatileAckIsDroppedButReliableAckCompletes"
+        }
+      ]
+    },
+    {
+      "id": "JS-085",
+      "upstream_ids": [
+        "JS-085"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Controlled engine writability covers connected busy pipe and disconnected pipe: volatile getId never sends or acknowledges, while reliable getId reaches the engine and its server-id acknowledgement completes. Explicit writability replaces the timing-dependent JS first-write backpressure setup; no buffer/ack registration for the dropped packet.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketVolatileTest.swift",
+          "symbol": "SocketVolatileTest.testDroppedVolatileAcknowledgementCannotBlockReliableAcknowledgement"
+        }
+      ]
+    },
+    {
+      "id": "JS-086",
+      "upstream_ids": [
+        "JS-086"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Repeat volatile server-ID request every 200ms across connection establishment until the real transport accepts it and the server acknowledgement succeeds; stop interval and check no retry-queue entry. Native fixture event is server-socket-id.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testVolatileAckEventuallySucceedsOnTheRealWritableTransport"
+        }
+      ]
+    },
+    {
+      "id": "JS-087",
+      "upstream_ids": [
+        "JS-087"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real /abc handshake reaches incoming catch-all with event name handshake and an object argument; lifecycle events do not pollute this observation.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testOriginalIncomingCatchAllPayloadPrependOrderAndRemoval"
+        }
+      ]
+    },
+    {
+      "id": "JS-088",
+      "upstream_ids": [
+        "JS-088"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original ordinary listener followed by two prepended listeners on /abc; server handshake invokes them in exact LIFO-prepend order 0,1,2.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testOriginalIncomingCatchAllPayloadPrependOrderAndRemoval"
+        }
+      ]
+    },
+    {
+      "id": "JS-089",
+      "upstream_ids": [
+        "JS-089"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Register then remove the sole catch-all by its native UUID; count is zero, removed callback must never fire, and a replacement receives the real /abc handshake.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testOriginalIncomingCatchAllPayloadPrependOrderAndRemoval"
+        }
+      ]
+    },
+    {
+      "id": "JS-090",
+      "upstream_ids": [
+        "JS-090"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "After real /abc connection, emit original my-event with String 123; outgoing catch-all receives the exact name and argument. Also repeated for an emit buffered before connection.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testOriginalOutgoingCatchAllPayloadAndPrependOrder"
+        }
+      ]
+    },
+    {
+      "id": "JS-092",
+      "upstream_ids": [
+        "JS-092"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Ordinary outgoing listener plus two prepended listeners observe original pre-connect my-event(123) in exact 0,1,2 order only after connection; also checked for an emit inside connect callback.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testOriginalOutgoingCatchAllPayloadAndPrependOrder"
+        }
+      ]
+    },
+    {
+      "id": "JS-014",
+      "upstream_ids": [
+        "JS-014"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Default reconnect is not overridden: a real established server transport is dropped; the socket observes disconnect, successful reconnect and namespace connect in that order, with a working server ACK afterward. Native explicit connect replaces JS autoConnect; server-side transport termination replaces engine.close and a connect barrier replaces the fixed 100 ms delay.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testNoErrorEventWhenAnEstablishedConnectionDrops"
+        }
+      ]
+    },
+    {
+      "id": "JS-016",
+      "upstream_ids": [
+        "JS-016"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Initial connect triggers disconnect; its callback calls connect reentrantly. After that manual connection a real transport drop must produce reconnect(attempt 1) before the namespace rejoins. Three total connects are asserted. Native socket lifecycle events expose manager events; a real handshake barrier replaces the JS 100 ms delay before engine termination.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testReconnectAutomaticallyAfterReconnectingManually"
+        }
+      ]
+    },
+    {
+      "id": "JS-017",
+      "upstream_ids": [
+        "JS-017"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real connectTimeout(0), two retries and reconnectFailed; connect is invoked inside the first reconnectFailed callback, then the second cycle must fail with a fresh two-attempt budget (four total attempts, two failures). Native one-second backoff replaces JS 10 ms and manager events are observed on the socket.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testAttemptReconnectsAfterAFailedReconnect"
+        }
+      ]
+    },
+    {
+      "id": "JS-018",
+      "upstream_ids": [
+        "JS-018"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real timeout(0), three retries, jitter 0.2: measure monotonic elapsed time from each opening error to reconnectAttempt, assert exactly [1,2,3], strictly increasing three actual intervals, then reconnectFailed. Native whole-second backoff scales the original 100 ms intervals by ten; the default cap does not truncate the third interval. Manager error is observed through native connectError.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testReconnectDelayIncreasesAcrossThreeRealTimeouts"
+        }
+      ]
+    },
+    {
+      "id": "JS-019",
+      "upstream_ids": [
+        "JS-019"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real opening timeout must occur, disconnect inside its error callback, then no reconnectAttempt over a window longer than the initial jittered retry delay. Native connectError exposes the opening error; seconds replace JS millisecond timing and the namespace is irrelevant because timeout precedes joining.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testNoReconnectWhenForceClosedDuringTimeout"
+        }
+      ]
+    },
+    {
+      "id": "JS-020",
+      "upstream_ids": [
+        "JS-020"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real timeout(0); disconnect in first reconnectAttempt, observe long enough for another retry, assert exactly one attempt. Native seconds scale the observation window and socket events expose manager events.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testStopReconnectingWhenForceClosed"
+        }
+      ]
+    },
+    {
+      "id": "JS-021",
+      "upstream_ids": [
+        "JS-021"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real timeout(0); disconnect and connect in the same first reconnectAttempt callback; await and assert a subsequent attempt. Native socket event API and seconds replace manager emitter and millisecond backoff; teardown closes the retrying socket.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testReconnectAfterStoppingReconnection"
+        }
+      ]
+    },
+    {
+      "id": "JS-022",
+      "upstream_ids": [
+        "JS-022"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Shared manager with root and /asd first connected; terminate real transport, disconnect root inside reconnectAttempt, await /asd rejoining, then assert root still has exactly one connect while /asd has reconnected. Native socket lifecycle events expose manager events; handshake barriers and a server-side transport kill replace timed engine.close.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testStopReconnectingOnOneSocketButNotTheOther"
+        }
+      ]
+    },
+    {
+      "id": "JS-023",
+      "upstream_ids": [
+        "JS-023"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real timeout(0), reconnectAttempts(2), await reconnectFailed and assert attempts exactly [1,2]. Native socket exposes manager lifecycle events; one-second backoff replaces JS 10 ms; namespace name cannot affect an opening timeout.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testReconnectTwiceThenFailWithImmediateTimeout"
+        }
+      ]
+    },
+    {
+      "id": "JS-024",
+      "upstream_ids": [
+        "JS-024"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original executable assertions: timeout(0), reconnectAttempts(2), reconnectAttempt carries sequential numbers 1 then 2, and reconnectFailed ends the cycle with exactly two attempts. All are checked together against real timers. Native socket lifecycle subscription replaces the JS manager event emitter, not an exclusion.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testReconnectTwiceThenFailWithImmediateTimeout"
+        }
+      ]
+    },
+    {
+      "id": "JS-025",
+      "upstream_ids": [
+        "JS-025"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original repeats the timeout(0), two attempts, sequential 1-based reconnectAttempt payload and reconnectFailed scenario. The native test asserts the exact [1,2] sequence at failure with real opening timers; socket subscriptions expose manager events.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testReconnectTwiceThenFailWithImmediateTimeout"
+        }
+      ]
+    },
+    {
+      "id": "JS-026",
+      "upstream_ids": [
+        "JS-026"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Connect real /valid with reconnect enabled and default opening timeout, then observe beyond the first retry interval: connected status and zero reconnectAttempt callbacks. Native seconds scale the original observation period.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testNoReconnectAttemptWhenConnectingToCorrectPort"
+        }
+      ]
+    },
+    {
+      "id": "JS-030",
+      "upstream_ids": [
+        "JS-030"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real refused port produces reconnectError after the first attempt; disable reconnects in that error callback (not reconnectAttempt), then assert that callback ran and only one attempt occurred over the observation window. Native socket emitter carries manager events and seconds replace JS millisecond timing.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testStopTryingToReconnect"
+        }
+      ]
+    },
+    {
+      "id": "JS-031",
+      "upstream_ids": [
+        "JS-031"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real refused localhost port with retries enabled and budget two: await reconnectFailed and assert exactly two attempts. The concrete unused port and namespace spelling differ; connection refusal occurs before namespace join. Native socket receives manager events.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testReconnectTwiceThenFailWithIncorrectAddress"
+        }
+      ]
+    },
+    {
+      "id": "JS-032",
+      "upstream_ids": [
+        "JS-032"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real refused localhost port with reconnects false must emit connectError and report terminal failure, then zero retry attempts throughout an observation window longer than the configured retry interval. Native terminal error/disconnect representations are accepted only with a non-nil reason.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testNoReconnectWhenDisabledWithIncorrectPort"
+        }
+      ]
+    },
+    {
+      "id": "JS-033",
+      "upstream_ids": [
+        "JS-033"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real refused port and two-attempt budget: asynchronously open another namespace during the initial backoff; await reconnectFailed and assert second namespace was opened and exactly two attempts occurred. Native explicit connect replaces JS manager autoConnect; delay is scaled within the initial native backoff.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testReconnectTwiceAfterOpeningAnotherSocketAsynchronously"
+        }
+      ]
+    },
+    {
+      "id": "JS-046",
+      "upstream_ids": [
+        "JS-046"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "AutoConnect enabled: first connect disconnects; inside that disconnect callback fetch the same namespace, assert object identity and active true immediately, then await its second connect. Native manager.defaultSocket uses the same namespace cache as socket(forNamespace:).",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testReopenACachedSocket"
+        }
+      ]
+    },
+    {
+      "id": "JS-094",
+      "upstream_ids": [
+        "JS-094"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Disconnected emit of event with a 50 ms timeout: assert timeout error and zero buffered packets inside the timeout callback, then simulate CONNECT and assert no expired packet is sent. Native testRetainedBuffers exposes the original private sendBuffer assertion; this local timer scenario needs no server.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketSendBufferTest.swift",
+          "symbol": "SocketSendBufferTest.testATimedOutEmitIsDroppedFromTheBuffer"
+        }
+      ]
+    },
+    {
+      "id": "JS-095",
+      "upstream_ids": [
+        "JS-095"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Start connection to the real server and immediately emit unknown with a 50 ms explicit timeout, without a connect barrier; callback must report SocketAckError.timeout. Native explicit connect replaces JS autoConnect.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testCallbackUnknownEventTimesOutAgainstTheRealServer"
+        }
+      ]
+    },
+    {
+      "id": "JS-096",
+      "upstream_ids": [
+        "JS-096"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Start real connection, immediately emit echo 42 with zero timeout, assert timeout error and exactly one callback after 200 ms. Additionally repeat on an established connection, wait for a subsequent server ACK as an ordered wire barrier behind the expired echo ACK, and assert exactly one callback and no pending ACK. Count every callback regardless of outcome, so a second successful ACK cannot evade the negative assertion.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testZeroTimeoutEchoCallsBackExactlyOnce"
+        }
+      ]
+    },
+    {
+      "id": "JS-097",
+      "upstream_ids": [
+        "JS-097"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real server: start connect and emit echo 42 immediately, without awaiting connect; explicit timed callback must receive nil error and integer 42. Native timeout scaled to five seconds for CI, preserving before-deadline semantics; default-timeout emit and ping/pong are not used as substitutes.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testCallbackEchoAcknowledgesTheOriginalIntegerBeforeTimeout"
+        }
+      ]
+    },
+    {
+      "id": "JS-098",
+      "upstream_ids": [
+        "JS-098"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real server: start connect and immediately await timeout(50 ms).emitWithAck(unknown); resolution fails the test, rejection must be SocketAckError.timeout. Swift async/throws replaces JS promise rejection.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testAsyncUnknownEventTimesOutAgainstTheRealServer"
+        }
+      ]
+    },
+    {
+      "id": "JS-100",
+      "upstream_ids": [
+        "JS-100"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Configure ackTimeout 50 ms, start real connect and immediately emit unknown with a plain callback and no explicit timeout; assert SocketAckError.timeout. Native manager default is inherited by the socket; explicit connect replaces autoConnect.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testDefaultAckTimeoutApplies"
+        }
+      ]
+    },
+    {
+      "id": "JS-101",
+      "upstream_ids": [
+        "JS-101"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Connect to real server, emit echo a with modern untimed ACK callback and immediately enqueue disconnect on the same handle queue. Assert empty pending ACK registry and inverted expectation proving callback never fires after disconnect, including delayed server responses. Native error-first callback is the supported plain ACK surface; legacy sentinel API is not used as evidence.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testANoTimeoutAckIsNotCalledAfterDisconnecting"
+        }
+      ]
+    },
+    {
+      "id": "JS-105",
+      "upstream_ids": [
+        "JS-105"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real established connection: await timeout(10 s).emitWithAck(echo,a); outgoing listener queues disconnect immediately after send registration, before a server ACK can return. Assert actual send, rejection with SocketAckError.disconnected within five seconds (before timeout), and empty ACK registry. This replaces synthetic didDisconnect-only evidence with the public disconnect API.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testAsyncTimedEchoRejectsWhenDisconnectedImmediatelyAfterSending"
+        }
+      ]
+    },
+    {
+      "id": "JS-027",
+      "upstream_ids": [
+        "JS-027"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real /foo connect callback starts /asd and disconnects /foo in that same callback; await /asd connect and assert it is connected while /foo is disconnected. Native explicit connect replaces implicit JS manager autoConnect.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testConnectWhileDisconnectingAnotherSocket"
+        }
+      ]
+    },
+    {
+      "id": "JS-039",
+      "upstream_ids": [
+        "JS-039"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Start connect and emit doge before joining; actual server returns binary bytes for asdfasdf. Assert Data type and exact bytes, separately on polling and WebSocket. Foundation.Data is the native binary representation replacing ArrayBuffer.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testOriginalBinaryReceptionUsesDataOnBothTransports"
+        }
+      ]
+    },
+    {
+      "id": "JS-040",
+      "upstream_ids": [
+        "JS-040"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Emit buffa while connecting with the exact bytes decoded from original base64 asdfasdf. Await buffack, emitted only if the real server received a Buffer; run on polling and WebSocket. Data replaces ArrayBuffer, with identical bytes.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testOriginalBinarySendIsDecodedAsBinaryByTheServer"
+        }
+      ]
+    },
+    {
+      "id": "JS-041",
+      "upstream_ids": [
+        "JS-041"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Emit jsonbuff before connect with hello=lol, goodbye=gotcha and the original permissively decoded howdy bytes [134,140,29]. Real server checks both strings and Buffer type before emitting jsonbuff-ack. Run polling and WebSocket; native Data replaces ArrayBuffer.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testOriginalMixedJSONAndBinarySendPreservesEveryField"
+        }
+      ]
+    },
+    {
+      "id": "JS-042",
+      "upstream_ids": [
+        "JS-042"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Start connect and emit original abuff1 binary [105,187,159,127], then abuff2 with please arrive second. Real server only emits abuff2-ack when abuff1 arrived first as binary. Native Data replaces ArrayBuffer; no artificial connection barrier.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testBinaryEventsArriveInOrder"
+        }
+      ]
+    },
+    {
+      "id": "JS-047",
+      "upstream_ids": [
+        "JS-047"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "AutoConnect manager: fetch same active root namespace twice before handshake completion and assert identity. On connect, disconnect and assert exact packet-create sequence [0,1] through a recording subclass of the real SocketEngine. Only explicit native root namespace spelling is canonicalized: 0/, to 0 and 1/, to 1.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testFetchingTheSameNamespaceTwiceSendsOneConnectFrame"
+        }
+      ]
+    },
+    {
+      "id": "JS-048",
+      "upstream_ids": [
+        "JS-048"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "AutoConnect manager opens root and /foo, then disconnects both from root connect callback. Assert exact real engine packet-create sequence [0,0/foo,,1,1/foo,], including no duplicate CONNECTs and subscription order. Native explicit root CONNECT/DISCONNECT namespace syntax alone is canonicalized.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testTwoNamespacesSendOneConnectFrameEach"
+        }
+      ]
+    },
+    {
+      "id": "JS-062",
+      "upstream_ids": [
+        "JS-062"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Begin real connect with timeout 100 ms, immediately disconnect, and observe 1.5 seconds (longer than original 300 ms). Assert neither error nor connectError occurred; native socket error events expose manager opening errors.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testNoErrorWhenDisconnectingWhileStillOpening"
+        }
+      ]
+    },
+    {
+      "id": "JS-063",
+      "upstream_ids": [
+        "JS-063"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Connect real refused localhost:9823 with 100 ms opening timeout, require connectError, then disconnect in that callback. Native explicit connect replaces autoConnect.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testOpeningFailureEmitsConnectError"
+        }
+      ]
+    },
+    {
+      "id": "JS-064",
+      "upstream_ids": [
+        "JS-064"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real polling-only transport with opening timeout zero must emit connectError with exact timeout message. Native String error payload replaces JS Error.message; reconnect is disabled to isolate the first failure.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testConnectErrorOnOpenTimeoutPolling"
+        }
+      ]
+    },
+    {
+      "id": "JS-065",
+      "upstream_ids": [
+        "JS-065"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real WebSocket-only transport with opening timeout zero must emit connectError with exact timeout message. Native String error payload replaces JS Error.message; reconnect is disabled to isolate the first failure.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testConnectErrorOnOpenTimeoutWebsocket"
+        }
+      ]
+    },
+    {
+      "id": "JS-066",
+      "upstream_ids": [
+        "JS-066"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real established transport drop: collect connectError events and require none through disconnect, successful reconnect and a following server ACK barrier. Also assert exact lifecycle order. Server-side transport termination replaces JS engine.close; native runtime error diagnostics are separate from connectError.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testNoErrorEventWhenAnEstablishedConnectionDrops"
+        }
+      ]
+    },
+    {
+      "id": "JS-067",
+      "upstream_ids": [
+        "JS-067"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real established socket ID captured, transport terminated, require reconnectAttempt observing cleared ID, reconnect observing an ID different from the old value, and subsequent namespace connect with a fresh ID. Require that attempt and reconnect callbacks actually ran. Native socket lifecycle emitter exposes manager events.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testSocketIdChangesOnReconnection"
+        }
+      ]
+    },
+    {
+      "id": "JS-070",
+      "upstream_ids": [
+        "JS-070"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Configure query object e=f, start real connect and immediately request getHandshake by ACK before connect completes; assert handshake.query.e is f. Native connectParams and legacy ACK callback replace JS query and emit callback.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testQueryOptionAcceptsAnObjectOnTheDefaultNamespace"
+        }
+      ]
+    },
+    {
+      "id": "JS-071",
+      "upstream_ids": [
+        "JS-071"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "URL query c=d on root, start real connect and immediately request getHandshake by ACK; assert handshake.query.c equals d. No pre-emit connect barrier.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testQueryOptionAcceptsAQueryStringOnTheDefaultNamespace"
+        }
+      ]
+    },
+    {
+      "id": "JS-072",
+      "upstream_ids": [
+        "JS-072"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real /abc namespace with connectParams a=b receives unsolicited handshake event and asserts query.a is b. Native explicit namespace selection replaces JS namespace in URL.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testQueryOptionAcceptsAnObjectOnACustomNamespace"
+        }
+      ]
+    },
+    {
+      "id": "JS-073",
+      "upstream_ids": [
+        "JS-073"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real /abc namespace with URL query b=c&d=e receives handshake and asserts both exact query values. Namespace is selected explicitly, URL retains the query.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testQueryOptionAcceptsAQueryStringOnACustomNamespace"
+        }
+      ]
+    },
+    {
+      "id": "JS-074",
+      "upstream_ids": [
+        "JS-074"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real /abc handshake receives exact query key &a and value &=?a without URL delimiter corruption; asserts decoded value equals original. Native connectParams replaces JS query object.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testQueryParametersAreProperlyEncoded"
+        }
+      ]
+    },
+    {
+      "id": "JS-055",
+      "upstream_ids": [
+        "JS-055"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original retry budget one and emits echo 1,2,3 before connect: immediate queue lengths 1,2,3; ACK-time lengths 2,1,0; final nil error and integer 3; complete ordered ACK values. Real engine packet-create recorder additionally asserts CONNECT, ACK IDs 0/1/2 with exact echo payloads, then DISCONNECT. Native positive deadline scaled to two seconds; only explicit root CONNECT/DISCONNECT namespace is canonicalized.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityRetryE2ETest.swift",
+          "symbol": "JSParityRetryE2ETest.testRetryPreservesTheOrderOfThePackets"
+        }
+      ]
+    },
+    {
+      "id": "JS-283",
+      "upstream_ids": [
+        "JS-283"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Encode message=test through the real polling packet encoder, assert exact 4test frame and POST body, decode and assert exactly one text delivery test with no error. Native client dispatch replaces returned JS packet object; no hand-constructed type-prefix expression substitutes for the encoder.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketEnginePacketCodecTest.swift",
+          "symbol": "SocketEnginePacketCodecTest.testEncodeDecodeAString"
+        }
+      ]
+    },
+    {
+      "id": "JS-284",
+      "upstream_ids": [
+        "JS-284"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "For each original malformed single packet (empty string and a123), require exactly parser error, no text delivery and closed engine. Native engine error callback replaces JS error packet {type:error,data:parser error}; closure is an additional transport assertion.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketEnginePacketCodecTest.swift",
+          "symbol": "SocketEnginePacketCodecTest.testFailToDecodeAMalformedPacket"
+        }
+      ]
+    },
+    {
+      "id": "JS-286",
+      "upstream_ids": [
+        "JS-286"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Decode each original malformed payload ({, {}, [\"a123\", \"a456\"]) through parsePollingMessage, assert exact single parser error, transport-error close and no deliveries. Also verify the empty payload edge case from decodePayload implementation, explicitly additional to the three original inputs.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketEnginePacketCodecTest.swift",
+          "symbol": "SocketEnginePacketCodecTest.testMalformedPollingPayloadReportsParserErrorAndCloses"
+        }
+      ]
+    },
+    {
+      "id": "JS-302",
+      "upstream_ids": [
+        "JS-302"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original [1,2,3,4] binary bytes encoded with the production createBinaryDataForSend protocol implementation in WebSocket mode return raw Data without prefix; decode as binary and assert exactly those bytes. Foundation.Data replaces Buffer; callbacks replace returned packet object.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketEnginePacketCodecTest.swift",
+          "symbol": "SocketEnginePacketCodecTest.testEncodeDecodeABuffer"
+        }
+      ]
+    },
+    {
+      "id": "JS-303",
+      "upstream_ids": [
+        "JS-303"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original binary bytes [1,2,3,4] encoded through the production binary encoder in polling mode produce exactly bAQIDBA==; decoding dispatches the exact original Data. Native Data replaces Buffer and binary callback replaces returned message packet.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketEnginePacketCodecTest.swift",
+          "symbol": "SocketEnginePacketCodecTest.testEncodeDecodeABufferAsBase64"
+        }
+      ]
+    },
+    {
+      "id": "JS-308",
+      "upstream_ids": [
+        "JS-308"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Decode exact [1,2,3,4] binary input as Data; assert byte equality and no text delivery. Foundation.Data is the native binary representation corresponding to both ArrayBuffer input and output; no JS type constructor is required.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketEnginePacketCodecTest.swift",
+          "symbol": "SocketEnginePacketCodecTest.testDecodeBinaryAsData"
+        }
+      ]
+    },
+    {
+      "id": "JS-309",
+      "upstream_ids": [
+        "JS-309"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Encode text test and binary [1,2,3,4] through real sendPollMessage and actual POST joiner: exact 4test record-separator bAQIDBA==. Decode payload, assert exact text and binary values and combined delivery sequence text then binary. Separate per-type arrays alone are not accepted as order proof.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketEnginePacketCodecTest.swift",
+          "symbol": "SocketEnginePacketCodecTest.testEncodeDecodeAStringPlusBufferPayload"
+        }
+      ]
+    },
+    {
+      "id": "JS-038",
+      "upstream_ids": [
+        "JS-038"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Request original getbin before connect on forced-base64 polling; assert b64=1 transport negotiation and received bytes re-encode exactly as YXNkZmFzZGY=. Native Data replaces the legacy JS {base64:true,data:...} wrapper used when ArrayBuffer/Blob are unavailable. The transferable binary content and base64 transport are tested; Swift does not emulate absence of native binary storage.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testOriginalBase64FallbackDeliversTheSameBinaryData"
+        }
+      ]
+    },
+    {
+      "id": "JS-081",
+      "upstream_ids": [
+        "JS-081"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "On namespace /no, emit original reserved disconnecting event with goodbye; assert exactly one synchronous error containing the exact quoted name and reserved-event message, plus no buffered packet. Native nonthrowing emit reports through error event rather than a JS throw; rejection and diagnostic are preserved.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketReservedEventTest.swift",
+          "symbol": "SocketReservedEventTest.testOriginalReservedDisconnectingEmitFailsBeforeBuffering"
+        }
+      ]
+    },
+    {
+      "id": "JS-271",
+      "upstream_ids": [
+        "JS-271"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "All eleven original invalid JSON/payload inputs must throw native invalidDataArray; original five invalid attachment headers must throw invalidPacket; 999 string must throw invalidPacketType. Native typed errors replace the corresponding JS error-message categories. Passing integer 999 to parseString is statically unrepresentable (String required; Data has a separate entry point), not a silently accepted input.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketProtocolSafetyTest.swift",
+          "symbol": "SocketProtocolSafetyTest.testOriginalParsingErrorsPreserveNativeErrorCategories"
+        }
+      ]
+    },
+    {
+      "id": "JS-273",
+      "upstream_ids": [
+        "JS-273"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Check original valid CONNECT without payload (type connect, namespace root, empty native data), then every original invalid payload shape: scalar/array CONNECT, payload-bearing DISCONNECT, scalar/object EVENT, object pretending toString, boolean/null event names and reserved names. Original packet objects are represented as their wire headers plus unchanged JSON payloads; native throwing decoder is the validity boundary instead of a standalone Boolean helper.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketProtocolSafetyTest.swift",
+          "symbol": "SocketProtocolSafetyTest.testOriginalPacketValidityPayloadCases"
+        }
+      ]
+    },
+    {
+      "id": "JS-149",
+      "upstream_ids": [
+        "JS-149"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real default Engine.IO connection opens; close then immediately send hi, await close and local refused-write completion, observe 200 ms with no incoming application packet. Require empty outgoing queue and no 4hi in actual server POST bodies or WebSocket frames. Native absence of queued/wire packet replaces JS packetCreate negative event assertion.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testSendImmediatelyAfterRealCloseDoesNotCreateAMessage"
+        }
+      ]
+    },
+    {
+      "id": "JS-150",
+      "upstream_ids": [
+        "JS-150"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real polling server maxPayload 100: send original a*99, b*30, c*30, d*35, euro*33 and f*99, require all six exact echoed messages in order. Assert multiple POST batches and every observed body at most 100 UTF-8 bytes. This is raw Engine.IO, not a substitute Socket.IO envelope test.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testOriginalSixMessagesRespectMaxPayloadIncludingUTF8"
+        }
+      ]
+    },
+    {
+      "id": "JS-151",
+      "upstream_ids": [
+        "JS-151"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Real polling maxPayload 100: send a*101 followed immediately by b, require transport-error closure with HTTP 413 for the rejected first write. Oversized first packet is sent rather than silently dropped or preventing error completion. Native typed close detail replaces JS close event.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testOversizePollingReports413AndCloseDetail"
+        }
+      ]
+    },
+    {
+      "id": "JS-049",
+      "upstream_ids": [
+        "JS-049"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Inject bad data through the manager engine-data entry point on a real connection. Assert parse-error disconnect, reconnect signal before reconnection, new engine object, retired engine closed, and different namespace SID. Listener setup uses the native namespace connect callback; the original engine identity and closed-state assertions are explicit.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/JSParityE2ETest.swift",
+          "symbol": "JSParityE2ETest.testParseErrorClosesEngineAndReconnectsWithFreshSession"
+        }
+      ]
+    },
+    {
+      "id": "JS-131",
+      "upstream_ids": [
+        "JS-131"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Polling-only raw Engine.IO send of bytes 0...4 yields one binary Data echo with the same bytes, followed by an additional empty-Data regression. No Socket.IO header or synthetic extra text message. Data is the native equivalent of the original ArrayBuffer/typed bytes.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testBinaryDataPolling"
+        }
+      ]
+    },
+    {
+      "id": "JS-134",
+      "upstream_ids": [
+        "JS-134"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Polling only, advertised maxPayload=100, five raw packets in original order: 72 binary bytes, 20 binary bytes, twenty a characters, 20 binary bytes, 72 binary bytes. Assert exactly five echoes with matching types/bytes/order and every observed POST <=100 bytes. Data replaces typed-array/ArrayBuffer/Blob/Node Buffer; initialized zero bytes also make the original allocUnsafe case deterministic.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testBinaryMaxPayloadBatching"
+        }
+      ]
+    },
+    {
+      "id": "JS-177",
+      "upstream_ids": [
+        "JS-177"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Polling only, advertised maxPayload=100, five raw packets in original order: 72 binary bytes, 20 binary bytes, twenty a characters, 20 binary bytes, 72 binary bytes. Assert exactly five echoes with matching types/bytes/order and every observed POST <=100 bytes. Data replaces typed-array/ArrayBuffer/Blob/Node Buffer; initialized zero bytes also make the original allocUnsafe case deterministic.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testBinaryMaxPayloadBatching"
+        }
+      ]
+    },
+    {
+      "id": "JS-135",
+      "upstream_ids": [
+        "JS-135"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Start with default polling/WebSocket transports; await the server marker emitted after actual upgrade and assert local polling=false/wsConnected=true. Send one raw binary packet containing bytes 0...4; assert one binary Data echo with identical bytes and actual binary WebSocket frame observation. Data replaces Blob/FileReader/ArrayBuffer representation, retaining the complete byte and type contract.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testBinaryAfterActualTransportUpgrade"
+        }
+      ]
+    },
+    {
+      "id": "JS-142",
+      "upstream_ids": [
+        "JS-142"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Start with default polling/WebSocket transports; await the server marker emitted after actual upgrade and assert local polling=false/wsConnected=true. Send one raw binary packet containing bytes 0...4; assert one binary Data echo with identical bytes and actual binary WebSocket frame observation. Data replaces Blob/FileReader/ArrayBuffer representation, retaining the complete byte and type contract.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testBinaryAfterActualTransportUpgrade"
+        }
+      ]
+    },
+    {
+      "id": "JS-143",
+      "upstream_ids": [
+        "JS-143"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Start with default polling/WebSocket transports; await the server marker emitted after actual upgrade and assert local polling=false/wsConnected=true. Send one raw binary packet containing bytes 0...4; assert one binary Data echo with identical bytes and actual binary WebSocket frame observation. Data replaces Blob/FileReader/ArrayBuffer representation, retaining the complete byte and type contract.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testBinaryAfterActualTransportUpgrade"
+        }
+      ]
+    },
+    {
+      "id": "JS-137",
+      "upstream_ids": [
+        "JS-137"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Default transports with forceBase64=true, actual polling-to-WebSocket upgrade before sending. Raw bytes 0...4 and an additional empty binary packet echo as Data in order, with exact bytes and no extra header. Observe base64 text frames bAAECAwQ= and b, and no client binary frames. Data replaces ArrayBuffer/Blob.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testForcedBase64AfterActualTransportUpgrade"
+        }
+      ]
+    },
+    {
+      "id": "JS-144",
+      "upstream_ids": [
+        "JS-144"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Default transports with forceBase64=true, actual polling-to-WebSocket upgrade before sending. Raw bytes 0...4 and an additional empty binary packet echo as Data in order, with exact bytes and no extra header. Observe base64 text frames bAAECAwQ= and b, and no client binary frames. Data replaces ArrayBuffer/Blob.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testForcedBase64AfterActualTransportUpgrade"
+        }
+      ]
+    },
+    {
+      "id": "JS-139",
+      "upstream_ids": [
+        "JS-139"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Default transports, send bytes 0...4 immediately on Engine.IO open, and assert one raw binary Data echo with identical bytes. Data replaces both typed-array/Blob input and Blob/FileReader/ArrayBuffer output; no artificial forced transport or text attachment header.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testBinarySentOnOpenWithDefaultTransports"
+        }
+      ]
+    },
+    {
+      "id": "JS-140",
+      "upstream_ids": [
+        "JS-140"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Default transports, send bytes 0...4 immediately on Engine.IO open, and assert one raw binary Data echo with identical bytes. Data replaces both typed-array/Blob input and Blob/FileReader/ArrayBuffer output; no artificial forced transport or text attachment header.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testBinarySentOnOpenWithDefaultTransports"
+        }
+      ]
+    },
+    {
+      "id": "JS-153",
+      "upstream_ids": [
+        "JS-153"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Complete WebSocket probe while a polling GET remains outstanding; assert fastUpgrade=true. Queue text and raw binary, request close, assert connected and no close yet. Later writes complete locally without extending the queue or reaching the wire. Settle GET; assert exact probe, upgrade, buffered text, binary, close frame order; upgrade callback precedes the single close; both buffers empty and binary completion exactly once. Native controlled transport/pause completion replaces event-loop timing and exposes every upstream ordering/buffer/negative assertion.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketNativeEngineTest.swift",
+          "symbol": "SocketNativeEngineTest.testCloseDeferredDuringUpgradeFlushesOverWebSocketAfterUpgrade"
+        }
+      ]
+    },
+    {
+      "id": "JS-155",
+      "upstream_ids": [
+        "JS-155"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Complete WebSocket probe while a polling GET remains outstanding; assert fastUpgrade=true. Queue text and raw binary, request close, assert connected and no close yet. Later writes complete locally without extending the queue or reaching the wire. Settle GET; assert exact probe, upgrade, buffered text, binary, close frame order; upgrade callback precedes the single close; both buffers empty and binary completion exactly once. Native controlled transport/pause completion replaces event-loop timing and exposes every upstream ordering/buffer/negative assertion.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketNativeEngineTest.swift",
+          "symbol": "SocketNativeEngineTest.testCloseDeferredDuringUpgradeFlushesOverWebSocketAfterUpgrade"
+        }
+      ]
+    },
+    {
+      "id": "JS-156",
+      "upstream_ids": [
+        "JS-156"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Complete WebSocket probe while a polling GET remains outstanding; assert fastUpgrade=true. Queue text and raw binary, request close, assert connected and no close yet. Later writes complete locally without extending the queue or reaching the wire. Settle GET; assert exact probe, upgrade, buffered text, binary, close frame order; upgrade callback precedes the single close; both buffers empty and binary completion exactly once. Native controlled transport/pause completion replaces event-loop timing and exposes every upstream ordering/buffer/negative assertion.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketNativeEngineTest.swift",
+          "symbol": "SocketNativeEngineTest.testCloseDeferredDuringUpgradeFlushesOverWebSocketAfterUpgrade"
+        }
+      ]
+    },
+    {
+      "id": "JS-154",
+      "upstream_ids": [
+        "JS-154"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Successful candidate probe with outstanding polling GET; request deferred close, then fail the active polling transport using the engine error entry point. Assert upgradeError before close, transport-error close exactly once, candidate aborted, queue empty, and no duplicate callbacks from late candidate failure. This follows the original active-transport failure rather than substituting a candidate-only fallback.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketNativeEngineTest.swift",
+          "symbol": "SocketNativeEngineTest.testActivePollingFailureReportsUpgradeErrorBeforeDeferredClose"
+        }
+      ]
+    },
+    {
+      "id": "JS-198",
+      "upstream_ids": [
+        "JS-198"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Assert hasPingExpired=false before open and immediately after. Use controlled monotonic clock to expire deadline; three successive reads return true with no synchronous close, then exactly one deferred ping timeout close. Additional ping-reset checks retain the original repeated-expiry and close-reason assertions.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketNativeEngineTest.swift",
+          "symbol": "SocketNativeEngineTest.testOnlyPingResetsTheDeadlineAndExpiredChecksCloseOnce"
+        }
+      ]
+    },
+    {
+      "id": "JS-209",
+      "upstream_ids": [
+        "JS-209"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original localhost, /engine.io, timestampRequests=true, timestampParam=t. Assert http scheme, host, default port omission, exact no-trailing-slash path, one nonempty t value matching original [0-9A-Za-z_-]+ alphabet. Native engine transport/EIO query fields are additional required handshake fields; query item ordering is not treated as semantic.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketRemainingParityTest.swift",
+          "symbol": "SocketRemainingParityTest.testOriginalPollingTimestampURI"
+        }
+      ]
+    },
+    {
+      "id": "JS-214",
+      "upstream_ids": [
+        "JS-214"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Original localhost, /engine.io, timestampRequests=true, timestampParam=woot. Assert ws scheme, host, default port omission, exact no-trailing-slash path, one nonempty woot value matching original alphabet. Native required transport/EIO query fields are retained; query ordering is normalized.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketRemainingParityTest.swift",
+          "symbol": "SocketRemainingParityTest.testOriginalWebSocketTimestampURI"
+        }
+      ]
+    },
+    {
+      "id": "JS-219",
+      "upstream_ids": [
+        "JS-219"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Pass the complete original custom-header and explicit Cookie dictionary. Assert engine retains the exact value dictionary and the real WebSocket upgrade request contains every original header/value unchanged. Swift dictionary value equality replaces JS object identity; public upstream fixture strings are not credentials.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testOriginalExtraHeadersReachWebSocket"
+        }
+      ]
+    },
+    {
+      "id": "JS-220",
+      "upstream_ids": [
+        "JS-220"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Polling configured with the complete original custom-header and explicit Cookie dictionary. Assert retained dictionary equality and every original header/value on actual GET and POST. Native engine options/URLSession replace nested JS polling options/XHR and object identity; browser CORS is outside this native representation contract.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testExtraHeadersReachPollingGETAndPOST"
+        }
+      ]
+    },
+    {
+      "id": "JS-223",
+      "upstream_ids": [
+        "JS-223"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Polling configured with the complete original custom-header and explicit Cookie dictionary. Assert retained dictionary equality and every original header/value on actual GET and POST. Native engine options/URLSession replace nested JS polling options/XHR and object identity; browser CORS is outside this native representation contract.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/E2E/EngineRemainingParityE2ETest.swift",
+          "symbol": "EngineRemainingParityE2ETest.testExtraHeadersReachPollingGETAndPOST"
+        }
+      ]
+    },
+    {
+      "id": "JS-285",
+      "upstream_ids": [
+        "JS-285"
+      ],
+      "kind": "native-assertion-equivalent",
+      "assertions": "Encode original [open(no data),close(no data),ping probe,pong probe,message test] into exact 0 RS 1 RS 2probe RS 3probe RS 4test. Decode all five packet types/data with the shared production codec, including packets after CLOSE. Transport lifecycle suppression after CLOSE remains a separate tested rule, no longer an excuse to omit parser assertions.",
+      "tests": [
+        {
+          "path": "Tests/TestSocketIO/SocketEnginePacketCodecTest.swift",
+          "symbol": "SocketEnginePacketCodecTest.testOriginalAllPacketTypesRoundTripIndependentlyOfLifecycle"
+        }
+      ]
+    }
+  ],
+  "remaining_review": {
+    "baseline_sha": "c905f4f869bdd208ad04269a855e3ac2438abddd",
+    "original_unmapped_ids": [
+      "JS-133",
+      "JS-137",
+      "JS-138",
+      "JS-139",
+      "JS-140",
+      "JS-141",
+      "JS-142",
+      "JS-143",
+      "JS-144",
+      "JS-145",
+      "JS-146",
+      "JS-147",
+      "JS-148",
+      "JS-158",
+      "JS-163",
+      "JS-164",
+      "JS-165",
+      "JS-168",
+      "JS-169",
+      "JS-170",
+      "JS-171",
+      "JS-172",
+      "JS-178",
+      "JS-179",
+      "JS-180",
+      "JS-181",
+      "JS-182",
+      "JS-183",
+      "JS-186",
+      "JS-194",
+      "JS-195",
+      "JS-196",
+      "JS-197",
+      "JS-201",
+      "JS-202",
+      "JS-220",
+      "JS-223",
+      "JS-240",
+      "JS-241",
+      "JS-242",
+      "JS-246",
+      "JS-247",
+      "JS-248",
+      "JS-257"
+    ],
+    "dispositions": [
+      {
+        "id": "JS-133",
+        "status": "focused-regression",
+        "reason": "Default polling/WebSocket transport list with forceBase64=true. Send bytes 0...4 on open and assert exactly one binary Data echo with identical bytes. Unlike the earlier mapping, no forced-polling-only configuration or attachment header changes the original scenario.",
+        "contract": "remaining-js-133"
+      },
+      {
+        "id": "JS-137",
+        "status": "focused-regression",
+        "reason": "Direct WebSocket and completed polling-to-WebSocket upgrade return bytes 0...4 and empty Data. Actual client frames are base64 text, not binary frames; handshake requests b64=1. Native Data replaces ArrayBuffer/Blob.",
+        "contract": "remaining-js-137"
+      },
+      {
+        "id": "JS-138",
+        "status": "platform-specific",
+        "reason": "Deleting JavaScript ArrayBuffer and receiving its browser fallback wrapper has no native runtime analogue. Swift always receives Data; the transferable base64 wire path is tested under JS-133."
+      },
+      {
+        "id": "JS-139",
+        "status": "focused-regression",
+        "reason": "Native Data replaces Blob input/output. Bytes 0...4 and zero-length bytes survive the raw polling round trip in order; the engine API uses a separate text header.",
+        "contract": "remaining-js-139"
+      },
+      {
+        "id": "JS-140",
+        "status": "focused-regression",
+        "reason": "Native Data replaces Blob input/output. Bytes 0...4 and zero-length bytes survive the raw polling round trip in order; the engine API uses a separate text header.",
+        "contract": "remaining-js-139"
+      },
+      {
+        "id": "JS-141",
+        "status": "focused-regression",
+        "reason": "Polling only, advertised maxPayload=100, five raw packets in original order: 72 binary bytes, 20 binary bytes, twenty a characters, 20 binary bytes, 72 binary bytes. Assert exactly five echoes with matching types/bytes/order and every observed POST <=100 bytes. Data replaces typed-array/ArrayBuffer/Blob/Node Buffer; initialized zero bytes also make the original allocUnsafe case deterministic.",
+        "contract": "remaining-js-141"
+      },
+      {
+        "id": "JS-142",
+        "status": "focused-regression",
+        "reason": "Native Data replaces Blob input/output. WebSocket echoes bytes 0...4 and empty bytes; observer confirms binary frames, independently of the Socket.IO parser.",
+        "contract": "remaining-js-142"
+      },
+      {
+        "id": "JS-143",
+        "status": "focused-regression",
+        "reason": "Native Data replaces Blob input/output. WebSocket echoes bytes 0...4 and empty bytes; observer confirms binary frames, independently of the Socket.IO parser.",
+        "contract": "remaining-js-142"
+      },
+      {
+        "id": "JS-144",
+        "status": "focused-regression",
+        "reason": "Direct WebSocket and completed polling-to-WebSocket upgrade return bytes 0...4 and empty Data. Actual client frames are base64 text, not binary frames; handshake requests b64=1. Native Data replaces ArrayBuffer/Blob.",
+        "contract": "remaining-js-137"
+      },
+      {
+        "id": "JS-145",
+        "status": "focused-regression",
+        "reason": "Raw localhost polling opens, then receives the unsolicited server greeting hi. Open precedes message delivery and the engine has a nonempty SID.",
+        "contract": "remaining-js-145"
+      },
+      {
+        "id": "JS-146",
+        "status": "focused-regression",
+        "reason": "Raw localhost WebSocket opens, then receives the unsolicited server greeting hi. Open precedes message delivery and the engine has a nonempty SID.",
+        "contract": "remaining-js-146"
+      },
+      {
+        "id": "JS-147",
+        "status": "focused-regression",
+        "reason": "The exact upstream string cash money followed by three euro symbols is echoed unchanged through raw polling.",
+        "contract": "remaining-js-147"
+      },
+      {
+        "id": "JS-148",
+        "status": "focused-regression",
+        "reason": "The exact upstream Unicode scalar sequence U+10000 through U+10FFFF and private-use endpoints U+E000/U+F8FF is echoed unchanged, not merely a common emoji.",
+        "contract": "remaining-js-148"
+      },
+      {
+        "id": "JS-158",
+        "status": "api-difference",
+        "reason": "The standalone JS package exports a numeric protocol constant. Swift exposes a fused Engine.IO transport with a generated EIO=4 query value, not the same module export. The generated Engine.IO 4 query value has a separate unit regression."
+      },
+      {
+        "id": "JS-163",
+        "status": "api-difference",
+        "reason": "These use JS new Socket({host,port,secure}) option-object overloads, including unbracketed IPv6 hosts. Swift requires an explicit Foundation URL; absolute URL cases are covered separately. No implicit-host constructor or identical default-location inference is promised."
+      },
+      {
+        "id": "JS-164",
+        "status": "api-difference",
+        "reason": "These use JS new Socket({host,port,secure}) option-object overloads, including unbracketed IPv6 hosts. Swift requires an explicit Foundation URL; absolute URL cases are covered separately. No implicit-host constructor or identical default-location inference is promised."
+      },
+      {
+        "id": "JS-165",
+        "status": "focused-regression",
+        "reason": "addTrailingSlash(false) emits /engine.io? on the wire, with no slash before the query. Custom paths are normalized independently of option order; the default retains the slash.",
+        "contract": "remaining-js-165"
+      },
+      {
+        "id": "JS-168",
+        "status": "api-difference",
+        "reason": "These use JS new Socket({host,port,secure}) option-object overloads, including unbracketed IPv6 hosts. Swift requires an explicit Foundation URL; absolute URL cases are covered separately. No implicit-host constructor or identical default-location inference is promised."
+      },
+      {
+        "id": "JS-169",
+        "status": "api-difference",
+        "reason": "These use JS new Socket({host,port,secure}) option-object overloads, including unbracketed IPv6 hosts. Swift requires an explicit Foundation URL; absolute URL cases are covered separately. No implicit-host constructor or identical default-location inference is promised."
+      },
+      {
+        "id": "JS-170",
+        "status": "api-difference",
+        "reason": "These use JS new Socket({host,port,secure}) option-object overloads, including unbracketed IPv6 hosts. Swift requires an explicit Foundation URL; absolute URL cases are covered separately. No implicit-host constructor or identical default-location inference is promised."
+      },
+      {
+        "id": "JS-171",
+        "status": "api-difference",
+        "reason": "These use JS new Socket({host,port,secure}) option-object overloads, including unbracketed IPv6 hosts. Swift requires an explicit Foundation URL; absolute URL cases are covered separately. No implicit-host constructor or identical default-location inference is promised."
+      },
+      {
+        "id": "JS-172",
+        "status": "api-difference",
+        "reason": "The JS internal randomString helper promises eight characters and different consecutive values. Swift does not expose that helper or its exact length; wire cache-busting uses a separate native contract, not a fabricated compatible helper."
+      },
+      {
+        "id": "JS-178",
+        "status": "focused-regression",
+        "reason": "Real polling-only connection with withCredentials=true. Fixture sets original cookies 1=1 and 2=2; after open, a raw message is echoed and the server-observed POST Cookie contains exactly both name/value pairs. Cookie pair order is normalized because Foundation owns serialization order; no missing or additional cookie is accepted. Original ten-millisecond sleep is replaced by the completed-open/cookie-processing barrier.",
+        "contract": "remaining-js-178"
+      },
+      {
+        "id": "JS-179",
+        "status": "focused-regression",
+        "reason": "Real polling-only connection with withCredentials=false. Fixture sets original cookies 1=1 and 2=2; send on open, await echo and assert the subsequent server-observed POST has no Cookie header. Native nil corresponds to JS undefined.",
+        "contract": "remaining-js-179"
+      },
+      {
+        "id": "JS-180",
+        "status": "focused-regression",
+        "reason": "Parse original foo=bar Set-Cookie input with Foundation; assert name foo and value bar. Native HTTPCookie replaces the Node object while preserving every field asserted by this simple original scenario.",
+        "contract": "remaining-js-180"
+      },
+      {
+        "id": "JS-181",
+        "status": "api-difference",
+        "reason": "The Node cookie parser returns only name/value/expires and overwrites expiry in header iteration order. Foundation preserves domain/path/security and owns native expiration policy. The conflicting Max-Age/Expires sample is not declared object-for-object equivalent; native parsing and security scope have separate tests."
+      },
+      {
+        "id": "JS-182",
+        "status": "focused-regression",
+        "reason": "Parse original foo=bar=bar&foo=foo&John=Doe&Doe=John; Domain=.example.com; Path=/; HttpOnly; Secure. Assert name foo and the complete original value including embedded equals and ampersands. HTTPCookie is the native object representation.",
+        "contract": "remaining-js-182"
+      },
+      {
+        "id": "JS-183",
+        "status": "api-difference",
+        "reason": "The standalone JS parseuri helper exposes a parsed-component object and handles a corpus of shorthand inputs. Swift uses Foundation URL/URLComponents instead; no identical public parseuri result or input grammar is promised. Absolute transport URL validation remains separately tested."
+      },
+      {
+        "id": "JS-186",
+        "status": "api-difference",
+        "reason": "JS can be configured with transports: [] and reports No transports available. Swift has fixed native transports and rejects contradictory forcePolling/forceWebsockets options; the empty transport-list API is not representable. A fail-before-network native configuration test remains."
+      },
+      {
+        "id": "JS-194",
+        "status": "focused-regression",
+        "reason": "Real a*101 exceeds 100-byte polling server limit. Error callback must carry SocketTransportError with HTTP 413, operation write, polling write (HTTP 413) description and empty body; close must follow the error with transport error and identical detail object. Native URLSession completed response/type replaces XHR readyState/TransportError fields; queued b additionally covers JS-151.",
+        "contract": "remaining-js-194"
+      },
+      {
+        "id": "JS-195",
+        "status": "focused-regression",
+        "reason": "Real WebSocket a*101 over 100-byte server limit closes with transport close, typed detail operation close, code 1009, empty close reason and websocket close (WebSocket 1009) description. Require no preceding error callback. Native SocketTransportError fields replace CloseEvent fields; IE11 branch is platform-specific.",
+        "contract": "remaining-js-195"
+      },
+      {
+        "id": "JS-196",
+        "status": "focused-regression",
+        "reason": "Real polling request with nonexistent SID returns 400: error callback asserts typed polling read error, exact status and exact Session ID unknown JSON body; close follows with transport error and same detail. Stale request injected at transport layer because user query may not override engine-owned SID. Native completed URLSession response replaces XHR readyState.",
+        "contract": "remaining-js-196"
+      },
+      {
+        "id": "JS-197",
+        "status": "focused-regression",
+        "reason": "Real WebSocket handshake carrying nonexistent SID must report typed websocket close-operation error with native underlying error; close follows with transport error and the same detail object. Native URLSession error replaces JS generic error Event; no unsupported HTTP response-body/status claim is made.",
+        "contract": "remaining-js-197"
+      },
+      {
+        "id": "JS-201",
+        "status": "api-difference",
+        "reason": "JavaScript exports public Transport/Polling/WebSocket constructors. Swift provides SocketEngine and internal native transport protocols instead; adding artificial JS constructor exports is outside the native API contract."
+      },
+      {
+        "id": "JS-202",
+        "status": "api-difference",
+        "reason": "JavaScript exports public Transport/Polling/WebSocket constructors. Swift provides SocketEngine and internal native transport protocols instead; adding artificial JS constructor exports is outside the native API contract."
+      },
+      {
+        "id": "JS-220",
+        "status": "focused-regression",
+        "reason": "A custom extraHeaders value reaches both actual polling GET and POST requests. URLSession replaces browser/Node XMLHttpRequest; browser CORS/preflight is not implemented by this native test.",
+        "contract": "remaining-js-220"
+      },
+      {
+        "id": "JS-223",
+        "status": "focused-regression",
+        "reason": "A custom extraHeaders value reaches both actual polling GET and POST requests. URLSession replaces browser/Node XMLHttpRequest; browser CORS/preflight is not implemented by this native test.",
+        "contract": "remaining-js-220"
+      },
+      {
+        "id": "JS-240",
+        "status": "focused-regression",
+        "reason": "EVENT [a,two zero bytes], root namespace, id 0; encode then decode all attachments, assert type, namespace, id, full deep data equality and reconstruction only completing on the final attachment. JS ArrayBuffer/TypedArray/Blob maps to native Data; native binaryEvent/binaryAck retains its wire type after reconstruction.",
+        "contract": "JS-240"
+      },
+      {
+        "id": "JS-241",
+        "status": "platform-specific",
+        "reason": "Object.create(null) and prototype lookup are JavaScript-specific. Swift dictionaries have no JavaScript prototype. A native special-key/binary dictionary regression exists, but is not labelled a literal null-prototype test port."
+      },
+      {
+        "id": "JS-242",
+        "status": "focused-regression",
+        "reason": "EVENT [a,bytes 0 through 4], root namespace, id 0; encode then decode all attachments, assert type, namespace, id, full deep data equality and reconstruction only completing on the final attachment. JS ArrayBuffer/TypedArray/Blob maps to native Data; native binaryEvent/binaryAck retains its wire type after reconstruction.",
+        "contract": "JS-242"
+      },
+      {
+        "id": "JS-246",
+        "status": "focused-regression",
+        "reason": "EVENT [a,two zero bytes], root namespace, id 0; encode then decode all attachments, assert type, namespace, id, full deep data equality and reconstruction only completing on the final attachment. JS ArrayBuffer/TypedArray/Blob maps to native Data; native binaryEvent/binaryAck retains its wire type after reconstruction.",
+        "contract": "JS-246"
+      },
+      {
+        "id": "JS-247",
+        "status": "focused-regression",
+        "reason": "EVENT [a,{a:hi,b:{why:two zero bytes},c:bye}], /deep, id 999; encode then decode all attachments, assert type, namespace, id, full deep data equality and reconstruction only completing on the final attachment. JS ArrayBuffer/TypedArray/Blob maps to native Data; native binaryEvent/binaryAck retains its wire type after reconstruction.",
+        "contract": "JS-247"
+      },
+      {
+        "id": "JS-248",
+        "status": "focused-regression",
+        "reason": "ACK [{a:hi ack,b:{why:two zero bytes},c:bye ack}], /deep, id 999; encode then decode all attachments, assert type, namespace, id, full deep data equality and reconstruction only completing on the final attachment. JS ArrayBuffer/TypedArray/Blob maps to native Data; native binaryEvent/binaryAck retains its wire type after reconstruction.",
+        "contract": "JS-248"
+      },
+      {
+        "id": "JS-257",
+        "status": "focused-regression",
+        "reason": "All seven public native SocketPacket.PacketType values correspond to protocol type numbers 0 through 6.",
+        "contract": "remaining-js-257"
+      }
+    ],
+    "meaning": "All prior unmapped rows now have an explicit native regression or API/platform boundary. This is classification completeness, NOT full assertion parity."
+  },
+  "excluded_unsupported_features": [
+    {
+      "upstream_ids": [
+        "JS-068",
+        "JS-069",
+        "JS-221",
+        "JS-222"
+      ],
+      "reason": "Excluded: native URLSession exposes no JS compression enable/disable or threshold controls; deflate interoperability remains tested."
+    },
+    {
+      "upstream_ids": [
+        "JS-190",
+        "JS-191"
+      ],
+      "reason": "Custom per-transport constructors are unsupported; built-in polling/WebSocket selection, fallback and remembered upgrades are implemented and must be tested."
+    },
+    {
+      "upstream_ids": [
+        "JS-224",
+        "JS-225",
+        "JS-226",
+        "JS-227",
+        "JS-228",
+        "JS-229",
+        "JS-230",
+        "JS-231",
+        "JS-232",
+        "JS-233",
+        "JS-234",
+        "JS-281",
+        "JS-282",
+        "JS-287",
+        "JS-288",
+        "JS-289",
+        "JS-290",
+        "JS-291",
+        "JS-292",
+        "JS-293",
+        "JS-294",
+        "JS-295",
+        "JS-296",
+        "JS-297",
+        "JS-298",
+        "JS-299",
+        "JS-300",
+        "JS-301",
+        "JS-310",
+        "JS-311"
+      ],
+      "reason": "WebTransport/stream framing is outside the Swift polling+WebSocket implementation."
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "baselines": {
+    "macos": 0
+  },
+  "note": "Review gate R5. `scripts/check-strict-concurrency.sh` builds the library with `-strict-concurrency=complete` and fails when a platform's recorded warning count grows. A platform with no entry here is reported, not failed: the run prints the count and the line to add, so the first CI run on a new platform measures the number instead of producing a red build. Record it with `scripts/check-strict-concurrency.sh --record` and commit the result.",
+  "observations": {
+    "linux-swift-6.4-harness": {
+      "warnings": 84,
+      "recorded": "2026-09-19",
+      "how": "The package does not build on Linux as-is (@objc, Security, Darwin URLSession). This number comes from the round-3 review harness, which copies Source/ to a scratch tree, strips @objc/@objcMembers, makes SocketEngineClient AnyObject-constrained and swaps Foundation.URLSession for FoundationNetworking.URLSession, then runs `swiftc -typecheck -swift-version 5 -strict-concurrency=complete` over it.",
+      "status": "evidence only, not a gate: the transformed sources are not what CI builds, so this is not recorded under `baselines`."
+    },
+    "macos-swift-6.4": {
+      "warnings": 0,
+      "commit": "e06d5beb2c7da0861fae7d3b66ebe6aa69e88679",
+      "run": "https://github.com/kaeferfreund/socket.io-client-swift/actions/runs/35433419941",
+      "job": 105871915711,
+      "status": "unmodified sources built on macOS under strict-concurrency=complete"
+    }
+  },
+  "topWarningKinds": [
+    "capture of 'self' with non-Sendable type 'SocketIOClient?' in a '@Sendable' closure (16)",
+    "capture of 'self' with non-Sendable type 'SocketManager' in a '@Sendable' closure (10)",
+    "converting non-Sendable function value to '@Sendable @convention(block)' (4)",
+    "capture of 'owner' with non-Sendable type 'URLSessionWebSocketConnection' (4)",
+    "capture of 'handler' with non-Sendable type '(SocketAnyEvent) -> ()' (4)"
+  ]
+}

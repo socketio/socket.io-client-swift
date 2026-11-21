@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-labelledby="title desc">
+  <title id="title">Stylized swallow in flight</title>
+  <desc id="desc">An original, stylized orange swallow with blue accents, drawn for the README of this project.</desc>
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFB457"/>
+      <stop offset="55%" stop-color="#FF7A3D"/>
+      <stop offset="100%" stop-color="#F05138"/>
+    </linearGradient>
+    <linearGradient id="wing" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#21486B"/>
+      <stop offset="100%" stop-color="#10263D"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#0F172A" flood-opacity="0.16"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <path d="M38 132c34-38 73-61 118-69 14-2 28-2 42 1-24 8-44 20-61 36 29-4 58 0 89 14-26 3-48 10-66 21 18 4 36 12 55 24-37-2-70-11-99-28-11 19-28 35-49 47 7-18 11-31 13-40-14 6-28 8-42 7z" fill="url(#body)"/>
+    <path d="M96 92c30-28 63-45 100-49-18 10-34 23-48 39 25-1 50 4 76 17-23 2-42 8-58 17 19 6 35 14 49 25-33-1-61-8-86-22-11 17-27 31-47 42 6-16 10-28 14-37-13 5-27 7-42 6 18-18 32-31 42-38z" fill="url(#wing)" opacity="0.96"/>
+    <path d="M175 84c27 6 51 17 74 34-23-5-43-5-61 2-6 2-12 5-17 8 21 8 40 19 58 34-25-6-48-15-69-27-10-6-20-13-30-21 11-11 26-21 45-30z" fill="#FFF3E8" opacity="0.92"/>
+    <circle cx="191" cy="92" r="4.5" fill="#10263D"/>
+    <path d="M198 94l16 4-14 5z" fill="#10263D"/>
+    <path d="M66 145c18 4 35 3 52-4-4 14-9 28-17 41-15-3-30-14-35-37z" fill="#21486B" opacity="0.88"/>
+    <path d="M47 150c-8 11-15 17-22 20 8 2 17 2 28 0" fill="none" stroke="#86B7FF" stroke-linecap="round" stroke-width="6" opacity="0.95"/>
+    <path d="M29 128c-10 9-18 14-24 16 7 2 15 2 24 1" fill="none" stroke="#86B7FF" stroke-linecap="round" stroke-width="5" opacity="0.75"/>
+  </g>
+</svg>

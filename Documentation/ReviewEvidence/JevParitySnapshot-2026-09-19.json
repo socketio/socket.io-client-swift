@@ -1,0 +1,37 @@
+{
+  "timestamp": "2026-09-19T10:02:27.338017+00:00",
+  "head": "0be321f51e479864cf49b26d590fea336c23c169",
+  "upstream_sha": "aaf2af36ec8ad05910f357a788e0e358bad32738",
+  "runtime_declarations": 297,
+  "certified_declarations": 88,
+  "boundaries": {
+    "api-difference": 28,
+    "platform-specific": 38,
+    "unsupported-feature": 36
+  },
+  "uncertified": 107,
+  "by_package": {
+    "socket.io-client": 55,
+    "engine.io-client": 42,
+    "socket.io-parser": 2,
+    "engine.io-parser": 8
+  },
+  "note": "Static contract inventory only; no runtime execution performed.",
+  "snapshot_sha256": {
+    "JSParityE2ETest.swift": "448769e7eb57414b8dfb579d75cdac1abd4f38374c555d182029a309949a98bd",
+    "SocketConnectTimeoutTest.swift": "00c6c92e7cb79b6eea6a2cdbc668b65559995525145692d8e555fbf350879ff2",
+    "SocketReconnectEventsTest.swift": "fbded87e0be00a261aa37d12910b7c1340d82db5967c64c9c0ac2536571c8831",
+    "selected-upstream.json": "ac65fafc35eac37981c5b3a6f4a7186d45c31c88a4a7b00f45eb29457e803c47",
+    "JavaScriptParityContracts.json": "2fe1efdcc884760cd29dc598f53a9d7166fceeb9a0361730abc6a51e4febc82b",
+    "JavaScriptTestInventory.csv": "2f9c85315234601e61b93b9190f9441a7be6e5bcf43cc34a8a8ae93837d279fa",
+    "backlog.csv": "c3403bbc849d05a4a0e56ae4749f04a6d680d5302d1658db2df5f2a38af99c00",
+    "backlog.json": "292822147718099884d4995ffbff90c3948cd3ef387f44416d6de50a05317e61",
+    "summary.json": "91fbdbe6858d63a5253b38acdf75320dd38be2071cf10177071f537aeb55941d"
+  },
+  "repository_backlog": {
+    "path": "JevParityBacklog-2026-09-19.csv",
+    "normalization": "CRLF to LF only; snapshot_sha256 retains the original evidence hashes",
+    "original_sha256": "c3403bbc849d05a4a0e56ae4749f04a6d680d5302d1658db2df5f2a38af99c00",
+    "sha256": "06dcc030871a767460ec5bc42a63db36d355e239b7dfa9e96386663034102848"
+  }
+}

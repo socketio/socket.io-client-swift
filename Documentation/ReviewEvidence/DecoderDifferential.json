@@ -1,0 +1,175 @@
+{
+  "upstream": "aaf2af36ec8ad05910f357a788e0e358bad32738",
+  "validCases": 5000,
+  "otherCases": 29,
+  "encodeCases": 1000,
+  "javascriptEncoderCases": 1000,
+  "javascriptEncoderDifferences": [],
+  "validDifferences": 0,
+  "encodeDifferences": [],
+  "differences": [
+    {
+      "input": {
+        "class": "malformed-or-noncanonical",
+        "header": "",
+        "binaries": []
+      },
+      "javascript": {
+        "status": "ok",
+        "type": 0,
+        "id": -1,
+        "nsp": "/",
+        "data": null
+      },
+      "swift": {
+        "status": "error"
+      }
+    },
+    {
+      "input": {
+        "class": "malformed-or-noncanonical",
+        "header": "2",
+        "binaries": []
+      },
+      "javascript": {
+        "status": "ok",
+        "type": 2,
+        "id": -1,
+        "nsp": "/",
+        "data": null
+      },
+      "swift": {
+        "data": [],
+        "id": -1,
+        "nsp": "/",
+        "status": "ok",
+        "type": 2
+      }
+    },
+    {
+      "input": {
+        "class": "malformed-or-noncanonical",
+        "header": "3",
+        "binaries": []
+      },
+      "javascript": {
+        "status": "ok",
+        "type": 3,
+        "id": -1,
+        "nsp": "/",
+        "data": null
+      },
+      "swift": {
+        "data": [],
+        "id": -1,
+        "nsp": "/",
+        "status": "ok",
+        "type": 3
+      }
+    },
+    {
+      "input": {
+        "class": "malformed-or-noncanonical",
+        "header": "4",
+        "binaries": []
+      },
+      "javascript": {
+        "status": "ok",
+        "type": 4,
+        "id": -1,
+        "nsp": "/",
+        "data": null
+      },
+      "swift": {
+        "status": "error"
+      }
+    },
+    {
+      "input": {
+        "class": "malformed-or-noncanonical",
+        "header": "2123",
+        "binaries": []
+      },
+      "javascript": {
+        "status": "ok",
+        "type": 2,
+        "id": 123,
+        "nsp": "/",
+        "data": null
+      },
+      "swift": {
+        "data": [],
+        "id": 123,
+        "nsp": "/",
+        "status": "ok",
+        "type": 2
+      }
+    },
+    {
+      "input": {
+        "class": "malformed-or-noncanonical",
+        "header": "51-",
+        "binaries": [
+          [
+            1
+          ]
+        ]
+      },
+      "javascript": {
+        "status": "ok",
+        "type": 2,
+        "id": -1,
+        "nsp": "/",
+        "data": null
+      },
+      "swift": {
+        "status": "error"
+      }
+    },
+    {
+      "input": {
+        "class": "malformed-or-noncanonical",
+        "header": "41",
+        "binaries": []
+      },
+      "javascript": {
+        "status": "ok",
+        "type": 4,
+        "id": 1,
+        "nsp": "/",
+        "data": null
+      },
+      "swift": {
+        "status": "error"
+      }
+    },
+    {
+      "input": {
+        "class": "malformed-or-noncanonical",
+        "header": "51e0-[\"x\",{\"_placeholder\":true,\"num\":0}]",
+        "binaries": [
+          [
+            1
+          ]
+        ]
+      },
+      "javascript": {
+        "status": "ok",
+        "type": 2,
+        "id": -1,
+        "nsp": "/",
+        "data": [
+          "x",
+          {
+            "__bytes": [
+              1
+            ]
+          }
+        ]
+      },
+      "swift": {
+        "status": "error"
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "socketio-swift-e2e-fixtures",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "socket.io": "4.8.3"
+  }
+}

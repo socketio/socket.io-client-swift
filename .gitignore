@@ -45,10 +45,16 @@ DerivedData
 *.ipa
 *.xcuserstate
 
-Socket.IO-Test-Server/node_modules/*
-
 .idea/
 docs/docsets/
 docs/undocumented.json
 
 .swiftpm
+
+# Local integration-test dependencies
+Tests/TestSocketIO/E2E/Fixtures/node_modules/
+
+# Local Python validation artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/

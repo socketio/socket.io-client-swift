@@ -8,7 +8,6 @@
 
 import XCTest
 @testable import SocketIO
-import Starscream
 
 class SocketSideEffectTest: XCTestCase {
     func testInitialCurrentAck() {
@@ -40,7 +39,7 @@ class SocketSideEffectTest: XCTestCase {
         }
 
         manager.parseEngineMessage("30[\"hello world\"]")
-        waitForExpectations(timeout: 3, handler: nil)
+        wait(for: [expect], timeout: 3)
     }
 
     func testHandleAckWithAckEmit() {
@@ -53,7 +52,7 @@ class SocketSideEffectTest: XCTestCase {
         }
 
         manager.parseEngineMessage("30[\"hello world\"]")
-        waitForExpectations(timeout: 3, handler: nil)
+        wait(for: [expect], timeout: 3)
     }
 
     func testHandleAck2() {
@@ -65,7 +64,7 @@ class SocketSideEffectTest: XCTestCase {
 
         manager.parseEngineMessage("61-0[{\"_placeholder\":true,\"num\":0},{\"test\":true}]")
         manager.parseEngineBinaryData(Data())
-        waitForExpectations(timeout: 3, handler: nil)
+        wait(for: [expect], timeout: 3)
     }
 
     func testHandleEvent() {
@@ -76,7 +75,7 @@ class SocketSideEffectTest: XCTestCase {
         }
 
         manager.parseEngineMessage("2[\"test\",\"hello world\"]")
-        waitForExpectations(timeout: 3, handler: nil)
+        wait(for: [expect], timeout: 3)
     }
 
     func testHandleStringEventWithQuotes() {
@@ -87,7 +86,7 @@ class SocketSideEffectTest: XCTestCase {
         }
 
         manager.parseEngineMessage("2[\"test\",\"\\\"hello world\\\"\"]")
-        waitForExpectations(timeout: 3, handler: nil)
+        wait(for: [expect], timeout: 3)
     }
 
     func testHandleOnceEvent() {
@@ -99,7 +98,7 @@ class SocketSideEffectTest: XCTestCase {
         }
 
         manager.parseEngineMessage("2[\"test\",\"hello world\"]")
-        waitForExpectations(timeout: 3, handler: nil)
+        wait(for: [expect], timeout: 3)
     }
 
     func testHandleOnceClientEvent() {
@@ -112,12 +111,12 @@ class SocketSideEffectTest: XCTestCase {
             expect.fulfill()
         }
 
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1) {
+        DispatchQueue.main.socketAsyncAfter(deadline: DispatchTime.now() + 0.1) {
             // Fake connecting
-            self.manager.parseEngineMessage("0/")
+            self.manager.parseEngineMessage("0/,{\"sid\":\"fake-sid\"}")
         }
 
-        waitForExpectations(timeout: 3, handler: nil)
+        wait(for: [expect], timeout: 3)
     }
 
     func testOffWithEvent() {
@@ -148,14 +147,14 @@ class SocketSideEffectTest: XCTestCase {
 
     func testHandlesErrorPacket() {
         let expect = expectation(description: "Handled error")
-        socket.on("error") {data, ack in
+        socket.on(clientEvent: .connectError) {data, ack in
             if let error = data[0] as? String, error == "test error" {
                 expect.fulfill()
             }
         }
 
         manager.parseEngineMessage("4\"test error\"")
-        waitForExpectations(timeout: 3, handler: nil)
+        wait(for: [expect], timeout: 3)
     }
 
     func testHandleBinaryEvent() {
@@ -169,7 +168,7 @@ class SocketSideEffectTest: XCTestCase {
 
         manager.parseEngineMessage("51-[\"test\",{\"test\":{\"_placeholder\":true,\"num\":0}}]")
         manager.parseEngineBinaryData(data)
-        waitForExpectations(timeout: 3, handler: nil)
+        wait(for: [expect], timeout: 3)
     }
 
     func testHandleMultipleBinaryEvent() {
@@ -186,7 +185,7 @@ class SocketSideEffectTest: XCTestCase {
         manager.parseEngineMessage("52-[\"test\",{\"test\":{\"_placeholder\":true,\"num\":0},\"test2\":{\"_placeholder\":true,\"num\":1}}]")
         manager.parseEngineBinaryData(data)
         manager.parseEngineBinaryData(data2)
-        waitForExpectations(timeout: 3, handler: nil)
+        wait(for: [expect], timeout: 3)
     }
 
     func testChangingStatusCallsStatusChangeHandler() {
@@ -207,7 +206,7 @@ class SocketSideEffectTest: XCTestCase {
 
         socket.setTestStatus(statusChange)
 
-        waitForExpectations(timeout: 0.2)
+        wait(for: [expect], timeout: 0.2)
     }
 
     func testOnClientEvent() {
@@ -229,7 +228,7 @@ class SocketSideEffectTest: XCTestCase {
 
         socket.handleClientEvent(event, data: [closeReason])
 
-        waitForExpectations(timeout: 0.2)
+        wait(for: [expect], timeout: 0.2)
     }
 
     func testClientEventsAreBackwardsCompatible() {
@@ -251,7 +250,7 @@ class SocketSideEffectTest: XCTestCase {
 
         socket.handleClientEvent(event, data: [closeReason])
 
-        waitForExpectations(timeout: 0.2)
+        wait(for: [expect], timeout: 0.2)
     }
 
     func testConnectTimesOutIfNotConnected() {
@@ -265,7 +264,7 @@ class SocketSideEffectTest: XCTestCase {
             expect.fulfill()
         })
 
-        waitForExpectations(timeout: 0.8)
+        wait(for: [expect], timeout: 0.8)
     }
 
     func testConnectDoesNotTimeOutIfConnected() {
@@ -282,12 +281,12 @@ class SocketSideEffectTest: XCTestCase {
             XCTFail("Should not call timeout handler if status is connected")
         })
 
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1) {
+        DispatchQueue.main.socketAsyncAfter(deadline: DispatchTime.now() + 0.1) {
             // Fake connecting
-            self.manager.parseEngineMessage("0/")
+            self.manager.parseEngineMessage("0/,{\"sid\":\"fake-sid\"}")
         }
 
-        waitForExpectations(timeout: 2)
+        wait(for: [expect], timeout: 2)
     }
 
     func testClientCallsConnectOnEngineOpen() {
@@ -309,7 +308,7 @@ class SocketSideEffectTest: XCTestCase {
             XCTFail("Should not call timeout handler if status is connected")
         })
 
-        waitForExpectations(timeout: 2)
+        wait(for: [expect], timeout: 2)
     }
 
     func testConnectIsCalledWithNamespace() {
@@ -336,12 +335,12 @@ class SocketSideEffectTest: XCTestCase {
             XCTFail("Should not call timeout handler if status is connected")
         })
 
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1) {
+        DispatchQueue.main.socketAsyncAfter(deadline: DispatchTime.now() + 0.1) {
             // Fake connecting
-            self.manager.parseEngineMessage("0/swift")
+            self.manager.parseEngineMessage("0/swift,{\"sid\":\"fake-sid\"}")
         }
 
-        waitForExpectations(timeout: 2)
+        wait(for: [expect], timeout: 2)
     }
 
     func testErrorInCustomSocketDataCallsErrorHandler() {
@@ -361,7 +360,7 @@ class SocketSideEffectTest: XCTestCase {
 
         socket.emit("myEvent", ThrowingData())
 
-        waitForExpectations(timeout: 0.2)
+        wait(for: [expect], timeout: 0.2)
     }
 
     func testErrorInCustomSocketDataCallsErrorHandler_ack() {
@@ -383,7 +382,7 @@ class SocketSideEffectTest: XCTestCase {
             XCTFail("Ack callback should not be called")
         })
 
-        waitForExpectations(timeout: 0.2)
+        wait(for: [expect], timeout: 0.2)
     }
 
     func testSettingConfigAfterInit() {
@@ -424,7 +423,7 @@ class SocketSideEffectTest: XCTestCase {
 
         manager.engineDidSendPong()
 
-        waitForExpectations(timeout: 0.2)
+        wait(for: [expect], timeout: 0.2)
     }
 
     func testClientCallsGotPongHandler() {
@@ -436,7 +435,7 @@ class SocketSideEffectTest: XCTestCase {
 
         manager.engineDidReceivePing()
 
-        waitForExpectations(timeout: 0.2)
+        wait(for: [expect], timeout: 0.2)
     }
 
     let data = "test".data(using: String.Encoding.utf8)!
@@ -468,7 +467,6 @@ struct ThrowingData: SocketData {
 class TestEngine: SocketEngineSpec {
     weak var client: SocketEngineClient?
     private(set) var closed = false
-    private(set) var compress = false
     private(set) var connected = false
     var connectParams: [String: Any]? = nil
     private(set) var cookies: [HTTPCookie]? = nil
@@ -483,9 +481,7 @@ class TestEngine: SocketEngineSpec {
     private(set) var socketPath = ""
     private(set) var urlPolling = URL(string: "http://localhost/")!
     private(set) var urlWebSocket = URL(string: "http://localhost/")!
-    private(set) var websocket = false
-    private(set) var ws: WebSocket? = nil
-    private(set) var version = SocketIOVersion.three
+
 
     internal var onConnect: (() -> ())?
 

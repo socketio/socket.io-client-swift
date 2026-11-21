@@ -14,8 +14,8 @@ class SocketMangerTest : XCTestCase {
         XCTAssertFalse(manager.forceNew)
         XCTAssertEqual(manager.handleQueue, DispatchQueue.main)
         XCTAssertTrue(manager.reconnects)
-        XCTAssertEqual(manager.reconnectWait, 10)
-        XCTAssertEqual(manager.reconnectWaitMax, 30)
+        XCTAssertEqual(manager.reconnectWait, 1, "JS reconnectionDelay: 1000 ms")
+        XCTAssertEqual(manager.reconnectWaitMax, 5, "JS reconnectionDelayMax: 5000 ms")
         XCTAssertEqual(manager.randomizationFactor, 0.5)
         XCTAssertEqual(manager.status, .notConnected)
     }
@@ -31,25 +31,29 @@ class SocketMangerTest : XCTestCase {
     }
 
     func testBackoffIntervalCalulation() {
-        XCTAssertLessThanOrEqual(manager.reconnectInterval(attempts: -1), Double(manager.reconnectWaitMax))
-        XCTAssertLessThanOrEqual(manager.reconnectInterval(attempts: 0), 15)
-        XCTAssertLessThanOrEqual(manager.reconnectInterval(attempts: 1), 22.5)
-        XCTAssertLessThanOrEqual(manager.reconnectInterval(attempts: 2), 33.75)
-        XCTAssertLessThanOrEqual(manager.reconnectInterval(attempts: 50), Double(manager.reconnectWaitMax))
-        XCTAssertLessThanOrEqual(manager.reconnectInterval(attempts: 10000), Double(manager.reconnectWaitMax))
-
-        XCTAssertGreaterThanOrEqual(manager.reconnectInterval(attempts: -1), Double(manager.reconnectWait))
-        XCTAssertGreaterThanOrEqual(manager.reconnectInterval(attempts: 0), Double(manager.reconnectWait))
-        XCTAssertGreaterThanOrEqual(manager.reconnectInterval(attempts: 1), 15)
-        XCTAssertGreaterThanOrEqual(manager.reconnectInterval(attempts: 2), 22.5)
-        XCTAssertGreaterThanOrEqual(manager.reconnectInterval(attempts: 10000), Double(manager.reconnectWait))
+        // JS backo2: min * 2^attempts, jittered by up to randomizationFactor in
+        // either direction, capped at max (1 s base, 5 s cap, factor 0.5).
+        for _ in 0..<50 {
+            XCTAssertLessThanOrEqual(manager.reconnectInterval(attempts: -1), 1.5)
+            XCTAssertGreaterThanOrEqual(manager.reconnectInterval(attempts: -1), 0.5)
+            XCTAssertLessThanOrEqual(manager.reconnectInterval(attempts: 0), 1.5)
+            XCTAssertGreaterThanOrEqual(manager.reconnectInterval(attempts: 0), 0.5)
+            XCTAssertLessThanOrEqual(manager.reconnectInterval(attempts: 1), 3)
+            XCTAssertGreaterThanOrEqual(manager.reconnectInterval(attempts: 1), 1)
+            XCTAssertLessThanOrEqual(manager.reconnectInterval(attempts: 2), Double(manager.reconnectWaitMax))
+            XCTAssertGreaterThanOrEqual(manager.reconnectInterval(attempts: 2), 2)
+            XCTAssertEqual(manager.reconnectInterval(attempts: 50), Double(manager.reconnectWaitMax))
+            XCTAssertEqual(manager.reconnectInterval(attempts: 10000), Double(manager.reconnectWaitMax))
+        }
     }
 
     func testManagerCallsConnect() {
         setUpSockets()
 
-        socket.expectations[ManagerExpectation.didConnectCalled] = expectation(description: "The manager should call connect on the default socket")
-        socket2.expectations[ManagerExpectation.didConnectCalled] = expectation(description: "The manager should call connect on the socket")
+        let managedExpectation1 = expectation(description: "The manager should call connect on the default socket")
+        socket.expectations[ManagerExpectation.didConnectCalled] = managedExpectation1
+        let managedExpectation2 = expectation(description: "The manager should call connect on the socket")
+        socket2.expectations[ManagerExpectation.didConnectCalled] = managedExpectation2
 
         socket.connect()
         socket2.connect()
@@ -57,7 +61,7 @@ class SocketMangerTest : XCTestCase {
         manager.fakeConnecting()
         manager.fakeConnecting(toNamespace: "/swift")
 
-        waitForExpectations(timeout: 0.3)
+        wait(for: [managedExpectation1, managedExpectation2], timeout: 0.3)
     }
 
     func testManagerDoesNotCallConnectWhenConnectingWithLessThanOneReconnect() {
@@ -77,7 +81,7 @@ class SocketMangerTest : XCTestCase {
         
         manager.connect()
 
-        waitForExpectations(timeout: 0.3)
+        wait(for: [expect], timeout: 0.3)
     }
     
     func testManagerCallConnectWhenConnectingAndMoreThanOneReconnect() {
@@ -95,14 +99,16 @@ class SocketMangerTest : XCTestCase {
         
         manager.connect()
 
-        waitForExpectations(timeout: 0.8)
+        wait(for: [expect], timeout: 0.8)
     }
 
     func testManagerCallsDisconnect() {
         setUpSockets()
 
-        socket.expectations[ManagerExpectation.didDisconnectCalled] = expectation(description: "The manager should call disconnect on the default socket")
-        socket2.expectations[ManagerExpectation.didDisconnectCalled] = expectation(description: "The manager should call disconnect on the socket")
+        let managedExpectation3 = expectation(description: "The manager should call disconnect on the default socket")
+        socket.expectations[ManagerExpectation.didDisconnectCalled] = managedExpectation3
+        let managedExpectation4 = expectation(description: "The manager should call disconnect on the socket")
+        socket2.expectations[ManagerExpectation.didDisconnectCalled] = managedExpectation4
 
         socket2.on(clientEvent: .connect) {data, ack in
             self.manager.disconnect()
@@ -115,7 +121,7 @@ class SocketMangerTest : XCTestCase {
         manager.fakeConnecting()
         manager.fakeConnecting(toNamespace: "/swift")
 
-        waitForExpectations(timeout: 0.3)
+        wait(for: [managedExpectation3, managedExpectation4], timeout: 0.3)
     }
 
 //    func testManagerEmitAll() {
@@ -167,6 +173,173 @@ class SocketMangerTest : XCTestCase {
         XCTAssertNil(manager.nsps[socket.nsp])
     }
 
+    func testAutoConnectFalseByDefault() {
+        let manager = SocketManager(socketURL: URL(string: "http://localhost")!, config: [])
+        XCTAssertFalse(manager.autoConnect)
+        XCTAssertEqual(manager.status, .notConnected, "manager should not auto-connect by default")
+        XCTAssertNil(manager.engine, "default config must NOT have created an engine")
+    }
+
+    func testAutoConnectExplicitFalse() {
+        let manager = SocketManager(
+            socketURL: URL(string: "http://localhost")!,
+            config: [.autoConnect(false)]
+        )
+        XCTAssertFalse(manager.autoConnect)
+        XCTAssertEqual(manager.status, .notConnected)
+    }
+
+    func testAutoConnectTrueTriggersConnect() {
+        let manager = SocketManager(
+            socketURL: URL(string: "http://localhost")!,
+            config: [.autoConnect(true)]
+        )
+        XCTAssertTrue(manager.autoConnect)
+        XCTAssertEqual(manager.status, .connecting,
+                       "autoConnect=true should put manager into .connecting immediately after init")
+        XCTAssertNotNil(manager.engine, "autoConnect=true should have triggered addEngine()")
+    }
+
+    func testAutoConnectFalseExplicitDoesNotTrigger() {
+        let manager = SocketManager(
+            socketURL: URL(string: "http://localhost")!,
+            config: [.autoConnect(false), .forceNew(true)]
+        )
+        XCTAssertEqual(manager.status, .notConnected)
+        XCTAssertTrue(manager.forceNew, "forceNew should still be honored independently")
+        XCTAssertNil(manager.engine, "autoConnect=false must NOT have created an engine")
+    }
+
+    func testSocketForNamespaceReconnectsInactiveSocketWhenAutoConnect() {
+        setUpSockets()
+        manager.autoConnect = true
+        socket.setTestStatus(.disconnected)
+        socket.setTestActive(false)
+        socket.connectCallCount = 0
+
+        let again = manager.socket(forNamespace: "/")
+
+        XCTAssertTrue(again === socket, "The manager has to hand back the cached socket")
+        XCTAssertEqual(socket.connectCallCount, 1, "Fetching an inactive socket with autoConnect must call connect()")
+        XCTAssertTrue(socket.active)
+        XCTAssertEqual(socket.status, .connecting)
+    }
+
+    func testSocketForNamespaceIsPureLookupWithoutAutoConnect() {
+        setUpSockets()
+        manager.autoConnect = false
+        socket.setTestStatus(.disconnected)
+        socket.setTestActive(false)
+        socket.connectCallCount = 0
+
+        let again = manager.socket(forNamespace: "/")
+
+        XCTAssertTrue(again === socket, "The manager has to hand back the cached socket")
+        XCTAssertEqual(socket.connectCallCount, 0, "Without autoConnect the fetch must not call connect()")
+        XCTAssertFalse(socket.active)
+        XCTAssertEqual(socket.status, .disconnected)
+    }
+
+    func testSocketForNamespaceDoesNotReconnectActiveSocket() {
+        setUpSockets()
+        manager.autoConnect = true
+        socket.setTestStatus(.connected)
+        socket.setTestActive(true)
+        socket.connectCallCount = 0
+
+        let again = manager.socket(forNamespace: "/")
+
+        XCTAssertTrue(again === socket, "The manager has to hand back the cached socket")
+        XCTAssertEqual(socket.connectCallCount, 0, "An already active socket must not be connected again")
+        XCTAssertTrue(socket.active)
+        XCTAssertEqual(socket.status, .connected)
+    }
+
+    func testConnectSocketUsesExplicitPayloadWithRecoveryState() throws {
+        let engine = CaptureEngine()
+        manager.engine = engine
+        manager.setTestStatus(.connected)
+        setUpSockets()
+
+        socket._pid = "p1"
+        socket._lastOffset = "offset-1"
+        socket.connectPayload = ["token": "stale"]
+
+        manager.connectSocket(socket, withPayload: ["token": "fresh", "room": "lobby"])
+
+        let sent = try XCTUnwrap(engine.lastSent)
+        XCTAssertTrue(sent.hasPrefix("0/,"),
+                      "expected \"0<nsp>,<json>\", got \(sent)")
+
+        let jsonStart = sent.index(sent.startIndex, offsetBy: 3)
+        let jsonStr = String(sent[jsonStart...])
+        let data = Data(jsonStr.utf8)
+        let obj = try XCTUnwrap(try JSONSerialization.jsonObject(with: data) as? [String: Any])
+
+        XCTAssertEqual(obj["pid"] as? String, "p1")
+        XCTAssertEqual(obj["offset"] as? String, "offset-1")
+        XCTAssertEqual(obj["token"] as? String, "fresh")
+        XCTAssertEqual(obj["room"] as? String, "lobby")
+    }
+
+    func testConnectSocketExplicitPayloadOverridesStoredSocketPayload() throws {
+        let engine = CaptureEngine()
+        manager.engine = engine
+        manager.setTestStatus(.connected)
+        setUpSockets()
+
+        socket._pid = "p1"
+        socket._lastOffset = "offset-1"
+        socket.connectPayload = ["token": "stale", "room": "old"]
+
+        manager.connectSocket(socket, withPayload: ["token": "fresh"])
+
+        let sent = try XCTUnwrap(engine.lastSent)
+        let jsonStart = sent.index(sent.startIndex, offsetBy: 3)
+        let jsonStr = String(sent[jsonStart...])
+        let data = Data(jsonStr.utf8)
+        let obj = try XCTUnwrap(try JSONSerialization.jsonObject(with: data) as? [String: Any])
+
+        XCTAssertEqual(obj["token"] as? String, "fresh")
+        XCTAssertNil(obj["room"], "stored socket payload must not leak into explicit connect payload")
+        XCTAssertEqual(obj["pid"] as? String, "p1")
+        XCTAssertEqual(obj["offset"] as? String, "offset-1")
+    }
+
+    func testConnectSocketPreservesExplicitPayloadUntilEngineOpens() throws {
+        let engine = CaptureEngine()
+        manager.engine = engine
+        setUpSockets()
+
+        socket.setTestStatus(.connecting)
+        // `connect()` would have set this; the manager only rejoins active sockets.
+        socket.setTestActive(true)
+        socket._pid = "p1"
+        socket._lastOffset = "offset-1"
+        socket.connectPayload = ["token": "stale", "room": "old"]
+
+        manager.connectSocket(socket, withPayload: ["token": "fresh", "room": "lobby"])
+
+        let openHandled = expectation(description: "engine open handled")
+        manager.engineDidOpen(reason: "Connect")
+        DispatchQueue.main.socketAsyncAfter(deadline: .now() + 0.1) {
+            openHandled.fulfill()
+        }
+
+        wait(for: [openHandled], timeout: 0.5)
+
+        let sent = try XCTUnwrap(engine.lastSent)
+        let jsonStart = sent.index(sent.startIndex, offsetBy: 3)
+        let jsonStr = String(sent[jsonStart...])
+        let data = Data(jsonStr.utf8)
+        let obj = try XCTUnwrap(try JSONSerialization.jsonObject(with: data) as? [String: Any])
+
+        XCTAssertEqual(obj["token"] as? String, "fresh")
+        XCTAssertEqual(obj["room"] as? String, "lobby")
+        XCTAssertEqual(obj["pid"] as? String, "p1")
+        XCTAssertEqual(obj["offset"] as? String, "offset-1")
+    }
+
     private func setUpSockets() {
         socket = manager.testSocket(forNamespace: "/")
         socket2 = manager.testSocket(forNamespace: "/swift")
@@ -209,15 +382,18 @@ public class TestManager: SocketManager {
     }
 
     public func fakeConnecting(toNamespace nsp: String = "/") {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+        DispatchQueue.main.socketAsyncAfter(deadline: .now() + 0.1) {
             // Fake connecting
-            self.parseEngineMessage("0\(nsp)")
+            self.parseEngineMessage("0\(nsp),{\"sid\":\"fake-sid\"}")
         }
     }
 
     public override func socket(forNamespace nsp: String) -> SocketIOClient {
-        // set socket to our test socket, the superclass method will get this from nsps
-        nsps[nsp] = TestSocket(manager: self, nsp: nsp)
+        // Preserve the cached socket so the superclass exercises its cached path;
+        // only create the test socket on first use for the namespace.
+        if nsps[nsp] == nil {
+            nsps[nsp] = TestSocket(manager: self, nsp: nsp)
+        }
 
         return super.socket(forNamespace: nsp)
     }
@@ -225,6 +401,13 @@ public class TestManager: SocketManager {
 
 public class TestSocket: SocketIOClient {
     public var expectations = [ManagerExpectation: XCTestExpectation]()
+    public var connectCallCount = 0
+
+    public override func connect(withPayload payload: [String: Any]? = nil) {
+        connectCallCount += 1
+
+        super.connect(withPayload: payload)
+    }
 
     public override func didConnect(toNamespace nsp: String, payload: [String: Any]?) {
         expectations[ManagerExpectation.didConnectCalled]?.fulfill()
