@@ -23,7 +23,8 @@
   <a href="Documentation/README.md">Documentation</a> ·
   <a href="#why-this-fork">Why this fork?</a> ·
   <a href="Documentation/Guides/Migration.md">Migration</a> ·
-  <a href="PARITY.md">JavaScript parity</a>
+  <a href="PARITY.md">JavaScript parity</a> ·
+  <a href="https://github.com/kaeferfreund/socket.io-client-kotlin">Kotlin &amp; Android version</a>
 </p>
 
 ---
@@ -34,7 +35,9 @@ handled by the client; your application works with `SocketManager` and `SocketIO
 
 **This is a Socket.IO client, not a general-purpose WebSocket library.** It needs a
 Socket.IO server. This repository is an independent community fork, not an official
-Socket.IO release.
+Socket.IO release. Its counterpart for Android and the JVM is
+[kaeferfreund/socket.io-client-kotlin](https://github.com/kaeferfreund/socket.io-client-kotlin):
+same reference, same test method, same fixtures wherever possible.
 
 ## Why this fork?
 
