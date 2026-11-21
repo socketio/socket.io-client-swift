@@ -4,7 +4,7 @@
 
 ## Migrating from 17.x to 18
 
-18.0 contains one breaking change: configured `.cookies(...)` are scoped like a browser
+The main breaking change in 18.0: configured `.cookies(...)` are scoped like a browser
 cookie jar (RFC 6265).
 
 - 17.x sent every configured cookie to the Socket.IO server, whatever its domain, and
@@ -18,7 +18,13 @@ What to check:
   or to its parent domain with a leading dot (`.example.com`) when sibling hosts need it.
 - Remove the `Secure` flag from cookies for plain `http`/`ws` servers, or connect over `https`/`wss`.
 - A cookie whose path does not cover the Socket.IO path (default `/socket.io/`) is no longer sent.
-- An explicit `Cookie` entry in `.extraHeaders` is still sent as written.
+- An explicit `Cookie` entry in `.extraHeaders` is still sent as written to the configured
+  host, on any scheme or port. A redirect to another host no longer receives it.
+- `SocketEngine.setConfigs(_:)` replaces the whole configuration, and disabling
+  `.withCredentials` empties the engine's cookie jar. Code that calls `setConfigs` on an
+  engine directly with a partial list must pass the complete configuration.
+- `SocketManager.connectSocket(_:withPayload:)` and `joinNamespace()` without `connect()`
+  connect again when the server answers (this regressed while 18.0 was in development).
 
 Details: [Configuration – Cookies](Configuration.md#cookies).
 

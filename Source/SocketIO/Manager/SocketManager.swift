@@ -92,7 +92,8 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
 
     /// Guards the properties that engine-queue callbacks read while the app may
     /// reconfigure the manager: `engine`, `handleQueue` and `bufferLimits`.
-    /// Held only for the read or write itself, never across a call out.
+    /// Held only for the read or write itself (plus the handle-queue marker,
+    /// which is plain libdispatch state), never across a call out.
     private let crossQueueLock = NSLock()
 
     /// If `true` then every time `connect` is called, a new engine will be created.
@@ -127,10 +128,14 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     public var handleQueue: DispatchQueue {
         get { crossQueueLock.lock(); defer { crossQueueLock.unlock() }; return _handleQueue }
         set {
-            crossQueueLock.lock()
+            // The queue marker moves with the swap, inside the same critical
+            // section: overlapping setters cannot leave it on a queue that is
+            // no longer the handle queue, and assigning the current queue again
+            // never clears it. `setSpecific` calls no user code.
+            crossQueueLock.lock(); defer { crossQueueLock.unlock() }
             let oldValue = _handleQueue
+            guard oldValue !== newValue else { return }
             _handleQueue = newValue
-            crossQueueLock.unlock()
             oldValue.setSpecific(key: handleQueueKey, value: nil)
             newValue.setSpecific(key: handleQueueKey, value: 1)
         }
@@ -370,6 +375,9 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
     /// - parameter socket: The socket who we should connect through this manager.
     /// - parameter withPayload: Optional payload to send on connect
     open func connectSocket(_ socket: SocketIOClient, withPayload payload: [String: Any]? = nil) {
+        // The socket expects the server's reply even when it was joined
+        // without `connect()` (no `active`, not `.connecting`).
+        socket.willRequestNamespace()
         guard status == .connected else {
             DefaultSocketLogger.Logger.log("Tried connecting socket when engine isn't open. Connecting",
                                            type: SocketManager.logType)
@@ -409,8 +417,7 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
                     "Failed to serialize CONNECT payload: invalid JSON object",
                     type: SocketManager.logType
                 )
-                socket.handleClientEvent(.error, data: [message])
-                socket.abortPendingConnect()
+                socket.failPendingConnect(message)
                 return
             }
 
@@ -428,11 +435,7 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
                     "Failed to serialize CONNECT payload: \(error)",
                     type: SocketManager.logType
                 )
-                socket.handleClientEvent(
-                    .error,
-                    data: ["connect payload serialization failed: \(error.localizedDescription)"]
-                )
-                socket.abortPendingConnect()
+                socket.failPendingConnect("connect payload serialization failed: \(error.localizedDescription)")
                 return
             }
         }
@@ -1005,7 +1008,12 @@ open class SocketManager: NSObject, SocketManagerSpec, SocketParsable, SocketDat
         // reason) before `reconnect()` runs. Swift additionally parks the socket
         // in `.connecting`, which is what makes `_engineDidOpen` re-join it.
         forAll {socket in
-            guard socket.status == .connected else { return }
+            guard socket.status == .connected else {
+                // A socket still joining loses its pending auth resolution with
+                // the transport; a `.connecting` one is rejoined on the next open.
+                socket.connectAttemptLostTransport()
+                return
+            }
 
             socket.handleTransportClose(reason: reason, error: error, reconnecting: true)
         }

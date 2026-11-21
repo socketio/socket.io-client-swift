@@ -25,7 +25,9 @@ internal enum EngineWebSocketMessage: Equatable {
 }
 
 internal enum EngineWebSocketEvent {
-    case opened(protocol: String?, headers: [String: String] = [:])
+    /// `url` is the URL of the handshake response, which differs from the
+    /// request after a redirect.
+    case opened(protocol: String?, headers: [String: String] = [:], url: URL? = nil)
     case message(EngineWebSocketMessage)
     case closed(code: Int?, reason: Data?, error: Error?)
 }

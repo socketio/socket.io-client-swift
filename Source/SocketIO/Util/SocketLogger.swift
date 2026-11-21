@@ -146,7 +146,9 @@ internal enum SocketLogRedaction {
         components.fragment = nil
         components.percentEncodedQueryItems = components.percentEncodedQueryItems?.map { item in
             let name = item.name.removingPercentEncoding ?? item.name
-            guard item.value != nil, !engineQueryKeys.contains(name) else { return item }
+            guard !engineQueryKeys.contains(name) else { return item }
+            // A bare `?token` carries its secret in the name.
+            guard item.value != nil else { return URLQueryItem(name: "REDACTED", value: nil) }
             // Percent-encoded items must stay valid percent-encoding.
             return URLQueryItem(name: item.name, value: "REDACTED")
         }
